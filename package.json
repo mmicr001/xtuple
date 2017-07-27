@@ -43,9 +43,8 @@
   "devDependencies": {
     "chai": "1.5.x",
     "mocha": "1.9.x",
-    "html5": "0.3.13",
     "jshint": "2.8.x",
-    "zombie": "1.4.x",
+    "zombie": "git://github.com/xtuple/zombie.git#13e43f7940b3bdcc11ffffcaa92e02b208216837",
     "nodemon": "~1.0.15",
     "csslint": "~0.10.0"
   },
