@@ -262,7 +262,7 @@ setup_postgres() {
   cdir $BASEDIR/postgres
 
   log "Setup database"
-  psql -U postgres -q -f $XT_DIR/lib/orm/source/init.sql 2>&1 | tee -a $LOG_FILE
+  psql -U postgres -q -f $XT_DIR/foundation-database/init.sql 2>&1 | tee -a $LOG_FILE
 }
 
 init_everythings() {
