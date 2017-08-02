@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSource ALIAS FOR $1;
@@ -26,7 +26,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSource ALIAS FOR $1;
@@ -54,7 +54,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
@@ -80,7 +80,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
@@ -94,7 +94,7 @@ DECLARE
   pAmount ALIAS FOR $9;
   pDistDate ALIAS FOR $10;
   pPostTrialBal ALIAS FOR $11;
-  
+
   _return INTEGER;
 
 BEGIN
@@ -108,7 +108,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
@@ -131,7 +131,7 @@ DECLARE
 BEGIN
 
 --  Check GL Interface metric
-  IF (fetchMetricBool('InterfaceToGL') = false AND pSource IN ('I/M', 'P/D', 'S/R', 'W/O')) THEN
+  IF (fetchMetricBool('InterfaceToGL') = false AND pSource IN ('I/M', 'P/D', 'S/O', 'S/R', 'W/O')) THEN
     RETURN 0;
   END IF;
   IF (fetchMetricBool('InterfaceAPToGL') = false AND pSource = 'A/P') THEN
@@ -151,11 +151,11 @@ BEGIN
     The 'IgnoreCompanyBalance' metric is a back door mechanism to
     allow legacy users to create transactions accross companies if
     they have been using the company segment for something else
-    and they MUST continue to be able to do so.  It can only be 
-    implemented by direct sql update to the metric table and should 
+    and they MUST continue to be able to do so.  It can only be
+    implemented by direct sql update to the metric table and should
     otherwise be discouraged.
-*/ 
-  IF (COALESCE(fetchMetricValue('GLCompanySize'),0) > 0 
+*/
+  IF (COALESCE(fetchMetricValue('GLCompanySize'),0) > 0
     AND fetchMetricBool('IgnoreCompany') = false)  THEN
 
     IF (SELECT (COALESCE(d.accnt_company,'') != COALESCE(c.accnt_company,''))
@@ -213,7 +213,7 @@ BEGIN
   SELECT fetchGLSequence() INTO _sequence;
 
   IF (NOT pOnlyGL AND fetchMetricBool('UseJournals')) THEN
-  --  First the credit	
+  --  First the credit
     INSERT INTO sltrans
     ( sltrans_journalnumber, sltrans_posted, sltrans_created, sltrans_date,
       sltrans_sequence, sltrans_accnt_id, sltrans_source,
