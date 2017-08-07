@@ -6,11 +6,11 @@ CREATE OR REPLACE FUNCTION createPkgSchema(pname      TEXT,
                                            pdescrip   TEXT    default '',
                                            pdeveloper TEXT    default '',
                                            pindev     BOOLEAN default FALSE
-                                          ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+                                          ) RETURNS BIGINT AS $$
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _namespaceoid INTEGER := -1;
+  _namespaceoid BIGINT := -1;
   _tabs         TEXT[] := ARRAY['cmd',  'cmdarg', 'image',  'metasql',
                                 'priv', 'report', 'script', 'uiform'] ;
   _pkgtab       TEXT;
