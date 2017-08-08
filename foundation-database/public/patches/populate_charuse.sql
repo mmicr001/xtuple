@@ -26,7 +26,6 @@ declare
   ];
 
   begin
-    /* bug 26266 - must precede the for loop { */
     update public.charuse
        set charuse_target_type = 'CRMACCT'
      where charuse_target_type = 'CRMA';
@@ -42,6 +41,17 @@ declare
                      _pair[_i], _pair[_i + 1], _pair[_i]);
       execute _ins;
     end loop;
+
+    -- bug 30700: {
+    INSERT INTO charuse (charuse_char_id, charuse_target_type)
+      SELECT DISTINCT bomitem_char_id, 'SI'
+        FROM bomitem
+       WHERE bomitem_char_id IS NOT NULL
+         AND bomitem_char_id NOT IN (SELECT charuse_char_id
+                                       FROM charuse
+                                      WHERE charuse_target_type = 'SI');
+    -- }
+
   end
 $$ language plpgsql;
 
