@@ -26,7 +26,6 @@ declare
   ];
 
   begin
-    /* bug 26266 - must precede the for loop { */
     update public.charuse
        set charuse_target_type = 'CRMACCT'
      where charuse_target_type = 'CRMA';
@@ -43,7 +42,7 @@ declare
       execute _ins;
     end loop;
 
-    /* bug 29827 - patch demo database */
+    -- bug 29827 - patch demo database:
     IF fetchMetricText('remitto_address2') = '12100 Playland Way' AND
        fetchMetricText('DatabaseName')     = 'Practice Database' THEN
       INSERT INTO public.charuse (
@@ -59,6 +58,16 @@ declare
            AND EXISTS(SELECT 1 FROM source WHERE source_charass = tgttype)
            AND couter.charuse_target_type = 'I';
     END IF;
+    -- }
+    -- bug 30700: {
+    INSERT INTO charuse (charuse_char_id, charuse_target_type)
+      SELECT DISTINCT bomitem_char_id, 'SI'
+        FROM bomitem
+       WHERE bomitem_char_id IS NOT NULL
+         AND bomitem_char_id NOT IN (SELECT charuse_char_id
+                                       FROM charuse
+                                      WHERE charuse_target_type = 'SI');
+    -- }
 
   end
 $$ language plpgsql;
