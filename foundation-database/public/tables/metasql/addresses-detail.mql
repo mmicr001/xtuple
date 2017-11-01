@@ -1,12 +1,18 @@
 -- Group: addresses
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
+ <? if exists("hasContext") ?>
+SELECT * FROM (
+<? endif ?>
 SELECT DISTINCT ON (addr_country, addr_state, addr_city, addr_line1, addr_number) 
   addr_id, addr_line1, addr_line2, addr_line3, 
   addr_city, addr_state, addr_country, addr_postalcode 
+<? if exists("hasContext") ?> 
+  , crmrole_sort, crmrole_name AS crmrole
+<? endif ?>
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
@@ -16,7 +22,13 @@ SELECT DISTINCT ON (addr_country, addr_state, addr_city, addr_line1, addr_number
 <? foreach("char_id_date_list") ?>
   , charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>
 <? endforeach ?>
-FROM addr 
+FROM addr
+<? if exists("crmacct_id") ?>
+  JOIN crmacctaddrass ON (crmacctaddrass_addr_id=addr_id)
+<? endif ?>
+<? if exists("hasContext") ?>
+  JOIN crmrole ON (crmacctaddrass_crmrole_id=crmrole_id)
+<? endif ?>
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='ADDR') 
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=addr_id)
@@ -36,8 +48,16 @@ FROM addr
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
 WHERE true
+<? if exists("crmacct_id") ?>
+ AND crmacctaddrass_crmacct_id=<? value("crmacct_id") ?>
+<? endif ?>
 <? if not exists("showInactive") ?> 
  AND addr_active 
 <? endif ?>
 <? literal("charClause") ?>
-ORDER BY addr_country, addr_state, addr_city, addr_line1, addr_number;
+ORDER BY addr_country, addr_state, addr_city, addr_line1, addr_number
+<? if exists("hasContext") ?>
+) foo
+ORDER BY crmrole_sort
+<? endif ?>
+;

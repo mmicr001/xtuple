@@ -1,7 +1,7 @@
 -- Group: contact
 -- Name:  uses
 -- Notes: Find and report uses of the contact
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if not exists('core') ?>
@@ -10,6 +10,20 @@ SELECT <? value("id") ?>::text || '.' || type_id::text || '.' || type_code::text
        *
 FROM (
 <? endif ?>
+  SELECT crmacct_id AS type_id, 1 AS type_code, <? value("crmacct") ?> AS type,
+         crmacct_number AS number,
+         crmacct_name AS name, crmrole_name AS role,
+         (crmacct_active) AS active,
+         crmacct_owner_username AS owner
+    FROM crmacct 
+    JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id)
+    JOIN crmrole ON (crmacctcntctass_crmrole_id=crmrole_id)
+    WHERE (crmacctcntctass_cntct_id=<? value("id") ?>)
+
+/*
+  Replace with CRM Account Relationhips.  It's possible we can migrate more of the following
+  into the CRM - Contact map and simplify this query further
+
   SELECT crmacct_id AS type_id, 1 AS type_code, <? value("crmacct") ?> AS type,
          crmacct_number AS number,
          crmacct_name AS name, <? value("primary") ?> AS role,
@@ -24,7 +38,7 @@ FROM (
          (crmacct_active) AS active,
          crmacct_owner_username AS owner
     FROM crmacct WHERE (crmacct_cntct_id_2=<? value("id") ?>)
-  
+*/
   UNION ALL
   SELECT cust_id AS type_id, 3 AS type_code, <? value("cust") ?> AS type,
          cust_number AS number,

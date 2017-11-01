@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _addrtrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   DECLARE
     _uses	INTEGER	:= 0;
@@ -21,6 +21,7 @@ CREATE OR REPLACE FUNCTION _addrtrigger() RETURNS "trigger" AS $$
 	RAISE EXCEPTION 'Cannot inactivate Address with Active Contacts (%)',
 			_uses;
       END IF;
+      NEW.addr_lastupdated = now();
     ELSIF (TG_OP = 'DELETE') THEN
       IF (_uses > 0) THEN
 	RAISE EXCEPTION 'Cannot Delete Address with Active Contacts (%)',
@@ -47,7 +48,7 @@ CREATE TRIGGER addrtrigger
   EXECUTE PROCEDURE _addrtrigger();
 
 CREATE OR REPLACE FUNCTION _addrAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

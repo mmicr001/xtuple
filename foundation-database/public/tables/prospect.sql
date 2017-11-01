@@ -7,12 +7,20 @@ SELECT
   xt.add_column('prospect', 'prospect_active',      'BOOLEAN', 'DEFAULT true NOT NULL', 'public'),
   xt.add_column('prospect', 'prospect_number',         'TEXT', 'NOT NULL', 'public'),
   xt.add_column('prospect', 'prospect_name',           'TEXT', 'NOT NULL', 'public'),
-  xt.add_column('prospect', 'prospect_cntct_id',    'INTEGER', NULL, 'public'),
-  xt.add_column('prospect', 'prospect_comments',       'TEXT', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_cntct_id',       'INTEGER', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_comments',          'TEXT', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_owner_username',    'TEXT', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_assigned_username', 'TEXT', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_assigned',     'DATE', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_lasttouch',    'DATE', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_priority_id', 'INTEGER', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_source_id',   'INTEGER', NULL, 'public'),
+  xt.add_column('prospect', 'prospect_status',      'character(1)', NULL, 'public'),
   xt.add_column('prospect', 'prospect_salesrep_id', 'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_warehous_id', 'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_taxzone_id',  'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_created',     'TIMESTAMP WITH TIME ZONE', $$DEFAULT now() NOT NULL$$, 'public'),
+  xt.add_column('prospect', 'prospect_createdby',   'TEXT', 'NOT NULL DEFAULT geteffectivextuser()', 'public'),
   xt.add_column('prospect', 'prospect_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
 
 SELECT
@@ -29,6 +37,8 @@ SELECT
                     'FOREIGN KEY (prospect_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_warehous_id_fkey',
                     'FOREIGN KEY (prospect_warehous_id) REFERENCES whsinfo(warehous_id)', 'public');
+
+-- TODO Add extra foreign key constraints
 
 ALTER TABLE public.prospect ENABLE TRIGGER ALL;
 

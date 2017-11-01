@@ -756,7 +756,7 @@ select createDoctype(42, --pDocAssNum
 select createDoctype(NULL, --pDocAssNum
                      'PSPCT', --pType
                      'PSPCT', --pDocAss
-                     '', --pCharAss
+                     'PSPCT', --pCharAss
                      'Prospect', --pFull
                      'prospect', --pTable
                      'prospect_id', --pKey

@@ -1,18 +1,34 @@
 -- Group: contacts
 -- Name: detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
+
+<? if exists("hasContext") ?>
+SELECT * FROM (
+<? endif ?>
 
 SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number) 
   cntct_id AS id
+<? if exists("hasContext") ?>
+, crmrole_sort, crmrole_name AS crmrole
+<? endif ?>
 <? if not exists("idOnly") ?> 
 , addr_id AS altId,
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
   crmacct_id, crmacct_number, crmacct_name,
-  cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, cntct_phone,
-  cntct_phone2, cntct_fax, cntct_email, cntct_webaddr
+  cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
+  (SELECT cntctphone_phone FROM cntctphone
+                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
+                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Office' LIMIT 1) AS cntct_phone,
+  (SELECT cntctphone_phone FROM cntctphone
+                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
+                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Mobile' LIMIT 1) AS cntct_phone2,                   
+  (SELECT cntctphone_phone FROM cntctphone
+                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
+                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Fax' LIMIT 1) AS cntct_phone3,
+ cntct_email, cntct_webaddr
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
@@ -25,10 +41,14 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
 <? endif ?>
 <? if exists("hasContext") ?>
 FROM cntct
+  LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+  LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
+  LEFT OUTER JOIN crmrole ON (crmrole_id=crmacctcntctass_crmrole_id)
 <? else ?>
 FROM cntct()
+  LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+  LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
 <? endif ?>
-  LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id) 
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
   LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
 <? foreach("char_id_text_list") ?>
@@ -109,4 +129,10 @@ WHERE true
   AND (addr_id=<? value("addr_id") ?>)
 <? endif ?>
 <? literal("charClause") ?>
-ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc;
+ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc
+
+<? if exists("hasContext") ?>
+) foo
+ORDER BY crmrole_sort
+<? endif ?>
+;
