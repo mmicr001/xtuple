@@ -1,7 +1,7 @@
 -- Group: vendors
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT 
@@ -17,7 +17,8 @@ SELECT
 <? foreach("char_id_date_list") ?>
   charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>,
 <? endforeach ?>
-  cntct.*,
+  cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone, getcontactphone(cntct_id, 'Mobile') AS contact_phone2,
+  getcontactphone(cntct_id, 'Fax') AS contact_fax,
   CASE WHEN (cntctaddr.addr_id IS NOT NULL) THEN cntctaddr.addr_id ELSE vendaddr.addr_id END AS addr_id,
   CASE WHEN (cntctaddr.addr_id IS NOT NULL) THEN cntctaddr.addr_active ELSE vendaddr.addr_active END AS addr_active,
   CASE WHEN (cntctaddr.addr_id IS NOT NULL) THEN cntctaddr.addr_line1 ELSE vendaddr.addr_line1 END AS addr_line1,
@@ -67,7 +68,7 @@ WHERE true
        OR (vend_name ~* <? value("search_pattern") ?>)
        OR (vendtype_code ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+       OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntctaddr.addr_line1, vendaddr.addr_line1, '') || ' ' || COALESCE(cntctaddr.addr_line2, vendaddr.addr_line2,'') || ' ' || COALESCE(cntctaddr.addr_line3, vendaddr.addr_line3, '') ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntctaddr.addr_city, vendaddr.addr_city,'') ~* <? value("search_pattern") ?>)
@@ -88,7 +89,7 @@ WHERE true
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND (phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(cntct_email,'') ~* <? value("cntct_email_pattern") ?>)

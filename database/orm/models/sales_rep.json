@@ -65,8 +65,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_salesrep_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "salesrep_crmacct_id"
           }
         ],
         "properties": [

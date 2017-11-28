@@ -1,6 +1,6 @@
 select xt.install_js('XM','Account','xtuple', $$
   /* Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
-     See www.xm.ple.com/CPAL for the full text of the software license. */
+     See www.xtuple.com/CPAL for the full text of the software license. */
   
   XM.Account = {};
 
@@ -18,8 +18,8 @@ select xt.install_js('XM','Account','xtuple', $$
       row,
       sql = "select crmacct_number, cust_number, prospect_number " +
             "from crmacct " +
-            "left join custinfo on cust_id = crmacct_cust_id " +
-            "left join prospect on prospect_id = crmacct_prospect_id " +
+            "left join custinfo on cust_crmacct_id = crmacct_id " +
+            "left join prospect on prospect_crmacct_id = crmacct_id " +
             " where crmacct_number = $1";
         
     res = XM.Model.findExisting("XM.Account", key, value, id);
@@ -46,13 +46,13 @@ select xt.install_js('XM','Account','xtuple', $$
   }
 
   XM.Account.used = function(id) {
-    var sql = "select (crmacct_cust_id is null" +
-	" and crmacct_prospect_id is null" +
-	" and crmacct_emp_id is null" +
-	" and crmacct_salesrep_id is null" +
-	" and crmacct_taxauth_id is null" +
-	" and crmacct_vend_id is null" +
-	" and crmacct_usr_username is null) as result " +
+    var sql = "select (crmaccttypes(crmacct_id)#>>'{customer}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{prospect}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{employee}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{salesrep}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{taxauth}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{vendor}' is null" +
+	" and crmaccttypes(crmacct_id)#>>'{user}' is null) as result " +
 	"from crmacct where crmacct_number = $1",
       res = plv8.execute(sql, [id])[0].result;
      return res ? XM.Model.used('XM.Account', id) : true;

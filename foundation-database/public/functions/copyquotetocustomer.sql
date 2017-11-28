@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION copyquotetocustomer(pQuheadid integer, pCustomerid integer, pSchedDate date)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2016 by OpenMFG LLC  d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC  d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _isCustomer BOOLEAN;
@@ -21,16 +21,22 @@ BEGIN
 
   SELECT * INTO _b FROM (
     SELECT cust_name as name,  addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country,
-       cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_fax, cntct_email    
+       cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, 
+       getcontactphone(cntct_id, 'Office') AS contact_phone, 
+       getcontactphone(cntct_id, 'Fax') AS contact_fax, 
+       cntct_title, cntct_email 
       FROM custinfo 
       LEFT JOIN cntct ON (cust_cntct_id = cntct_id)
       LEFT JOIN addr ON (cntct_addr_id = addr_id)
       WHERE cust_id = pCustomerid
     UNION
     SELECT prospect_name AS name,  addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country,
-        cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_fax, cntct_email
+        cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, 
+        getcontactphone(cntct_id, 'Office') AS contact_phone, 
+        getcontactphone(cntct_id, 'Fax') AS contact_fax, 
+        cntct_title, cntct_email
       FROM prospect
-      LEFT JOIN cntct ON (prospect_cntct_id = cntct_id)
+      LEFT JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id))
       LEFT JOIN addr ON (cntct_addr_id = addr_id)  
       WHERE prospect_id = pCustomerid ) data;
 
@@ -101,9 +107,9 @@ BEGIN
          _b.cntct_middle,		-- quhead_billto_cntct_middle,
          _b.cntct_last_name,	-- quhead_billto_cntct_last_name,
          _b.cntct_suffix,		-- quhead_billto_cntct_suffix,
-         _b.cntct_phone,		-- quhead_billto_cntct_phone,
+         _b.contact_phone,		-- quhead_billto_cntct_phone,
          _b.cntct_title,		-- quhead_billto_cntct_title,
-         _b.cntct_fax,			-- quhead_billto_cntct_fax,
+         _b.contact_fax,			-- quhead_billto_cntct_fax,
          _b.cntct_email		-- quhead_billto_cntct_email
   FROM quhead 
   WHERE (quhead_id=pquheadid);

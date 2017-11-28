@@ -593,21 +593,21 @@
    </field>
    <field>
     <rect>
-     <x>302.941</x>
-     <y>15.3526</y>
+     <x>305</x>
+     <y>15</y>
      <width>100</width>
      <height>15</height>
     </rect>
     <font>
      <face>Arial</face>
-     <size>8</size>
+     <size>10</size>
      <weight>bold</weight>
     </font>
     <left/>
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>cntct_phone</column>
+     <column>contact_phone</column>
     </data>
    </field>
    <field>

@@ -177,6 +177,7 @@
     "xt/views/coheadinfo.sql",
     "xt/views/coiteminfo.sql",
     "xt/views/crmacct_users.sql",
+    "xt/views/crmacctinfo.sql",
     "xt/views/crmacctaddr.sql",
     "xt/views/crmacctcomment.sql",
     "xt/views/customer_prospect.sql",

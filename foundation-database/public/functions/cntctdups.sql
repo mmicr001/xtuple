@@ -15,24 +15,24 @@ CREATE OR REPLACE FUNCTION cntctdups(pSearchText        text,
                                      pCheckPhone        boolean,
                                      pCheckEmail        boolean)
   RETURNS SETOF cntctdup AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntct    cntctdup%ROWTYPE;
   _cntctdup cntctdup%ROWTYPE;
   _qry        TEXT := '';
   _debug   BOOLEAN := false;
-  _baseSelect TEXT := 'SELECT cntct_id,
-                              cntct_crmacct_id,
+  _baseSelect TEXT := 'SELECT DISTINCT ON (cntct_id, cntct_last_name, cntct_first_name) cntct_id,
+                              crmacct_id,
                               cntct_addr_id,
                               UPPER(cntct_first_name) AS cntct_first_name,
                               UPPER(cntct_last_name) AS cntct_last_name,
                               UPPER(cntct_honorific) AS cntct_honorific,
                               cntct_initials,
                               cntct_active,
-                              cntct_phone,
-                              cntct_phone2,
-                              cntct_fax,
+                              (SELECT array_to_string(array_agg(cntctphone_phone), '', '')
+                               FROM cntctphone
+                               WHERE cntctphone_cntct_id=cntct_id) AS contact_phones,
                               UPPER(cntct_email) AS cntct_email,
                               cntct_webaddr,
                               cntct_notes,
@@ -57,7 +57,8 @@ DECLARE
                               addr_number,
                               0 AS cntctdup_level
                   FROM cntct()
-                  LEFT OUTER JOIN crmacct ON cntct_crmacct_id = crmacct_id
+                  LEFT OUTER JOIN crmacctcntctass ON crmacctcntctass_cntct_id=cntct_id
+                  LEFT OUTER JOIN crmacct ON crmacctcntctass_crmacct_id = crmacct_id
                   LEFT OUTER JOIN addr    ON cntct_addr_id    = addr_id';
   _paramsary  TEXT[] := ARRAY[ '"pSearchText": "' || pSearchText || '"' ];
   _paramStr   TEXT;
@@ -90,16 +91,14 @@ BEGIN
   _qry := xt.parsemetasql($m$
 <? if exists("pIndentedDups") ?>
    SELECT -1 AS cntct_id,
-          -1 AS cntct_crmacct_id,
+          -1 AS crmacct_id,
           -1 AS cntct_addr_id,
           <? if not exists("pCheckFirst") ?>'' AS<? endif ?> cntct_first_name,
           <? if not exists("pCheckLast") ?> '' AS<? endif ?> cntct_last_name,
           <? if not exists("pCheckHnfc") ?> '' AS<? endif ?> cntct_honorific,
           '' AS cntct_initials,
           NULL AS cntct_active,
-          <? if not exists("pCheckPhone") ?>'' AS<? endif ?> cntct_phone,
-          <? if not exists("pCheckPhone") ?>'' AS<? endif ?> cntct_phone2,
-          '' AS cntct_fax,
+          <? if not exists("pCheckPhone") ?>'' AS<? endif ?> contact_phones,
           <? if not exists("pCheckEmail") ?>'' AS<? endif ?> cntct_email,
           '' AS cntct_webaddr,
           '' AS cntct_notes,
@@ -142,7 +141,7 @@ $m$
               OR (cntct_first_name || ' ' || cntct_last_name) ~* <? value("pSearchText") ?>
             <? endif ?>
             <? if exists("pSearchPhone") ?>
-              OR (cntct_phone || ' ' || cntct_phone2 || ' ' || cntct_fax) ~* <? value("pSearchText") ?>
+              OR phonejson(cntct_id)::TEXT ~* <? value("pSearchText") ?>
             <? endif ?>
             <? if exists("pSearchEmail") ?>
               OR cntct_email ~* <? value("pSearchText") ?>
@@ -158,8 +157,7 @@ $m$
             <? if exists("pCheckLast") ?>   , cntct_last_name  <? endif ?>
             <? if exists("pCheckSuffix") ?> , cntct_suffix     <? endif ?>
             <? if exists("pCheckEmail") ?>  , cntct_email      <? endif ?>
-            <? if exists("pCheckPhone") ?>  , cntct_phone
-                                            , cntct_phone2     <? endif ?>
+            <? if exists("pCheckPhone") ?>  , contact_phones   <? endif ?>
    HAVING (false
      <? if exists("pCheckHnfc") ?>   OR COUNT(cntct_honorific)  > 1 <? endif ?>
      <? if exists("pCheckFirst") ?>  OR COUNT(cntct_first_name) > 1 <? endif ?>
@@ -168,8 +166,7 @@ $m$
      <? if exists("pCheckSuffix") ?> OR COUNT(cntct_suffix)     > 1 <? endif ?>
      <? if exists("pCheckEmail") ?>  OR COUNT(cntct_email)      > 1 <? endif ?>
      <? if exists("pCheckPhone") ?>
-      OR (COUNT(cntct_phone)  > 1 AND LENGTH(cntct_phone)  > 0)
-      OR (COUNT(cntct_phone2) > 1 AND LENGTH(cntct_phone2) > 0)
+      OR (COUNT(contact_phones)  > 1 AND LENGTH(contact_phones)  > 0)
     <? endif ?>
    )
 
@@ -180,7 +177,7 @@ $m$
    <? if exists("pCheckSuffix") ?> AND LENGTH(cntct_suffix)     > 0 <? endif ?>
    <? if exists("pCheckEmail") ?>  AND LENGTH(cntct_email)      > 0 <? endif ?>
 <? endif ?>
- ORDER BY cntct_last_name, cntct_first_name;
+ ORDER BY cntct_last_name, cntct_first_name, cntct_id;
 $m$, _paramStr);
 
   IF (NOT pIndentedDups) THEN
@@ -195,7 +192,7 @@ $m$, _paramStr);
               <? if exists("pCheckLast") ?>   AND UPPER(cntct_last_name) = $4<? endif ?>
               <? if exists("pCheckSuffix") ?> AND UPPER(cntct_suffix)    = $5<? endif ?>
               <? if exists("pCheckEmail") ?>  AND UPPER(cntct_email)     = $6<? endif ?>
-              <? if exists("pCheckPhone") ?>  AND cntct_phone            = $7<? endif ?>
+              <? if exists("pCheckPhone") ?>  AND contact_phones         = $7<? endif ?>
           ;$m$;
 
   IF _debug THEN RAISE NOTICE $r$
@@ -214,7 +211,7 @@ _paramStr: %$r$, _qry, _dupstr, _paramStr;
       FOR _cntctdup IN EXECUTE _qry USING
                          _cntct.cntct_honorific, _cntct.cntct_first_name, _cntct.cntct_middle,
                          _cntct.cntct_last_name, _cntct.cntct_suffix,     _cntct.cntct_email,
-                         _cntct.cntct_phone
+                         _cntct.contact_phones
       LOOP
         RETURN NEXT _cntctdup;
       END LOOP;

@@ -1,14 +1,15 @@
 -- Group: prospects
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT 
   prospect.*,
-  cntct.*, addr.*
+  cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone,
+  addr.*
 FROM prospect 
-  LEFT OUTER JOIN cntct ON (prospect_cntct_id=cntct_id) 
+  LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id)) 
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
 WHERE true
 <? if not exists("showInactive") ?> 
@@ -23,7 +24,7 @@ WHERE true
   AND ((prospect_number ~* <? value("search_pattern") ?>)
        OR (prospect_name ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+       OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
@@ -41,7 +42,7 @@ WHERE true
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND (phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(cntct_email,'') ~* <? value("cntct_email_pattern") ?>)

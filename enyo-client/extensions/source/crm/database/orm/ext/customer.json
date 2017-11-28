@@ -9,8 +9,8 @@
     "comment": "Extended by Crm",
     "relations": [
       {
-        "column": "crmacct_cust_id",
-        "inverse": "id"
+        "column": "crmacct_id",
+        "inverse": "cust_crmacct_id"
       }
     ],
     "properties": [
@@ -67,8 +67,8 @@
     "comment": "Extended by Crm",
     "relations": [
       {
-        "column": "crmacct_cust_id",
-        "inverse": "id"
+        "column": "crmacct_id",
+        "inverse": "cust_crmacct_id"
       }
     ],
     "properties": [

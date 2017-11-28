@@ -51,15 +51,6 @@
         }
       },
       {
-        "name": "contact",
-        "toOne": {
-          "isNested": true,
-          "type": "ContactRelation",
-          "column": "prospect_cntct_id",
-          "inverse": "id"
-        }
-      },
-      {
         "name": "salesRep",
         "toOne": {
           "type": "SalesRep",
@@ -87,8 +78,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_prospect_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "prospect_crmacct_id"
           }
         ],
         "properties": [
@@ -145,14 +136,6 @@
         }
       },
       {
-        "name": "contact",
-        "toOne": {
-          "isNested": true,
-          "type": "ContactRelation",
-          "column": "prospect_cntct_id"
-        }
-      },
-      {
         "name": "salesRep",
         "toOne": {
           "type": "SalesRep",
@@ -173,8 +156,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_prospect_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "prospect_crmacct_id"
           }
         ],
         "properties": [

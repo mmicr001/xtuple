@@ -3,6 +3,12 @@
  <title>Incident</title>
  <name>Incident</name>
  <description></description>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
  <size>Letter</size>
  <portrait/>
  <topmargin>50</topmargin>
@@ -16,7 +22,7 @@
        incdt_owner_username, incdtseverity_name,
        incdtpriority_name, incdtcat_name,
        crmacct_name, cntct_first_name || ' ' ||cntct_last_name as f_name,    
-       cntct_phone,  cntct_email,cntct_title
+       getcontactphone(cntct_id, 'Office') AS contact_phone,  cntct_email,cntct_title
   from incdt left outer join incdtseverity on 
        (incdt_incdtseverity_id = incdtseverity_id)
        left outer join incdtpriority on
@@ -301,8 +307,8 @@ and url_source  = 'INCDT'
   </field>
   <field>
    <rect>
-    <x>128</x>
-    <y>208</y>
+    <x>130</x>
+    <y>183</y>
     <width>279</width>
     <height>20</height>
    </rect>
@@ -321,7 +327,7 @@ and url_source  = 'INCDT'
   <label>
    <rect>
     <x>25</x>
-    <y>208</y>
+    <y>183</y>
     <width>100</width>
     <height>20</height>
    </rect>
@@ -492,8 +498,8 @@ and url_source  = 'INCDT'
   </label>
   <field>
    <rect>
-    <x>128</x>
-    <y>144</y>
+    <x>130</x>
+    <y>143</y>
     <width>150</width>
     <height>20</height>
    </rect>
@@ -506,48 +512,13 @@ and url_source  = 'INCDT'
    <vcenter/>
    <data>
     <query>head</query>
-    <column>cntct_phone</column>
+    <column>contact_phone</column>
    </data>
   </field>
   <label>
    <rect>
     <x>25</x>
     <y>144</y>
-    <width>100</width>
-    <height>20</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>10</size>
-    <weight>normal</weight>
-   </font>
-   <right/>
-   <vcenter/>
-   <string>Contact Phone:</string>
-  </label>
-  <field>
-   <rect>
-    <x>128</x>
-    <y>187</y>
-    <width>170</width>
-    <height>20</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>10</size>
-    <weight>bold</weight>
-   </font>
-   <left/>
-   <vcenter/>
-   <data>
-    <query>head</query>
-    <column>cntct_phone</column>
-   </data>
-  </field>
-  <label>
-   <rect>
-    <x>25</x>
-    <y>187</y>
     <width>100</width>
     <height>20</height>
    </rect>

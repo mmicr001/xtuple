@@ -765,7 +765,7 @@ select createDoctype(NULL, --pDocAssNum
                      'firstline(prospect_comments)', --pDesc
                      '', --pWidget
                      '', --pJoin
-                     '', --pParam
+                     'prospect_id', --pParam
                      '', --pUi
                      '', --pPriv
                      'CRM',             -- pModule

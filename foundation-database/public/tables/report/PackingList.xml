@@ -40,7 +40,7 @@
                   cohead_shiptocountry) AS shipping_address,           
        cust_number,
        trim(cntct_first_name || ' ' || cntct_last_name) AS cust_contact,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        terms_descrip
   FROM cohead
   JOIN custinfo ON (cohead_cust_id=cust_id)

@@ -1,7 +1,7 @@
 -- Group: todolist
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT * FROM (
@@ -50,8 +50,8 @@ SELECT * FROM (
            <? value("incident") ?> || '-' || incdt_number
          END AS f_parent,
          COALESCE(todoitem_ophead_id, todoitem_incdt_id) AS parent_xtidrole,
-         COALESCE(crmacct_cust_id,-1) > 0 AS cust_qtdisplayrole,
-         crmacct_cust_id AS cust,
+         COALESCE(cust_id,-1) > 0 AS cust_qtdisplayrole,
+         cust_id AS cust,
          CASE WHEN (todoitem_active AND todoitem_due_date < CURRENT_DATE) THEN 'expired'
               WHEN (todoitem_active AND todoitem_due_date > CURRENT_DATE) THEN 'future'
          END AS due_qtforegroundrole 
@@ -62,7 +62,8 @@ SELECT * FROM (
 <? endif ?>
       LEFT OUTER JOIN incdt ON (incdt_id=todoitem_incdt_id) 
       LEFT OUTER JOIN ophead ON (ophead_id=todoitem_ophead_id)
-      LEFT OUTER JOIN crmacct ON (crmacct_id=todoitem_crmacct_id) 
+      LEFT OUTER JOIN crmacct ON (crmacct_id=todoitem_crmacct_id)
+      LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
       LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=todoitem_priority_id) 
 <? if not exists("todoList")?>
     WHERE false
@@ -135,8 +136,8 @@ UNION ALL
          '' AS parent_qtdisplay_role,
          '' AS f_parent,
          NULL AS parent_xtidrole,
-         COALESCE(crmacct_cust_id,-1) > 0 AS cust_qtdisplayrole,
-         COALESCE(crmacct_cust_id,-1) AS cust,
+         COALESCE(cust_id,-1) > 0 AS cust_qtdisplayrole,
+         COALESCE(cust_id,-1) AS cust,
          NULL AS due_qtforegroundrole 
 <? if exists("hasContext") ?>
          FROM incdt
@@ -144,7 +145,7 @@ UNION ALL
          FROM incdt()
 <? endif ?>
            LEFT OUTER JOIN crmacct ON (crmacct_id=incdt_crmacct_id) 
-           LEFT OUTER JOIN custinfo ON (cust_id=crmacct_cust_id)
+           LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
            LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=incdt_incdtpriority_id) 
 <? if not exists("incidents")?>
     WHERE false
@@ -361,8 +362,8 @@ UNION ALL
          '' AS parent_qtdisplayrole,
          '' AS f_parent,
          NULL AS parent_xtidrole,
-         COALESCE(crmacct_cust_id,-1) > 0 AS cust_qtdisplayrole,
-         crmacct_cust_id AS cust,
+         COALESCE(cust_id,-1) > 0 AS cust_qtdisplayrole,
+         cust_id AS cust,
          CASE WHEN (ophead_active AND ophead_target_date < CURRENT_DATE) THEN 'expired'
               WHEN (ophead_active AND ophead_target_date > CURRENT_DATE) THEN 'future'
          END AS due_qtforegroundrole 
@@ -372,7 +373,8 @@ UNION ALL
     FROM ophead()
 <? endif ?>
       JOIN opstage ON (ophead_opstage_id=opstage_id)
-      LEFT OUTER JOIN crmacct ON (crmacct_id=ophead_crmacct_id) 
+      LEFT OUTER JOIN crmacct ON (crmacct_id=ophead_crmacct_id)
+      LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
       LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=ophead_priority_id) 
 <? if not exists("opportunities")?>
     WHERE false

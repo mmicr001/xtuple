@@ -4,16 +4,12 @@ ALTER TABLE public.cntct DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('cntct', 'cntct_id',           'SERIAL', 'NOT NULL', 'public'),
-  xt.add_column('cntct', 'cntct_crmacct_id',  'INTEGER', NULL,       'public'),
   xt.add_column('cntct', 'cntct_addr_id',     'INTEGER', NULL,       'public'),
   xt.add_column('cntct', 'cntct_first_name',     'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_last_name',      'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_honorific',      'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_initials',       'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_active',      'BOOLEAN', 'DEFAULT true', 'public'),
-  xt.add_column('cntct', 'cntct_phone',          'TEXT', NULL,       'public'),
-  xt.add_column('cntct', 'cntct_phone2',         'TEXT', NULL,       'public'),
-  xt.add_column('cntct', 'cntct_fax',            'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_email',          'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_webaddr',        'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_notes',          'TEXT', NULL,       'public'),

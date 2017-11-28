@@ -19,15 +19,9 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
   addr_country, addr_notes, addr_number,
   crmacct_id, crmacct_number, crmacct_name,
   cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
-  (SELECT cntctphone_phone FROM cntctphone
-                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
-                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Office' LIMIT 1) AS cntct_phone,
-  (SELECT cntctphone_phone FROM cntctphone
-                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
-                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Mobile' LIMIT 1) AS cntct_phone2,                   
-  (SELECT cntctphone_phone FROM cntctphone
-                           JOIN crmrole ON (crmrole_id=cntctphone_crmrole_id)
-                           WHERE cntctphone_cntct_id=cntct_id AND crmrole_name ='Fax' LIMIT 1) AS cntct_phone3,
+  getContactPhone(cntct_id, 'Office') AS contact_phone,
+  getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
+  getContactPhone(cntct_id, 'Fax') AS contact_phone3,
  cntct_email, cntct_webaddr
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
@@ -83,7 +77,7 @@ WHERE true
  (crmacct_number ~* <? value("search_pattern") ?>)
   OR (crmacct_name ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+  OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntcteml_email,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
@@ -102,7 +96,7 @@ WHERE true
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(cntcteml_email,'') ~* <? value("cntct_email_pattern") ?>)

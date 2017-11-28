@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION _docinfo(pRefId INTEGER, pRefType TEXT, pRecursive BO
   RETURNS SETOF _docinfo AS
 $$
 DECLARE
-  _crmacct      RECORD;
+  _crmacct      JSON;
   _id           INTEGER;
   _column       TEXT;
   _row          _docinfo%ROWTYPE;
@@ -94,49 +94,49 @@ BEGIN
   IF NOT pRecursive THEN
     -- get child document associations for CRM Account records
     IF pRefType = 'CRMA' THEN
-      SELECT * INTO _crmacct FROM crmacct WHERE crmacct_id = pRefId;
-      IF _crmacct.crmacct_cust_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_cust_id, 'C', TRUE) LOOP
+      _crmacct := crmaccttypes(pRefId);
+
+      IF _crmacct#>>'{customer}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{customer}')::INTEGER, 'C', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
-      IF _crmacct.crmacct_prospect_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_prospect_id, 'PSPCT', TRUE) LOOP
+      IF _crmacct#>>'{prospect}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{prospect}')::INTEGER, 'PSPCT', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
-      IF _crmacct.crmacct_vend_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_vend_id, 'V', TRUE) LOOP
+      IF _crmacct#>>'{vendor}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{vendor}')::INTEGER, 'V', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
-      IF _crmacct.crmacct_taxauth_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_taxauth_id, 'TAXAUTH', TRUE) LOOP
+      IF _crmacct#>>'{taxauth}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{taxauth}')::INTEGER, 'TAXAUTH', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
-      IF _crmacct.crmacct_emp_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_emp_id, 'EMP', TRUE) LOOP
+      IF _crmacct#>>'{employee}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{employee}')::INTEGER, 'EMP', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
-      IF _crmacct.crmacct_salesrep_id IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo(_crmacct.crmacct_salesrep_id, 'SR', TRUE) LOOP
+      IF _crmacct#>>'{salesrep}' IS NOT NULL THEN
+        FOR _row IN SELECT * FROM _docinfo((_crmacct_crmacct#>>'{salesrep}')::INTEGER, 'SR', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;
     END IF;
 
     -- get CRM Account document associations for child records
-    _column := CASE pRefType WHEN 'C'       THEN 'crmacct_cust_id'
-                             WHEN 'PSPCT'   THEN 'crmacct_prospect_id'
-                             WHEN 'V'       THEN 'crmacct_vend_id'
-                             WHEN 'TAXAUTH' THEN 'crmacct_taxauth_id'
-                             WHEN 'EMP'     THEN 'crmacct_emp_id'
-                             WHEN 'SR'      THEN 'crmacct_salesrep_ic'
+    _id := CASE pRefType WHEN 'C'       THEN (_crmacct#>>'{customer}')::INTEGER
+                         WHEN 'PSPCT'   THEN (_crmacct#>>'{prospect}')::INTEGER
+                         WHEN 'V'       THEN (_crmacct#>>'{vendor}')::INTEGER
+                         WHEN 'TAXAUTH' THEN (_crmacct#>>'{taxauth}')::INTEGER
+                         WHEN 'EMP'     THEN (_crmacct#>>'{employee}')::INTEGER
+                         WHEN 'SR'      THEN (_crmacct#>>'{salesrep}')::INTEGER
                END;
-    IF _column IS NOT NULL THEN
-      EXECUTE format('SELECT crmacct_id FROM crmacct WHERE %I = %L;', _column, pRefId) INTO _id;
+    IF _id IS NOT NULL THEN
       FOR _row IN SELECT * FROM _docinfo(_id, 'CRMA', TRUE) LOOP
         RETURN NEXT _row;
       END LOOP;

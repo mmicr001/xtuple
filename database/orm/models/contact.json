@@ -3,7 +3,7 @@
     "context": "xtuple",
     "nameSpace": "XM",
     "type": "Contact",
-    "table": "cntct",
+    "table": "xt.cntctinfo",
     "idSequenceName": "cntct_cntct_id_seq",
     "isRest": true,
     "lockable": true,
@@ -151,7 +151,7 @@
         "toOne": {
           "isNested": true,
           "type": "AccountRelation",
-          "column": "cntct_crmacct_id"
+          "column": "cntct_crmacct"
         }
       },
       {
@@ -800,7 +800,7 @@
         "toOne": {
           "isNested": true,
           "type": "AccountRelation",
-          "column": "cntct_crmacct_id"
+          "column": "cntct_crmacct"
         }
       },
       {

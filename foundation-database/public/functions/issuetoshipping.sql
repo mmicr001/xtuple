@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION issueToShipping(INTEGER, NUMERIC) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN issueToShipping('SO', $1, $2, 0, CURRENT_TIMESTAMP);
@@ -7,7 +7,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION issueToShipping(INTEGER, NUMERIC, INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN issueToShipping('SO', $1, $2, $3, CURRENT_TIMESTAMP);
@@ -15,7 +15,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION issueToShipping(TEXT, INTEGER, NUMERIC, INTEGER, TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN issueToShipping($1, $2, $3, $4, $5, NULL);
@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION issueToShipping(pordertype TEXT,
                                            pinvhistid INTEGER,
                                            pDropship BOOLEAN DEFAULT FALSE,
                                            pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocSeries        INTEGER := COALESCE(pItemlocSeries, NEXTVAL('itemloc_series_seq'));
@@ -84,9 +84,12 @@ BEGIN
     IF ( SELECT COALESCE(itemsite_autoreg, FALSE)
          FROM coitem JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
          WHERE (coitem_id=pitemid) ) THEN
-      SELECT COALESCE(crmacct_cntct_id_1, -1) INTO _cntctid
+      SELECT COALESCE(crmacctcntctass_cntct_id, -1) INTO _cntctid
       FROM coitem JOIN cohead ON (cohead_id=coitem_cohead_id)
-                  JOIN crmacct ON (crmacct_cust_id=cohead_cust_id)
+                  JOIN custinfo ON (cohead_cust_id=cust_id)
+                  JOIN crmacct ON (crmacct_id=cust_crmacct_id)
+                  LEFT OUTER JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id
+                                                 AND crmacctcntctass_crmrole_id=getcrmroleid('Primary'))
       WHERE (coitem_id=pitemid);
       IF (_cntctid = -1) THEN
         RETURN -15;

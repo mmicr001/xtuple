@@ -1,45 +1,80 @@
 CREATE OR REPLACE FUNCTION merge2crmaccts(INTEGER, INTEGER, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSourceId ALIAS FOR $1;
   pTargetId ALIAS FOR $2;
   _purge    BOOLEAN := COALESCE($3, FALSE);
 
+  _sourcenum  TEXT;
+  _targetnum  TEXT;
+  _canmerge   RECORD;
   _coldesc    RECORD;
   _count      INTEGER := 0;
   _hassubtype BOOLEAN;
   _mrgcol     BOOLEAN;
   _result     INTEGER := 0;
   _sel        RECORD;
+  _tblname    TEXT;
   _colname    TEXT;
   _tmpid      INTEGER;
 
 BEGIN
+  -- Human Readable values;
+  _sourcenum := (SELECT crmacct_number FROM crmacct WHERE crmacct_id=pSourceId);
+  _targetnum := (SELECT crmacct_number FROM crmacct WHERE crmacct_id=pTargetId);
+
   -- Validate
   IF (pSourceId = pTargetId) THEN
-    RAISE WARNING 'Tried to merge a CRM Account with itself: %.', pSourceId;
+    RAISE WARNING 'Tried to merge a CRM Account with itself: %.', _sourcenum;
     RETURN 0;
   ELSIF (pSourceId IS NULL) THEN
     RAISE EXCEPTION 'Merge source id cannot be null [xtuple: merge, -1]';
   ELSIF NOT(EXISTS(SELECT 1 FROM crmacct WHERE crmacct_id=pSourceId)) THEN
     RAISE EXCEPTION 'Merge source % not found [xtuple: merge, -2, %]',
-                    pSourceId, pSourceId;
+                    _sourcenum, pSourceId;
   ELSIF (pTargetId IS NULL) THEN
     RAISE EXCEPTION 'Merge target id cannot be null [xtuple: merge, -3]';
   ELSIF NOT(EXISTS(SELECT 1 FROM crmacct WHERE crmacct_id=pTargetId)) THEN
     RAISE EXCEPTION 'Merge target % not found [xtuple: merge, -4, %]',
-                    pTargetId, pTargetId;
+                    _targetnum, pTargetId;
   ELSIF NOT(EXISTS(SELECT 1
                      FROM crmacctsel
                     WHERE (crmacctsel_src_crmacct_id=pSourceId)
                       AND (crmacctsel_dest_crmacct_id=pTargetId))) THEN
     RAISE EXCEPTION 'Source % and target % have not been selected for merging [xtuple: merge, -5, %, %]',
-                    pSourceId, pTargetId, pSourceId, pTargetId;
+                    _sourcenum, _targetnum, pSourceId, pTargetId;
   END IF;
 
+  -- Check whether CRM Accounts to merge both exist as customers/prospects/vendors etc. which cannot
+  -- be merged if both exist.
+  FOR _canmerge IN
+    SELECT initcap(CASE WHEN foo.key IN ('customer','prospect') THEN 'customer or prospect' 
+                        WHEN foo.key = 'salesrep' THEN 'sales rep'
+                        WHEN foo.key = 'taxauth' THEn 'tax authority'
+                        ELSE foo.key END) AS newkey, 
+           bool_or(cust1check) AND bool_or(cust2check) AS matchingcust,
+           bool_or(othercheck) AS matchingother
+    FROM (       
+       SELECT c1.key, 
+       CASE WHEN c1.key IN ('customer','prospect') THEN (c1.value IS NOT NULL) ELSE false END AS cust1check,
+       CASE WHEN c1.key IN ('customer','prospect') THEN (c2.value IS NOT NULL) ELSE false END AS cust2check,
+       (c1.value IS NOT NULL) AND (c2.value IS NOT NULL) AS othercheck
+       FROM (select * from json_each_text(crmaccttypes(pSourceId))) c1
+       JOIN (select * from json_each_text(crmaccttypes(pTargetId))) c2 ON (c1.key=c2.key)
+    WHERE c1.key NOT IN ('competitor', 'partner')      
+    ) foo
+    GROUP BY newkey
+  LOOP
+    IF (_canmerge.matchingcust OR _canmerge.matchingother) THEN
+      RAISE EXCEPTION 'Cannot merge two CRM Accounts that both refer to % [xtuple: merge, -6, %, %]',
+                      _canmerge.newkey, pSourceId, pTargetId;    
+    END IF;
+  END LOOP;
+
   _result:= changeFkeyPointers('public', 'crmacct', pSourceId, pTargetId,
-                               ARRAY[ 'crmacctsel', 'crmacctmrgd' ], _purge)
+                               ARRAY[ 'crmacctsel', 'crmacctmrgd', 'crmacctcntctass', 'custinfo',
+                                      'vendinfo', 'prospect', 'salesrep', 'taxauth', 'emp' ], _purge)
           + changePseudoFKeyPointers('public', 'alarm', 'alarm_source_id',
                                      pSourceId, 'public', 'crmacct', pTargetId,
                                      'alarm_source', 'CRMA', _purge)
@@ -77,7 +112,8 @@ BEGIN
                    WHERE (attnum >= 0)
                      AND (relname='crmacct')
                      AND (nspname='public')
-                     AND (attname NOT IN ('crmacct_id', 'crmacct_number'))
+                     AND (attname NOT IN ('crmacct_id', 'crmacct_number', 
+                                  'crmacct_created', 'crmacct_lastupdated'))
   LOOP
 
     -- if we're supposed to merge this column at all
@@ -87,7 +123,7 @@ BEGIN
                  AND (crmacctsel_dest_crmacct_id=' || pTargetId || '))' INTO _mrgcol;
 
     IF (_mrgcol) THEN
-      _colname := REPLACE(_coldesc.attname, 'crmacctsel_mrg_', '');
+      _colname := _coldesc.attname;
 
       -- optionally back up the old value from the destination
       -- we'll back up the old value from the source further down
@@ -108,7 +144,7 @@ BEGIN
                     WHERE (crmacct_id=' || pTargetId || ');' ;
         EXCEPTION WHEN unique_violation THEN
           RAISE EXCEPTION 'Could not make a backup copy of % when merging % into % [xtuple: merge, -8, %, %, public, crmacct, %]',
-                       _colname, pSourceId, pTargetId,
+                       _colname, _sourcenum, _targetnum,
                        _colname, pSourceId, pTargetId;
         END;
       END IF;
@@ -116,7 +152,7 @@ BEGIN
       -- TODO: what do we do about users?
       /* update the destination crmacct in one of 3 different ways:
          - crmacct_notes might be concatenated from more than one source record
-	 - foreign keys to crm account subtype records (e.g. crmacct_cust_id)
+	 - foreign keys to crm account subtype records
            must not leave orphaned records and must avoid uniqueness violations
          - some fields can simply be updated in place
        */
@@ -129,74 +165,6 @@ BEGIN
                   JOIN crmacctsel ON (src.crmacct_id=crmacctsel_src_crmacct_id)
                  WHERE ((dest.crmacct_id=crmacctsel_dest_crmacct_id)
                     AND (dest.crmacct_id!=crmacctsel_src_crmacct_id));';
-
-      ELSIF (_colname IN ('crmacct_cust_id', 'crmacct_prospect_id',
-                          'crmacct_vend_id', 'crmacct_taxauth_id',
-                          'crmacct_emp_id',  'crmacct_salesrep_id')) THEN
-        IF (_colname IN ('crmacct_cust_id', 'crmacct_prospect_id')) THEN
-          EXECUTE 'SELECT src.' || quote_ident(_colname) || ' IS NOT NULL
-                      AND (dest.crmacct_prospect_id IS NOT NULL OR
-                           dest.crmacct_cust_id IS NOT NULL)
-                     FROM crmacct src
-                     JOIN crmacctsel ON (src.crmacct_id=crmacctsel_src_crmacct_id)
-                     JOIN crmacct dest ON (crmacctsel_dest_crmacct_id=dest.crmacct_id)
-                    WHERE ((src.crmacct_id='  || pSourceId || ')
-                       AND (dest.crmacct_id=' || pTargetId || '))' INTO _hassubtype;
-          IF (_hassubtype) THEN
-            RAISE EXCEPTION 'Cannot merge two CRM Accounts that both refer to Customers and/or Prospects [xtuple: merge, -6, %, %]',
-                            pSourceId, pTargetId;
-          END IF;
-        ELSE
-          EXECUTE 'SELECT src.' || quote_ident(_colname) || ' IS NOT NULL
-                      AND dest.'|| quote_ident(_colname) || ' IS NOT NULL
-                     FROM crmacct src
-                     JOIN crmacctsel ON (src.crmacct_id=crmacctsel_src_crmacct_id)
-                     JOIN crmacct dest ON (crmacctsel_dest_crmacct_id=dest.crmacct_id)
-                    WHERE ((src.crmacct_id='  || pSourceId || ')
-                       AND (dest.crmacct_id=' || pTargetId || '))' INTO _hassubtype;
-
-          IF (_hassubtype) THEN
-            RAISE EXCEPTION 'Cannot merge CRM Accounts until the % child records have been merged [xtuple: merge, -7, %, %, %]',
-                            _colname, _colname, pSourceId, pTargetId;
-          END IF;
-
-        END IF;
-
-        /* clearing the source separately from setting the target avoids
-           problems with triggers updating the wrong records */
-        EXECUTE 'SELECT ' || quote_ident(_colname) || ' FROM crmacct
-                  WHERE crmacct_id=' || pSourceId
-        INTO _tmpid;
-
-        -- now we have the data to back up the source
-        IF (NOT _purge) THEN
-          BEGIN
-            EXECUTE 'INSERT INTO mrgundo (
-                         mrgundo_schema,      mrgundo_table,
-                         mrgundo_pkey_col,    mrgundo_pkey_id,
-                         mrgundo_col,         mrgundo_value,      mrgundo_type,
-                         mrgundo_base_schema, mrgundo_base_table, mrgundo_base_id
-                   ) SELECT ''public'',     ''crmacct'',
-                            ''crmacct_id'', crmacct_id, '   ||
-                            quote_literal(_colname)         || ', ' ||
-                            quote_ident(_colname)           || ', ' ||
-                            quote_literal(_coldesc.typname) || ',
-                            ''public'', ''crmacct'', '      || pTargetId || '
-                       FROM crmacct
-                      WHERE (crmacct_id=' || pSourceId || ');' ;
-          EXCEPTION WHEN unique_violation THEN
-            RAISE EXCEPTION 'Could not make a backup copy of % when merging % into % [xtuple: merge, -8, %, %, public, crmacct, %]',
-                         _colname, pSourceId, pTargetId,
-                         _colname, pSourceId, pTargetId;
-          END;
-        END IF;
-
-        EXECUTE 'UPDATE crmacct SET ' || quote_ident(_colname) || '=NULL
-              WHERE (crmacct_id=' || pSourceId || ');';
-
-        EXECUTE 'UPDATE crmacct
-                    SET ' || quote_ident(_colname) || '=' || quote_literal(_tmpid) || '
-              WHERE (crmacct_id=' || pTargetId || ');';
 
       ELSE
         EXECUTE 'UPDATE crmacct dest
@@ -215,6 +183,7 @@ BEGIN
 
   IF (_purge) THEN
     DELETE FROM crmacct WHERE crmacct = pSourceId;
+    DELETE FROM crmacctcntctass WHERE crmacctcntctass_crmacct_id = pSourceId;
   ELSE
     INSERT INTO mrgundo (
            mrgundo_schema,      mrgundo_table,

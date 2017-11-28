@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION convertProspectToCustomer(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN convertProspectToCustomer($1, FALSE);
@@ -9,7 +9,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION convertProspectToCustomer(INTEGER,
                                                      BOOLEAN)
 RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pProspectId ALIAS FOR $1;
@@ -63,7 +63,7 @@ BEGIN
     _p.prospect_active,
     _p.prospect_number,
     _p.prospect_name,
-    _p.prospect_cntct_id,
+    getcrmaccountcontact(_p.prospect_crmacct_id),
     _p.prospect_taxzone_id,
     _p.prospect_comments,
     'G',

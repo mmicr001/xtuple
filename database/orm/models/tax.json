@@ -137,8 +137,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_taxauth_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "taxauth_crmacct_id"
           }
         ],
         "properties": [

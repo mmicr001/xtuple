@@ -86,31 +86,6 @@
   {
     "context": "crm",
     "nameSpace": "XM",
-    "type": "Prospect",
-    "table": "crmacct",
-    "isExtension": true,
-    "isChild": true,
-    "comment": "Extended by Crm",
-    "relations": [
-      {
-        "column": "crmacct_prospect_id",
-        "inverse": "id"
-      }
-    ],
-    "properties": [
-     {
-        "name": "account",
-        "attr": {
-         "type": "String",
-         "column": "crmacct_number"
-        }
-     }
-    ],
-    "isSystem": true
-  },
-  {
-    "context": "crm",
-    "nameSpace": "XM",
     "type": "ToDo",
     "table": "xt.todoiteminfo",
     "isExtension": true,

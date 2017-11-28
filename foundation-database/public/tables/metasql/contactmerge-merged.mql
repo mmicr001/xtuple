@@ -1,7 +1,7 @@
 -- Group: contactmerge
 -- Name: merged
 -- Notes:  Lists all merged contacts
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT cntct_id,
@@ -12,6 +12,9 @@ SELECT cntct_id,
       4 -- Already merged contact, but still has relationships
   END AS status,
   cntct.*,
+  getcontactphone(cntct_id, 'Office') AS contact_phone,
+  getcontactphone(cntct_id, 'Mobile') AS contact_phone2,
+  getcontactphone(cntct_id, 'Fax') AS contact_fax,
   crmacct_number,crmacct_name,
   addr_id, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
   addr_postalcode, addr_country, addr_active, addr_notes, addr_number,
@@ -25,4 +28,5 @@ SELECT cntct_id,
 FROM cntct
   JOIN cntctmrgd ON (cntct_id=cntctmrgd_cntct_id)
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
-  LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id);
+  LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+  LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id);
