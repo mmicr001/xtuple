@@ -122,7 +122,7 @@ BEGIN
         END LOOP;
       END IF;
       IF _crmacct#>>'{salesrep}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct_crmacct#>>'{salesrep}')::INTEGER, 'SR', TRUE) LOOP
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{salesrep}')::INTEGER, 'SR', TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
       END IF;

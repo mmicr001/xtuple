@@ -147,8 +147,7 @@ BEGIN
   END IF;
 
   IF (TG_OP = 'INSERT') THEN
-    PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id,
-                        ('Created by ' || getEffectiveXtUser()));
+    PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id, 'Created');
   ELSIF TG_OP = 'UPDATE' THEN
     IF NEW.crmacct_usr_username != OLD.crmacct_usr_username THEN
       PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id,

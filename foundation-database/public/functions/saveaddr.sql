@@ -161,7 +161,7 @@ BEGIN
                 _addr.addr_postalcode, _addr.addr_country,
                 _addr.addr_active, _addr.addr_notes,
                 _addr.addr_lon, _addr.addr_lat, _addr.addr_accuracy,
-                _addr.addr_allowmktg                
+                _addr.addr_allowmktg
       ) RETURNING addr_id INTO _addr.addr_id;
   END IF;
 

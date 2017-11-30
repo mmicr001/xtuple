@@ -69,7 +69,7 @@ SELECT c.crmacct_id,
        (crmacctTypes(c.crmacct_id)#>>'{prospect}')::INT  AS prospect_xtidrole,
        (crmacctTypes(c.crmacct_id)#>>'{salesrep}')::INT  AS salesrep_xtidrole,
        (crmacctTypes(c.crmacct_id)#>>'{taxauth}')::INT   AS taxauth_xtidrole,
-       (crmacctTypes(c.crmacct_id)#>>'{user}')::INT      AS usr_xtidrole,
+       (crmacctTypes(c.crmacct_id)#>>'{user}')           AS usr_xtidrole,
        (crmacctTypes(c.crmacct_id)#>>'{vendor}')::INT    AS vend_xtidrole,
 
        c.crmacct_notes AS notes_qttooltiprole
