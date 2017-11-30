@@ -4,6 +4,7 @@ ALTER TABLE public.emp DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('emp', 'emp_id',            'SERIAL', 'NOT NULL',              'public'),
+  xt.add_column('emp', 'emp_crmacct_id',   'INTEGER', NULL,                    'public'),
   xt.add_column('emp', 'emp_code',            'TEXT', 'NOT NULL',              'public'),
   xt.add_column('emp', 'emp_number',          'TEXT', 'NOT NULL',              'public'),
   xt.add_column('emp', 'emp_active',       'BOOLEAN', 'DEFAULT true NOT NULL', 'public'),
@@ -39,6 +40,10 @@ SELECT
   xt.add_constraint('emp', 'emp_emp_number_key', 'UNIQUE (emp_number)', 'public'),
   xt.add_constraint('emp', 'emp_emp_cntct_id_fkey',
                     'FOREIGN KEY (emp_cntct_id) REFERENCES cntct(cntct_id)', 'public'),
+  xt.add_constraint('emp', 'emp_crmacct_id_fkey',
+                    'FOREIGN KEY (emp_crmacct_id) REFERENCES crmacct(crmacct_id)
+                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('emp', 'emp_crmacct_id_key', 'UNIQUE (emp_crmacct_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_dept_id_fkey',
                     'FOREIGN KEY (emp_dept_id) REFERENCES dept(dept_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_image_id_fkey',
@@ -51,6 +56,19 @@ SELECT
                     'FOREIGN KEY (emp_wage_curr_id) REFERENCES curr_symbol(curr_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_warehous_id_fkey',
                     'FOREIGN KEY (emp_warehous_id) REFERENCES whsinfo(warehous_id)', 'public');
+
+-- Version 5.0 data migration
+DO $$
+BEGIN
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='crmacct' and column_name='crmacct_emp_id') THEN
+
+     UPDATE emp SET emp_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_emp_id=emp_id);
+  END IF;
+END$$;
+
+ALTER TABLE emp ALTER COLUMN emp_crmacct_id SET NOT NULL;
 
 ALTER TABLE public.emp ENABLE TRIGGER ALL;
 

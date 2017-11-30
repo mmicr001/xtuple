@@ -26,9 +26,48 @@ SELECT
   xt.add_constraint('cntct', 'cntct_pkey', 'PRIMARY KEY (cntct_id)', 'public'),
   xt.add_constraint('cntct', 'cntct_cntct_number_key', 'UNIQUE (cntct_number)', 'public'),
   xt.add_constraint('cntct', 'cntct_cntct_addr_id_fkey',
-                    'FOREIGN KEY (cntct_addr_id) REFERENCES addr(addr_id)', 'public'),
-  xt.add_constraint('cntct', 'cntct_cntct_crmacct_id_fkey',
-                    'FOREIGN KEY (cntct_crmacct_id) REFERENCES crmacct(crmacct_id)', 'public');
+                    'FOREIGN KEY (cntct_addr_id) REFERENCES addr(addr_id)', 'public');
+
+-- Version 5.0 data migration
+DO $$
+BEGIN
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='cntct' and column_name='cntct_crmacct_id') THEN
+
+     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+     SELECT cntct_crmacct_id, cntct_id, getcrmroleid('Other')
+     FROM cntct WHERE cntct_crmacct_id IS NOT NULL
+     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                     WHERE crmacctcntctass_crmacct_id=cntct_crmacct_id 
+                     AND crmacctcntctass_cntct_id=cntct_id);
+  END IF;
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='cntct' and column_name='cntct_phone') THEN
+-- Copy existing contact phone records over to the new table
+     INSERT INTO cntctphone (cntctphone_cntct_id, cntctphone_crmrole_id, cntctphone_phone)
+     SELECT cntct_id, crmrole_id, cntct_phone
+       FROM cntct, crmrole
+       WHERE crmrole_name = 'Office'
+       AND cntct_phone <> ''
+     UNION
+     SELECT cntct_id, crmrole_id, cntct_phone2
+       FROM cntct, crmrole
+       WHERE crmrole_name = 'Mobile'
+      AND cntct_phone2 <> ''
+     UNION
+      SELECT cntct_id, crmrole_id, cntct_fax
+      FROM cntct, crmrole
+      WHERE crmrole_name = 'Fax'
+      AND cntct_fax <> '';
+  END IF;
+END$$;
+
+ALTER TABLE cntct DROP COLUMN IF EXISTS cntct_crmacct_id CASCADE,
+                  DROP COLUMN IF EXISTS cntct_phone CASCADE, 
+                  DROP COLUMN IF EXISTS cntct_phone2 CASCADE,
+                  DROP COLUMN IF EXISTS cntct_fax CASCADE;
 
 ALTER TABLE public.cntct ENABLE TRIGGER ALL;
 

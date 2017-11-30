@@ -30,6 +30,39 @@ SELECT
                     $$CHECK (btrim(crmacct_owner_username) <> '')$$, 'public'),
   xt.add_constraint('crmacct', 'crmacct_crmacct_parent_id_fkey',
                     'FOREIGN KEY (crmacct_parent_id) REFERENCES crmacct(crmacct_id)', 'public');
+
+-- Version 5.0 data migration
+DO $$
+BEGIN
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='crmacct' and column_name='crmacct_cntct_id_1') THEN
+
+     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+     SELECT crmacct_id, crmacct_cntct_id_1, getcrmroleid('Primary')
+     FROM crmacct WHERE crmacct_cntct_id_1 IS NOT NULL
+     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
+                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_1);
+
+     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+     SELECT crmacct_id, crmacct_cntct_id_2, getcrmroleid('Secondary')
+     FROM crmacct WHERE crmacct_cntct_id_2 IS NOT NULL
+     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
+                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_2);
+  END IF;
+END$$;
+
+ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1,
+                    DROP COLUMN IF EXISTS crmacct_cntct_id_2,
+                    DROP COLUMN IF EXISTS crmacct_cust_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_prospect_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_vend_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_taxauth_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_emp_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_salesrep_id CASCADE;
+
 ALTER TABLE public.crmacct ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE crmacct IS 'CRM Accounts are umbrella records that tie together people and organizations with whom we have business relationships.';

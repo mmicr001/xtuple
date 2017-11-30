@@ -4,6 +4,7 @@ ALTER TABLE public.prospect DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('prospect', 'prospect_id',          'INTEGER', $$DEFAULT nextval('cust_cust_id_seq'::regclass) NOT NULL$$, 'public'),
+  xt.add_column('prospect', 'prospect_crmacct_id',  'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_active',      'BOOLEAN', 'DEFAULT true NOT NULL', 'public'),
   xt.add_column('prospect', 'prospect_number',         'TEXT', 'NOT NULL', 'public'),
   xt.add_column('prospect', 'prospect_name',           'TEXT', 'NOT NULL', 'public'),
@@ -28,6 +29,10 @@ SELECT
                     $$CHECK (prospect_number <> '')$$, 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_number_key',
                     'UNIQUE (prospect_number)', 'public'),
+  xt.add_constraint('prospect', 'prospect_crmacct_id_fkey',
+                    'FOREIGN KEY (prospect_crmacct_id) REFERENCES crmacct(crmacct_id)
+                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('prospect', 'prospect_crmacct_id_key', 'UNIQUE (prospect_crmacct_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_salesrep_id_fkey',
                     'FOREIGN KEY (prospect_salesrep_id) REFERENCES salesrep(salesrep_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_taxzone_id_fkey',
@@ -41,7 +46,32 @@ SELECT
   xt.add_constraint('prospect', 'prospect_prospect_warehous_id_fkey',
                     'FOREIGN KEY (prospect_warehous_id) REFERENCES whsinfo(warehous_id)', 'public');
 
--- TODO Add extra foreign key constraints
+-- Version 5.0 data migration
+DO $$
+BEGIN
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='crmacct' and column_name='crmacct_prospect_id') THEN
+
+     UPDATE prospect SET prospect_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_prospect_id=prospect_id);
+  END IF;
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='prospect' and column_name='prospect_cntct_id') THEN
+
+  -- Migrate Prospect Contacts to CRM Contact assignment
+    INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+    SELECT prospect_crmacct_id, prospect_cntct_id, getcrmroleid('Primary')
+      FROM prospect 
+      WHERE prospect_crmacct_id IS NOT NULL AND prospect_cntct_id IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                      WHERE crmacctcntctass_crmacct_id=prospect_crmacct_id 
+                      AND crmacctcntctass_cntct_id=prospect_cntct_id);
+  END IF;
+END$$;
+
+ALTER TABLE prospect DROP COLUMN IF EXISTS prospect_cntct_id CASCADE;
+ALTER TABLE prospect ALTER COLUMN prospect_crmacct_id SET NOT NULL;
 
 ALTER TABLE public.prospect ENABLE TRIGGER ALL;
 
