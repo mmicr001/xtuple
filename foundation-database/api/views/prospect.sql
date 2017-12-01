@@ -36,7 +36,7 @@
     (''::TEXT) AS contact_address_change
   FROM
     prospect
-      LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmact_id))
+      LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id))
       LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
       LEFT OUTER JOIN taxzone ON (prospect_taxzone_id=taxzone_id)
       LEFT OUTER JOIN salesrep ON (prospect_salesrep_id=salesrep_id)

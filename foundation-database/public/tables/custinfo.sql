@@ -22,7 +22,7 @@ SELECT
   xt.add_column('custinfo', 'cust_shipform_id',      'INTEGER',       NULL,              'public'),
   xt.add_column('custinfo', 'cust_shipvia',          'TEXT',          NULL,              'public'),
   xt.add_column('custinfo', 'cust_blanketpos',       'BOOLEAN',       'NOT NULL',        'public'),
-  xt.add_column('custinfos', 'cust_shipchrg_id',      'INTEGER',       'NOT NULL',       'public'),
+  xt.add_column('custinfo', 'cust_shipchrg_id',      'INTEGER',       'NOT NULL',       'public'),
   xt.add_column('custinfo', 'cust_creditstatus',     'CHARACTER(1)',  'NOT NULL',        'public'),
   xt.add_column('custinfo', 'cust_comments',         'TEXT',          NULL,              'public'),
   xt.add_column('custinfo', 'cust_ffbillto',         'BOOLEAN',      'NOT NULL',         'public'),

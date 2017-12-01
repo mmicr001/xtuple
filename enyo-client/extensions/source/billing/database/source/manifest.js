@@ -4,7 +4,6 @@
   "loadOrder": 30,
   "databaseScripts": [
     "xt/trigger_functions/refresh_invchead_share_users_cache.sql",
-    "public/tables/invchead.sql",
     "xt/tables/rptdef.sql",
     "xm/javascript/billing.sql",
     "xm/javascript/cashrcpt.sql",
@@ -18,7 +17,6 @@
     "xt/views/receivable_invoice_return.sql",
     "xt/views/aropeninfo.sql",
     "xt/views/receivable_applications.sql",
-    "xt/views/cashrcpt.sql",
-    "xt/tables/sharetype.sql"
+    "xt/views/cashrcpt.sql"
   ]
 }

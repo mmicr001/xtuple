@@ -54,8 +54,8 @@ BEGIN
   END IF;
 END$$;
 
-ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1,
-                    DROP COLUMN IF EXISTS crmacct_cntct_id_2,
+ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1 CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_cntct_id_2 CASCADE,
                     DROP COLUMN IF EXISTS crmacct_cust_id CASCADE,
                     DROP COLUMN IF EXISTS crmacct_prospect_id CASCADE,
                     DROP COLUMN IF EXISTS crmacct_vend_id CASCADE,

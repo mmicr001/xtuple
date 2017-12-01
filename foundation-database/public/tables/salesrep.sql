@@ -41,6 +41,4 @@ ALTER TABLE public.salesrep ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE salesrep IS 'Sales Representative information';
 
-COMMENT ON COLUMN salesrep.salesrep_emp_id IS 'DEPRECATED - the relationship between Sales Rep and Employee is now maintained through the crmacct table.';
-
 ALTER TABLE salesrep DROP COLUMN IF EXISTS salesrep_emp_id CASCADE;

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION crmacctTypes(pCrmAcctId INTEGER)
 RETURNS json AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 -- Returns list of CRM entity relationship IDs as a json string
@@ -8,32 +8,32 @@ RETURNS json AS $$
 
       SELECT row_to_json(d) AS associations
       FROM (
-         SELECT 
-            (SELECT cust_id 
-            FROM custinfo 
-            WHERE cust_crmacct_id = pCrmAcctId) as customer,         
+         SELECT
+            (SELECT cust_id
+            FROM custinfo
+            WHERE cust_crmacct_id = pCrmAcctId) as customer,
            (SELECT vend_id
-            FROM vendinfo 
+            FROM vendinfo
             WHERE vend_crmacct_id = pCrmAcctId) as vendor,
-            (SELECT salesrep_id 
-            FROM salesrep 
+            (SELECT salesrep_id
+            FROM salesrep
             WHERE salesrep_crmacct_id = pCrmAcctId) as salesrep,
-            (SELECT taxauth_id 
+            (SELECT taxauth_id
             FROM taxauth
             WHERE taxauth_crmacct_id = pCrmAcctId) as taxauth,
-            (SELECT prospect_id 
-            FROM prospect 
+            (SELECT prospect_id
+            FROM prospect
             WHERE prospect_crmacct_id = pCrmAcctId) as prospect,
-            (SELECT emp_id 
-            FROM emp 
+            (SELECT emp_id
+            FROM emp
             WHERE emp_crmacct_id = pCrmAcctId) as employee,
-            (SELECT crmacct_competitor_id 
+            (SELECT crmacct_competitor_id
              FROM crmacct
              WHERE crmacct_id = pCrmAcctId) as competitor,
-            (SELECT crmacct_partner_id 
+            (SELECT crmacct_partner_id
              FROM crmacct
              WHERE crmacct_id = pCrmAcctId) as partner,
-            (SELECT crmacct_usr_username 
+            (SELECT crmacct_usr_username
              FROM crmacct
              WHERE crmacct_id = pCrmAcctId) as user
       ) d
