@@ -1477,14 +1477,6 @@
         }
       },
       {
-        "name": "crmacct",
-        "attr": {
-          "type": "Number",
-          "column": "cust_crmacct_id",
-          "required": true
-        }
-      },
-      {
         "name": "isDefault",
         "attr": {
           "type": "Boolean",
@@ -1782,6 +1774,14 @@
         "attr": {
           "type": "Boolean",
           "column": "cust_active"
+        }
+      },
+      {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "cust_crmacct_id",
+          "required": true
         }
       },
       {
