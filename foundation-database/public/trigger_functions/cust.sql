@@ -97,7 +97,7 @@ BEGIN
           AND (custtype_char)
           AND (charass_default));
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND OLD.cust_crmacct_id=NEW.cust_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.cust_number
     WHERE ((crmacct_id=NEW.cust_crmacct_id)
       AND  (crmacct_number!=NEW.cust_number));

@@ -921,43 +921,10 @@ strict: false*/
         {name: "exists"},
         {name: "whatToDo"},
         {tag: "br"},
-        {kind: "onyx.Button", name: "ok", content: "_ok".loc(), ontap: "customerConvert",
-          classes: "onyx-blue xv-popup-button", type: ""},
         {kind: "onyx.Button", name: "cancel", content: "_cancel".loc(), ontap: "customerCancel",
           classes: "xv-popup-button", type: ""}
       ]}
     ],
-    customerConvert: function (inEvent) {
-      this._popupDone = true;
-      this.$.findExistingCustomerPopup.hide();
-      if (inEvent.type === "prospect") {
-        this.value.convertFromProspect(this.existingNumber);
-      } else if (inEvent.type === "account") {
-        this.value.convertFromAccount(this.existingNumber);
-      }
-    },
-    errorNotify: function (inSender, inEvent) {
-      // Handle customer existing as prospect
-      if (inEvent.error.code === 'xt1008') {
-        var type = inEvent.error.params.response.type;
-        this.existingNumber = inEvent.error.params.response.id;
-        if (type === 'P') { // Prospect
-          this._popupDone = false;
-          this.$.exists.setContent("_prospectExists".loc());
-          this.$.whatToDo.setContent("_convertProspect".loc());
-          this.$.ok.type = "prospect";
-          this.$.findExistingCustomerPopup.show();
-          return true;
-        } else if (type === 'A') { // Existing Account
-          this._popupDone = false;
-          this.$.exists.setContent("_accountExists".loc());
-          this.$.whatToDo.setContent("_convertAccount".loc());
-          this.$.ok.type = "account";
-          this.$.findExistingCustomerPopup.show();
-          return true;
-        }
-      }
-    },
     customerCancel: function () {
       this._popupDone = true;
       this.$.findExistingCustomerPopup.hide();
@@ -973,7 +940,6 @@ strict: false*/
 
   XV.registerModelWorkspace("XM.CustomerRelation", "XV.CustomerWorkspace");
   XV.registerModelWorkspace("XM.CustomerListItem", "XV.CustomerWorkspace");
-  XV.registerModelWorkspace("XM.CustomerProspectListItem", "XV.CustomerWorkspace");
 
   // ..........................................................
   // CUSTOMER EMAIL PROFILE
@@ -1954,55 +1920,6 @@ strict: false*/
   });
 
   XV.registerModelWorkspace("XM.ProductCategory", "XV.ProductCategoryWorkspace");
-
-  // ..........................................................
-  // PROSPECT
-  //
-
-  enyo.kind({
-    name: "XV.ProspectWorkspace",
-    kind: "XV.AccountDocumentWorkspace",
-    title: "_prospect".loc(),
-    model: "XM.Prospect",
-    headerAttrs: ["number", "-", "name"],
-    components: [
-      {kind: "Panels", arrangerKind: "CarouselArranger",
-        fit: true, components: [
-        {kind: "XV.Groupbox", name: "mainPanel", components: [
-          {kind: "onyx.GroupboxHeader", content: "_overview".loc()},
-          {kind: "XV.ScrollableGroupbox", name: "mainGroup", fit: true,
-            classes: "in-panel", components: [
-            {kind: "XV.InputWidget", attr: "number"},
-            {kind: "XV.InputWidget", attr: "name"},
-            {kind: "XV.CheckboxWidget", attr: "isActive"},
-            {kind: "XV.SalesRepPicker", attr: "salesRep"},
-            {kind: "XV.TaxZonePicker", attr: "taxZone"},
-            {kind: "onyx.GroupboxHeader", content: "_contact".loc()},
-            {kind: "XV.ContactWidget", attr: "contact",
-              showAddress: true, label: "_name".loc()},
-            {kind: "onyx.GroupboxHeader", content: "_notes".loc()},
-            {kind: "XV.TextArea", attr: "notes"}
-          ]}
-        ]},
-        {kind: "XV.ProspectQuoteListRelationsBox", attr: "quoteRelations"}
-      ]},
-      // TODO: use standard notify mechanism
-      {kind: "onyx.Popup", name: "findExistingAccountPopup", centered: true,
-        modal: true, floating: true, scrim: true, onShow: "popupShown",
-        onHide: "popupHidden", components: [
-        {content: "_accountExists".loc()},
-        {name: "whatToDo", content: "_convertAccountProspect".loc()},
-        {tag: "br"},
-        {kind: "onyx.Button", name: "convert", content: "_ok".loc(), ontap: "accountConvert",
-          classes: "onyx-blue xv-popup-button"},
-        {kind: "onyx.Button", name: "cancel", content: "_cancel".loc(), ontap: "accountCancel",
-          classes: "xv-popup-button"}
-      ]}
-    ]
-  });
-
-  XV.registerModelWorkspace("XM.ProspectRelation", "XV.ProspectWorkspace");
-  XV.registerModelWorkspace("XM.ProspectListItem", "XV.ProspectWorkspace");
 
   // ..........................................................
   // RETURN

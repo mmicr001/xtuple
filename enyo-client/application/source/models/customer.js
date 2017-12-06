@@ -217,38 +217,6 @@ white:true*/
       }
     },
 
-    /**
-      Creates a new prospect model and fetches based on the given ID.
-      Takes attributes from the prospect model and gives them to this customer model.
-      The prospect model will be destroyed by the save function.
-    */
-    convertFromProspect: function (id) {
-      var prospect = new XM.Prospect(),
-        fetchOptions = {},
-        that = this;
-      // this id is the natural key, which is the number
-      // for both customer and prospect
-      fetchOptions.id = id;
-
-      fetchOptions.success = function (resp) {
-        that.set("name", prospect.get("name"));
-        that.set("billingContact", prospect.get("contact"));
-        that.set("salesRep", prospect.get("salesRep"));
-        that.set("preferredSite", prospect.get("site"));
-        that.set("taxZone", prospect.get("taxZone"));
-        that.setReadOnly("number", false);
-        that.set("number", prospect.id);
-        that.setReadOnly("number", true);
-        that.revertStatus();
-        that.checkConflicts = false;
-      };
-      fetchOptions.error = function (resp) {
-        XT.log("Fetch failed in convertFromProspect");
-      };
-      this.setStatus(XM.Model.BUSY_FETCHING);
-      prospect.fetch(fetchOptions);
-    },
-
     salesRepDidChange: function () {
       var salesRep = this.get('salesRep');
       if (!salesRep) { return; }

@@ -92,7 +92,7 @@ DECLARE
   _crmacctid  INTEGER;
 BEGIN
 
-  IF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.emp_crmacct_id=NEW.emp_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.emp_code
     WHERE ((crmacct_id=NEW.emp_crmacct_id)
       AND  (crmacct_number!=NEW.emp_code));

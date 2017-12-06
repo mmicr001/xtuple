@@ -74,7 +74,7 @@ BEGIN
 
     /* TODO: default characteristic assignments based on what? */
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND OLD.prospect_crmacct_id=NEW.prospect_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.prospect_number
     WHERE ((crmacct_id=NEW.prospect_crmacct_id)
       AND  (crmacct_number!=NEW.prospect_number));

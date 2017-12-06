@@ -38,7 +38,8 @@
         "name":"id",
         "attr":{
           "type":"Number",
-          "column":"crmacct_id"
+          "column":"crmacct_id",
+          "isPrimaryKey":true
         }
       },
       {

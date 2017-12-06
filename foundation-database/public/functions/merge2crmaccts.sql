@@ -19,6 +19,9 @@ DECLARE
   _colname    TEXT;
   _tmpid      INTEGER;
 
+  _crmtbls    TEXT[] := ARRAY['custinfo', 'vendinfo', 'prospect', 'salesrep', 'taxauth', 'emp'];
+  _crmtbl     TEXT;
+
 BEGIN
   -- Human Readable values;
   _sourcenum := (SELECT crmacct_number FROM crmacct WHERE crmacct_id=pSourceId);
@@ -47,7 +50,7 @@ BEGIN
   END IF;
 
   -- Check whether CRM Accounts to merge both exist as customers/prospects/vendors etc. which cannot
-  -- be merged if both exist.
+  -- be merged if both exist. Pass human-readable message back to user.
   FOR _canmerge IN
     SELECT initcap(CASE WHEN foo.key IN ('customer','prospect') THEN 'customer or prospect' 
                         WHEN foo.key = 'salesrep' THEN 'sales rep'
@@ -73,8 +76,7 @@ BEGIN
   END LOOP;
 
   _result:= changeFkeyPointers('public', 'crmacct', pSourceId, pTargetId,
-                               ARRAY[ 'crmacctsel', 'crmacctmrgd', 'crmacctcntctass', 'custinfo',
-                                      'vendinfo', 'prospect', 'salesrep', 'taxauth', 'emp' ], _purge)
+                 array_cat(ARRAY[ 'crmacctsel', 'crmacctmrgd'], _crmtbls), _purge)
           + changePseudoFKeyPointers('public', 'alarm', 'alarm_source_id',
                                      pSourceId, 'public', 'crmacct', pTargetId,
                                      'alarm_source', 'CRMA', _purge)
@@ -102,6 +104,23 @@ BEGIN
                                        pSourceId, 'public', 'crmacct', pTargetId,
                                        'emlassc_type', 'CRMA', _purge);
   END IF;
+
+  -- Merge the associated CRM entities based on user selections
+  FOREACH _crmtbl IN ARRAY _crmtbls
+  LOOP
+    -- if we're supposed to merge this table at all
+    EXECUTE format('SELECT crmacctsel_mrg_%I
+                    FROM crmacctsel
+                    WHERE crmacctsel_src_crmacct_id = %L
+                      AND crmacctsel_dest_crmacct_id = %L',
+                 _crmtbl,  pSourceId, pTargetId) INTO _mrgcol;
+
+    IF (_mrgcol) THEN
+      EXECUTE format('UPDATE %I SET %I_crmacct_id = %L 
+                      WHERE %I_crmacct_id = %L;', _crmtbl, REPLACE(_crmtbl 'info', ''),
+                         pTargetId, REPLACE(_crmtbl, 'info', ''), pSourceId);
+    END IF;
+  END LOOP;
 
   -- back up all of the values in the target record that are about to be changed
   FOR _coldesc IN SELECT attname, typname
@@ -149,7 +168,6 @@ BEGIN
         END;
       END IF;
 
-      -- TODO: what do we do about users?
       /* update the destination crmacct in one of 3 different ways:
          - crmacct_notes might be concatenated from more than one source record
 	 - foreign keys to crm account subtype records

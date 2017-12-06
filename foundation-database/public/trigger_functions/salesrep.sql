@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION _salesrepAfterTrigger() RETURNS TRIGGER AS $$
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
-  IF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.salesrep_crmacct_id=NEW.salesrep_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.salesrep_number
     WHERE ((crmacct_id=NEW.salesrep_crmacct_id)
       AND  (crmacct_number!=NEW.salesrep_number));

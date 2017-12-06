@@ -148,9 +148,8 @@
       },
       {
         "name": "account",
-        "toOne": {
-          "isNested": true,
-          "type": "AccountRelation",
+        "attr": {
+          "type": "Number",
           "column": "contact_crmacct"
         }
       },

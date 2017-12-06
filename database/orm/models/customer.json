@@ -69,8 +69,7 @@
         "name": "crmacct",
         "attr": {
           "type": "Number",
-          "column": "cust_crmacct_id",
-          "required": true
+          "column": "cust_crmacct_id"
         }
       },
       {

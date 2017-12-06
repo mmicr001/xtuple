@@ -83,7 +83,7 @@ BEGIN
 
   /* TODO: default characteristic assignments based on vendgrp? */
 
-  IF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.vend_crmacct_id=NEW.vend_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.vend_number
     WHERE ((crmacct_id=NEW.vend_crmacct_id)
       AND  (crmacct_number!=NEW.vend_number));

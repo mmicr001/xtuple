@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION _taxauthAfterTrigger () RETURNS TRIGGER AS $$
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
-  IF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.taxauth_crmacct_id=NEW.taxauth_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.taxauth_code
     WHERE ((crmacct_id=NEW.taxauth_crmacct_id)
       AND  (crmacct_number!=NEW.taxauth_code));
