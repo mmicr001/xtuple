@@ -85,6 +85,7 @@ FROM (SELECT
           <? endif ?>
           <? if exists("item_id") ?>
             AND (item_id=<? value("item_id") ?>)
+          <? endif ?>
           <? if exists("classcode_id") ?>
             AND (item_classcode_id=<? value("classcode_id") ?>)
           <? endif ?>
@@ -120,6 +121,7 @@ FROM (SELECT
           <? endif ?>
           <? if exists("vend_id") ?>
             AND (vend_id=<? value("vend_id") ?>)
+          <? endif ?>
           <? if exists("vendtype_id") ?>
             AND (vend_vendtype_id=<? value("vendtype_id") ?>)
           <? endif ?>

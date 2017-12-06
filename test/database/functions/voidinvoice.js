@@ -146,6 +146,18 @@ var _      = require("underscore"),
       }
     });
 
+    it("there should be no unposted invhist records", function (done) {
+      var sql = "SELECT true AS result" +
+                "  FROM invhist" +
+                " WHERE invhist_posted = false;";
+
+      datasource.query(sql, adminCred, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 0);
+        done();
+      });
+    });
+
     it.skip("should have affected gltrans by the value of the invoice");
     it.skip("should have deleted cohisttax");
     it.skip("should have deleted cohist");

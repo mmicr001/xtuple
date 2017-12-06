@@ -117,7 +117,7 @@ BEGIN
 
     IF (_mrgcol) THEN
       EXECUTE format('UPDATE %I SET %I_crmacct_id = %L 
-                      WHERE %I_crmacct_id = %L;', _crmtbl, REPLACE(_crmtbl 'info', ''),
+                      WHERE %I_crmacct_id = %L;', _crmtbl, REPLACE(_crmtbl, 'info', ''),
                          pTargetId, REPLACE(_crmtbl, 'info', ''), pSourceId);
     END IF;
   END LOOP;

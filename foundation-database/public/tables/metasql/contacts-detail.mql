@@ -22,7 +22,12 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
   getContactPhone(cntct_id, 'Fax') AS contact_phone3,
- cntct_email, cntct_webaddr
+  cntct_email, cntct_webaddr,
+  COALESCE(crmaccttypes(crmacct_id)#>>'{"customer"}',-1) > 0 AS cust_qtdisplayrole,
+  crmaccttypes(crmacct_id)#>>'{"customer"}' AS cust,
+  COALESCE(crmaccttypes(crmacct_id)#>>'{"prospect"}',-1) > 0 AS prospect_qtdisplayrole,
+  crmaccttypes(crmacct_id)#>>'{"prospect"}' AS prospect
+
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>

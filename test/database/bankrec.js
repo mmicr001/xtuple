@@ -48,7 +48,7 @@ var _    = require("underscore"),
       cashrcpt,
       cm,
       cobmisc = {},
-      cohead, coitem,
+      cohead = {}, coitem = {},
       invchead = {},
       pohead, poitem,
       recvid,
@@ -116,7 +116,9 @@ var _    = require("underscore"),
                          "       ON taxhist_id=taxpay_taxhist_id"              +
                          " WHERE cohist_itemsite_id=<? value('itemsite') ?>"   +
                          "   AND cohist_ordernumber=<? value('cohead') ?>;",
-      lastGltransCount = 0
+      lastGltransCount = 0,
+      coheadId,
+      coitemId
     ;
 
     // set up /////////////////////////////////////////////////////////////////
@@ -539,109 +541,69 @@ var _    = require("underscore"),
       });
     });
 
-    it('creates a sales order', function (done) {
-      var sql = mqlToSql("INSERT INTO cohead (cohead_number, cohead_cust_id,"  +
-                 "    cohead_orderdate, cohead_packdate,"                      +
-                 "    cohead_shipto_id, cohead_shiptoname,"                    +
-                 "    cohead_shiptoaddress1, cohead_shiptoaddress2,"           +
-                 "    cohead_shiptoaddress3, cohead_shiptocity,"               +
-                 "    cohead_shiptostate, cohead_shiptozipcode,"               +
-                 "    cohead_shiptocountry, cohead_ordercomments,"             +
-                 "    cohead_salesrep_id, cohead_terms_id, cohead_holdtype,"   +
-                 "    cohead_freight, cohead_calcfreight,"                     +
-                 "    cohead_shipto_cntct_id, cohead_shipto_cntct_first_name," +
-                 "    cohead_shipto_cntct_last_name,"                          +
-                 "    cohead_curr_id, cohead_taxzone_id, cohead_taxtype_id,"   +
-                 "    cohead_saletype_id,"                                     +
-                 "    cohead_shipvia,"                                         +
-                 "    cohead_shipchrg_id,"                                     +
-                 "    cohead_shipzone_id, cohead_shipcomplete"                 +
-                 ") SELECT fetchSoNumber(), cust_id,"                          +
-                 "    CURRENT_DATE, CURRENT_DATE,"                             +
-                 "    shipto_id, shipto_name,"                                 +
-                 "    addr_line1, addr_line2,"                                 +
-                 "    addr_line3, addr_city,"                                  +
-                 "    addr_state, addr_postalcode,"                            +
-                 "    addr_country, <? value('testTag') ?>,"                   +
-                 "    cust_salesrep_id, cust_terms_id, 'N',"                   +
-                 "    0, TRUE,"                                                +
-                 "    cntct_id, cntct_first_name, cntct_last_name,"            +
-                 "    cust_curr_id, shipto_taxzone_id, taxass_taxtype_id,"     +
-                 "    (SELECT saletype_id FROM saletype"                       +
-                 "      WHERE saletype_code='REP'),"                           +
-                 "    (SELECT MIN(shipvia_code) FROM shipvia),"                +
-                 "    (SELECT shipchrg_id FROM shipchrg"                       +
-                 "      WHERE shipchrg_name='ADDCHARGE'),"                     +
-                 "    shipto_shipzone_id, FALSE"                               +
-                 "  FROM custinfo"                                             +
-                 "  JOIN shiptoinfo ON cust_id=shipto_cust_id"                 +
-                 "                 AND shipto_active"                          +
-                 "  JOIN taxass ON shipto_taxzone_id=taxass_taxzone_id"        +
-                 "  JOIN taxrate ON taxass_tax_id=taxrate_tax_id"              +
-                 "  LEFT OUTER JOIN addr ON shipto_addr_id=addr_id"            +
-                 "  LEFT OUTER JOIN cntct ON shipto_cntct_id=cntct_id"         +
-                 " WHERE cust_active"                                          +
-                 "   AND cust_preferred_warehous_id > 0"                       +
-                 "   AND (taxrate_percent > 0 OR taxrate_amount > 0)"          +
-                 " LIMIT 1 RETURNING *;",
-                 { testTag: testTag });
-      datasource.query(sql, creds, function (err, res) {
+    // Create a Sales Order
+    it("should create a sales order", function (done) {
+     var callback = function (result) {
+        assert.isNotNull(result);
+        cohead.cohead_id = result;
+        done();
+      };
+
+      dblib.createSalesOrder(callback);
+    });
+
+    // Create a line item
+    it("should add a line item to the SO",function (done) {
+      var callback = function (result) {  
+        coitem.coitem_id = result;
+        done();
+      };
+
+      var params = {
+        coheadId: cohead.cohead_id,
+        itemNumber: "BTRUCK1",
+        whCode: "WH1",
+        qty: 1
+      };
+
+      var sql = "SELECT itemsite_qtyonhand, itemsite_id, itemsite_item_id FROM itemsite WHERE itemsite_id = getitemsiteid($1, $2);",
+        options = _.extend({}, creds, { parameters: [ params.whCode, params.itemNumber ]});
+
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        cohead = res.rows[0];
-        assert(cohead.cohead_id > 0);
+        assert.operator(res.rows[0].itemsite_id, ">", 0);
+      
+        coitem.coitem_itemsite_id = res.rows[0].itemsite_id;
+        coitem.item_id = res.rows[0].itemsite_item_id;
+        params.itemsiteId = res.rows[0].itemsite_id;
+
+        dblib.createSalesOrderLineItem(params, callback);
+      });
+    });
+
+    it("should update and store cohead info",function (done) {
+      var sql = "UPDATE cohead SET cohead_taxzone_id = (SELECT taxzone_id FROM taxzone LIMIT 1) WHERE cohead_id=$1 RETURNING cohead_number, cohead_freight;",
+        options = _.extend({}, creds, { parameters: [ cohead.cohead_id ]});
+
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        
+        cohead.cohead_number = res.rows[0].cohead_number;
+        cohead.cohead_freight = res.rows[0].cohead_freight;
+
         done();
       });
     });
 
-    it('creates a sales order item', function (done) {
-      var sql = mqlToSql("INSERT INTO coitem (coitem_cohead_id,"              +
-               "    coitem_linenumber, coitem_scheddate, coitem_itemsite_id," +
-               "    coitem_taxtype_id, coitem_status,"                        +
-               "    coitem_qtyord, coitem_qtyshipped,  coitem_qtyreturned,"   +
-               "    coitem_unitcost, coitem_price, coitem_custprice,"         +
-               "    coitem_qty_uom_id, coitem_price_uom_id,"                  +
-               "    coitem_qty_invuomratio, coitem_price_invuomratio"         +
-               ") SELECT cohead_id,"                                          +
-               "    1, CURRENT_DATE + itemsite_leadtime, itemsite_id,"        +
-               "    getItemTaxType(item_id, cohead_taxzone_id), 'O',"         +
-               "    123, 0, 0,"                                               +
-               "    itemcost(itemsite_id), item_listprice, item_listprice,"   +
-               "    item_price_uom_id, item_price_uom_id,"                    +
-               "    1, 1"                                                     +
-               "  FROM cohead"                                                +
-               "  JOIN custinfo ON cohead_cust_id=cust_id"                    +
-               "  JOIN itemsite"                                              +
-               "        ON cust_preferred_warehous_id=itemsite_warehous_id"   +
-               "  JOIN item ON (itemsite_item_id=item_id)"                    +
-               " WHERE cohead_id=<? value('coheadid') ?>"                     +
-               "   AND itemsite_active"                                       +
-               "   AND item_active"                                           +
-               "   AND item_sold"                                             +
-               "   AND NOT item_exclusive"                                    +
-               "   AND NOT item_exclusive"                                    +
-               "   AND ("                                                     +
-               "         SELECT itemprice_price"                              +
-               "         FROM itemipsprice("                                  +
-               "           item_id,"                                          +
-               "           cohead_cust_id,"                                   +
-               "           cohead_shipto_id,"                                 +
-               "           123,"                                              +
-               "           item_price_uom_id,"                                +
-               "           item_price_uom_id,"                                +
-               "           basecurrid(),"                                     +
-               "           CURRENT_DATE,"                                     +
-               "           CURRENT_DATE,"                                     +
-               "           itemsite_warehous_id"                              +
-               "         )"                                                   +
-               "       ) > 0 "                                                +
-               "   AND item_price_uom_id=item_inv_uom_id"                     +
-/* simplify!*/ "   AND item_type != 'K'"                                      +
-               " LIMIT 1 RETURNING *;",
-                 { coheadid: cohead.cohead_id, testTag: testTag });
-      datasource.query(sql, creds, function (err, res) {
+    it("should update coitem info",function (done) {
+      var sql = "UPDATE coitem SET coitem_taxtype_id = (SELECT getItemTaxType($1, (SELECT taxzone_id FROM taxzone LIMIT 1))) WHERE coitem_id=$2;",
+        options = _.extend({}, creds, { parameters: [ coitem.item_id, coitem.coitem_id ]});
+
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        coitem = res.rows[0];
-        assert(coitem.coitem_id > 0);
         done();
       });
     });

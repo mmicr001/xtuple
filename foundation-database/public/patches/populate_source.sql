@@ -907,5 +907,5 @@ SELECT createDocType(NULL,
                      'gltrans_id',
                      'gltrans_journalnumber',
                      'gltrans_docnumber',
-                     'firstline(gltrans__notes)'
+                     'firstline(gltrans_notes)'
 );
