@@ -54,4 +54,5 @@ BEGIN
    EXECUTE format('SELECT dropifexists(''FUNCTION'', ''%I()'', ''%I'',true)',
                     _rec.proname, _rec.schemaname);
   END LOOP;
-END;$$
+END;
+$$ LANGUAGE plpgsql;
