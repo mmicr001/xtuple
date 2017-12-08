@@ -37,6 +37,7 @@
     "public/tables/acttype.sql",
 
     "public/patches/fixaccntname.sql",
+    "public/functions/dropifexists.sql",
     "public/patches/drop_share_users_triggers.sql",
     "public/patches/fixaddress.sql",
     "public/patches/info1099.sql",

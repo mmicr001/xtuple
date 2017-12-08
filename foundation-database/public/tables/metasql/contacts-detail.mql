@@ -17,17 +17,12 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
 , addr_id AS altId,
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
-  crmacct_id, crmacct_number, crmacct_name,
+  crmacct_id, crmacct_number, crmacct_name, cntct_active,
   cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
   getContactPhone(cntct_id, 'Fax') AS contact_phone3,
-  cntct_email, cntct_webaddr,
-  COALESCE(crmaccttypes(crmacct_id)#>>'{"customer"}',-1) > 0 AS cust_qtdisplayrole,
-  crmaccttypes(crmacct_id)#>>'{"customer"}' AS cust,
-  COALESCE(crmaccttypes(crmacct_id)#>>'{"prospect"}',-1) > 0 AS prospect_qtdisplayrole,
-  crmaccttypes(crmacct_id)#>>'{"prospect"}' AS prospect
-
+ cntct_email, cntct_webaddr
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
