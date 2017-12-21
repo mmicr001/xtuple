@@ -146,16 +146,18 @@ BEGIN
 
   END IF;
 
-  IF (TG_OP = 'INSERT') THEN
-    PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id, 'Created');
-  ELSIF TG_OP = 'UPDATE' THEN
-    IF NEW.crmacct_usr_username != OLD.crmacct_usr_username THEN
-      PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id,
-                          format('Changed crmacct from db user %L to %L by %L',
-                                 OLD.crmacct_usr_username,
-                                 NEW.crmacct_usr_username,
-                                 getEffectiveXtUser()));
+  IF (fetchMetricBool('AccountChangeLog')) THEN
+    IF (TG_OP = 'INSERT') THEN
+      PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id, 'Created');
+    ELSIF TG_OP = 'UPDATE' THEN
+      IF NEW.crmacct_usr_username != OLD.crmacct_usr_username THEN
+        PERFORM postComment('ChangeLog', 'CRMA', NEW.crmacct_id,
+                            format('Changed crmacct from db user %L to %L by %L',
+                                   OLD.crmacct_usr_username,
+                                   NEW.crmacct_usr_username,
+                                   getEffectiveXtUser()));
       END IF;
+    END IF;
   END IF;
 
   RETURN NEW;
@@ -187,8 +189,10 @@ BEGIN
   WHERE charass_target_type = 'CRMACCT'
     AND charass_target_id = OLD.crmacct_id;
 
-  PERFORM postComment('ChangeLog', 'CRMA', OLD.crmacct_id,
-                      'Deleted "' || OLD.crmacct_number || '"');
+  IF (fetchMetricBool('AccountChangeLog')) THEN
+    PERFORM postComment('ChangeLog', 'CRMA', OLD.crmacct_id,
+                        'Deleted "' || OLD.crmacct_number || '"');
+  END IF;
 
   RETURN OLD;
 END;

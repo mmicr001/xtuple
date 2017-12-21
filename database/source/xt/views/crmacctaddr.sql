@@ -1,5 +1,5 @@
 /**
-   This is really not a good idea beacuse address relationships are not generally extensible
+   This is really not a good idea because address relationships are not generally extensible
    using a union like this. Implementing this way because of time constraints. A
    different method more like the way documents are handled shoud be used in the future.
 */

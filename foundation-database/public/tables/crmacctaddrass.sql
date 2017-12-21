@@ -19,8 +19,8 @@ SELECT
   xt.add_constraint('crmacctaddrass', 'crmacctaddrass_addr_fk', 'FOREIGN KEY (crmacctaddrass_addr_id)
       REFERENCES public.addr (addr_id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE', 'public'),
   xt.add_constraint('crmacctaddrass', 'crmacctaddrass_crmrole_fk', 'FOREIGN KEY (crmacctaddrass_crmrole_id)
-      REFERENCES public.crmrole (crmrole_id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public');
-
+      REFERENCES public.crmrole (crmrole_id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('crmacctaddrass', 'crmacctaddrass_unq', 'UNIQUE (crmacctaddrass_crmacct_id, crmacctaddrass_addr_id, crmacctaddrass_crmrole_id)', 'public');
 
 ALTER TABLE public."crmacctaddrass" ENABLE TRIGGER ALL;
 

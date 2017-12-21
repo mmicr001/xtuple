@@ -30,7 +30,7 @@ SELECT
   
 ALTER TABLE public.cntctsel ENABLE TRIGGER ALL;
 
-COMMENT ON TABLE public.crmacctsel
+COMMENT ON TABLE public.cntctsel
   IS 'This table records the proposed conditions of a CRM Contact merge. When this merge is performed, 
       the BOOLEAN columns in this table indicate which values in the cntct table will be copied to the target record. 
       Data in this table is temporary and will be removed by a purge.';

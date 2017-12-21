@@ -14,7 +14,6 @@ SELECT
   xt.add_column('addr', 'addr_country',        'TEXT', $$NOT NULL DEFAULT ' '$$, 'public'),
   xt.add_column('addr', 'addr_notes',          'TEXT', $$DEFAULT ''$$, 'public'),
   xt.add_column('addr', 'addr_number',         'TEXT', 'NOT NULL', 'public'),
-  xt.add_column('addr', 'addr_crmrole_id',        'INTEGER', null, 'public'),
   xt.add_column('addr', 'addr_lat',            'NUMERIC(9,6)', null, 'public'),
   xt.add_column('addr', 'addr_lon',            'NUMERIC(9,6)', null, 'public'),
   xt.add_column('addr', 'addr_accuracy',       'NUMERIC', null, 'public'),
@@ -26,14 +25,9 @@ SELECT
 SELECT
   xt.add_constraint('addr', 'addr_pkey', 'PRIMARY KEY (addr_id)', 'public'),
   xt.add_constraint('addr', 'addr_addr_number_key', 'UNIQUE (addr_number)', 'public'),
-  xt.add_constraint('addr', 'addr_addr_number_check', $$CHECK (addr_number <> ''::TEXT$$, 'public'),
-  xt.add_constraint('addr', 'addr_crmrole_id_fkey',
-                    'FOREIGN KEY (addr_crmrole_id) REFERENCES crmrole(crmrole_id)
-                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public');
+  xt.add_constraint('addr', 'addr_addr_number_check', $$CHECK (addr_number <> ''::TEXT$$, 'public');
 
 ALTER TABLE public.addr ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE public.addr
   IS 'Detailed Address Information';
-COMMENT ON COLUMN public.addr.addr_crmrole_id IS 'Reference to CRM Role';
-

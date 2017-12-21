@@ -9,6 +9,7 @@ SELECT * FROM (
 <? endif ?>
 SELECT DISTINCT ON (addr_country, addr_state, addr_city, addr_line1, addr_number) 
   addr_id, addr_line1, addr_line2, addr_line3, 
+  regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
   addr_city, addr_state, addr_country, addr_postalcode 
 <? if exists("hasContext") ?> 
   , crmrole_sort, crmrole_name AS crmrole
@@ -22,12 +23,10 @@ SELECT DISTINCT ON (addr_country, addr_state, addr_city, addr_line1, addr_number
 <? foreach("char_id_date_list") ?>
   , charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>
 <? endforeach ?>
-FROM addr
-<? if exists("crmacct_id") ?>
-  JOIN crmacctaddrass ON (crmacctaddrass_addr_id=addr_id)
-<? endif ?>
+FROM address
 <? if exists("hasContext") ?>
-  JOIN crmrole ON (crmacctaddrass_crmrole_id=crmrole_id)
+  LEFT JOIN crmacctaddrass ON (crmacctaddrass_addr_id=addr_id)
+  LEFT JOIN crmrole ON (crmacctaddrass_crmrole_id=crmrole_id)
 <? endif ?>
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='ADDR') 
@@ -49,12 +48,43 @@ FROM addr
 <? endforeach ?>
 WHERE true
 <? if exists("crmacct_id") ?>
- AND crmacctaddrass_crmacct_id=<? value("crmacct_id") ?>
+ AND crmacct_id=<? value("crmacct_id") ?>
 <? endif ?>
 <? if not exists("showInactive") ?> 
  AND addr_active 
 <? endif ?>
+<? if exists("address") ?>
+ AND concat(addr_line1, addr_line2, addr_line3) ~ <? value("address") ?>
+<? endif ?>
+<? if exists("city") ?>
+ AND addr_city ~ <? value("city") ?>
+<? endif ?>
+<? if exists("state") ?>
+ AND addr_state ~ <? value("state") ?>
+<? endif ?>
+<? if exists("country") ?>
+ AND addr_country = (SELECT country_name FROM country WHERE country_id=<? value("country") ?>)
+<? endif ?>
+<? if exists("postalcode") ?>
+ AND addr_postalcode ~ <? value("postalcode") ?>
+<? endif ?>
 <? literal("charClause") ?>
+
+
+GROUP BY addr_id, addr_line1, addr_line2, addr_line3, addr_country, addr_state, 
+         addr_city, addr_line1, addr_number, addr_postalcode
+<? if exists("hasContext") ?>
+         ,crmrole_sort, crmrole_name
+<? endif ?>
+<? foreach("char_id_text_list") ?>
+  , charass_alias<? literal("char_id_text_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+  , charass_alias<? literal("char_id_list_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+  , charass_alias<? literal("char_id_date_list") ?>.charass_value
+<? endforeach ?>
 ORDER BY addr_country, addr_state, addr_city, addr_line1, addr_number
 <? if exists("hasContext") ?>
 ) foo
