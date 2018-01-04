@@ -17,7 +17,8 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
 , addr_id AS altId,
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
-  crmacct_id, crmacct_number, crmacct_name, cntct_active,
+  regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
+  cntct_active,
   cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
@@ -123,6 +124,27 @@ WHERE true
   AND (addr_id=<? value("addr_id") ?>)
 <? endif ?>
 <? literal("charClause") ?>
+
+GROUP BY cntct_id, cntct_number, cntcteml_primary
+<? if exists("hasContext") ?>
+    , crmrole_sort, crmrole_name
+<? endif ?>
+<? if not exists("idOnly") ?> 
+  ,addr_id,addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
+  addr_country, addr_notes, addr_number,
+  cntct_active, cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
+  contact_phone,contact_phone2,contact_phone3,
+  cntct_email, cntct_webaddr
+<? foreach("char_id_text_list") ?>
+  , charass_alias<? literal("char_id_text_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+  , charass_alias<? literal("char_id_list_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+  , charass_alias<? literal("char_id_date_list") ?>.charass_value::date
+<? endforeach ?>
+<? endif ?>
 ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc
 
 <? if exists("hasContext") ?>

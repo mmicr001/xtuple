@@ -19,7 +19,7 @@ BEGIN
     AND conrelid=con.oid
     AND f.relname = 'cntct'
     AND con.relnamespace=pg_namespace.oid
-    AND con.relname NOT IN ('cntctaddr', 'cntctdata', 'cntcteml', 'cntctphone',
+    AND con.relname NOT IN ('cntcteml', 'cntctphone',
                             'cohead',    'pohead',    'quhead',   'tohead',
                             'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist',
                             'crmacctcntctass')

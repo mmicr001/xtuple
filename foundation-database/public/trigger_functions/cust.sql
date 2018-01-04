@@ -39,7 +39,6 @@ BEGIN
       WHERE crmacct_number=NEW.cust_number
       RETURNING crmacct_id INTO NEW.cust_crmacct_id;
       IF (FOUND) THEN
-        DELETE FROM prospect WHERE prospect_id=NEW.cust_id;
         EXIT;
       END IF;
       BEGIN

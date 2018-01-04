@@ -72,3 +72,4 @@ ALTER TABLE cntct DROP COLUMN IF EXISTS cntct_crmacct_id CASCADE,
 ALTER TABLE public.cntct ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE cntct IS 'Contact - information on how to reach a living person';
+

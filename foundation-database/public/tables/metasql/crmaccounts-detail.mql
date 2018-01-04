@@ -117,18 +117,6 @@ WHERE true
 <? endif ?>
 <? literal("charClause") ?>
 
-<? if exists("excludeMergeWIP") ?>
-  AND (crmacct_id NOT IN (SELECT mrgundo_base_id
-                            FROM mrgundo
-                           WHERE (mrgundo_base_schema='public')
-                             AND (mrgundo_base_table='crmacct')
-                          UNION
-                          SELECT crmacctsel_src_crmacct_id
-                            FROM crmacctsel
-                          UNION
-                          SELECT crmacctsel_dest_crmacct_id
-                            FROM crmacctsel))
-<? endif ?>
 <? if exists("crmacct_acct_type") ?>
   AND CASE WHEN <? value("crmacct_acct_type") ?> = 1 THEN crmaccttypes(crmacct_id)#>>'{customer}'   IS NOT NULL
            WHEN <? value("crmacct_acct_type") ?> = 2 THEN crmaccttypes(crmacct_id)#>>'{prospect}'   IS NOT NULL

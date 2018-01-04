@@ -49,8 +49,6 @@ CREATE OR REPLACE FUNCTION _cntctTriggerBeforeDelete() RETURNS "trigger" AS $$
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM cntctaddr WHERE cntctaddr_cntct_id=OLD.cntct_id;
-    DELETE FROM cntctdata WHERE cntctdata_cntct_id=OLD.cntct_id;
     DELETE FROM cntcteml  WHERE cntcteml_cntct_id=OLD.cntct_id;
     DELETE FROM docass WHERE docass_source_id = OLD.cntct_id AND docass_source_type = 'T';
     DELETE FROM docass WHERE docass_target_id = OLD.cntct_id AND docass_target_type = 'T';
