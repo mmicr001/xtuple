@@ -11,6 +11,7 @@ SELECT
   xt.add_column('cntct', 'cntct_initials',       'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_active',      'BOOLEAN', 'DEFAULT true', 'public'),
   xt.add_column('cntct', 'cntct_email',          'TEXT', NULL,       'public'),
+  xt.add_column('cntct', 'cntct_email_optin',    'BOOLEAN', 'NOT NULL DEFAULT TRUE', 'public'),
   xt.add_column('cntct', 'cntct_webaddr',        'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_notes',          'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_title',          'TEXT', NULL,       'public'),
@@ -72,4 +73,4 @@ ALTER TABLE cntct DROP COLUMN IF EXISTS cntct_crmacct_id CASCADE,
 ALTER TABLE public.cntct ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE cntct IS 'Contact - information on how to reach a living person';
-
+COMMENT ON COLUMN public.cntct.cntct_email_optin IS 'Contact email address opt in/out';

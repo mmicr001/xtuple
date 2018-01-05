@@ -1,32 +1,33 @@
 -- ===================================================================
 --Remove the legacy functions
 -- ===================================================================
-DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT );
-DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT);
-DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT);
-
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT ) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,JSON,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.savecntct(
-    pcntctid integer,
-    pcontactnumber text,
-    paddrid integer,
-    phonorific text,
-    pfirstname text,
-    pmiddlename text,
-    plastname text,
-    psuffix text,
-    pinitials text,
-    pactive boolean,
-    pphone JSON,
-    pemail text,
-    pwebaddr text,
-    pnotes text,
-    ptitle text,
-    pflag text,
-    pownerusername text DEFAULT NULL)
+    pCntctid integer,
+    pContactNumber text,
+    pAddrid integer,
+    pHonorific text,
+    pFirstname text,
+    pMiddlename text,
+    pLastname text,
+    pSuffix text,
+    pInitials text,
+    pActive boolean,
+    pPhone JSON,
+    pEmail text,
+    pWebaddr text,
+    pNotes text,
+    pTitle text,
+    pFlag text,
+    pOwnerUsername text DEFAULT NULL,
+    pEmailOptIn boolean DEFAULT fetchmetricbool('DefaultEmailOptIn'))
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntctId      INTEGER;
@@ -112,13 +113,13 @@ BEGIN
       cntct_id,cntct_number,
       cntct_addr_id,cntct_first_name,
       cntct_last_name,cntct_honorific,cntct_initials,
-      cntct_active,cntct_email,cntct_webaddr,
+      cntct_active,cntct_email,cntct_email_optin,cntct_webaddr,
       cntct_notes,cntct_title,cntct_middle,cntct_suffix, cntct_owner_username ) 
     VALUES (
       _cntctId, COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pAddrId,
       pFirstName,pLastName,pHonorific,
       pInitials,COALESCE(pActive,true),
-      pEmail,pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername );
+      pEmail,COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername );
 
     -- Now insert the Contact's phone numbers
     INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
@@ -140,6 +141,7 @@ BEGIN
       cntct_initials=COALESCE(pInitials,cntct_initials),
       cntct_active=COALESCE(pActive,cntct_active),
       cntct_email=COALESCE(pEmail,cntct_email),
+      cntct_email_optin=COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),
       cntct_webaddr=COALESCE(pWebAddr,cntct_webaddr),
       cntct_notes=COALESCE(pNotes,cntct_notes),
       cntct_title=COALESCE(pTitle,cntct_title),
@@ -193,7 +195,7 @@ CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
                                       pWebAddr         TEXT,
                                       pTitle           TEXT,
                                       pFlag            TEXT ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;

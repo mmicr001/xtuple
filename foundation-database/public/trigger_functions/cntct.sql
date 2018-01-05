@@ -167,11 +167,11 @@ BEGIN
       END IF;
     END IF;
 
-    IF (fetchMetricBool('ContactChangeLog')) THEN
+    IF (TG_OP = 'UPDATE' AND fetchMetricBool('ContactChangeLog')) THEN
       IF (OLD.cntct_title != NEW.cntct_title) THEN
         PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Job Title', OLD.cntct_title, NEW.cntct_title);
       END IF;
-      IF (OLD.cntct_owner_username != NEW.cntct_owner_username) THEN
+      IF (OLD.cntct_owner_username != '' AND OLD.cntct_owner_username != NEW.cntct_owner_username) THEN
         PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Owner', OLD.cntct_owner_username, NEW.cntct_owner_username);
       END IF;
       IF (OLD.cntct_name != NEW.cntct_name) THEN
