@@ -21,9 +21,9 @@
   FROM custtype
  WHERE(custtype_id=&lt;? value("custtype_id") ?>);
 &lt;? elseif exists("custgrp_id") ?>
-       custgrp_name AS f_custtype
+       groups_name AS f_custtype
   FROM custgrp
- WHERE(custgrp_id=&lt;? value("custgrp_id") ?>);
+ WHERE(groups_id=&lt;? value("custgrp_id") ?>);
 &lt;? else ?>
        text('All Customer Types') AS f_custtype
 &lt;? endif ?></sql>
@@ -51,7 +51,7 @@ CASE
   WHEN rahead_creditmethod = 'C' THEN
     &lt;? value("creditcard") ?>
 END AS creditmethod, rahead_authdate
-FROM rahead, raitem, custtype, custinfo LEFT OUTER JOIN custgrpitem ON (cust_id=custgrpitem_cust_id)
+FROM rahead, raitem, custtype, custinfo LEFT OUTER JOIN custgrpitem ON (cust_id=groupsitem_reference_id)
 WHERE ( (rahead_id=raitem_rahead_id)
  AND (rahead_cust_id=cust_id)
  AND (cust_custtype_id=custtype_id)
@@ -69,7 +69,7 @@ WHERE ( (rahead_id=raitem_rahead_id)
  &lt;? elseif exists("custtype_pattern") ?>
  AND (custtype_pattern=&lt;? value("custtype_pattern") ?>)
  &lt;? elseif exists("custgrp_id") ?>
- AND (custgrpitem_custgrp_id=&lt;? value("custgrp_id") ?>)
+ AND (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)
  &lt;? endif ?>
  AND (rahead_creditmethod IN ('$'
  &lt;? if exists("doM") ?>, 'M'&lt;? endif ?>

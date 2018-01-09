@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION postCashReceipt(pCashrcptid    INTEGER,
                                            pJournalNumber INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _ccpayid  INTEGER;
@@ -61,7 +61,7 @@ BEGIN
   SELECT _cashcust.rcptcust AS cashrcpt_cust_id,
          CASE WHEN (COALESCE(cashrcpt_cust_id,0) > 0)
 		      THEN (cust_number||'-'||cust_name)
-	          ELSE (SELECT custgrp_name||'-'||custgrp_descrip FROM custgrp WHERE custgrp_id = cashrcpt_custgrp_id)
+	          ELSE (SELECT groups_name||'-'||groups_descrip FROM custgrp WHERE groups_id = cashrcpt_custgrp_id)
          END AS custnote,
          COALESCE(cashrcpt_custgrp_id, 0) as groupid,
          cashrcpt_fundstype, cashrcpt_number, cashrcpt_docnumber,

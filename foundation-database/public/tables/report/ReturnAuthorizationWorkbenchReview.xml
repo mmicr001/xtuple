@@ -21,9 +21,9 @@
   FROM custtype
  WHERE(custtype_id=&lt;? value("custtype_id") ?>)
 &lt;? elseif exists("custgrp_id") ?>
-       (custgrp_name || '-' || custgrp_descrip) AS f_custtype
+       (groups_name || '-' || groups_descrip) AS f_custtype
   FROM custgrp
- WHERE(custgrp_id=&lt;? value("custgrp_id") ?>)
+ WHERE(groups_id=&lt;? value("custgrp_id") ?>)
 &lt;? else ?>
        text('All Customer Types') AS f_custtype
 &lt;? endif ?>
@@ -88,7 +88,7 @@ END AS awaiting
 FROM rahead
   LEFT OUTER JOIN custinfo ON (rahead_cust_id=cust_id)
   LEFT OUTER JOIN custtype ON (cust_custtype_id=custtype_id)
-  LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id), 
+  LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id), 
  raitem
   LEFT OUTER JOIN coitem ON (raitem_new_coitem_id=coitem_id)
 WHERE ( (rahead_id=raitem_rahead_id)
@@ -98,7 +98,7 @@ WHERE ( (rahead_id=raitem_rahead_id)
 &lt;? elseif exists("custtype_id") ?>
   AND (custtype_id=&lt;? value("custtype_id") ?>)
 &lt;? elseif exists("custgrp_id") ?>
-  AND (custgrpitem_custgrp_id=&lt;? value("custgrp_id") ?>)
+  AND (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)
 &lt;? elseif exists("custtype_pattern") ?>
   AND (custtype_code ~ &lt;? value("custtype_pattern") ?>)
 &lt;? endif ?>

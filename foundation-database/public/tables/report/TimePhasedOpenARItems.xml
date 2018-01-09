@@ -20,9 +20,9 @@
              FROM custtype
             WHERE (custtype_id=&lt;? value(&quot;custtype_id&quot;) ?>) )
       &lt;? elseif exists(&quot;custgrp_id&quot;) ?>
-         ( SELECT (custgrp_name || '-' ||  custgrp_descrip)
+         ( SELECT (groups_name || '-' ||  groups_descrip)
 	   FROM custgrp
-            WHERE (custgrp_id=&lt;? value(&quot;custgrp_id&quot;) ?>) )
+            WHERE (groups_id=&lt;? value(&quot;custgrp_id&quot;) ?>) )
        &lt;? elseif exists(&quot;custtype_pattern&quot;) ?>
          text(&lt;? value(&quot;custtype_pattern&quot;) ?>)
        &lt;? else ?>
@@ -53,8 +53,8 @@
          cust_number,
          cust_name,
          openARItemsValue(cust_id, calitem_id) AS value
-    FROM custinfo LEFT OUTER JOIN custgrpitem ON (cust_id=custgrpitem_cust_id)
-         LEFT OUTER JOIN custgrp ON (custgrpitem_custgrp_id=custgrp_id),
+    FROM custinfo LEFT OUTER JOIN custgrpitem ON (cust_id=groupsitem_reference_id)
+         LEFT OUTER JOIN custgrp ON (groupsitem_groups_id=custgrp_id),
          ( SELECT rcalitem_id AS calitem_id,
                   findPeriodStart(rcalitem_id) AS calitem_start,
                   findPeriodEnd(rcalitem_id) AS calitem_end

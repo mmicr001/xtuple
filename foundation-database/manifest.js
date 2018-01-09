@@ -1015,6 +1015,9 @@
     "public/functions/woplancost.sql",
     "public/functions/wostarted.sql",
 
+    "public/tables/groups.sql",
+    "public/tables/groupsitem.sql",
+
     "public/tables/accnt.sql",
     "public/tables/addrsel.sql",
     "public/tables/apapply.sql",
@@ -1056,6 +1059,7 @@
     "public/tables/crmacctaddrass.sql",
     "public/tables/crmacctsel.sql",
     "public/tables/curr_rate.sql",
+    "public/tables/custgrp.sql",
     "public/tables/custgrpitem.sql",
     "public/tables/dict.sql",
     "public/tables/docass.sql",
@@ -1411,7 +1415,7 @@
     "public/tables/metasql/briefSalesHistory-detail.mql",
     "public/tables/metasql/capacityUOMs-detail.mql",
     "public/tables/metasql/cashReceipts-detail.mql",
-    "public/tables/metasql/ccpayments.mql",
+    "public/tables/metasql/ccpayments-list.mql",
     "public/tables/metasql/charass-populate.mql",
     "public/tables/metasql/checkRegister-detail.mql",
     "public/tables/metasql/checks-detail.mql",

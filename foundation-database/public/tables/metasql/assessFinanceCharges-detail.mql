@@ -29,7 +29,7 @@ FROM fincharg,
       FROM aropen JOIN custinfo ON (cust_id=aropen_cust_id)
                   LEFT OUTER JOIN terms ON (terms_id=aropen_terms_id)
                   LEFT OUTER JOIN custtype ON (cust_custtype_id=custtype_id)
-                  LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id)
+                  LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id)
       WHERE ((aropen_doctype='I')
         AND  (aropen_open)
         AND  (COALESCE(terms_fincharg, FALSE))
@@ -44,7 +44,7 @@ FROM fincharg,
         AND   (custtype_code~<? value("custtype_pattern") ?>)
       <? endif ?>
       <? if exists("custgrp_id") ?>
-        AND   (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+        AND   (groupsitem_groups_id=<? value("custgrp_id") ?>)
       <? endif ?>
       )) AS data
 WHERE ((COALESCE(aropen_fincharg_date, aropen_duedate) + COALESCE(cust_gracedays, fincharg_graceperiod)) < <? value("assessmentDate") ?>)

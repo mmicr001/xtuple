@@ -1,7 +1,7 @@
 -- Group: arOpenApplications
 -- Name: detail
 -- Notes: used by applyARCreditMemo, cashReceipt
---        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 --        
 -- Modified Jan 2011 for Cash Receipt by Customer Group
@@ -90,8 +90,8 @@ FROM (SELECT
 <? endif ?>
    AND ((aropen_cust_id=<? value("cust_id") ?>)
      <? if exists("custgrp_id") ?>
-      OR aropen_cust_id IN (SELECT custgrpitem_cust_id from custgrpitem 
-		WHERE custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+      OR aropen_cust_id IN (SELECT groupsitem_reference_id from custgrpitem 
+		WHERE groupsitem_groups_id=<? value("custgrp_id") ?>)
      <? endif ?>)
    )
  ) AS dummy
