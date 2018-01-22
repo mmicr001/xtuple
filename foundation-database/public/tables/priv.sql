@@ -23,7 +23,11 @@ declare
       ['Accounting', 'ReverseARApplication', 'Allows A/R Applications to be reversed'],
       ['Accounting', 'ReverseAPApplication', 'Allows A/P Applications to be reversed'],
       ['CRM', 'MaintainCRMRoles', 'Allows Maintenance of CRM Roles'],
-      ['CRM', 'ViewCRMRoles', 'Can View CRM Roles']
+      ['CRM', 'ViewCRMRoles', 'Can View CRM Roles'],
+      ['CRM', 'MaintainProspectGroups', 'Allows Maintenance of Prospect Groups'],
+      ['CRM', 'ViewProspectGroups', 'Allows Viewing of Prospect Groups'],
+      ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
+      ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups']
     ];
   _p TEXT[];
 begin

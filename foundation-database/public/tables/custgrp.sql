@@ -17,3 +17,7 @@ ALTER TABLE tempgrp RENAME TO custgrp;
 SELECT
   xt.add_constraint('custgrp', 'custgrp_pkey', 'PRIMARY KEY (groups_id)', 'public'),
   xt.add_constraint('custgrp', 'custgrp_custgrp_name_check', $$CHECK (groups_name <> ''::text)$$, 'public');
+
+COMMENT ON TABLE public.custgrp
+  IS 'Customer Groups';
+

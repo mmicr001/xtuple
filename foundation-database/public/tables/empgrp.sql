@@ -1,0 +1,25 @@
+-- Migrate empgrp table from standalone to inherited from `groups` base table
+-- must run this SQL script prior to running the `empgrpitem` scripts
+
+DROP TABLE IF EXISTS tempgrp;
+SELECT xt.create_table('tempgrp', 'public', false, 'groups');
+
+ALTER TABLE public.empgrp DROP COLUMN IF EXISTS obj_uuid;
+
+INSERT INTO tempgrp 
+  SELECT * FROM empgrp;
+
+ALTER TABLE public.empgrpitem DROP CONSTRAINT IF EXISTS empgrpitem_empgrpitem_empgrp_id_fkey;
+
+DROP TABLE empgrp;
+
+ALTER TABLE tempgrp RENAME TO empgrp;
+
+SELECT
+  xt.add_constraint('empgrp', 'empgrp_pkey', 'PRIMARY KEY (groups_id)', 'public'),
+  xt.add_constraint('empgrp', 'empgrp_empgrp_name_key', 'UNIQUE (groups_name)', 'public'),
+  xt.add_constraint('empgrp', 'empgrp_empgrp_name_check', $$CHECK (groups_name <> ''::text)$$, 'public');
+
+COMMENT ON TABLE public.empgrp
+  IS 'Employee Groups';
+

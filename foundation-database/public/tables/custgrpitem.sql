@@ -3,7 +3,7 @@
 DROP TABLE IF EXISTS tempgrpitem;
 SELECT xt.create_table('tempgrpitem', 'public', false, 'groupsitem');
 
-ALTER TABLE public.custgrpitem DROP COLUMN IF EXISTS obj_uuid;
+ALTER TABLE public.custgrpitem DROP COLUMN IF EXISTS obj_uuid CASCADE;
 
 INSERT INTO tempgrpitem
   SELECT * FROM custgrpitem;

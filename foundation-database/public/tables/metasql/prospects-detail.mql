@@ -1,7 +1,7 @@
 -- Group: prospects
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT 
@@ -69,6 +69,9 @@ WHERE true
        OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_country,'') ~* <? value("search_pattern") ?>))
+<? endif ?>
+<? if exists("pspctgrp") ?>
+  AND prospect_id IN (SELECT groupsitem_reference_id FROM pspctgrpitem WHERE groupsitem_groups_id=<? value("pspctgrp") ?>)
 <? endif ?>
 <? if exists("prospect_number_pattern") ?>
   AND (prospect_number ~* <? value("prospect_number_pattern") ?>)
