@@ -72,7 +72,7 @@ BEGIN
     FetchMetricValue('DefaultTerms'),
     FetchMetricValue('DefaultCustType'),
     FetchMetricValue('DefaultShipFormId'),
-    COALESCE(FetchMetricValue('DefaultShipViaId'),-1),
+    COALESCE(FetchDefaultShipVia(),''),
     FetchMetricText('DefaultBalanceMethod'),
     FetchMetricBool('DefaultFreeFormShiptos'),
     FetchMetricBool('DefaultBackOrders'),

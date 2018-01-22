@@ -30,7 +30,8 @@ BEGIN
                                         ELSE apselect_amount END * _check_curr_rate / apopen_curr_rate)          
 	 FROM apselect JOIN apopen ON (apopen_id=apselect_apopen_id)
 	 WHERE ((apopen_vend_id=_v.vend_id)
-	   AND  (apselect_bankaccnt_id=pBankaccntid)) ) >= 0) THEN
+	   AND  (apselect_bankaccnt_id=pBankaccntid)
+           AND  (apselect_date <= pCheckDate)) ) >= 0) THEN
       -- 0.01 is a temporary amount; we''ll update the check amount later
       _checkid := createCheck(pBankaccntid,	'V',	_v.vend_id,
 			      pCheckDate,		0.01,	_check_curr_id,
@@ -43,7 +44,8 @@ BEGIN
 		FROM apselect, apopen
 		WHERE ( (apselect_apopen_id=apopen_id)
 		 AND (apopen_vend_id=_v.vend_id)
-		 AND (apselect_bankaccnt_id=pBankaccntid) ) LOOP
+		 AND (apselect_bankaccnt_id=pBankaccntid)
+                 AND (apselect_date <= pCheckDate) ) LOOP
 	INSERT INTO checkitem
 	( checkitem_checkhead_id, checkitem_apopen_id,
 	  checkitem_vouchernumber, checkitem_invcnumber, checkitem_ponumber,

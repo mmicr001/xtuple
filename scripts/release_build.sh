@@ -222,15 +222,46 @@ if $TRANSLATIONS ; then
     fi
   done
 
-  cd ../qt-client
-  lupdate -no-obsolete xtuple.pro
-  lrelease xtuple.pro
-  mv share/dict/*.qm ../xtuple/scripts/output/dict/postbooks
+  cd ../xtuple
+  for TRANSLATION in $(find foundation-database/public/tables/dict/*.ts) ; do
+    for REPORT in $(find foundation-database/public/tables/report/*.xml) ; do
+      xsltproc --stringparam ts ../../$TRANSLATION scripts/xml/reports.xsl $REPORT |
+      sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
+    done
+
+    echo '<?xml version="1.0" encoding="utf-8"?>' > $TRANSLATION
+    echo '<TS version="2.0">' >> $TRANSLATION
+    cat reports.ts >> $TRANSLATION
+    echo '</TS>' >> $TRANSLATION
+    rm reports.ts
+
+    lrelease $TRANSLATION
+  done
+  mv foundation-database/public/tables/dict/*.qm scripts/output/dict/postbooks
 
   cd ../private-extensions
   for PACKAGE in $EDITIONS $PACKAGES ; do
     if [ "$PACKAGE" != postbooks -a -d ../xtuple/scripts/output/dict/$PACKAGE ] ; then
+      if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
+        for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+          for REPORT in $(find source/$PACKAGE/foundation-database/*/tables/pkgreport/*.xml) ; do
+            xsltproc --stringparam ts ../../../private-extensions/$TRANSLATION ../xtuple/scripts/xml/reports.xsl $REPORT |
+            sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
+          done
+        done
+      fi
+
       lupdate -no-obsolete source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
+
+      if [ -e reports.ts ] ; then
+        for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+          sed -i -e '/<\/TS>/d' $TRANSLATION
+          cat reports.ts >> $TRANSLATION
+          echo '</TS>' >> $TRANSLATION
+        done
+        rm reports.ts
+      fi
+
       lrelease source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
       mv source/$PACKAGE/foundation-database/*/tables/dict/*.qm ../xtuple/scripts/output/dict/$PACKAGE
     fi

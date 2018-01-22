@@ -1,7 +1,7 @@
 DROP VIEW IF EXISTS public.documentimport CASCADE;
 
 CREATE OR REPLACE VIEW public.documentimport AS 
-SELECT 'target number'::TEXT AS target_code, 'target type'::TEXT AS target_type, 'title'::TEXT AS doc_title, 'file_data'::BYTEA AS file_data,
+SELECT 'target number'::TEXT AS target_code, 'target type'::TEXT AS target_type, 'title'::TEXT AS doc_title, 'file_data'::BYTEA AS file_data, 'file_mime_type'::TEXT AS file_mime_type,
        'file location/url'::TEXT AS file_url;
 
 CREATE OR REPLACE VIEW public.imagesimport AS 
@@ -49,8 +49,8 @@ BEGIN
   END IF;
 
 -- Import file data in to correct table and make the correct associations
-    INSERT INTO url ( url_source, url_source_id, url_title, url_url, url_stream ) 
-      VALUES(pNEW.target_type, _tgtid, pNEW.doc_title, pNEW.file_url, pNEW.file_data);
+    INSERT INTO url ( url_source, url_source_id, url_title, url_url, url_stream, url_mime_type ) 
+      VALUES(pNEW.target_type, _tgtid, pNEW.doc_title, pNEW.file_url, pNEW.file_data, pNEW.file_mime_type);
       
   RETURN _tgtid;
 END; $$
