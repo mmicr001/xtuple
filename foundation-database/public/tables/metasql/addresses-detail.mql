@@ -1,7 +1,7 @@
 -- Group: addresses
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
  <? if exists("hasContext") ?>
@@ -52,6 +52,9 @@ WHERE true
 <? endif ?>
 <? if not exists("showInactive") ?> 
  AND addr_active 
+<? endif ?>
+<? if exists("addrgrp") ?>
+  AND addr_id IN (SELECT groupsitem_reference_id FROM addrgrpitem WHERE groupsitem_groups_id = <? value("addrgrp") ?>)
 <? endif ?>
 <? if exists("address") ?>
  AND concat(addr_line1, addr_line2, addr_line3) ~ <? value("address") ?>

@@ -17,8 +17,8 @@ ALTER TABLE tempgrp RENAME TO empgrp;
 
 SELECT
   xt.add_constraint('empgrp', 'empgrp_pkey', 'PRIMARY KEY (groups_id)', 'public'),
-  xt.add_constraint('empgrp', 'empgrp_empgrp_name_key', 'UNIQUE (groups_name)', 'public'),
-  xt.add_constraint('empgrp', 'empgrp_empgrp_name_check', $$CHECK (groups_name <> ''::text)$$, 'public');
+  xt.add_constraint('empgrp', 'empgrp_groups_name_unq', 'UNIQUE (groups_name)', 'public'),
+  xt.add_constraint('empgrp', 'empgrp_groups_name_check', $$CHECK (groups_name <> ''::text)$$, 'public');
 
 COMMENT ON TABLE public.empgrp
   IS 'Employee Groups';

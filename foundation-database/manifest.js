@@ -1019,6 +1019,8 @@
     "public/tables/groupsitem.sql",
 
     "public/tables/accnt.sql",
+    "public/tables/addrgrp.sql",
+    "public/tables/addrgrpitem.sql",
     "public/tables/addrsel.sql",
     "public/tables/apapply.sql",
     "public/tables/apopen.sql",
@@ -1068,6 +1070,7 @@
     "public/tables/file.sql",
     "public/tables/empgrp.sql",
     "public/tables/empgrpitem.sql",
+    "public/tables/filter.sql",
     "public/tables/fundstype.sql",
     "public/tables/grp.sql",
     "public/tables/imageass.sql",
