@@ -9,9 +9,9 @@ SELECT crmacct_number AS account_number,
        cntct_number   AS contact_number,
        crmrole_name   AS crm_role
 FROM crmacctcntctass
-JOIN crmacct ON (crmacct_id=crmacctcntctass_crmacct_id)
-JOIN cntct ON (cntct_id=crmacctcntctass_cntct_id)
-JOIN crmrole ON (crmrole_id=crmacctcntctass_crmrole_id);
+JOIN crmacct ON crmacct_id=crmacctcntctass_crmacct_id
+JOIN cntct ON cntct_id=crmacctcntctass_cntct_id
+JOIN crmrole ON crmrole_id=crmacctcntctass_crmrole_id;
 
 GRANT ALL ON TABLE api.accountcontact TO xtrole;
 COMMENT ON VIEW api.accountcontact IS 'Account to Contact assignment';

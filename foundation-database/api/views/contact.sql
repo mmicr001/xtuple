@@ -28,7 +28,7 @@ SELECT dropIfExists('VIEW', 'contact', 'api');
     cntct_notes AS notes, 
     ''::TEXT AS address_change
   FROM cntct
-  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
+  JOIN addr ON (cntct_addr_id=addr_id)
 ;
 
 GRANT ALL ON TABLE api.contact TO xtrole;
