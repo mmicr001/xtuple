@@ -24,12 +24,15 @@ declare
       ['Accounting', 'ReverseAPApplication', 'Allows A/P Applications to be reversed'],
       ['CRM', 'MaintainCRMRoles', 'Allows Maintenance of CRM Roles'],
       ['CRM', 'ViewCRMRoles', 'Can View CRM Roles'],
+      ['CRM', 'MaintainAccountGroups', 'Allows Maintenance of CRM Account Groups'],
+      ['CRM', 'ViewAccountGroups', 'Allows Viewing of CRM Account Groups'],
       ['CRM', 'MaintainAddressGroups', 'Allows Maintenance of Address Groups'],
       ['CRM', 'ViewAddressGroups', 'Allows Viewing of Address Groups'],
       ['CRM', 'MaintainProspectGroups', 'Allows Maintenance of Prospect Groups'],
       ['CRM', 'ViewProspectGroups', 'Allows Viewing of Prospect Groups'],
       ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
-      ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups']
+      ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
+      ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups']
     ];
   _p TEXT[];
 begin

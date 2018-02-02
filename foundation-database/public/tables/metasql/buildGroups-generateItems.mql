@@ -6,8 +6,14 @@
 WITH rows AS (
 
 INSERT INTO <? literal('groupsitem') ?> (groupsitem_groups_id, groupsitem_reference_id)
-SELECT <? value('groups_id') ?>, <? literal('source_id') ?> 
+SELECT DISTINCT <? value('groups_id') ?>, <? literal('source_id') ?> 
 FROM <? literal('source_table') ?>
+<? if exists('Account') ?>
+  LEFT OUTER JOIN crmacctaddrass ON crmacctaddrass_crmacct_id=crmacct_id
+  LEFT OUTER JOIN crmacctcntctass ON crmacctcntctass_crmacct_id=crmacct_id
+  LEFT OUTER JOIN cntct ON crmacctcntctass_cntct_id=cntct_id
+  LEFT OUTER JOIN addr ON cntct_addr_id=addr_id
+<? endif ?>
 <? if exists('Customer') ?>
   LEFT OUTER JOIN cntct bill_cntct ON (cust_cntct_id=bill_cntct.cntct_id) 
   LEFT OUTER JOIN addr bill_addr ON (bill_cntct.cntct_addr_id=bill_addr.addr_id)
@@ -45,6 +51,7 @@ FROM <? literal('source_table') ?>
 <? endforeach ?>
 WHERE (true)
 <? literal("charClause") ?>
+<? literal("filterClause") ?>
 <? if exists("Customer") ?>
   <? if exists("addr_street_pattern") ?>
     AND (COALESCE(bill_addr.addr_line1,'') || ' ' || COALESCE(bill_addr.addr_line2,'') || ' ' || COALESCE(bill_addr.addr_line3,'') ~* <? value("addr_street_pattern") ?>
