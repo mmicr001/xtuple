@@ -1185,6 +1185,7 @@
     "public/trigger_functions/cust.sql",
     "public/trigger_functions/custtype.sql",
     "public/trigger_functions/docass.sql",
+    "public/trigger_functions/dynamicfilter.sql",
     "public/trigger_functions/emp.sql",
     "public/trigger_functions/file.sql",
     "public/trigger_functions/gltrans.sql",
