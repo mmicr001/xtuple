@@ -99,8 +99,6 @@ white:true*/
       "salesRep",
       "taxAuthority",
       "userAccount",
-      "competitor",
-      "partner"
     ],
 
     // ..........................................................

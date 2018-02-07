@@ -1,7 +1,7 @@
 -- Group: crmaccounts
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT DISTINCT ON (crmacct_number)
@@ -15,8 +15,6 @@ SELECT DISTINCT ON (crmacct_number)
   (crmaccttypes(crmacct_id)#>>'{customer}'       IS NOT NULL) AS cust,
   (crmaccttypes(crmacct_id)#>>'{prospect}'       IS NOT NULL) AS prospect,
   (crmaccttypes(crmacct_id)#>>'{vendor}'         IS NOT NULL) AS vend,
-  (crmaccttypes(crmacct_id)#>>'{competitor}'    IS NOT NULL) AS competitor,
-  (crmaccttypes(crmacct_id)#>>'{partner}'        IS NOT NULL) AS partner,
   (crmaccttypes(crmacct_id)#>>'{taxauth}'        IS NOT NULL) AS taxauth,
   (crmaccttypes(crmacct_id)#>>'{user}'           IS NOT NULL) AS usr,
   (crmaccttypes(crmacct_id)#>>'{employee}'       IS NOT NULL) AS emp,
@@ -58,6 +56,9 @@ WHERE true
   AND (crmacct_owner_username=<? value("owner_username") ?>) 
 <? elseif exists("owner_usr_pattern") ?>
   AND (crmacct_owner_username ~ <? value("owner_usr_pattern") ?>) 
+<? endif ?>
+<? if exists("crmacctgrp") ?>
+  AND crmacct_id IN (SELECT groupsitem_reference_id FROM crmacctgrpitem WHERE groupsitem_groups_id=<? value("crmacctgrp") ?>)
 <? endif ?>
 <? if not exists("showInactive") ?> 
   AND crmacct_active 
@@ -121,12 +122,13 @@ WHERE true
   AND CASE WHEN <? value("crmacct_acct_type") ?> = 1 THEN crmaccttypes(crmacct_id)#>>'{customer}'   IS NOT NULL
            WHEN <? value("crmacct_acct_type") ?> = 2 THEN crmaccttypes(crmacct_id)#>>'{prospect}'   IS NOT NULL
            WHEN <? value("crmacct_acct_type") ?> = 3 THEN crmaccttypes(crmacct_id)#>>'{vendor}'     IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 4 THEN crmaccttypes(crmacct_id)#>>'{competitor}' IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 5 THEN crmaccttypes(crmacct_id)#>>'{partner}'    IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 6 THEN crmaccttypes(crmacct_id)#>>'{taxauth}'    IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 7 THEN crmaccttypes(crmacct_id)#>>'{user}'       IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 8 THEN crmaccttypes(crmacct_id)#>>'{employee}'   IS NOT NULL
-           WHEN <? value("crmacct_acct_type") ?> = 9 THEN crmaccttypes(crmacct_id)#>>'{salesrep}'   IS NOT NULL
+           WHEN <? value("crmacct_acct_type") ?> = 4 THEN crmaccttypes(crmacct_id)#>>'{taxauth}'    IS NOT NULL
+           WHEN <? value("crmacct_acct_type") ?> = 5 THEN crmaccttypes(crmacct_id)#>>'{user}'       IS NOT NULL
+           WHEN <? value("crmacct_acct_type") ?> = 6 THEN crmaccttypes(crmacct_id)#>>'{employee}'   IS NOT NULL
+           WHEN <? value("crmacct_acct_type") ?> = 7 THEN crmaccttypes(crmacct_id)#>>'{salesrep}'   IS NOT NULL
+           WHEN <? value("crmacct_acct_type") ?>  > 100 THEN crmacct_id IN (SELECT crmacctrole_crmacct_id 
+                                                                             FROM  crmacctrole  
+                                                                             WHERE crmacctrole_crmrole_id = (<? value("crmacct_acct_type") ?>-100))
       END
 <? endif ?>
 ORDER BY crmacct_number; 

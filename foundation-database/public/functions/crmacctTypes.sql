@@ -27,12 +27,6 @@ RETURNS json AS $$
             (SELECT emp_id
             FROM emp
             WHERE emp_crmacct_id = pCrmAcctId) as employee,
-            (SELECT crmacct_competitor_id
-             FROM crmacct
-             WHERE crmacct_id = pCrmAcctId) as competitor,
-            (SELECT crmacct_partner_id
-             FROM crmacct
-             WHERE crmacct_id = pCrmAcctId) as partner,
             (SELECT crmacct_usr_username
              FROM crmacct
              WHERE crmacct_id = pCrmAcctId) as user
