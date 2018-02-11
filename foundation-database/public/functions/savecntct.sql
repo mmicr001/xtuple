@@ -123,11 +123,8 @@ BEGIN
 
     -- Now insert the Contact's phone numbers
     INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
-      SELECT _cntctId, crmrole_id, pnumb
-      FROM crmrole
-      JOIN (SELECT json_array_elements(_phones)->>'role' AS myrole, 
-                   json_array_elements(_phones)->>'number' AS pnumb) foo
-      ON crmrole_name=foo.myrole;
+      SELECT _cntctId, getcrmroleid(json_array_elements(_phones)->>'role'), 
+                       json_array_elements(_phones)->>'number';
 
     RETURN _cntctId;
 
@@ -154,26 +151,13 @@ BEGIN
     -- There's no primary key available so we have to delete no longer existing numbers
     -- and insert new ones.
     DELETE FROM cntctphone 
-      WHERE cntctphone_id IN 
-        (SELECT cntctphone_id
-         FROM cntctphone
-         LEFT JOIN (SELECT pCntctId AS id, crmrole_id, pnumb
-                  FROM crmrole
-                  JOIN (SELECT json_array_elements(_phones)->>'role' AS myrole, 
-                               json_array_elements(_phones)->>'number' AS pnumb) foo
-                    ON crmrole_name=foo.myrole) bar
-           ON (cntctphone_cntct_id=id AND cntctphone_crmrole_id=crmrole_id AND cntctphone_phone=pnumb)
-         WHERE cntctphone.cntctphone_cntct_id=pCntctId
-           AND id IS NULL);   
+      WHERE cntctphone_cntct_id = pCntctId
+        AND cntctphone_phone NOT IN (SELECT json_array_elements(_phones)->>'number');
 
     INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
-      SELECT pCntctId, crmrole_id, pnumb
-      FROM crmrole
-      JOIN (SELECT json_array_elements(_phones)->>'role' AS myrole, 
-                   json_array_elements(_phones)->>'number' AS pnumb) foo
-        ON crmrole_name=foo.myrole
-      LEFT JOIN cntctphone ON (cntctphone_cntct_id=pCntctId AND cntctphone_crmrole_id=crmrole_id AND cntctphone_phone=pnumb)
-      WHERE cntctphone_id IS NULL;
+      SELECT pCntctId, getcrmroleid(json_array_elements(_phones)->>'role'), 
+                       json_array_elements(_phones)->>'number'
+    ON CONFLICT DO NOTHING; 
     
     RETURN pCntctId;
 

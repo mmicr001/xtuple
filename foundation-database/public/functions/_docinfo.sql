@@ -4,11 +4,18 @@ CREATE OR REPLACE FUNCTION _docinfo(pRefId INTEGER, pRefType TEXT, pRecursive BO
   RETURNS SETOF _docinfo AS
 $$
 DECLARE
-  _crmacct      JSON;
   _id           INTEGER;
   _column       TEXT;
   _row          _docinfo%ROWTYPE;
   _target       RECORD;
+  _crmacct      JSON;
+  _src          TEXT[];
+  _crmtypesrc jsonb := '{"customer": "C","prospect": "PSPCT","vendor": "V","taxauth": "TAXAUTH", 
+                         "employee": "EMP","salesrep": "SR"}';
+  _crmtypesrc_rev jsonb := '{}';
+  _r RECORD;
+  _i RECORD;
+  _s  text[];
 BEGIN
 
   -- Unify images, urls, and documents into one "view" for the given reference item
@@ -93,49 +100,27 @@ BEGIN
 
   IF NOT pRecursive THEN
     -- get child document associations for CRM Account records
+    _crmacct := crmaccttypes(pRefId);
     IF pRefType = 'CRMA' THEN
-      _crmacct := crmaccttypes(pRefId);
-
-      IF _crmacct#>>'{customer}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{customer}')::INTEGER, 'C', TRUE) LOOP
+      FOR _r IN SELECT * FROM json_each(_crmacct)
+                WHERE NULLIF(value::TEXT, 'null') IS NOT NULL
+      LOOP
+        _s := '{'||_r.key||'}';
+        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE) LOOP
           RETURN NEXT _row;
         END LOOP;
-      END IF;
-      IF _crmacct#>>'{prospect}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{prospect}')::INTEGER, 'PSPCT', TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
-      END IF;
-      IF _crmacct#>>'{vendor}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{vendor}')::INTEGER, 'V', TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
-      END IF;
-      IF _crmacct#>>'{taxauth}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{taxauth}')::INTEGER, 'TAXAUTH', TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
-      END IF;
-      IF _crmacct#>>'{employee}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{employee}')::INTEGER, 'EMP', TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
-      END IF;
-      IF _crmacct#>>'{salesrep}' IS NOT NULL THEN
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>'{salesrep}')::INTEGER, 'SR', TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
-      END IF;
+      END LOOP;
     END IF;
 
     -- get CRM Account document associations for child records
-    _id := CASE pRefType WHEN 'C'       THEN (_crmacct#>>'{customer}')::INTEGER
-                         WHEN 'PSPCT'   THEN (_crmacct#>>'{prospect}')::INTEGER
-                         WHEN 'V'       THEN (_crmacct#>>'{vendor}')::INTEGER
-                         WHEN 'TAXAUTH' THEN (_crmacct#>>'{taxauth}')::INTEGER
-                         WHEN 'EMP'     THEN (_crmacct#>>'{employee}')::INTEGER
-                         WHEN 'SR'      THEN (_crmacct#>>'{salesrep}')::INTEGER
-               END;
+    FOR _i IN SELECT * FROM jsonb_each_text(_crmtypesrc) LOOP
+      _crmtypesrc_rev = _crmtypesrc_rev || ('{"'|| _i.value ||'": "'||_i.key ||'"}')::jsonb;
+    END LOOP;
+ 
+    _s := '{' || COALESCE(NULLIF(pRefType, ''), 'CRMA') || '}';
+    _s := '{'||(_crmtypesrc_rev#>>_s)::TEXT||'}'; 
+    _id := (_crmacct#>>_s)::INTEGER;
+   
     IF _id IS NOT NULL THEN
       FOR _row IN SELECT * FROM _docinfo(_id, 'CRMA', TRUE) LOOP
         RETURN NEXT _row;

@@ -1,1 +1,1 @@
-UPDATE pkghead SET pkghead_version = '4.11.2' WHERE pkghead_name = 'xt';
+UPDATE pkghead SET pkghead_version = '5.0.0-alpha' WHERE pkghead_name = 'xt';

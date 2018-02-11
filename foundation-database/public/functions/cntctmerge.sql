@@ -84,10 +84,10 @@ BEGIN
       END LOOP;
 
       -- Gather and store the history
-      _qry := format('INSERT INTO mrghist 
-                      SELECT %s, ''%s.%s'', ''%s'', %s, ''%s''
+      _qry := format($f$INSERT INTO mrghist 
+                      SELECT %s, '%s.%s', '%s', %s, '%s'
                       FROM %I.%I
-                      WHERE ( %I = %L);',
+                      WHERE ( %I = %L);$f$,
                       pSourceCntctId, _fk.schemaname, _fk.tablename,
                       _pkcol, _pkcol, _col,
                       _fk.schemaname, _fk.tablename,

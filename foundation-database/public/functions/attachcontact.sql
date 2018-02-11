@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS attachContact(INTEGER, INTEGER);
 
 CREATE OR REPLACE FUNCTION attachContact(pCntctId INTEGER, pCrmacctId INTEGER, pRole INTEGER, pDefault BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -9,7 +9,7 @@ BEGIN
   IF (pDefault) THEN
     UPDATE crmacctcntctass SET crmacctcntctass_default=FALSE
     WHERE crmacctcntctass_crmacct_id=pCrmacctId
-      AND  crmacctcntctass_cntct_id=pCntctId
+      AND  crmacctcntctass_cntct_id != pCntctId
       AND  crmacctcntctass_crmrole_id=pRole;
   END IF;
 

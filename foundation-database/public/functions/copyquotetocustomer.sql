@@ -49,16 +49,11 @@ BEGIN
     quhead_quotedate,  quhead_packdate,  quhead_fob,
     quhead_warehous_id,  quhead_terms_id,  quhead_salesrep_id,
     quhead_custponumber,  quhead_shipvia,
-    quhead_shipto_id,  quhead_shiptoname,  quhead_shiptoaddress1,  quhead_shiptoaddress2,  quhead_shiptoaddress3,
-    quhead_shiptocity,  quhead_shiptostate,  quhead_shiptozipcode,  quhead_shiptophone,  quhead_shiptocountry,
-    quhead_billtoname,  quhead_billtoaddress1,  quhead_billtoaddress2,  quhead_billtoaddress3,
-    quhead_billtocity,  quhead_billtostate,  quhead_billtozip,
+    quhead_shipto_id,  
     quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
     quhead_ordercomments,  quhead_shipcomments,
     quhead_imported,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  quhead_status,
-    quhead_shipto_cntct_id,  quhead_shipto_cntct_honorific,  quhead_shipto_cntct_first_name,  quhead_shipto_cntct_middle,
-    quhead_shipto_cntct_last_name,  quhead_shipto_cntct_suffix,  quhead_shipto_cntct_phone,  quhead_shipto_cntct_title,
-    quhead_shipto_cntct_fax,  quhead_shipto_cntct_email,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
+    quhead_shipto_cntct_id,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
     quhead_billto_cntct_first_name,  quhead_billto_cntct_middle,  quhead_billto_cntct_last_name,  quhead_billto_cntct_suffix,
     quhead_billto_cntct_phone,  quhead_billto_cntct_title,  quhead_billto_cntct_fax,  quhead_billto_cntct_email )
   SELECT _quheadid,  _qunumber,
@@ -68,38 +63,12 @@ BEGIN
          quhead_warehous_id,  quhead_terms_id,  quhead_salesrep_id,
          quhead_custponumber,  quhead_shipvia,
          NULL,    -- shipto_id         
-         '',   -- shipto_name 	
-         '',   -- addr_line1 	
-         '',   -- addr_line2 	
-         '',   -- addr_line3	
-         '',   -- addr_city	
-         '',   -- addr_state	
-         '',   -- addr_postalcode	
-         NULL,  
-         '',  
-         -- new billto info
-         _b.name,		-- quhead_billtoname,
-         _b.addr_line1,		-- quhead_billtoaddress1,
-         _b.addr_line2, 	-- quhead_billtoaddress2  
-         _b.addr_line3,		-- quhead_billtoaddress3,
-         _b.addr_city,		-- quhead_billtocity  
-         _b.addr_state,		-- quhead_billtostate,
-         _b.addr_postalcode,	-- quhead_billtozip,
-		 
+ 
          quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
          quhead_ordercomments,  quhead_shipcomments,
          FALSE,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  'O',
          
  	 NULL, -- quhead_shipto_cntct_id,
-         '', -- quhead_shipto_cntct_honorific,
-         '', -- quhead_shipto_cntct_first_name  
-         '', -- quhead_shipto_cntct_middle,
-         '', -- quhead_shipto_cntct_last_name,
-         '', -- quhead_shipto_cntct_suffix,
-         '', -- quhead_shipto_cntct_phone,
-         '', -- quhead_shipto_cntct_title,
-         '', -- quhead_shipto_cntct_fax,
-         '', -- quhead_shipto_cntct_email,
 	
          _b.cntct_id,			-- quhead_billto_cntct_id,
          _b.cntct_honorific,	-- quhead_billto_cntct_honorific,

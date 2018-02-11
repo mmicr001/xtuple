@@ -57,11 +57,11 @@ SELECT dropIfExists('VIEW', 'account', 'api');
     c.crmacct_notes AS notes
   FROM
     crmacct c
-      LEFT OUTER JOIN crmacct p  ON (c.crmacct_parent_id=p.crmacct_id)
-      LEFT OUTER JOIN cntct   pc ON (pc.cntct_id=getcrmaccountcontact(c.crmacct_id))
-      LEFT OUTER JOIN addr    m  ON (pc.cntct_addr_id=m.addr_id)
-      LEFT OUTER JOIN cntct   sc ON (sc.cntct_id=getcrmaccountcontact(c.crmacct_id, 'Secondary'))
-      LEFT OUTER JOIN addr s ON (sc.cntct_addr_id=s.addr_id);
+      LEFT OUTER JOIN crmacct p  ON c.crmacct_parent_id=p.crmacct_id
+      LEFT OUTER JOIN cntct   pc ON pc.cntct_id=getcrmaccountcontact(c.crmacct_id)
+      LEFT OUTER JOIN addr    m  ON pc.cntct_addr_id=m.addr_id
+      LEFT OUTER JOIN cntct   sc ON sc.cntct_id=getcrmaccountcontact(c.crmacct_id, 'Secondary')
+      LEFT OUTER JOIN addr s     ON sc.cntct_addr_id=s.addr_id;
 
 GRANT ALL ON TABLE api.account TO xtrole;
 COMMENT ON VIEW api.account IS 'Account';

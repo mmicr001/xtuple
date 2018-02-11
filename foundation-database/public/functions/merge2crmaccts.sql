@@ -33,23 +33,23 @@ BEGIN
 
   -- Validate
   IF (pSourceId = pTargetId) THEN
-    RAISE WARNING 'Tried to merge a CRM Account with itself: %. [xtuple: mergeAccounts, -1]', _sourcenum;
+    RAISE WARNING 'Tried to merge a CRM Account with itself: %. [xtuple: merge2crmaccts, -1]', _sourcenum;
     RETURN 0;
   ELSIF (pSourceId IS NULL) THEN
-    RAISE EXCEPTION 'Merge source id cannot be null [xtuple: mergeAccounts, -1]';
+    RAISE EXCEPTION 'Merge source id cannot be null [xtuple: merge2crmaccts, -1]';
   ELSIF NOT(EXISTS(SELECT 1 FROM crmacct WHERE crmacct_id=pSourceId)) THEN
-    RAISE EXCEPTION 'Merge source % not found [xtuple: mergeAccounts, -2, %]',
+    RAISE EXCEPTION 'Merge source % not found [xtuple: merge2crmaccts, -2, %]',
                     _sourcenum, pSourceId;
   ELSIF (pTargetId IS NULL) THEN
-    RAISE EXCEPTION 'Merge target id cannot be null [xtuple: mergeAccounts, -3]';
+    RAISE EXCEPTION 'Merge target id cannot be null [xtuple: merge2crmaccts, -3]';
   ELSIF NOT(EXISTS(SELECT 1 FROM crmacct WHERE crmacct_id=pTargetId)) THEN
-    RAISE EXCEPTION 'Merge target % not found [xtuple: mergeAccounts, -4, %]',
+    RAISE EXCEPTION 'Merge target % not found [xtuple: merge2crmaccts, -4, %]',
                     _targetnum, pTargetId;
   ELSIF NOT(EXISTS(SELECT 1
                      FROM crmacctsel
                     WHERE (crmacctsel_src_crmacct_id=pSourceId)
                       AND (crmacctsel_dest_crmacct_id=pTargetId))) THEN
-    RAISE EXCEPTION 'Source % and target % have not been selected for merging [xtuple: mergeAccounts, -5, %, %]',
+    RAISE EXCEPTION 'Source % and target % have not been selected for merging [xtuple: merge2crmaccts, -5, %, %]',
                     _sourcenum, _targetnum, pSourceId, pTargetId;
   END IF;
 
@@ -88,10 +88,10 @@ BEGIN
   -- Customer takes precedence over Prospect regardless of source/target.
   FOREACH _crmtbl IN ARRAY _crmtbls
   LOOP
-    _paramsary := ARRAY['"tblname": "' || _crmtbl || '"'];
-    _paramsary := array_append(_paramsary, '"colname": "' || REPLACE(_crmtbl, 'info', '') || '"');
-    _paramsary := array_append(_paramsary, '"srcid": ' || pSourceId);
-    _paramsary := array_append(_paramsary, '"destid": ' || pTargetId);
+    _paramsary := ARRAY[ format('"tblname": "%s"', _crmtbl),
+                         format('"colname": "%s"', REPLACE(_crmtbl, 'info', '')),
+                         format('"srcid": %s', pSourceId),
+                         format('"destid": %s', pTargetId)];
     if (_crmtbl IN ('custinfo', 'prospect')) THEN
       _paramsary := array_append(_paramsary, '"custpspct": true');
     END IF;

@@ -2,19 +2,13 @@ CREATE OR REPLACE FUNCTION public.addrmerge(
     pSourceAddrId integer,
     pTargetAddrId integer)
   RETURNS boolean AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _fk		RECORD;
-  _pk   	RECORD;
   _coldesc      RECORD;
-  _mrgcol       BOOLEAN;
   _seq  	INTEGER;
   _col		TEXT;
-  _pkcol  	TEXT;
-  _qry  	TEXT;
-  _colname      TEXT;
-  _multi	BOOLEAN;
 
 BEGIN
   -- Validate
@@ -50,11 +44,10 @@ BEGIN
     AND (attnum=_seq));
 
      -- Merge references
-    _qry := format('UPDATE %I.%I SET %I=%L
+    EXECUTE format('UPDATE %I.%I SET %I=%L
                     WHERE (%I=%L);',
                     _fk.schemaname, _fk.tablename,
                     _col, pTargetAddrId, _col, pSourceAddrId);
-    EXECUTE _qry;
          
   END LOOP;
 
@@ -92,20 +85,15 @@ BEGIN
                      'addr_lat', 'addr_lon', 'addr_accuracy')
   LOOP
 
-    -- if we're supposed to merge this column at all
-    EXECUTE format('SELECT addrsel_mrg_%I FROM addrsel
+    IF (format('SELECT addrsel_mrg_%I FROM addrsel
                     WHERE (addrsel_addr_id=%L)', 
-                    _coldesc.attname, pSourceAddrId)
-            INTO _mrgcol;
-
-    IF (_mrgcol) THEN
-      _colname := _coldesc.attname;
+                    _coldesc.attname, pSourceAddrId)) THEN
 
       EXECUTE format('UPDATE addr dest SET %I=src.%I
                       FROM addr src
                       WHERE ((dest.addr_id=%L)
                       AND (src.addr_id=%L));',
-                      _colname, _colname,
+                      _coldesc.attname, _coldesc.attname,
                       pTargetAddrId, pSourceAddrId);
     END IF;
   END LOOP;
