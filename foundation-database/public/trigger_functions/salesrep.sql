@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _salesrepBeforeTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -23,18 +23,27 @@ BEGIN
 
     NEW.salesrep_number = UPPER(NEW.salesrep_number);
 
-    -- deprecated column salesrep_emp_id
-    -- TODO: will this prevent breaking the crmacct-emp relationship?
-    IF (TG_OP = 'UPDATE') THEN
-      SELECT crmacct_emp_id INTO NEW.salesrep_emp_id
-        FROM crmacct
-       WHERE crmacct_salesrep_id = NEW.salesrep_id;
+    IF (TG_OP = 'INSERT') THEN
+      LOOP
+        UPDATE crmacct SET crmacct_name=NEW.salesrep_name
+         WHERE crmacct_number=NEW.salesrep_number
+         RETURNING crmacct_id INTO NEW.salesrep_crmacct_id;
+        IF (FOUND) THEN
+          EXIT;
+        END IF;
+        BEGIN
+          INSERT INTO crmacct(crmacct_number, crmacct_name, crmacct_active, crmacct_type)
+          VALUES (NEW.salesrep_number, NEW.salesrep_name, NEW.salesrep_active, 'I')
+          RETURNING crmacct_id INTO NEW.salesrep_crmacct_id;
+
+          EXIT;
+        EXCEPTION WHEN unique_violation THEN
+              -- do nothing, and loop to try the UPDATE again
+        END;
+      END LOOP;
     END IF;
 
-  ELSIF (TG_OP = 'DELETE') THEN
-    UPDATE crmacct SET crmacct_salesrep_id = NULL
-     WHERE crmacct_salesrep_id = OLD.salesrep_id;
-    RETURN OLD;
+    -- TODO: default characteristic assignments?
   END IF;
 
   -- Timestamps
@@ -53,41 +62,17 @@ CREATE TRIGGER salesrepBeforeTrigger BEFORE INSERT OR UPDATE OR DELETE ON salesr
        FOR EACH ROW EXECUTE PROCEDURE _salesrepBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _salesrepAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-
 BEGIN
 
-  IF (TG_OP = 'INSERT') THEN
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
-    LOOP
-      UPDATE crmacct SET crmacct_salesrep_id=NEW.salesrep_id,
-                         crmacct_name=NEW.salesrep_name
-      WHERE crmacct_number=NEW.salesrep_number;
-      IF (FOUND) THEN
-        EXIT;
-      END IF;
-      BEGIN
-        INSERT INTO crmacct(crmacct_number,      crmacct_name,      crmacct_active,
-                            crmacct_type,        crmacct_salesrep_id
-                  ) VALUES (NEW.salesrep_number, NEW.salesrep_name, NEW.salesrep_active,
-                            'I',                 NEW.salesrep_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
-            -- do nothing, and loop to try the UPDATE again
-      END;
-    END LOOP;
-
-    -- TODO: default characteristic assignments?
-
-  ELSIF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.salesrep_crmacct_id=NEW.salesrep_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.salesrep_number
-    WHERE ((crmacct_salesrep_id=NEW.salesrep_id)
+    WHERE ((crmacct_id=NEW.salesrep_crmacct_id)
       AND  (crmacct_number!=NEW.salesrep_number));
 
     UPDATE crmacct SET crmacct_name = NEW.salesrep_name
-    WHERE ((crmacct_salesrep_id=NEW.salesrep_id)
+    WHERE ((crmacct_id=NEW.salesrep_crmacct_id)
       AND  (crmacct_name!=NEW.salesrep_name));
   END IF;
 

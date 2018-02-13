@@ -66,6 +66,13 @@
         }
       },
       {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "cust_crmacct_id"
+        }
+      },
+      {
         "name": "customerType",
         "toOne": {
           "type": "CustomerType",
@@ -1766,6 +1773,14 @@
         "attr": {
           "type": "Boolean",
           "column": "cust_active"
+        }
+      },
+      {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "cust_crmacct_id",
+          "required": true
         }
       },
       {

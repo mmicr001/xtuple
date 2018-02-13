@@ -11,12 +11,9 @@ SELECT dropIfExists('VIEW', 'contact', 'api');
     cntct_last_name AS last,
     cntct_suffix AS suffix,
     cntct_initials AS initials,
-    crmacct_number AS crm_account,
     cntct_active AS active,
     cntct_title AS job_title,
-    cntct_phone AS voice,
-    cntct_phone2 AS alternate,
-    cntct_fax AS fax,
+    phoneJson(cntct_id) AS phones,
     cntct_email AS email,
     cntct_webaddr AS web,
     ''::TEXT AS contact_change, 
@@ -30,10 +27,9 @@ SELECT dropIfExists('VIEW', 'contact', 'api');
     addr_country AS country,
     cntct_notes AS notes, 
     ''::TEXT AS address_change
-  FROM
-    cntct
-      LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
-      LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id);
+  FROM cntct
+  JOIN addr ON (cntct_addr_id=addr_id)
+;
 
 GRANT ALL ON TABLE api.contact TO xtrole;
 COMMENT ON VIEW api.contact IS 'Contact';
@@ -46,7 +42,6 @@ CREATE OR REPLACE RULE "_INSERT" AS
 SELECT saveCntct(
 	  NULL,
           NEW.contact_number,
-          getCrmAcctid(NEW.crm_account),
           saveAddr(
             CASE WHEN NOT EXISTS (SELECT addr_id FROM addr WHERE addr_number = NEW.address_number) THEN NULL ELSE getaddrid(new.address_number) END,
             NEW.address_number,
@@ -65,9 +60,7 @@ SELECT saveCntct(
           NEW.suffix,
           NEW.initials,
           COALESCE(NEW.active,TRUE),
-          NEW.voice,
-          NEW.alternate,
-          NEW.fax,
+          NEW.phones,
           NEW.email,
           NEW.web,
           NEW.notes,
@@ -81,7 +74,6 @@ CREATE OR REPLACE RULE "_UPDATE" AS
 SELECT saveCntct(
           getCntctId(NEW.contact_number),
           NEW.contact_number,
-          getCrmAcctid(NEW.crm_account),
           saveAddr(
             getAddrId(NEW.address_number),
             NEW.address_number,
@@ -100,9 +92,7 @@ SELECT saveCntct(
           NEW.suffix,
           NEW.initials,
           NEW.active,
-          NEW.voice,
-          NEW.alternate,
-          NEW.fax,
+          NEW.phones,
           NEW.email,
           NEW.web,
           NEW.notes,

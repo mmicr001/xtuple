@@ -107,7 +107,7 @@ BEGIN
       AND checkhead_recip_id=vend_id
       AND vend_ach_enabled)
     JOIN curr_symbol ON (checkhead_curr_id=curr_id)
-    LEFT OUTER JOIN crmacct ON (crmacct_vend_id=vend_id)
+    LEFT OUTER JOIN crmacct ON (crmacct_id=vend_crmacct_id)
     WHERE ((checkhead_bankaccnt_id=pbankaccntid)
       AND (checkhead_amount > 0)
       AND (checkhead_id=pcheckheadid OR pcheckheadid IS NULL)

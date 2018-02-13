@@ -739,7 +739,7 @@ select createDoctype(42, --pDocAssNum
 select createDoctype(NULL, --pDocAssNum
                      'PSPCT', --pType
                      'PSPCT', --pDocAss
-                     '', --pCharAss
+                     'PSPCT', --pCharAss
                      'Prospect', --pFull
                      'prospect', --pTable
                      'prospect_id', --pKey
@@ -748,7 +748,7 @@ select createDoctype(NULL, --pDocAssNum
                      'firstline(prospect_comments)', --pDesc
                      '', --pWidget
                      '', --pJoin
-                     '', --pParam
+                     'prospect_id', --pParam
                      '', --pUi
                      '', --pPriv
                      'CRM',             -- pModule

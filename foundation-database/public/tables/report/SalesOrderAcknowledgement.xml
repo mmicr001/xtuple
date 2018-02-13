@@ -30,7 +30,7 @@
        cohead_billtoaddress2,
        cohead_billtoaddress3,
        (cohead_billtocity || '  ' || cohead_billtostate || '  ' || cohead_billtozipcode) AS billtocitystatezip,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        cohead_shiptoname,
        cohead_shiptoaddress1,
        cohead_shiptoaddress2,

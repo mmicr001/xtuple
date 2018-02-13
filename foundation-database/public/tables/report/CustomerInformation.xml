@@ -3,6 +3,12 @@
  <title>Customer Information</title>
  <name>CustomerInformation</name>
  <description></description>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
  <size>Letter</size>
  <portrait/>
  <topmargin>50</topmargin>
@@ -15,12 +21,17 @@
        ba.addr_line1 AS cust_address1, ba.addr_line2 AS cust_address2, ba.addr_line3 AS cust_address3,
        ba.addr_city AS cust_city, ba.addr_state AS cust_state, ba.addr_postalcode AS cust_zipcode,
        (ba.addr_city || ', ' || ba.addr_state || ' ' || ba.addr_postalcode) AS citystatezip,
-       trim(bc.cntct_first_name || ' ' || bc.cntct_last_name) AS cust_contact, bc.cntct_phone AS cust_phone, bc.cntct_fax AS cust_fax, bc.cntct_email AS cust_email,
+       trim(bc.cntct_first_name || ' ' || bc.cntct_last_name) AS cust_contact, 
+       getcontactphone(bc.cntct_id, 'Office') AS cust_phone, 
+       getcontactphone(bc.cntct_id, 'Fax') AS cust_fax, 
+       bc.cntct_email AS cust_email,
        ca.addr_line1 AS cust_corraddress1, ca.addr_line2 AS cust_corraddress2, ca.addr_line3 AS cust_corraddress3,
        ca.addr_city AS cust_corrcity, ca.addr_state AS cust_corrstate, ca.addr_postalcode AS cust_corrzipcode,
        (ca.addr_city || ', ' || ca.addr_state || ' ' || ca.addr_postalcode) AS corrcitystatezip,
-       trim(cc.cntct_first_name || ' ' || cc.cntct_last_name) AS cust_corrcontact, cc.cntct_phone AS cust_corrphone,
-       cc.cntct_fax AS cust_corrfax, cc.cntct_email AS cust_corremail,
+       trim(cc.cntct_first_name || ' ' || cc.cntct_last_name) AS cust_corrcontact, 
+       getcontactphone(cc.cntct_id, 'Office') AS cust_corrphone,
+       getcontactphone(cc.cntct_id, 'Fax') AS cust_corrfax, 
+       cc.cntct_email AS cust_corremail,
        CASE WHEN (cust_creditstatus='G') THEN 'In Good Standing'
             WHEN (cust_creditstatus='W') THEN 'On Credit Warning'
             WHEN (cust_creditstatus='H') THEN 'On Credit Hold'
@@ -32,37 +43,37 @@
  LEFT OUTER JOIN addr ca ON (cc.cntct_addr_id=ca.addr_id)
  LEFT OUTER JOIN cntct bc ON (cust_cntct_id=bc.cntct_id)
  LEFT OUTER JOIN addr ba ON (bc.cntct_addr_id=ba.addr_id)
- WHERE (cust_id=&lt;? value(&quot;cust_id&quot;) ?>);</sql>
+ WHERE (cust_id=&lt;? value("cust_id") ?>);</sql>
  </querysource>
  <querysource>
   <name>firstlastorderdate</name>
   <sql>SELECT formatDate(MIN(cohist_invcdate)) AS firstdate,
        formatDate(MAX(cohist_invcdate)) AS lastdate
    FROM cohist
-WHERE (cohist_cust_id=&lt;? value(&quot;cust_id&quot;) ?>);</sql>
+WHERE (cohist_cust_id=&lt;? value("cust_id") ?>);</sql>
  </querysource>
  <querysource>
   <name>lysales</name>
-  <sql>SELECT formatMoney(COALESCE(SUM(round(cohist_qtyshipped * cohist_unitprice,2)), 0)) AS lysales FROM cohist WHERE ( (cohist_invcdate BETWEEN (DATE_TRUNC('year', CURRENT_TIMESTAMP) - INTERVAL '1 year') AND                                 (DATE_TRUNC('year', CURRENT_TIMESTAMP) - INTERVAL '1 day')) AND (cohist_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) );</sql>
+  <sql>SELECT formatMoney(COALESCE(SUM(round(cohist_qtyshipped * cohist_unitprice,2)), 0)) AS lysales FROM cohist WHERE ( (cohist_invcdate BETWEEN (DATE_TRUNC('year', CURRENT_TIMESTAMP) - INTERVAL '1 year') AND                                 (DATE_TRUNC('year', CURRENT_TIMESTAMP) - INTERVAL '1 day')) AND (cohist_cust_id=&lt;? value("cust_id") ?>) );</sql>
  </querysource>
  <querysource>
   <name>ytdsales</name>
   <sql>SELECT formatExtPrice(SUM(round(cohist_qtyshipped * cohist_unitprice,2))) AS ytdsales
   FROM cohist
  WHERE ((cohist_invcdate>=DATE_TRUNC('year', CURRENT_TIMESTAMP))
-   AND (cohist_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) );</sql>
+   AND (cohist_cust_id=&lt;? value("cust_id") ?>) );</sql>
  </querysource>
  <querysource>
   <name>backlog</name>
-  <sql>SELECT formatMoney( COALESCE( SUM( (noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturned) * coitem_qty_invuomratio) * (coitem_price / coitem_price_invuomratio) ), 0 ) ) AS backlog FROM cohead, coitem, itemsite, item WHERE ( (coitem_cohead_id=cohead_id) AND (coitem_itemsite_id=itemsite_id) AND (itemsite_item_id=item_id) AND (coitem_status='O') AND (cohead_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) );</sql>
+  <sql>SELECT formatMoney( COALESCE( SUM( (noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturned) * coitem_qty_invuomratio) * (coitem_price / coitem_price_invuomratio) ), 0 ) ) AS backlog FROM cohead, coitem, itemsite, item WHERE ( (coitem_cohead_id=cohead_id) AND (coitem_itemsite_id=itemsite_id) AND (itemsite_item_id=item_id) AND (coitem_status='O') AND (cohead_cust_id=&lt;? value("cust_id") ?>) );</sql>
  </querysource>
  <querysource>
   <name>OpenBalance</name>
-  <sql>SELECT formatMoney( COALESCE( SUM( CASE WHEN (aropen_doctype IN ('I', 'D')) THEN (aropen_amount - aropen_paid)                                       ELSE ((aropen_amount - aropen_paid) * -1)                                   END ), 0 ) ) AS f_balance FROM aropen WHERE ( (aropen_open) AND (aropen_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) );</sql>
+  <sql>SELECT formatMoney( COALESCE( SUM( CASE WHEN (aropen_doctype IN ('I', 'D')) THEN (aropen_amount - aropen_paid)                                       ELSE ((aropen_amount - aropen_paid) * -1)                                   END ), 0 ) ) AS f_balance FROM aropen WHERE ( (aropen_open) AND (aropen_cust_id=&lt;? value("cust_id") ?>) );</sql>
  </querysource>
  <querysource>
   <name>LateBalance</name>
-  <sql>SELECT formatMoney( noNeg( COALESCE( SUM( CASE WHEN (aropen_doctype IN ('I', 'D')) THEN (aropen_amount - aropen_paid)                                      ELSE ((aropen_amount - aropen_paid) * -1)                                   END ), 0 ) ) ) AS f_balance FROM aropen WHERE ( (aropen_open) AND (aropen_duedate &lt; CURRENT_DATE) AND (aropen_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) );
+  <sql>SELECT formatMoney( noNeg( COALESCE( SUM( CASE WHEN (aropen_doctype IN ('I', 'D')) THEN (aropen_amount - aropen_paid)                                      ELSE ((aropen_amount - aropen_paid) * -1)                                   END ), 0 ) ) ) AS f_balance FROM aropen WHERE ( (aropen_open) AND (aropen_duedate &lt; CURRENT_DATE) AND (aropen_cust_id=&lt;? value("cust_id") ?>) );
 </sql>
  </querysource>
  <querysource>
@@ -74,7 +85,7 @@ WHERE (cohist_cust_id=&lt;? value(&quot;cust_id&quot;) ?>);</sql>
        comment_text
   FROM comment
  WHERE ( (comment_source='C')
-   AND (comment_source_id=&lt;? value(&quot;cust_id&quot;) ?>) )
+   AND (comment_source_id=&lt;? value("cust_id") ?>) )
 ORDER BY comment_date;</sql>
  </querysource>
  <querysource>
@@ -95,7 +106,7 @@ ORDER BY comment_date;</sql>
        formatMoney(aropen_amount) AS f_amount,
        formatMoney((aropen_amount - aropen_paid)) AS f_balance
 FROM aropen
-WHERE (aropen_cust_id=&lt;? value(&quot;cust_id&quot;) ?>)
+WHERE (aropen_cust_id=&lt;? value("cust_id") ?>)
 
 UNION
 SELECT aropen_cust_id AS cust_id,
@@ -117,8 +128,8 @@ FROM arapply, aropen
 WHERE ( (arapply_target_doctype IN ('I', 'D'))
  AND (arapply_target_doctype=aropen_doctype)
  AND (arapply_target_docnumber=aropen_docnumber)
- AND (arapply_cust_id=&lt;? value(&quot;cust_id&quot;) ?>)
- AND (aropen_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) )
+ AND (arapply_cust_id=&lt;? value("cust_id") ?>)
+ AND (aropen_cust_id=&lt;? value("cust_id") ?>) )
 
 UNION
 SELECT aropen_cust_id AS cust_id,
@@ -138,8 +149,8 @@ FROM arapply, aropen
 WHERE ( (arapply_source_doctype IN ('K', 'C'))
  AND (arapply_source_doctype=aropen_doctype)
  AND (arapply_source_docnumber=aropen_docnumber)
- AND (arapply_cust_id=&lt;? value(&quot;cust_id&quot;) ?>)
- AND (aropen_cust_id=&lt;? value(&quot;cust_id&quot;) ?>) )
+ AND (arapply_cust_id=&lt;? value("cust_id") ?>)
+ AND (aropen_cust_id=&lt;? value("cust_id") ?>) )
 
 ORDER BY sortnumber, applyid;</sql>
  </querysource>

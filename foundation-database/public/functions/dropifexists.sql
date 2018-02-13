@@ -1,27 +1,11 @@
-CREATE OR REPLACE FUNCTION dropIfExists(TEXT, TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
-BEGIN
-  RETURN dropIfExists($1, $2, 'public');
-END;
-$$ LANGUAGE 'plpgsql';
+DROP FUNCTION IF EXISTS dropIfExists(TEXT, TEXT);
+DROP FUNCTION IF EXISTS dropIfExists(TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS dropIfExists(TEXT, TEXT, TEXT, BOOLEAN);
 
-CREATE OR REPLACE FUNCTION dropIfExists(TEXT, TEXT, TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
-BEGIN
-  RETURN dropIfExists($1, $2, $3, false);
-END;
-$$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION dropIfExists(TEXT, TEXT, TEXT, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+CREATE OR REPLACE FUNCTION dropIfExists(pType TEXT, pObject TEXT, pSchema TEXT DEFAULT 'public', pCascade BOOLEAN DEFAULT false) RETURNS INTEGER AS $$
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  pType         ALIAS FOR $1;
-  pObject       ALIAS FOR $2;
-  pSchema       ALIAS FOR $3;
-  pCascade      ALIAS FOR $4;
   _table	TEXT;
   _query	TEXT;
 BEGIN
@@ -86,6 +70,9 @@ BEGIN
   ELSIF (UPPER(pType) = 'FUNCTION') THEN
     _query = 'DROP FUNCTION ' || (LOWER(pSchema)) || '.' ||
                                    (LOWER(pObject));
+    IF (pCascade) THEN
+      _query = _query || ' CASCADE';
+    END IF;
     BEGIN
       EXECUTE _query;
     EXCEPTION WHEN undefined_object OR undefined_function OR invalid_schema_name THEN
@@ -154,7 +141,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION dropIfExists(TEXT, TEXT, TEXT, TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pType         ALIAS FOR $1;

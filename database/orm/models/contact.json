@@ -3,7 +3,7 @@
     "context": "xtuple",
     "nameSpace": "XM",
     "type": "Contact",
-    "table": "cntct",
+    "table": "xt.cntctinfo",
     "idSequenceName": "cntct_cntct_id_seq",
     "isRest": true,
     "lockable": true,
@@ -115,21 +115,21 @@
         "name": "phone",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone"
+          "column": "contact_phone"
         }
       },
       {
         "name": "alternate",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone2"
+          "column": "contact_phone2"
         }
       },
       {
         "name": "fax",
         "attr": {
           "type": "Phone",
-          "column": "cntct_fax"
+          "column": "contact_fax"
         }
       },
       {
@@ -148,10 +148,9 @@
       },
       {
         "name": "account",
-        "toOne": {
-          "isNested": true,
-          "type": "AccountRelation",
-          "column": "cntct_crmacct_id"
+        "attr": {
+          "type": "Number",
+          "column": "contact_crmacct"
         }
       },
       {
@@ -230,7 +229,7 @@
     "context": "xtuple",
     "nameSpace": "XM",
     "type": "ContactInfo",
-    "table": "cntct",
+    "table": "xt.cntctinfo",
     "isRest": true,
     "idSequenceName": "cntct_cntct_id_seq",
     "orderSequence": "ContactNumber",
@@ -330,21 +329,21 @@
         "name": "phone",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone"
+          "column": "contact_phone"
         }
       },
       {
         "name": "alternate",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone2"
+          "column": "contact_phone2"
         }
       },
       {
         "name": "fax",
         "attr": {
           "type": "Phone",
-          "column": "cntct_fax"
+          "column": "contact_fax"
         }
       },
       {
@@ -747,21 +746,21 @@
         "name": "phone",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone"
+          "column": "contact_phone"
         }
       },
       {
         "name": "alternate",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone2"
+          "column": "contact_phone2"
         }
       },
       {
         "name": "fax",
         "attr": {
           "type": "Phone",
-          "column": "cntct_fax"
+          "column": "contact_fax"
         }
       },
       {
@@ -800,7 +799,7 @@
         "toOne": {
           "isNested": true,
           "type": "AccountRelation",
-          "column": "cntct_crmacct_id"
+          "column": "contact_crmacct"
         }
       },
       {
@@ -925,21 +924,21 @@
         "name": "phone",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone"
+          "column": "contact_phone"
         }
       },
       {
         "name": "alternate",
         "attr": {
           "type": "Phone",
-          "column": "cntct_phone2"
+          "column": "contact_phone2"
         }
       },
       {
         "name": "fax",
         "attr": {
           "type": "Phone",
-          "column": "cntct_fax"
+          "column": "contact_fax"
         }
       },
       {

@@ -27,6 +27,8 @@ SELECT
 
 SELECT
   xt.add_constraint('arapply', 'arapply_pkey', 'PRIMARY KEY (arapply_id)', 'public'),
+  xt.add_constraint('arapply', 'arapply_cust_id_fk',
+                    'FOREIGN KEY (arapply_cust_id) REFERENCES custinfo(cust_id)', 'public'),
   xt.add_constraint('arapply', 'arapply_to_curr_symbol',
                     'FOREIGN KEY (arapply_curr_id) REFERENCES curr_symbol(curr_id)', 'public');
 

@@ -101,6 +101,13 @@
         }
       },
       {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "taxauth_crmacct_id"
+        }
+      },
+      {
         "name": "externalReference",
         "attr": {
           "type": "String",
@@ -137,8 +144,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_taxauth_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "crmacct"
           }
         ],
         "properties": [

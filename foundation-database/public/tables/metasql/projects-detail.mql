@@ -1,7 +1,7 @@
 -- Group: projects
 -- Name:  detail
 -- Notes:
---        Copyright (c) 1999-2013 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 --
 --        xTuple version 4.2.0 - Modified to significantly amend the display of this screen and its filters.
@@ -55,7 +55,9 @@ SELECT prj_id AS id,
   FROM prj()
   LEFT OUTER JOIN prjtype ON (prj_prjtype_id=prjtype_id)
   LEFT OUTER JOIN crmacct ON (prj_crmacct_id=crmacct_id)
-  LEFT OUTER JOIN cntct ON (crmacct_cntct_id_1=cntct_id)
+  LEFT OUTER JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id
+                                  AND crmacctcntctass_crmrole_id = getcrmroleid('Primary'))
+  LEFT OUTER JOIN cntct ON (crmacctcntctass_cntct_id=cntct_id)
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
 
  WHERE (1=1 )

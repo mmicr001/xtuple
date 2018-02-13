@@ -3,7 +3,7 @@
  <title>Picking List</title>
  <name>PickingListSONoClosedLines</name>
  <description>Omits Closed Lines -- With Barcodes formatitemsitebarcode(itemsite_id) -- SO # barcoded formatsobarcode(cohead_id) -- With Logo, place logo graphic in images DB with name "logo"</description>
- <parameter default="3203" active="true" listtype="static" type="string" name="sohead_id">
+ <parameter type="string" active="true" name="sohead_id" listtype="static" default="3203">
   <description></description>
  </parameter>
  <grid>
@@ -38,7 +38,7 @@
        cohead_billtoaddress2,
        cohead_billtoaddress3,
        (cohead_billtocity || '  ' || cohead_billtostate || '  ' || cohead_billtozipcode) AS billtocitystatezip,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        cohead_shiptoname,
        cohead_shiptoaddress1,
        cohead_shiptoaddress2,

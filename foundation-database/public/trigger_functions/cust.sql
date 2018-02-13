@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _custTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters') OR
@@ -33,6 +33,34 @@ BEGIN
 
   NEW.cust_number := UPPER(NEW.cust_number);
 
+  IF (TG_OP = 'INSERT') THEN
+    LOOP
+      UPDATE crmacct SET crmacct_name=NEW.cust_name
+      WHERE crmacct_number=NEW.cust_number
+      RETURNING crmacct_id INTO NEW.cust_crmacct_id;
+      IF (FOUND) THEN
+        EXIT;
+      END IF;
+      BEGIN
+        INSERT INTO crmacct(crmacct_number,  crmacct_name,    crmacct_active, crmacct_type) 
+                    VALUES (NEW.cust_number, NEW.cust_name,   NEW.cust_active, 'O')
+                  RETURNING crmacct_id INTO NEW.cust_crmacct_id;
+
+        INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, 
+                                     crmacctcntctass_crmrole_id)
+        SELECT NEW.cust_crmacct_id, NEW.cust_cntct_id, getcrmroleid('Billing')
+          WHERE  NEW.cust_cntct_id IS NOT NULL
+        UNION
+        SELECT NEW.cust_crmacct_id, NEW.cust_corrcntct_id, getcrmroleid('Correspondence')
+          WHERE NEW.cust_corrcntct_id IS NOT NULL;
+
+        EXIT;
+      EXCEPTION WHEN unique_violation THEN
+            -- do nothing, and loop to try the UPDATE again
+      END;
+    END LOOP;
+  END IF;
+
   -- Timestamps
   IF (TG_OP = 'INSERT') THEN
     NEW.cust_created := now();
@@ -52,37 +80,14 @@ CREATE TRIGGER custTrigger
   EXECUTE PROCEDURE _custTrigger();
 
 CREATE OR REPLACE FUNCTION _custAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _whsId      INTEGER := -1;
-
+  _crmacctid  INTEGER;
 BEGIN
 
   IF (TG_OP = 'INSERT') THEN
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
-    LOOP
-      UPDATE crmacct SET crmacct_cust_id=NEW.cust_id,
-                         crmacct_name=NEW.cust_name,
-                         crmacct_prospect_id=NULL
-      WHERE crmacct_number=NEW.cust_number;
-      IF (FOUND) THEN
-        DELETE FROM prospect WHERE prospect_id=NEW.cust_id;
-        EXIT;
-      END IF;
-      BEGIN
-        INSERT INTO crmacct(crmacct_number,  crmacct_name,    crmacct_active,
-                            crmacct_type,    crmacct_cust_id, crmacct_cntct_id_1,
-                            crmacct_cntct_id_2
-                  ) VALUES (NEW.cust_number, NEW.cust_name,   NEW.cust_active,
-                            'O',             NEW.cust_id,     NEW.cust_cntct_id,
-                            NEW.cust_corrcntct_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
-            -- do nothing, and loop to try the UPDATE again
-      END;
-    END LOOP;
-
     PERFORM updateCharAssignment('C', NEW.cust_id, char_id, charass_value)
        FROM custtype
        JOIN charass ON (custtype_id=charass_target_id AND charass_target_type='CT')
@@ -91,13 +96,13 @@ BEGIN
           AND (custtype_char)
           AND (charass_default));
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND OLD.cust_crmacct_id=NEW.cust_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.cust_number
-    WHERE ((crmacct_cust_id=NEW.cust_id)
+    WHERE ((crmacct_id=NEW.cust_crmacct_id)
       AND  (crmacct_number!=NEW.cust_number));
 
     UPDATE crmacct SET crmacct_name = NEW.cust_name
-    WHERE ((crmacct_cust_id=NEW.cust_id)
+    WHERE ((crmacct_id=NEW.cust_crmacct_id)
       AND  (crmacct_name!=NEW.cust_name));
   END IF;
 
@@ -192,15 +197,12 @@ CREATE TRIGGER custAfterTrigger
   EXECUTE PROCEDURE _custAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _custinfoBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Customers.';
   END IF;
-
-  UPDATE crmacct SET crmacct_cust_id = NULL
-   WHERE crmacct_cust_id = OLD.cust_id;
 
   RETURN OLD;
 END;
@@ -214,7 +216,7 @@ CREATE TRIGGER custinfoBeforeDeleteTrigger
   EXECUTE PROCEDURE _custinfoBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _custinfoAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   -- handle transitory state when converting customer to prospect

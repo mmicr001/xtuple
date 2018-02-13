@@ -18,6 +18,8 @@ SELECT
                     'FOREIGN KEY (cashrcptmisc_accnt_id) REFERENCES accnt(accnt_id)', 'public'),
   xt.add_constraint('cashrcptmisc', 'cashrcptmisc_cashrcpt_cashrcpt_id_fkey',
                     'FOREIGN KEY (cashrcptmisc_cashrcpt_id) REFERENCES cashrcpt(cashrcpt_id)', 'public'),
+  xt.add_constraint('cashrcptmisc', 'cashrcptmisc_cust_id_fk', 
+                    'FOREIGN KEY (cashrcptmisc_cust_id) REFERENCES custinfo(cust_id)', 'public'),
   xt.add_constraint('cashrcptmisc', 'cashrcptmisc_tax_id_fkey',
                     'FOREIGN KEY (cashrcptmisc_tax_id) REFERENCES tax (tax_id)
                      MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public');

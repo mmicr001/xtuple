@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _vendTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -29,6 +29,33 @@ BEGIN
 
   NEW.vend_number := UPPER(NEW.vend_number);
 
+  IF (TG_OP = 'INSERT') THEN
+    LOOP
+      UPDATE crmacct SET crmacct_name=NEW.vend_name
+       WHERE crmacct_number=NEW.vend_number
+      RETURNING crmacct_id INTO NEW.vend_crmacct_id;
+      IF (FOUND) THEN
+        EXIT;
+      END IF;
+      BEGIN
+        INSERT INTO crmacct(crmacct_number, crmacct_name, crmacct_active, crmacct_type)
+          VALUES (NEW.vend_number, NEW.vend_name, NEW.vend_active, 'O')
+        RETURNING crmacct_id INTO NEW.vend_crmacct_id;
+
+        INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, 
+                                     crmacctcntctass_crmrole_id)
+        SELECT NEW.vend_crmacct_id, NEW.vend_cntct1_id, getcrmroleid('Primary')
+          WHERE NEW.vend_cntct1_id IS NOT NULL
+        UNION
+        SELECT NEW.vend_crmacct_id, NEW.vend_cntct2_id, getcrmroleid('Secondary')
+          WHERE NEW.vend_cntct2_id IS NOT NULL;
+        EXIT;
+      EXCEPTION WHEN unique_violation THEN
+            -- do nothing, and loop to try the UPDATE again
+      END;
+    END LOOP;
+  END IF;
+
   -- Timestamps
   IF (TG_OP = 'INSERT') THEN
     NEW.vend_created := now();
@@ -48,44 +75,21 @@ CREATE TRIGGER vendTrigger
   EXECUTE PROCEDURE _vendTrigger();
 
 CREATE OR REPLACE FUNCTION _vendAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cmnttypeid   INTEGER;
-
 BEGIN
 
-  IF (TG_OP = 'INSERT') THEN
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
-    LOOP
-      UPDATE crmacct SET crmacct_vend_id=NEW.vend_id,
-                         crmacct_name=NEW.vend_name
-       WHERE crmacct_number=NEW.vend_number;
-      IF (FOUND) THEN
-        EXIT;
-      END IF;
-      BEGIN
-        INSERT INTO crmacct(crmacct_number,     crmacct_name,    crmacct_active,
-                            crmacct_type,       crmacct_vend_id,
-                            crmacct_cntct_id_1, crmacct_cntct_id_2
-                  ) VALUES (NEW.vend_number,    NEW.vend_name,   NEW.vend_active,
-                            'O',                NEW.vend_id,
-                            NEW.vend_cntct1_id, NEW.vend_cntct2_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
-            -- do nothing, and loop to try the UPDATE again
-      END;
-    END LOOP;
+  /* TODO: default characteristic assignments based on vendgrp? */
 
-    /* TODO: default characteristic assignments based on vendgrp? */
-
-  ELSIF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.vend_crmacct_id=NEW.vend_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.vend_number
-    WHERE ((crmacct_vend_id=NEW.vend_id)
+    WHERE ((crmacct_id=NEW.vend_crmacct_id)
       AND  (crmacct_number!=NEW.vend_number));
 
     UPDATE crmacct SET crmacct_name = NEW.vend_name
-    WHERE ((crmacct_vend_id=NEW.vend_id)
+    WHERE ((crmacct_id=NEW.vend_crmacct_id)
       AND  (crmacct_name!=NEW.vend_name));
 
   END IF;
@@ -126,7 +130,7 @@ CREATE TRIGGER vendAfterTrigger
   EXECUTE PROCEDURE _vendAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _vendinfoBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainVendors')) THEN
@@ -145,8 +149,6 @@ BEGIN
   DELETE FROM docass WHERE docass_source_id = OLD.vend_id AND docass_source_type = 'V';
   DELETE FROM docass WHERE docass_target_id = OLD.vend_id AND docass_target_type = 'V';
 
-  UPDATE crmacct SET crmacct_vend_id = NULL
-   WHERE crmacct_vend_id = OLD.vend_id;
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -159,7 +161,7 @@ CREATE TRIGGER vendinfoBeforeDeleteTrigger
   EXECUTE PROCEDURE _vendinfoBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _vendinfoAfterDeleteTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF EXISTS(SELECT 1

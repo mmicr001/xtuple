@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION copyquotetocustomer(pQuheadid integer, pCustomerid integer, pSchedDate date)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2016 by OpenMFG LLC  d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC  d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _isCustomer BOOLEAN;
@@ -21,16 +21,22 @@ BEGIN
 
   SELECT * INTO _b FROM (
     SELECT cust_name as name,  addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country,
-       cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_fax, cntct_email    
+       cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, 
+       getcontactphone(cntct_id, 'Office') AS contact_phone, 
+       getcontactphone(cntct_id, 'Fax') AS contact_fax, 
+       cntct_title, cntct_email 
       FROM custinfo 
       LEFT JOIN cntct ON (cust_cntct_id = cntct_id)
       LEFT JOIN addr ON (cntct_addr_id = addr_id)
       WHERE cust_id = pCustomerid
     UNION
     SELECT prospect_name AS name,  addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country,
-        cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_fax, cntct_email
+        cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_last_name, cntct_suffix, 
+        getcontactphone(cntct_id, 'Office') AS contact_phone, 
+        getcontactphone(cntct_id, 'Fax') AS contact_fax, 
+        cntct_title, cntct_email
       FROM prospect
-      LEFT JOIN cntct ON (prospect_cntct_id = cntct_id)
+      LEFT JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id))
       LEFT JOIN addr ON (cntct_addr_id = addr_id)  
       WHERE prospect_id = pCustomerid ) data;
 
@@ -43,16 +49,11 @@ BEGIN
     quhead_quotedate,  quhead_packdate,  quhead_fob,
     quhead_warehous_id,  quhead_terms_id,  quhead_salesrep_id,
     quhead_custponumber,  quhead_shipvia,
-    quhead_shipto_id,  quhead_shiptoname,  quhead_shiptoaddress1,  quhead_shiptoaddress2,  quhead_shiptoaddress3,
-    quhead_shiptocity,  quhead_shiptostate,  quhead_shiptozipcode,  quhead_shiptophone,  quhead_shiptocountry,
-    quhead_billtoname,  quhead_billtoaddress1,  quhead_billtoaddress2,  quhead_billtoaddress3,
-    quhead_billtocity,  quhead_billtostate,  quhead_billtozip,
+    quhead_shipto_id,  
     quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
     quhead_ordercomments,  quhead_shipcomments,
     quhead_imported,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  quhead_status,
-    quhead_shipto_cntct_id,  quhead_shipto_cntct_honorific,  quhead_shipto_cntct_first_name,  quhead_shipto_cntct_middle,
-    quhead_shipto_cntct_last_name,  quhead_shipto_cntct_suffix,  quhead_shipto_cntct_phone,  quhead_shipto_cntct_title,
-    quhead_shipto_cntct_fax,  quhead_shipto_cntct_email,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
+    quhead_shipto_cntct_id,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
     quhead_billto_cntct_first_name,  quhead_billto_cntct_middle,  quhead_billto_cntct_last_name,  quhead_billto_cntct_suffix,
     quhead_billto_cntct_phone,  quhead_billto_cntct_title,  quhead_billto_cntct_fax,  quhead_billto_cntct_email )
   SELECT _quheadid,  _qunumber,
@@ -62,38 +63,12 @@ BEGIN
          quhead_warehous_id,  quhead_terms_id,  quhead_salesrep_id,
          quhead_custponumber,  quhead_shipvia,
          NULL,    -- shipto_id         
-         '',   -- shipto_name 	
-         '',   -- addr_line1 	
-         '',   -- addr_line2 	
-         '',   -- addr_line3	
-         '',   -- addr_city	
-         '',   -- addr_state	
-         '',   -- addr_postalcode	
-         NULL,  
-         '',  
-         -- new billto info
-         _b.name,		-- quhead_billtoname,
-         _b.addr_line1,		-- quhead_billtoaddress1,
-         _b.addr_line2, 	-- quhead_billtoaddress2  
-         _b.addr_line3,		-- quhead_billtoaddress3,
-         _b.addr_city,		-- quhead_billtocity  
-         _b.addr_state,		-- quhead_billtostate,
-         _b.addr_postalcode,	-- quhead_billtozip,
-		 
+ 
          quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
          quhead_ordercomments,  quhead_shipcomments,
          FALSE,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  'O',
          
  	 NULL, -- quhead_shipto_cntct_id,
-         '', -- quhead_shipto_cntct_honorific,
-         '', -- quhead_shipto_cntct_first_name  
-         '', -- quhead_shipto_cntct_middle,
-         '', -- quhead_shipto_cntct_last_name,
-         '', -- quhead_shipto_cntct_suffix,
-         '', -- quhead_shipto_cntct_phone,
-         '', -- quhead_shipto_cntct_title,
-         '', -- quhead_shipto_cntct_fax,
-         '', -- quhead_shipto_cntct_email,
 	
          _b.cntct_id,			-- quhead_billto_cntct_id,
          _b.cntct_honorific,	-- quhead_billto_cntct_honorific,
@@ -101,9 +76,9 @@ BEGIN
          _b.cntct_middle,		-- quhead_billto_cntct_middle,
          _b.cntct_last_name,	-- quhead_billto_cntct_last_name,
          _b.cntct_suffix,		-- quhead_billto_cntct_suffix,
-         _b.cntct_phone,		-- quhead_billto_cntct_phone,
+         _b.contact_phone,		-- quhead_billto_cntct_phone,
          _b.cntct_title,		-- quhead_billto_cntct_title,
-         _b.cntct_fax,			-- quhead_billto_cntct_fax,
+         _b.contact_fax,			-- quhead_billto_cntct_fax,
          _b.cntct_email		-- quhead_billto_cntct_email
   FROM quhead 
   WHERE (quhead_id=pquheadid);

@@ -20,8 +20,8 @@ SELECT dropIfExists('VIEW', 'account', 'api');
     pc.cntct_last_name AS primary_contact_last,
     pc.cntct_suffix AS primary_contact_suffix,
     pc.cntct_title AS primary_contact_job_title,
-    pc.cntct_phone AS primary_contact_voice,
-    pc.cntct_fax AS primary_contact_fax,
+    getContactPhone(pc.cntct_id, 'Office') AS primary_contact_voice,
+    getContactPhone(pc.cntct_id, 'Fax') AS primary_contact_fax,
     pc.cntct_email AS primary_contact_email,
     (''::TEXT) AS primary_contact_change,
     m.addr_number AS primary_contact_address_number,
@@ -40,8 +40,8 @@ SELECT dropIfExists('VIEW', 'account', 'api');
     sc.cntct_last_name AS secondary_contact_last,
     sc.cntct_suffix AS secondary_contact_suffix,
     sc.cntct_title AS secondary_contact_job_title,
-    sc.cntct_phone AS secondary_contact_voice,
-    sc.cntct_fax AS secondary_contact_fax,
+    getContactPhone(sc.cntct_id, 'Office') AS secondary_contact_voice,
+    getContactPhone(sc.cntct_id, 'Fax')  AS secondary_contact_fax,
     sc.cntct_email AS secondary_contact_email,
     sc.cntct_webaddr AS secondary_contact_web,
     (''::TEXT) AS secondary_contact_change,
@@ -57,11 +57,11 @@ SELECT dropIfExists('VIEW', 'account', 'api');
     c.crmacct_notes AS notes
   FROM
     crmacct c
-      LEFT OUTER JOIN crmacct p ON (c.crmacct_parent_id=p.crmacct_id)
-      LEFT OUTER JOIN cntct pc ON (c.crmacct_cntct_id_1=pc.cntct_id)
-      LEFT OUTER JOIN addr m ON (pc.cntct_addr_id=m.addr_id)
-      LEFT OUTER JOIN cntct sc ON (c.crmacct_cntct_id_2=sc.cntct_id)
-      LEFT OUTER JOIN addr s ON (sc.cntct_addr_id=s.addr_id);
+      LEFT OUTER JOIN crmacct p  ON c.crmacct_parent_id=p.crmacct_id
+      LEFT OUTER JOIN cntct   pc ON pc.cntct_id=getcrmaccountcontact(c.crmacct_id)
+      LEFT OUTER JOIN addr    m  ON pc.cntct_addr_id=m.addr_id
+      LEFT OUTER JOIN cntct   sc ON sc.cntct_id=getcrmaccountcontact(c.crmacct_id, 'Secondary')
+      LEFT OUTER JOIN addr s     ON sc.cntct_addr_id=s.addr_id;
 
 GRANT ALL ON TABLE api.account TO xtrole;
 COMMENT ON VIEW api.account IS 'Account';
@@ -77,9 +77,7 @@ INSERT INTO crmacct
          crmacct_name,
          crmacct_active,
          crmacct_type,
-         crmacct_cntct_id_1,
-         crmacct_cntct_id_2,
-         crmacct_notes )
+         crmacct_notes)         
         VALUES
         (COALESCE(NEW.account_number,CAST(fetchCRMAccountNumber() AS text)),
          getCrmAcctId(NEW.parent_account),
@@ -88,6 +86,13 @@ INSERT INTO crmacct
          CASE WHEN (NEW.type = 'Individual') THEN
            'I'
          ELSE 'O' END,
+         NEW.notes);
+
+CREATE OR REPLACE RULE "_INSERT_CNTCT1" AS
+    ON INSERT TO api.account DO INSTEAD
+
+INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+VALUES (getCrmAcctId(NEW.account_number),
          saveCntct(
           getCntctId(NEW.primary_contact_number),
           NEW.primary_contact_number,
@@ -107,14 +112,19 @@ INSERT INTO crmacct
           NEW.primary_contact_middle,
           NEW.primary_contact_last,
           NEW.primary_contact_suffix,
-          NEW.primary_contact_voice,
-          NULL,
-          NEW.primary_contact_fax,
+          buildSimplePhoneJson(NEW.primary_contact_voice, NULL, NEW.primary_contact_fax),
           NEW.primary_contact_email,
           NULL,
           NEW.primary_contact_job_title,
           NEW.primary_contact_change
           ),
+          getCrmRoleId('Primary'));
+
+CREATE OR REPLACE RULE "_INSERT_CNTCT2" AS
+    ON INSERT TO api.account DO INSTEAD
+
+INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+VALUES (getCrmAcctId(NEW.account_number),
           saveCntct(
           getCntctId(NEW.secondary_contact_number),
           NEW.secondary_contact_number,
@@ -134,14 +144,12 @@ INSERT INTO crmacct
           NEW.secondary_contact_middle,
           NEW.secondary_contact_last,
           NEW.secondary_contact_suffix,
-          NEW.secondary_contact_voice,
-          NULL,
-          NEW.secondary_contact_fax,
+          buildSimplePhoneJson(NEW.secondary_contact_voice, NULL, NEW.secondary_contact_fax),
           NEW.secondary_contact_email,
           NULL,
           NEW.secondary_contact_job_title,
           NEW.secondary_contact_change),
-          NEW.notes);
+          getCrmRoleId('Secondary'));
 
 CREATE OR REPLACE RULE "_UPDATE" AS
     ON UPDATE TO api.account DO INSTEAD
@@ -155,9 +163,7 @@ UPDATE crmacct SET
     CASE WHEN (NEW.type = 'Individual') THEN
            'I'
     ELSE 'O' END),
-    crmacct_cntct_id_1=getCntctId(NEW.primary_contact_number),
-    crmacct_cntct_id_2=getCntctId(NEW.secondary_contact_number),
-    crmacct_notes=NEW.notes
+    crmacct_notes=NEW.notes   
   WHERE (crmacct_number=OLD.account_number);
 
 CREATE OR REPLACE RULE "_DELETE" AS

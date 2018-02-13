@@ -3,7 +3,7 @@
  <title>Sales Credit</title>
  <name>CreditMemo</name>
  <description>Sales Credit with Logo and CM Currency</description>
- <parameter default="" type="string" active="true" listtype="dynamic" name="cmhead_id">
+ <parameter type="string" active="true" name="cmhead_id" listtype="dynamic" default="">
   <description></description>
   <query>select cmhead_id, cmhead_number from cmhead;</query>
  </parameter>
@@ -30,7 +30,7 @@
                   COALESCE(cmhead_billtocity,'') || '  ' || COALESCE(cmhead_billtostate,'') || '  ' || COALESCE(cmhead_billtozip,''),
                    cmhead_billtocountry)
        AS f_custaddr,
-       cntct_phone AS cust_phone,
+       getcontactphone(cust_cntct_id, 'Office') AS cust_phone,
        cmhead_shipto_name,
        formatAddr(cmhead_shipto_address1, cmhead_shipto_address2, cmhead_shipto_address3,
                   COALESCE(cmhead_shipto_city,'') ||'  '|| COALESCE(cmhead_shipto_state,'') || '  '|| COALESCE(cmhead_shipto_zipcode,''),
@@ -51,7 +51,6 @@
   FROM cmhead
   JOIN curr_symbol ON (cmhead_curr_id = curr_id)
   JOIN custinfo ON (cmhead_cust_id=cust_id)
-  LEFT OUTER JOIN cntct ON (cust_cntct_id=cntct_id)
   LEFT OUTER JOIN rsncode ON (cmhead_rsncode_id = rsncode_id)
   JOIN remitto ON (1=1)
  WHERE (cmhead_id=&lt;? value("cmhead_id") ?>)

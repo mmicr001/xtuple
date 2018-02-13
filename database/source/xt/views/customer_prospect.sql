@@ -7,16 +7,16 @@ select xt.create_view('xt.customer_prospect', $$
     cust_preferred_warehous_id as site, cust_shipvia as cust_shipvia,
     'C' as status, crmacct_id
   from custinfo
-    join crmacct on crmacct_cust_id=cust_id
+    join crmacct on cust_crmacct_id=crmacct_id
   union
   select prospect_id as id, prospect_active as active, prospect_number as number,
-    prospect_name as name, null as type, prospect_cntct_id as contact, true as cust_ffshipto,
+    prospect_name as name, null as type, getcrmaccountcontact(prospect_crmacct_id) as contact, true as cust_ffshipto,
     true as cust_ffbillto, basecurrid() as cust_curr_id, null as cust_terms_id,
     null as cust_creditstatus, prospect_salesrep_id as salesrep_id, 0 as cust_commprcnt,
     null as cust_discntprcnt, prospect_taxzone_id as taxzone_id, null as cust_shipchrg_id,
     prospect_comments as comments, prospect_warehous_id as site,
     null as cust_shipvia, 'P' as status, crmacct_id
   from prospect
-    join crmacct on crmacct_prospect_id=prospect_id; ;
+    join crmacct on prospect_crmacct_id=crmacct_id; ;
 
 $$);

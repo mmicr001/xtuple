@@ -26,12 +26,16 @@
        (poitem_qty_ordered - poitem_qty_received) * poitem_unitprice,
                               CURRENT_DATE))) AS backlog ,
        c1.cntct_first_name || ' ' || c1.cntct_last_name AS contact1_name,
-       c1.cntct_phone AS contact1_phone, c1.cntct_phone2 AS contact1_phone, 
+       getcontactphone(c1.cntct_id, 'Office') AS contact1_phone, 
+       getcontactphone(c1.cntct_id, 'Mobile') AS contact1_phone2, 
+       getcontactphone(c1.cntct_id, 'Fax') AS contact1_fax, 
        formataddr(a1.addr_id) AS contact1_address,
-       c1.cntct_fax as contact1_fax, c1.cntct_email AS contct1_email,
+       c1.cntct_email AS contct1_email,
        c2.cntct_first_name || ' ' || c2.cntct_last_name AS contact2_name,
-       c2.cntct_phone AS contact2_phone, c2.cntct_phone2 AS contact2_phone, 
-       c2.cntct_fax as contact2_fax, c2.cntct_email AS contct2_email,
+       getcontactphone(c2.cntct_id, 'Office') AS contact2_phone, 
+       getcontactphone(c2.cntct_id, 'Mobile') AS contact2_phone2, 
+       getcontactphone(c2.cntct_id, 'Fax') as contact2_fax, 
+       c2.cntct_email AS contct2_email,
        formataddr(a2.addr_id) AS contact2_address,
        vend_comments
   FROM vendinfo
@@ -42,17 +46,17 @@
     LEFT OUTER JOIN pohead ON (pohead_vend_id=vend_id)
     LEFT OUTER JOIN poitem ON (poitem_pohead_id=pohead_id
                                AND poitem_status='O')
-    JOIN crmacct ON (crmacct_vend_id=vend_id)
+    JOIN crmacct ON (vend_crmacct_id=crmacct_id)
     WHERE (vend_id=&lt;? value("vend_id") ?>) 
     GROUP BY vend_name, vend_vendtype_id, vend_terms_id,
        vend_shipvia,   vend_active,vend_cntct1_id,
        vend_cntct2_id, crmacct_id,
        c1.cntct_first_name, c1.cntct_last_name,
-       c1.cntct_phone, c1.cntct_phone2, 
-       a1.addr_id,c1.cntct_fax, c1.cntct_email,
+       contact1_phone, contact1_phone2, 
+       a1.addr_id,contact1_fax, c1.cntct_email,
        c2.cntct_first_name,c2.cntct_last_name ,
-       c2.cntct_phone, c2.cntct_phone2, 
-       c2.cntct_fax, c2.cntct_email,a2.addr_id,
+       contact2_phone, contact2_phone2, 
+       contact2_fax, c2.cntct_email,a2.addr_id,
        vend_comments, vend_number;</sql>
  </querysource>
  <querysource>
