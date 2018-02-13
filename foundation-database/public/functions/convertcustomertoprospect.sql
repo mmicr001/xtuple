@@ -31,9 +31,13 @@ BEGIN
                                                          AND  crmacctcntctass_cntct_id=_c.cust_cntct_id));
   END IF;
 
+  UPDATE charass SET charass_target_type = 'PSPCT'
+  WHERE charass_target_type = 'C'
+    AND charass_target_id = pCustId
+    AND charass_char_id IN (SELECT charuse_char_id FROM charuse WHERE charuse_target_type = 'PSPCT');
+
   DELETE FROM custinfo WHERE (cust_id=pCustId);
 
   RETURN pCustId;
 END;
 $$ LANGUAGE 'plpgsql';
-
