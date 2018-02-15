@@ -28,8 +28,8 @@ CASE WHEN (&lt;? value("asofDate") ?> = endOfTime()) THEN 'Latest'
 &lt;? elseif exists("custtype_pattern") ?>
   ('Customer Type pattern = ' || &lt;? value("custtype_pattern") ?>) AS selection,
 &lt;? elseif exists("custgrp_id") ?>
-  (SELECT custgrp_name FROM custgrp WHERE 
- custgrp_id=&lt;? value("custgrp_id") ?>) AS selection,
+  (SELECT groups_name FROM custgrp WHERE 
+ groups_id=&lt;? value("custgrp_id") ?>) AS selection,
 &lt;? else ?>
   'All Customers' AS selection,
 &lt;? endif ?>

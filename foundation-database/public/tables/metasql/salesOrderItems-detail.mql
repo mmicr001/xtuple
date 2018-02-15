@@ -1,7 +1,7 @@
 -- Group: salesOrderItems
 -- Name: detail
 -- Notes: used by dspBacklogByCustomer, dspBacklogByItem, dspBacklogByParameterList, dspBacklogBySalesOrder, dspBookingsByCustomer, dspBookingsByCustomerGroup, dspBookingsByItem, dspBookingsByProductCategory, dspBookingsBySalesRep, dspBookingsByShipTo, dspSalesOrdersByItem
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT
@@ -130,17 +130,18 @@ FROM (
                                FROM custtype
                                WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
   <? elseif exists("custgrp") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem))
   <? elseif exists("custgrp_id") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem
-                     WHERE (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)))
+                     WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
   <? elseif exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrp, custgrpitem
-                     WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                       AND   (custgrp_name ~ <? value("custgrp_pattern") ?>) )) )
+                     WHERE ( (groupsitem_groups_id=groups_id)
+                       AND   (groups_name ~ <? value("custgrp_pattern") ?>
+                           OR groups_descrip ~ <? value("custgrp_pattern") ?>) )) )
   <? endif ?>
 
   <? if exists("item_id") ?>
@@ -260,17 +261,17 @@ FROM (
                                FROM custtype
                                WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
   <? elseif exists("custgrp") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem))
   <? elseif exists("custgrp_id") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem
-                     WHERE (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)))
+                     WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
   <? elseif exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrp, custgrpitem
-                     WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                       AND   (custgrp_name ~ <? value("custgrp_pattern") ?>) )) )
+                     WHERE ( (groupsitem_groups_id=groups_id)
+                       AND   (groups_name ~ <? value("custgrp_pattern") ?>) )) )
   <? endif ?>
 
   <? if exists("item_id") ?>

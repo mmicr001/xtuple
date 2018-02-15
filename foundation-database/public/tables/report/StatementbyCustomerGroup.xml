@@ -37,17 +37,17 @@ CASE WHEN (araging_doctype = 'I') THEN &lt;? value("invoice") ?>
        formatMoney(araging_aropen_amount - araging_total_val) AS f_applied,
        formatMoney(araging_total_val) AS f_balance
 FROM araging(&lt;? value("asofdate") ?>, true, false)
-WHERE ((araging_cust_id IN (SELECT custgrpitem_cust_id FROM custgrpitem WHERE custgrpitem_custgrp_id=&lt;? value("custgrp") ?>))
+WHERE ((araging_cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem WHERE groupsitem_groups_id=&lt;? value("custgrp") ?>))
    AND (abs(araging_aropen_amount) > 0)
       )
 ORDER BY araging_duedate;</sql>
  </querysource>
  <querysource>
   <name>head</name>
-  <sql>SELECT custgrp_name, custgrp_descrip,
+  <sql>SELECT groups_name, groups_descrip,
        formatDate(COALESCE(&lt;? value("asofdate") ?>, current_date)) AS asofdate
 FROM custgrp
-WHERE (custgrp_id = &lt;? value("custgrp") ?>);</sql>
+WHERE (groups_id = &lt;? value("custgrp") ?>);</sql>
  </querysource>
  <querysource>
   <name>Currency</name>
@@ -66,8 +66,8 @@ WHERE (custgrp_id = &lt;? value("custgrp") ?>);</sql>
        formatMoney(SUM(araging_total_val)) AS f_total
 FROM araging(&lt;? value("asofdate") ?>, true, false)
 WHERE ((abs(araging_aropen_amount) > 0)
-   AND (araging_cust_id IN (SELECT custgrpitem_cust_id FROM custgrpitem 
-         WHERE custgrpitem_custgrp_id=&lt;? value("custgrp") ?>)));</sql>
+   AND (araging_cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem 
+         WHERE groupsitem_groups_id=&lt;? value("custgrp") ?>)));</sql>
  </querysource>
  <pghead>
   <height>200</height>
@@ -255,7 +255,7 @@ WHERE ((abs(araging_aropen_amount) > 0)
    <vcenter/>
    <data>
     <query>head</query>
-    <column>custgrp_descrip</column>
+    <column>groups_descrip</column>
    </data>
   </field>
   <line>

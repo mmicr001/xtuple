@@ -72,15 +72,16 @@ WHERE ( (true)
    AND (custtype_code ~ <? value("custtype_pattern") ?>)
 <? endif ?>
 <? if exists("custgrp_id") ?>
-  AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+  AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                    FROM custgrpitem
-                   WHERE (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)))
+                   WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
 <? endif ?>
 <? if exists("custgrp_pattern") ?>
-  AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+  AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                    FROM custgrp, custgrpitem
-                   WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                     AND   (custgrp_name ~ <? value("custgrp_pattern") ?>) )) )
+                   WHERE ( (groupsitem_groups_id=groups_id)
+                     AND   (groups_name ~ <? value("custgrp_pattern") ?>
+                         OR groups_descrip ~ <? value("custgrp_pattern") ?>) )) )
 <? endif ?>
 <? if exists("warehous_id") ?>
    AND (warehous_id=<? value("warehous_id") ?>)

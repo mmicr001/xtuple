@@ -602,7 +602,7 @@
     "type": "EmployeeGroup",
     "table": "empgrp",
     "isRest": true,
-    "idSequenceName": "empgrp_empgrp_id_seq",
+    "idSequenceName": "groups_groups_id_seq",
     "lockable": true,
     "comment": "Employee Group Map",
     "privileges": {
@@ -618,7 +618,7 @@
         "name": "id",
         "attr":	{
           "type": "Number",
-          "column": "empgrp_id",
+          "column": "groups_id",
           "isPrimaryKey": true
         }
       },
@@ -626,7 +626,7 @@
         "name": "name",
         "attr":	{
           "type": "String",
-          "column": "empgrp_name",
+          "column": "groups_name",
           "isNaturalKey": true
         }
       },
@@ -634,7 +634,7 @@
         "name": "description",
         "attr":	{
           "type": "String",
-          "column": "empgrp_descrip"
+          "column": "groups_descrip"
         }
       },
       {
@@ -642,7 +642,7 @@
         "toMany": {
           "isNested": true,
           "type": "EmployeeGroupEmployee",
-          "column": "empgrp_id",
+          "column": "groups_id",
           "inverse": "employeeGroup"
         }
       }
@@ -654,14 +654,14 @@
     "nameSpace": "XM",
     "type": "EmployeeGroupEmployee",
     "table": "empgrpitem",
-    "idSequenceName": "empgrpitem_empgrpitem_id_seq",
+    "idSequenceName": "groupsitem_groupsitem_id_seq",
     "comment": "Employee Group Employee Map",
     "properties": [
       {
         "name": "id",
         "attr":	{
           "type": "Number",
-          "column": "empgrpitem_id",
+          "column": "groupsitem_id",
           "isPrimaryKey": true
         }
       },
@@ -677,7 +677,7 @@
         "name": "employeeGroup",
         "attr": {
           "type": "Number",
-          "column": "empgrpitem_empgrp_id"
+          "column": "groupsitem_groups_id"
         }
       },
       {
@@ -685,7 +685,7 @@
         "toOne":	{
           "isNested": true,
           "type": "EmployeeRelation",
-          "column": "empgrpitem_emp_id"
+          "column": "groupsitem_reference_id"
         }
       }
     ],
@@ -697,14 +697,14 @@
     "nameSpace": "XM",
     "type": "EmployeeGroupGroup",
     "table": "empgrpitem",
-    "idSequenceName": "empgrpitem_empgrpitem_id_seq",
+    "idSequenceName": "groupsitem_groupsitem_id_seq",
     "comment": "Employee Group Group Map",
     "properties": [
       {
         "name": "id",
         "attr":	{
           "type": "Number",
-          "column": "empgrpitem_id",
+          "column": "groupsitem_id",
           "isPrimaryKey": true
         }
       },
@@ -721,14 +721,14 @@
         "toOne": {
           "isNested": true,
           "type": "EmployeeGroup",
-          "column": "empgrpitem_empgrp_id"
+          "column": "groupsitem_groups_id"
         }
       },
       {
         "name": "employee",
         "attr":	{
           "type": "Number",
-          "column": "empgrpitem_emp_id"
+          "column": "groupsitem_reference_id"
         }
       }
     ],

@@ -98,8 +98,8 @@ FROM cohist JOIN itemsite ON (itemsite_id=cohist_itemsite_id)
  JOIN prodcat ON (item_prodcat_id=prodcat_id)
 &lt;? endif ?>
 &lt;? if reExists("custgrp") ?>
- JOIN custgrpitem ON (custgrpitem_cust_id=cohist_cust_id)
- JOIN custgrp ON (custgrpitem_custgrp_id=custgrp_id)
+ JOIN custgrpitem ON (groupsitem_reference_id=cohist_cust_id)
+ JOIN custgrp ON (groupsitem_groups_id=groups_id)
 &lt;? endif ?>
     ,   ( SELECT rcalitem_id AS calitem_id,
                 findPeriodStart(rcalitem_id) AS calitem_start,
@@ -154,10 +154,10 @@ WHERE ((cohist_invcdate BETWEEN
                               WHERE (custtype_code ~ &lt;? value("custtype_pattern") ?>)))
 &lt;? endif ?>
 &lt;? if exists("custgrp_id") ?> 
-    AND (custgrpitem_custgrp_id=&lt;? value("custgrp_id") ?>)
+    AND (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)
 &lt;? endif ?>
 &lt;? if exists("custgrp_pattern") ?>
-    AND (cust_custgrp_name ~ &lt;? value("custgrp_pattern") ?>)))
+    AND (groups_name ~ &lt;? value("custgrp_pattern") ?>)))
 &lt;? endif ?>
 &lt;? if exists("prodcat_id") ?> 
     AND (item_prodcat_id=&lt;? value("prodcat_id") ?>) 
@@ -218,8 +218,8 @@ FROM cohist JOIN itemsite ON (itemsite_id=cohist_itemsite_id)
    JOIN prodcat ON (item_prodcat_id=prodcat_id)
 &lt;? endif ?>
 &lt;? if reExists("custgrp") ?>
- JOIN custgrpitem ON (custgrpitem_cust_id=cohist_cust_id)
- JOIN custgrp ON (custgrpitem_custgrp_id=custgrp_id)
+ JOIN custgrpitem ON (groupsitem_reference_id=cohist_cust_id)
+ JOIN custgrp ON (groupsitem_groups_id=custgrp_id)
 &lt;? endif ?>
   WHERE ((cohist_invcdate BETWEEN findPeriodStart(&lt;? value("period_id_list") ?>) AND findPeriodEnd(&lt;? value("period_id_list") ?>))
 &lt;? if exists("item_id") ?> 
@@ -237,10 +237,10 @@ FROM cohist JOIN itemsite ON (itemsite_id=cohist_itemsite_id)
                               WHERE (custtype_code ~ &lt;? value("custtype_pattern") ?>)))
 &lt;? endif ?>
 &lt;? if exists("custgrp_id") ?> 
-    AND (custgrpitem_custgrp_id=&lt;? value("custgrp_id") ?>)
+    AND (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)
 &lt;? endif ?>
 &lt;? if exists("custgrp_pattern") ?>
-    AND (cust_custgrp_name ~ &lt;? value("custgrp_pattern") ?>)))
+    AND (groups_name ~ &lt;? value("custgrp_pattern") ?>)))
 &lt;? endif ?>
 &lt;? if exists("prodcat_id") ?> 
     AND (item_prodcat_id=&lt;? value("prodcat_id") ?>) 

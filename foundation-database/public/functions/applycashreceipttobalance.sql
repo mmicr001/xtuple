@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION applyCashReceiptToBalance(INTEGER, NUMERIC) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCashrcptid ALIAS FOR $1;
@@ -11,7 +11,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION applyCashReceiptToBalance(INTEGER, NUMERIC, INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCashrcptid ALIAS FOR $1;
@@ -26,7 +26,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION applyCashReceiptToBalance(INTEGER, NUMERIC, INTEGER, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 DECLARE
@@ -67,8 +67,8 @@ BEGIN
                      AND  (cashrcptitem_aropen_id=aropen_id))), 0)) - pAmount),0)
 	INTO _toApply
 	FROM cashrcpt 
-	JOIN custgrpitem ON (cashrcpt.cashrcpt_custgrp_id=custgrpitem_custgrp_id)
-	JOIN aropen ON (custgrpitem_cust_id=aropen_cust_id)
+	JOIN custgrpitem ON (cashrcpt.cashrcpt_custgrp_id=groupsitem_groups_id)
+	JOIN aropen ON (groupsitem_reference_id=aropen_cust_id)
 	WHERE ((cashrcpt_id=pCashrcptid)
 		AND (aropen_open)
 	AND (aropen_doctype IN ('I','D')));
@@ -77,8 +77,8 @@ BEGIN
 	FOR _r IN 
 	  SELECT aropen_id
 	  FROM cashrcpt
-	    JOIN custgrpitem ON (cashrcpt.cashrcpt_custgrp_id=custgrpitem_custgrp_id)
-	    JOIN aropen ON (custgrpitem_cust_id=aropen_cust_id)
+	    JOIN custgrpitem ON (cashrcpt.cashrcpt_custgrp_id=groupsitem_groups_id)
+	    JOIN aropen ON (groupsitem_reference_id=aropen_cust_id)
           WHERE ((cashrcpt_id=pCashrcptid)
             AND (aropen_open)
             AND (aropen_doctype IN ('C','R')))
@@ -165,7 +165,7 @@ BEGIN
                  ) AS data
 
             WHERE ((CASE WHEN COALESCE(cashrcpt_cust_id,0) > 0 THEN (aropen_cust_id=cashrcpt_cust_id) 
-		   ELSE (aropen_cust_id IN (SELECT custgrpitem_cust_id FROM custgrpitem WHERE custgrpitem_custgrp_id=cashrcpt.cashrcpt_custgrp_id))
+		   ELSE (aropen_cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem WHERE groupsitem_groups_id=cashrcpt.cashrcpt_custgrp_id))
 		   END )
              AND (aropen_doctype IN ('I', 'D'))
              AND (aropen_open)

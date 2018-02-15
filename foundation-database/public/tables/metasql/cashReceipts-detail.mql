@@ -4,7 +4,7 @@
 --        There are 2 display modes for this query:
 --        1) Legacy mode which uses A/R Application information
 --        2) Version 3.3.0 upgrade mode which uses Cash Receipt information
---        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 --        Cash Receipts by Customer Group package - modifies display to include receipts by Customer Group.
 
@@ -38,7 +38,7 @@ SELECT arapply_id, 1 AS type, '' AS cashrcpt_number, cust_number, cust_name,
        0 AS base_applied_xttotalrole,
        currConcat(arapply_curr_id) AS currAbbr,
        arapply_postdate AS sortdate
-FROM custinfo LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id), arapply
+FROM custinfo LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id), arapply
   LEFT OUTER JOIN cashrcptitem ON ((arapply_reftype='CRA')
                                AND (arapply_ref_id=cashrcptitem_id))
   LEFT OUTER JOIN cashrcptmisc ON ((arapply_reftype='CRD')
@@ -51,7 +51,7 @@ WHERE ( (arapply_cust_id=cust_id)
 <? elseif exists("custtype_id") ?>
   AND   (cust_custtype_id=<? value("custtype_id") ?>)
 <? elseif exists("custgrp_id") ?>
-  AND   (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+  AND   (groupsitem_groups_id=<? value("custgrp_id") ?>)
 <? elseif exists("custtype_pattern") ?>
   AND   (cust_custtype_id IN (SELECT custtype_id FROM custtype WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
 <? endif ?>
@@ -86,7 +86,7 @@ SELECT cashrcpt_id, 2 AS type, '' AS cashrcpt_number, cust_number, cust_name,
        0 AS base_applied_xttotalrole,
        currConcat(cashrcpt_curr_id) AS currAbbr,
        cashrcpt_distdate AS sortdate
-FROM cashrcpt, custinfo LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id)
+FROM cashrcpt, custinfo LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id)
 WHERE ( (NOT cashrcpt_posted)
   AND   (cashrcpt_cust_id=cust_id)
   AND   (cashrcpt_distdate BETWEEN <? value("startDate") ?> AND <? value("endDate") ?>)
@@ -95,7 +95,7 @@ WHERE ( (NOT cashrcpt_posted)
 <? elseif exists("custtype_id") ?>
   AND   (cust_custtype_id=<? value("custtype_id") ?>)
 <? elseif exists("custgrp_id") ?>
-  AND   (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+  AND   (groupsitem_groups_id=<? value("custgrp_id") ?>)
 <? elseif exists("custtype_pattern") ?>
   AND   (cust_custtype_id IN (SELECT custtype_id FROM custtype WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
 <? endif ?>
@@ -135,7 +135,7 @@ SELECT aropen_id, 3 AS type, '' AS cashrcpt_number, cust_number, cust_name,
        0 AS base_applied_xttotalrole,
        currConcat(aropen_curr_id) AS currAbbr,
        aropen_duedate AS sortdate
-FROM custinfo LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id), aropen
+FROM custinfo LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id), aropen
   JOIN cashrcptitem ON (aropen_id=cashrcptitem_aropen_id)
 WHERE ( (aropen_cust_id=cust_id)
   AND   (aropen_doctype IN ('R','C'))
@@ -145,7 +145,7 @@ WHERE ( (aropen_cust_id=cust_id)
 <? elseif exists("custtype_id") ?>
   AND   (cust_custtype_id=<? value("custtype_id") ?>)
 <? elseif exists("custgrp_id") ?>
-  AND   (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+  AND   (groupsitem_groups_id=<? value("custgrp_id") ?>)
 <? elseif exists("custtype_pattern") ?>
   AND   (cust_custtype_id IN (SELECT custtype_id FROM custtype WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
 <? endif ?>
@@ -179,9 +179,9 @@ FROM (
 --  Cash Receipt headers
 SELECT cashrcpt_id AS id, 0 AS type, cashrcpt_number,
        CASE WHEN (cashrcpt_cust_id <> -1) THEN cust_number
-		ELSE (SELECT custgrp_name FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_number,
+		ELSE (SELECT groups_name FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_number,
        CASE WHEN (cashrcpt_cust_id <> -1) THEN cust_name
-		ELSE (SELECT custgrp_descrip FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_name,
+		ELSE (SELECT groups_descrip FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_name,
        cashrcpt_distdate AS postdate, cashrcpt_posted AS posted, cashrcpt_void AS voided,
        ( CASE WHEN (cashrcpt_fundstype='C') THEN <? value("check") ?>
               WHEN (cashrcpt_fundstype='T') THEN <? value("certifiedCheck") ?>
@@ -207,7 +207,7 @@ SELECT cashrcpt_id AS id, 0 AS type, cashrcpt_number,
        -1 AS arapply_id
 FROM cashrcpt
 LEFT OUTER JOIN custinfo ON (cust_id=cashrcpt_cust_id)
-LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id)
+LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id)
 WHERE ( (cashrcpt_distdate BETWEEN <? value("startDate") ?> AND <? value("endDate") ?>)
 <? if exists("cust_id") ?>
   AND   (cashrcpt_cust_id=<? value("cust_id") ?>
@@ -248,7 +248,7 @@ SELECT cashrcpt_id AS id, 1 AS type, '', cust_number, cust_name,
 FROM cashrcpt
         JOIN cashrcptitem ON (cashrcptitem_cashrcpt_id=cashrcpt_id)
 	LEFT OUTER JOIN custinfo ON (cust_id=cashrcptitem_cust_id)
-	LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id)
+	LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id)
         JOIN aropen ON (aropen_id=cashrcptitem_aropen_id)
         LEFT OUTER JOIN arapply ON ((arapply_target_aropen_id=aropen_id OR
                                      arapply_source_aropen_id=aropen_id) AND
@@ -285,7 +285,7 @@ SELECT cashrcpt_id AS id, 1 AS type, '', '', '',
        -1 AS base_applied_xttotalrole,
        arapply_id
 FROM cashrcpt JOIN custinfo ON (cust_id=cashrcpt_cust_id)
-              LEFT OUTER JOIN custgrpitem ON (custgrpitem_cust_id=cust_id)
+              LEFT OUTER JOIN custgrpitem ON (groupsitem_reference_id=cust_id)
               JOIN cashrcptmisc ON (cashrcptmisc_cashrcpt_id=cashrcpt_id)
               LEFT OUTER JOIN arapply ON (arapply_reftype='CRD' AND
                                           arapply_ref_id=cashrcptmisc_id)
@@ -295,7 +295,7 @@ WHERE ( (cashrcpt_distdate BETWEEN <? value("startDate") ?> AND <? value("endDat
 <? elseif exists("custtype_id") ?>
   AND   (cust_custtype_id=<? value("custtype_id") ?>)
 <? elseif exists("custgrp_id") ?>
-  AND   (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)
+  AND   (groupsitem_groups_id=<? value("custgrp_id") ?>)
 <? elseif exists("custtype_pattern") ?>
   AND   (cust_custtype_id IN (SELECT custtype_id FROM custtype WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
 <? endif ?>

@@ -59,7 +59,7 @@
        &lt;? endif ?>
          AS custtype_pattern,
        &lt;? if exists("custgrp_id") ?>
-         (SELECT custgrp_name FROM custgrp WHERE custgrp_id=&lt;? value("custgrp_id") ?>)
+         (SELECT groups_name FROM custgrp WHERE groups_id=&lt;? value("custgrp_id") ?>)
        &lt;? else ?>
          text('All Customer Groups')
        &lt;? endif ?>
