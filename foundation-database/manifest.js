@@ -72,6 +72,7 @@
     "public/tables/crmrole.sql",
     "public/functions/getcrmroleid.sql",
     "public/tables/crmacctcntctass.sql",
+    "public/tables/crmacctrole.sql",
     "public/tables/cntctphone.sql",
     "public/tables/custinfo.sql",
     "public/tables/emp.sql",
