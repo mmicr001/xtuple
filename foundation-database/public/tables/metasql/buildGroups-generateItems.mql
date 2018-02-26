@@ -95,19 +95,10 @@ WHERE (true)
   <? if exists("salesrep_id") ?>
     AND (cust_salesrep_id = <? value("salesrep_id") ?>)
   <? endif ?>
-  <? if exists('sales_greater') ?>
-    AND cust_id IN (SELECT cohist_cust_id 
-                    FROM public.saleshistorymisc 
-                    GROUP BY cohist_cust_id 
-                    HAVING sum(custextprice) > <? value('sales_greater') ?>::NUMERIC) 
+  <? if exists("custtype_id") ?>
+    AND (cust_custtype_id = <? value("custtype_id") ?>)
   <? endif ?>
-  <? if exists('sales_less') ?>
-    AND cust_id IN (SELECT cohist_cust_id 
-                    FROM public.saleshistorymisc 
-                    GROUP BY cohist_cust_id 
-                    HAVING sum(custextprice) < <? value('sales_less') ?>::NUMERIC) 
-  <? endif ?>
-  <? if exists("item_id") ?>
+   <? if exists("item_id") ?>
     AND cust_id IN (SELECT cohist_cust_id 
                     FROM public.saleshistorymisc 
                     JOIN itemsite its ON cohist_itemsite_id=its.itemsite_id AND itemsite_item_id=<? value("item_id") ?>)  
@@ -145,24 +136,6 @@ WHERE (true)
   <? endif ?>
 <? endif ?>
 <? if exists('Contact') ?>
-  <? if exists('sales_greater') ?>
-    AND cntct_id IN (SELECT crmacctcntctass_cntct_id 
-                    FROM crmacctcntctass
-                    JOIN custinfo ON cust_crmacct_id=crmacctcntctass_crmacct_id
-                    WHERE cust_id IN (SELECT cohist_cust_id 
-                                      FROM public.saleshistorymisc 
-                                      GROUP BY cohist_cust_id 
-                                      HAVING sum(custextprice) > <? value('sales_greater') ?>::NUMERIC) ) 
-  <? endif ?>
-  <? if exists('sales_less') ?>
-    AND cntct_id IN (SELECT crmacctcntctass_cntct_id 
-                    FROM crmacctcntctass
-                    JOIN custinfo ON cust_crmacct_id=crmacctcntctass_crmacct_id
-                    WHERE cust_id IN (SELECT cohist_cust_id 
-                                      FROM public.saleshistorymisc 
-                                      GROUP BY cohist_cust_id 
-                                      HAVING sum(custextprice) > <? value('sales_greater') ?>::NUMERIC) ) 
-  <? endif ?>
   <? if exists("item_id") ?>
     AND cntct_id IN (SELECT crmacctcntctass_cntct_id 
                     FROM crmacctcntctass
