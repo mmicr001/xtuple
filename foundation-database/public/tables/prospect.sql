@@ -13,9 +13,7 @@ SELECT
   xt.add_column('prospect', 'prospect_assigned_username', 'TEXT', NULL, 'public'),
   xt.add_column('prospect', 'prospect_assigned',     'DATE', NULL, 'public'),
   xt.add_column('prospect', 'prospect_lasttouch',    'DATE', NULL, 'public'),
-  xt.add_column('prospect', 'prospect_priority_id', 'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_source_id',   'INTEGER', NULL, 'public'),
-  xt.add_column('prospect', 'prospect_opstage_id',  'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_salesrep_id', 'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_warehous_id', 'INTEGER', NULL, 'public'),
   xt.add_column('prospect', 'prospect_taxzone_id',  'INTEGER', NULL, 'public'),
@@ -37,12 +35,8 @@ SELECT
                     'FOREIGN KEY (prospect_salesrep_id) REFERENCES salesrep(salesrep_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_taxzone_id_fkey',
                     'FOREIGN KEY (prospect_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
-  xt.add_constraint('prospect', 'prospect_prospect_priority_id_fkey',
-                    'FOREIGN KEY (prospect_priority_id) REFERENCES incdtpriority(incdtpriority_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_source_id_fkey',
                     'FOREIGN KEY (prospect_source_id) REFERENCES opsource(opsource_id)', 'public'),
-  xt.add_constraint('prospect', 'prospect_prospect_opstage_id_fkey',
-                    'FOREIGN KEY (prospect_opstage_id) REFERENCES opstage(opstage_id)', 'public'),
   xt.add_constraint('prospect', 'prospect_prospect_warehous_id_fkey',
                     'FOREIGN KEY (prospect_warehous_id) REFERENCES whsinfo(warehous_id)', 'public');
 

@@ -1,5 +1,5 @@
+  DROP VIEW IF EXISTS api.prospect;
 
-  SELECT dropIfExists('VIEW', 'prospect', 'api');
   CREATE OR REPLACE VIEW api.prospect AS
  
   SELECT 
@@ -10,7 +10,6 @@
     warehous_code AS site_code,
     taxzone_code AS default_tax_zone,
     prospect_comments AS notes,
-    incdtpriority_name AS priority,
     opsource_name AS source,
     cntct_number AS contact_number,
     cntct_honorific AS contact_honorific,
@@ -40,7 +39,6 @@
       LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
       LEFT OUTER JOIN taxzone ON (prospect_taxzone_id=taxzone_id)
       LEFT OUTER JOIN salesrep ON (prospect_salesrep_id=salesrep_id)
-      LEFT OUTER JOIN incdtpriority ON (prospect_priority_id=incdtpriority_id)
       LEFT OUTER JOIN opsource ON (prospect_source_id=opsource_id)
       LEFT OUTER JOIN whsinfo ON (prospect_warehous_id=warehous_id);
 
@@ -60,7 +58,6 @@ INSERT INTO prospect
         prospect_taxzone_id,
         prospect_salesrep_id,
         prospect_warehous_id,
-        prospect_priority_id,
         prospect_source_id,
   	prospect_comments)
         VALUES (
@@ -70,7 +67,6 @@ INSERT INTO prospect
         getTaxZoneId(NEW.default_tax_zone),
         getSalesRepId(NEW.sales_rep),
         getWarehousId(NEW.site_code,'ACTIVE'),
-        (SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=NEW.priority),
         (SELECT opsource_id FROM opsource WHERE opsource_name=NEW.source),
         COALESCE(NEW.notes,''));
 
@@ -84,7 +80,6 @@ UPDATE prospect SET
         prospect_taxzone_id=getTaxZoneId(NEW.default_tax_zone),
         prospect_salesrep_id=getSalesRepId(NEW.sales_rep),
         prospect_warehous_id=getWarehousId(NEW.site_code,'ACTIVE'),
-        prospect_priority_id=(SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=NEW.priority),
         prospect_source_id=(SELECT opsource_id FROM opsource WHERE opsource_name=NEW.source),
   	prospect_comments=NEW.notes
 WHERE prospect_id=getProspectId(OLD.prospect_number);
