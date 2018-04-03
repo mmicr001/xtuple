@@ -1,7 +1,7 @@
 -- Group: contact
 -- Name:  uses
 -- Notes: Find and report uses of the contact
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if not exists('core') ?>
@@ -176,13 +176,14 @@ FROM (
 <? endif ?>
 
   UNION ALL
-  SELECT todoitem_id, 21 AS altId, <? value("todo") ?> AS type,
-         todoitem_seq::TEXT AS number,
-         todoitem_name AS name, '' AS role,
-         (todoitem_completed_date IS NULL) AS active,
-         todoitem_owner_username AS owner
-    FROM todoitem
-   WHERE todoitem_cntct_id=<? value("id") ?>
+  SELECT task_id, 21 AS altId, <? value("todo") ?> AS type,
+         task_number AS number,
+         task_name AS name, '' AS role,
+         (task_completed_date IS NULL) AS active,
+         task_owner_username AS owner
+    FROM task
+   WHERE task_parent_id=<? value("id") ?>
+     AND task_parent_type = 'T'
 
 <? if exists("showOrders") ?>
   <? if exists("tohead") ?>

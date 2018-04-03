@@ -10,6 +10,9 @@ BEGIN
     DELETE FROM docass WHERE docass_source_id = OLD.prj_id AND docass_source_type = 'J';
     DELETE FROM docass WHERE docass_target_id = OLD.prj_id AND docass_target_type = 'J';
 
+    DELETE FROM task   WHERE task_parent_id = OLD.prj_id AND task_parent_type = 'J';
+    UPDATE task SET task_prj_id = NULL WHERE task_prj_id = OLD.prj_id;
+
     SELECT recur_id INTO _recurid
       FROM recur
      WHERE ((recur_parent_id=OLD.prj_id)

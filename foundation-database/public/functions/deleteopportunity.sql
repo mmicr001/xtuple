@@ -1,17 +1,15 @@
+DROP FUNCTION IF EXISTS deleteOpportunity(INTEGER);
 
-CREATE OR REPLACE FUNCTION deleteOpportunity(INTEGER) RETURNS INTEGER AS '
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+CREATE OR REPLACE FUNCTION deleteOpportunity(pOpheadid INTEGER) RETURNS INTEGER AS $$
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  pOpheadid ALIAS FOR $1;
   _test INTEGER;
 BEGIN
 
-  SELECT todoitem_id INTO _test
-    FROM todoitem
-   WHERE(todoitem_ophead_id=pOpheadid)
-   LIMIT 1;
-  IF(FOUND) THEN
+  IF EXISTS(SELECT 1 FROM task
+            WHERE task_parent_id=pOpheadid 
+            AND task_parent_type='OPP') THEN
     RETURN -1;
   END IF;
 
@@ -33,12 +31,12 @@ BEGIN
 
   DELETE
     FROM charass
-   WHERE((charass_target_type=''OPP'')
+   WHERE((charass_target_type='OPP')
      AND (charass_target_id=pOpheadid));
 
   DELETE
     FROM comment
-   WHERE((comment_source=''OPP'')
+   WHERE((comment_source='OPP')
      AND (comment_source_id=pOpheadid));
 
   DELETE
@@ -47,4 +45,4 @@ BEGIN
   
   return 0;
 END;
-' LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;

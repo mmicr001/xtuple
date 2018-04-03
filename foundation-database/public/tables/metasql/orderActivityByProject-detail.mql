@@ -1,6 +1,6 @@
 -- Group: orderActivityByProject
 -- Name:  detail
--- Notes: Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Notes: Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT *, 
@@ -91,20 +91,20 @@ SELECT DISTINCT -1 AS id,
 
 UNION ALL
 
-SELECT prjtask_id AS id,
+SELECT task_id AS id,
        5 AS type,
        '0' AS subtype,
        1 AS section,
        NULL AS section_qtdisplayrole,
-       prjtask_number AS name,
+       task_number AS name,
        CASE                         
-           WHEN prjtask_status = 'C' THEN <? value('complete') ?>
-           WHEN prjtask_status = 'O' THEN <? value('inprocess') ?>
-           WHEN prjtask_status = 'P' THEN <? value('planning') ?>
+           WHEN task_status = 'C' THEN <? value('complete') ?>
+           WHEN task_status = 'O' THEN <? value('inprocess') ?>
+           WHEN task_status = 'P' THEN <? value('planning') ?>
        END AS status,
        NULL::text AS project_type,
-       prjtask_name AS item,
-       prjtask_descrip AS descrip,
+       task_name AS item,
+       task_descrip AS descrip,
        cust_name as customer,
        cntct_name AS contact,
        addr_city AS city,
@@ -112,28 +112,31 @@ SELECT prjtask_id AS id,
        NULL::numeric AS qty,
        NULL::text AS uom,
        NULL::numeric AS value,
-       prjtask_due_date AS due,
-       prjtask_assigned_date AS assigned,
-       prjtask_start_date AS started,
-       prjtask_completed_date AS completed,
-       prjtask_hours_budget AS hrs_budget,
-       prjtask_hours_actual AS hrs_actual,
-       (prjtask_hours_budget-prjtask_hours_actual) AS hrs_balance,
-       prjtask_exp_budget AS exp_budget,
-       prjtask_exp_actual AS exp_actual,
-       (prjtask_exp_budget-prjtask_exp_actual) AS exp_balance,
-       CASE WHEN (prjtask_status = 'O' AND prjtask_due_date < current_date) THEN 'red' 
-         WHEN (prjtask_status = 'O' AND prjtask_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange' 
+       task_due_date AS due,
+       (SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id=task_id) AS assigned,
+       task_start_date AS started,
+       task_completed_date AS completed,
+       task_hours_budget AS hrs_budget,
+       task_hours_actual AS hrs_actual,
+       (task_hours_budget-task_hours_actual) AS hrs_balance,
+       task_exp_budget AS exp_budget,
+       task_exp_actual AS exp_actual,
+       (task_exp_budget-task_exp_actual) AS exp_balance,
+       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'red' 
+         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange' 
          END AS due_qtforegroundrole,
        2 AS xtindentrole
-  FROM prjtask
-  LEFT OUTER JOIN te.teprjtask ON (prjtask_id = teprjtask_prjtask_id)
+  FROM task
+  LEFT OUTER JOIN te.teprjtask ON (task_id = teprjtask_prjtask_id)
   LEFT OUTER JOIN custinfo ON (teprjtask_cust_id=cust_id)
   LEFT OUTER JOIN cntct ON (cust_corrcntct_id=cntct_id)
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
 
- WHERE (prjtask_prj_id = <? value("prj_id") ?> )
- GROUP BY prjtask_prj_id, custinfo.cust_name, prjtask.prjtask_id, addr.addr_city, addr.addr_state, cntct_name, prjtask.prjtask_number, prjtask.prjtask_status, prjtask_username, prjtask.prjtask_owner_username, prjtask_name, prjtask_descrip, prjtask_due_date, prjtask_assigned_date, prjtask_start_date, prjtask_completed_date, prjtask_hours_budget, prjtask_hours_actual, prjtask_exp_budget, prjtask_exp_actual
+ WHERE (task_parent_id = <? value("prj_id") ?> AND task_parent_type='J')
+ GROUP BY task_parent_id, custinfo.cust_name, task.task_id, addr.addr_city, addr.addr_state, cntct_name, 
+          task.task_number, task.task_status, task.task_owner_username, task_name, task_descrip, 
+          task_due_date, task_start_date, task_completed_date, task_hours_budget, 
+          task_hours_actual, task_exp_budget, task_exp_actual
 
 <? if exists("showIn") ?>
 UNION ALL

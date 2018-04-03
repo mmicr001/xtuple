@@ -1,0 +1,61 @@
+-- Group: projects
+-- Name:  summary
+-- Notes: Project Summary
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT * FROM (
+SELECT  prj_id, crmacct_name, prj_number, prj_name, prjtype_code,
+        CASE prj_status WHEN 'P' THEN <? value('pending') ?>
+	              WHEN 'O' THEN <? value('active') ?>
+	              WHEN 'C' THEN <? value('closed') ?>
+                        ELSE 'undefined' END AS prj_stat,
+        ROUND(SUM(CASE WHEN task_status IN ('O', 'D') THEN task_hours_budget ELSE 0.00 END),2) AS budhrs,
+        ROUND(SUM(CASE WHEN task_status IN ('N', 'P') THEN task_hours_budget ELSE 0.00 END),2) AS pendbudhrs,
+        ROUND(SUM(task_hours_actual),2) AS acthrs,
+        ROUND(SUM(task_hours_budget) - SUM(task_hours_actual),2) AS balhrs, 
+        ROUND(SUM(CASE WHEN task_status IN ('O', 'D') THEN task_exp_budget ELSE 0.00 END),2) AS budexp,
+        ROUND(SUM(CASE WHEN task_status IN ('N', 'P') THEN task_exp_budget ELSE 0.00 END),2) AS pendbudexp,
+        ROUND(SUM(task_exp_actual),2) AS actexp,
+        ROUND(SUM(task_exp_budget) - SUM(task_exp_actual),2) AS balexp,         
+        coalesce(usr_propername, prj_username, '---') AS username,
+        0 AS budhrs_xttotalrole,
+        0 AS pendbudhrs_xttotalrole,
+        0 AS acthrs_xttotalrole,
+        0 AS balhrs_xttotalrole,
+        0 AS budexp_xttotalrole,
+        0 AS pendbudexp_xttotalrole,
+        0 AS actexp_xttotalrole,
+        0 AS balexp_xttotalrole,
+        1 as prjcnt, 
+        0 as prjcnt_xttotalrole
+FROM prj
+LEFT JOIN task ON prj_id = task_prj_id AND task_status != 'C' 
+LEFT JOIN prjtype ON prjtype_id = prj_prjtype_id 
+LEFT JOIN usr ON usr_username = prj_username
+LEFT JOIN crmacct ON crmacct_id = prj_crmacct_id
+WHERE true
+<? if exists("prj_id") ?>
+  AND prj_id=<? value("prj_id") ?>
+<? endif ?>
+<? if exists('prj_stat_id') ?>
+  AND CASE <? value('prj_stat_id') ?> WHEN 1 THEN prj_status IN ('N','P')
+                                      WHEN 2 THEN prj_status IN ('D','O')
+                                      ELSE 'C' END)
+<? endif ?>
+<? if exists('prjtype_id') ?>
+  AND prj_prjtype_id IN ('-1'
+  <? foreach('prjtype_id') ?>,<? value('prjtype_id') ?><? endforeach ?>
+   )
+<? endif ?>
+<? if exists('assignto_id') ?>
+   AND prj_username = (SELECT usr_username FROM usr WHERE usr_id = <? value('assignto_id') ?>)
+<? endif ?>
+<? if not exists("showCompleted") ?>
+  AND prj_status <> 'C'
+<? endif ?>
+
+GROUP BY prj_id, crmacct_name, prj_name, prjtype_code, username
+)baseqry
+WHERE TRUE
+ORDER BY crmacct_name, prj_name;

@@ -1,18 +1,10 @@
 CREATE OR REPLACE FUNCTION _incdtBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _rec          RECORD;
   _check        BOOLEAN;
   _crmacct      INTEGER;
-
 BEGIN
-
-  IF(TG_OP = 'DELETE') THEN
-    _rec := OLD;
-  ELSE
-    _rec := NEW;
-  END IF;
 
   -- Set the incident number if blank
   IF (TG_OP = 'INSERT') THEN
@@ -27,16 +19,6 @@ BEGIN
   -- Description is required
   IF (LENGTH(COALESCE(NEW.incdt_summary,''))=0) THEN
     RAISE EXCEPTION 'You must supply a valid Incident Description.';
-  END IF;
-
-  -- CRM Account is required
-  IF (NEW.incdt_crmacct_id IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid CRM Account.';
-  END IF;
-
-  -- Contact is required
-  IF (NEW.incdt_cntct_id IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid Contact.';
   END IF;
 
   NEW.incdt_updated := now();

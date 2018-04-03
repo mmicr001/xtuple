@@ -23,7 +23,8 @@ declare
       ['Accounting', 'ReverseARApplication', 'Allows A/R Applications to be reversed'],
       ['Accounting', 'ReverseAPApplication', 'Allows A/P Applications to be reversed'],
       ['CRM', 'MaintainCRMRoles', 'Allows Maintenance of CRM Roles'],
-      ['CRM', 'ViewCRMRoles', 'Can View CRM Roles']
+      ['CRM', 'ViewCRMRoles', 'Can View CRM Roles'],
+      ['CRM', 'MaintainTaskTemplates', 'Can maintain Task templates and template tasks']
     ];
   _p TEXT[];
 begin

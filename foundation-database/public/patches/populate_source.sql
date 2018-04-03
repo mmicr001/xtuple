@@ -601,19 +601,19 @@ select createDoctype(35, --pDocAssNum
                      'TD', --pType
                      'TODO', --pDocAss
                      '', --pCharAss
-                     'To-Do', --pFull
-                     'todoitem', --pTable
-                     'todoitem_id', --pKey
-                     'todoitem_id::text', --pNumber
-                     'todoitem_name', --pName
-                     'firstline(todoitem_description)', --pDesc
+                     'Task', --pFull
+                     'task', --pTable
+                     'task_id', --pKey
+                     'task_id::text', --pNumber
+                     'task_name', --pName
+                     'firstline(task_descrip)', --pDesc
                      '', --pWidget
                      '', --pJoin
-                     'todoitem_id', --pParam
-                     'todoItem', --pUi
+                     'task_id', --pParam
+                     'task', --pUi
                      'MaintainPersonalToDoItems MaintainAllToDoItems', --pPriv
                      'CRM',             -- pModule
-                     'todoitem_active'  -- pActive
+                     'task_active'  -- pActive
 );
 select createDoctype(36, --pDocAssNum
                      'TO', --pType
@@ -741,14 +741,14 @@ select createDoctype(42, --pDocAssNum
                      'TASK', --pDocAss
                      'TASK', --pCharAss
                      'Project Task', --pFull
-                     'prjtask', --pTable
-                     'prjtask_id', --pKey
-                     'prjtask_number', --pNumber
-                     'prjtask_name', --pName
-                     'firstline(prjtask_descrip)', --pDesc
+                     'task', --pTable
+                     'task_id', --pKey
+                     'task_number', --pNumber
+                     'task_name', --pName
+                     'firstline(task_descrip)', --pDesc
                      '', --pWidget
                      '', --pJoin
-                     'prjtask_id', --pParam
+                     'task_id', --pParam
                      'task', --pUi
                      '', --pPriv
                      'CRM' --pModule

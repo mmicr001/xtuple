@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION hasAlarms() RETURNS BOOLEAN AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _alarm          RECORD;
@@ -27,11 +27,11 @@ BEGIN
     _returnVal := TRUE;
 
     IF (_alarm.alarm_source = 'TODO') THEN
-      SELECT (todoitem_name || '-' || todoitem_description),
+      SELECT (task_name || '-' || task_description),
              'T', 'TodoAlarm', 'To-Do Item'
       INTO _summary, _evntlogordtype, _evnttypename, _longsource
-      FROM todoitem
-      WHERE (todoitem_id = _alarm.alarm_source_id);
+      FROM task
+      WHERE (task_id = _alarm.alarm_source_id);
 
       _alarmtype = 'To-Do: ';
 
@@ -45,11 +45,11 @@ BEGIN
       _alarmtype = 'Incident: ';
 
     ELSIF (_alarm.alarm_source = 'J') THEN
-      SELECT (prj_number || ' ' || prj_name || '-' || prjtask_name),
+      SELECT (prj_number || ' ' || prj_name || '-' || task_name),
               'J', 'TaskAlarm', 'Project Task'
       INTO _summary, _evntlogordtype, _evnttypename, _longsource
-      FROM prjtask JOIN prj ON (prj_id=prjtask_prj_id)
-      WHERE (prjtask_id = _alarm.alarm_source_id);
+      FROM task JOIN prj ON (prj_id=task_parent_id AND task_parent_type = 'J')
+      WHERE (task_id = _alarm.alarm_source_id);
 
       _alarmtype = 'Project: ';
 

@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION deleteProjectTask(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pPrjtaskid ALIAS FOR $1;
@@ -9,18 +9,18 @@ DECLARE
 BEGIN
 
   SELECT * INTO _row
-    FROM prjtask
-   WHERE (prjtask_id=pPrjtaskid)
+    FROM task
+   WHERE (task_id=pPrjtaskid)
    LIMIT 1;
   IF (NOT FOUND) THEN
     RETURN -1;
   END IF;
 
-  IF (COALESCE(_row.prjtask_hours_actual, 0.0) > 0.0) THEN
+  IF (COALESCE(_row.task_hours_actual, 0.0) > 0.0) THEN
     RETURN -2;
   END IF;
 
-  IF (COALESCE(_row.prjtask_exp_actual, 0.0) > 0.0) THEN
+  IF (COALESCE(_row.task_exp_actual, 0.0) > 0.0) THEN
     RETURN -3;
   END IF;
 
@@ -28,8 +28,8 @@ BEGIN
   WHERE ((comment_source='TA')
   AND (comment_source_id=pPrjtaskid));
 
-  DELETE FROM prjtask
-   WHERE (prjtask_id=pPrjtaskid);
+  DELETE FROM task
+   WHERE (task_id=pPrjtaskid);
 
   RETURN 0;
 
