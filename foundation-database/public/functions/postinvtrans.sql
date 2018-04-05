@@ -246,7 +246,7 @@ BEGIN
   END IF;
 
   -- If either of the following: postItemlocSeries (calls postInvHist) is required for all transactiions
-  IF (NOT pPreDistributed OR pInvhistid IS NOT NULL) THEN
+  IF (pInvhistid IS NOT NULL) THEN
     PERFORM postItemlocSeries(pItemlocSeries);
   END IF;
 

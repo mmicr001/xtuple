@@ -8,7 +8,6 @@ SELECT
   xt.add_column('crmacctsel', 'crmacctsel_src_crmacct_id', 'integer', 'NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_dest_crmacct_id', 'integer', 'NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_active', 'boolean', 'DEFAULT false NOT NULL', 'public'),
-  xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_competitor_id', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_custinfo', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_emp', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_prospect', 'boolean', 'DEFAULT false NOT NULL', 'public'),
@@ -19,7 +18,6 @@ SELECT
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_notes', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_owner_username', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_parent_id', 'boolean', 'DEFAULT false NOT NULL', 'public'),
-  xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_partner_id', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_type', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_usr_username', 'boolean', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('crmacctsel', 'crmacctsel_mrg_crmacct_number', 'boolean', 'DEFAULT false NOT NULL', 'public');

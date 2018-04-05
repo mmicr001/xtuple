@@ -2,20 +2,18 @@
 -- Name:  pickdatasources
 -- Notes: Show the records the user has selected to merge crm accounts. Emphasize
 --        the particular fields in each record that s/he has selected.
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT c.crmacct_id,
        crmacctsel_dest_crmacct_id,
        c.crmacct_active,
-       crmacctTypes(c.crmacct_id)#>>'{competitor}' IS NOT NULL   AS competitor,
        crmacctTypes(c.crmacct_id)#>>'{customer}'   IS NOT NULL   AS cust,
        crmacctTypes(c.crmacct_id)#>>'{employee}'   IS NOT NULL   AS emp,
        c.crmacct_name,
        c.crmacct_number,
        c.crmacct_owner_username              AS owner,
        p.crmacct_number                      AS parent,
-       crmacctTypes(c.crmacct_id)#>>'{partner}'    IS NOT NULL   AS partner,
        crmacctTypes(c.crmacct_id)#>>'{prospect}'   IS NOT NULL   AS prospect,
        crmacctTypes(c.crmacct_id)#>>'{salesrep}'   IS NOT NULL   AS salesrep,
        crmacctTypes(c.crmacct_id)#>>'{taxauth}'      IS NOT NULL   AS taxauth,
@@ -42,13 +40,11 @@ SELECT c.crmacct_id,
 
        CASE WHEN crmacctsel_mrg_crmacct_number         THEN 'emphasis' END AS crmacct_number_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_crmacct_active         THEN 'emphasis' END AS crmacct_active_qtforegroundrole,
-       CASE WHEN crmacctsel_mrg_crmacct_competitor_id  THEN 'emphasis' END AS competitor_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_custinfo               THEN 'emphasis' END AS cust_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_emp                    THEN 'emphasis' END AS emp_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_crmacct_name           THEN 'emphasis' END AS crmacct_name_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_crmacct_owner_username THEN 'emphasis' END AS owner_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_crmacct_parent_id      THEN 'emphasis' END AS parent_qtforegroundrole,
-       CASE WHEN crmacctsel_mrg_crmacct_partner_id     THEN 'emphasis' END AS partner_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_prospect               THEN 'emphasis' END AS prospect_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_salesrep               THEN 'emphasis' END AS salesrep_qtforegroundrole,
        CASE WHEN crmacctsel_mrg_taxauth                THEN 'emphasis' END AS taxauth_qtforegroundrole,

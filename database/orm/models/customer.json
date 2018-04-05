@@ -2217,7 +2217,7 @@
     "type": "CustomerGroup",
     "table": "custgrp",
     "isRest": true,
-    "idSequenceName": "custgrp_custgrp_id_seq",
+    "idSequenceName": "groups_groups_id_seq",
     "lockable": true,
     "comment": "Customer Group Map",
     "privileges": {
@@ -2233,7 +2233,7 @@
         "name": "id",
         "attr": {
           "type": "Number",
-          "column": "custgrp_id",
+          "column": "groups_id",
           "isPrimaryKey": true
         }
       },
@@ -2241,7 +2241,7 @@
         "name": "name",
         "attr": {
           "type": "String",
-          "column": "custgrp_name",
+          "column": "groups_name",
           "isNaturalKey": true
         }
       },
@@ -2249,7 +2249,7 @@
         "name": "description",
         "attr": {
           "type": "String",
-          "column": "custgrp_descrip"
+          "column": "groups_descrip"
         }
       },
       {
@@ -2257,7 +2257,7 @@
         "toMany": {
           "isNested": true,
           "type": "CustomerGroupCustomer",
-          "column": "custgrp_id",
+          "column": "groups_id",
           "inverse": "customerGroup"
         }
       }
@@ -2269,7 +2269,7 @@
     "nameSpace": "XM",
     "type": "CustomerGroupCustomer",
     "table": "custgrpitem",
-    "idSequenceName": "custgrpitem_custgrpitem_id_seq",
+    "idSequenceName": "groupsitem_groups_id_seq",
     "comment": "Customer Group Customer Map",
     "properties": [
       {
@@ -2292,7 +2292,7 @@
         "name": "customerGroup",
         "attr": {
           "type": "Number",
-          "column": "custgrpitem_custgrp_id"
+          "column": "groupsitem_groups_id"
         }
       },
       {
@@ -2300,7 +2300,7 @@
         "toOne":  {
           "isNested": true,
           "type": "CustomerRelation",
-          "column": "custgrpitem_cust_id"
+          "column": "groupsitem_reference_id"
         }
       }
     ],
@@ -2312,7 +2312,7 @@
     "nameSpace": "XM",
     "type": "CustomerCustomerGroup",
     "table": "custgrpitem",
-    "idSequenceName": "custgrpitem_custgrpitem_id_seq",
+    "idSequenceName": "groupsitem_groups_id_seq",
     "comment": "Customer Group Customer Map",
     "properties": [
       {
@@ -2336,14 +2336,14 @@
         "toOne": {
           "type": "CustomerGroup",
           "isNested": true,
-          "column": "custgrpitem_custgrp_id"
+          "column": "groupsitem_groups_id"
         }
       },
       {
         "name": "customer",
         "attr": {
           "type": "Number",
-          "column": "custgrpitem_cust_id"
+          "column": "groupsitem_reference_id"
         }
       }
     ],

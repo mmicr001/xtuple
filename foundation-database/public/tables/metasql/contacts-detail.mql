@@ -1,7 +1,7 @@
 -- Group: contacts
 -- Name: detail
 -- Notes: 
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if exists("hasContext") ?>
@@ -92,6 +92,9 @@ WHERE true
 <? endif ?>
 <? if exists("crmacct_id") ?>
   AND ( (crmacct_id=<? value("crmacct_id")?>) OR (crmacct_parent_id=<? value("crmacct_id")?>) )
+<? endif ?>
+<? if exists("cntctgrp") ?>
+  AND cntct_id IN (SELECT groupsitem_reference_id FROM cntctgrpitem WHERE groupsitem_groups_id=<? value("cntctgrp") ?>)
 <? endif ?>
 <? if exists("cntct_name_pattern") ?>
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)

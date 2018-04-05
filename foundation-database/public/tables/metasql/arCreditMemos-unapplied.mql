@@ -1,7 +1,7 @@
 -- Group: arCreditMemos
 -- Name: unapplied
 -- Notes: used by unappliedARCreditMemos
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT aropen_id, aropen_docnumber,
@@ -41,9 +41,9 @@ WHERE (aropen_doctype IN ('C', 'R'))
 <? if exists('cust_id') ?>
  AND (cust_id=<? value('cust_id') ?>)
 <? elseif exists('custgrp_id') ?>
- AND (cust_id IN (SELECT custgrpitem_cust_id 
+ AND (cust_id IN (SELECT groupsitem_reference_id 
                           FROM custgrpitem
-                          WHERE custgrpitem_custgrp_id =<? value('custgrp_id') ?>))
+                          WHERE groupsitem_groups_id =<? value('custgrp_id') ?>))
 <? elseif exists('custtype_id') ?>
  AND (cust_custtype_id=<? value('custtype_id') ?>)
 <? elseif exists('custtype_pattern') ?>

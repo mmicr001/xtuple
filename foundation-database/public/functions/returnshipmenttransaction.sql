@@ -97,7 +97,7 @@ BEGIN
                                shiphead_number, 'Return from Shipping',
                                costcat_asset_accnt_id, getPrjAccntId(_r.prj_id, costcat_shipasset_accnt_id),
                                _itemlocSeries, pTimestamp, _r.shipitem_value, _r.shipitem_invhist_id,
-                               _r.shiphead_order_id, _r.shipitem_orderitem_id) INTO _invhistid
+                               NULL, FALSE, _r.shiphead_order_id, _r.shipitem_orderitem_id) INTO _invhistid
           FROM coitem, itemsite, costcat, shiphead, shipitem
           WHERE ((coitem_itemsite_id=itemsite_id)
             AND  (itemsite_costcat_id=costcat_id)
@@ -142,7 +142,7 @@ BEGIN
                             tohead_number, 'Return from Shipping',
                             costcat_asset_accnt_id, costcat_shipasset_accnt_id,
                             _itemlocSeries, pTimestamp, _r.shipitem_value, _r.shipitem_invhist_id,
-                            _r.shiphead_order_id, _r.shipitem_orderitem_id) INTO _invhistid
+                            NULL, FALSE, _r.shiphead_order_id, _r.shipitem_orderitem_id) INTO _invhistid
         FROM toitem, tohead, itemsite, costcat
         WHERE ((toitem_item_id=itemsite_item_id)
           AND  (toitem_tohead_id=tohead_id)

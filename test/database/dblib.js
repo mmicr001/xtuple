@@ -457,6 +457,21 @@
     });
   };
 
+  exports.parseMetasql = function (query, params, callback) {
+    var sql = "SELECT xt.parsemetasql($1::text, $2::text) AS result;",
+        options = _.extend({}, adminCred,
+                           { parameters: [ query,
+                                           typeof params == 'object' ? JSON.stringify(params) : params
+                           ] });
+    datasource.query(sql, options, function (err, res) {
+      assert.isNull(err);
+      assert.isNotNull(res.rows[0].result);
+      if (DEBUG)
+        console.log("parseMetasql result: ", res.rows[0].result);
+      callback(res.rows[0].result);
+    });
+  };
+
   var adminCred = exports.adminCred = exports.generateCreds();
 
 }());

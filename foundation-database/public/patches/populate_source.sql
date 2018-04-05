@@ -706,7 +706,7 @@ select createDoctype(41, --pDocAssNum
                      'W', --pType
                      'W', --pDocAss
                      'W', --pCharAss
-                     'Work Order Item', --pFull
+                     'Work Order', --pFull
                      'wo', --pTable
                      'wo_id', --pKey
                      'formatWonumber(wo_id)', --pNumber
@@ -714,26 +714,9 @@ select createDoctype(41, --pDocAssNum
                      'item_descrip2', --pDesc
                      'core', --pWidget
                      'join itemsite on wo_itemsite_id=itemsite_id join item on itemsite_item_id=item_id', --pJoin
-                     '', --pParam
+                     'wo_id', --pParam
                      '', --pUi
                      '', --pPriv
-                     'Manufacture' --pModule
-);
-SELECT createDocType(NULL, --pDocAssNum
-                     'WO', --pType
-                     'WO', --pDocAss
-                     'WO', --pCharAss
-                     'Work Order', --pFull
-                     'wo', --pTable
-                     'wo_id', --pKey
-                     'formatWonumber(wo_id)', --pNumber
-                     'formatWonumber(wo_id)', --pName
-                     'formatWonumber(wo_id)', --pDesc
-                     '', --pWidget
-                     '', --pJoin
-                     'wo_id', --pParam
-                     'workOrder', --pUi
-                     '', -- pPriv, set this to 'MaintainWorkOrders' when Incident #28911 is implemented
                      'Manufacture' --pModule
 );
 select createDoctype(42, --pDocAssNum

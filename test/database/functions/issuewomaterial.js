@@ -22,8 +22,9 @@
       whCode: "WH1",
       qty: 1
     };
+    var itemlocseries, numUnpostedInvHist;
 
-    it("should get the womatl itemsite_id and qoh",function (done) {
+    it("needs the womatl itemsite_id and qoh",function (done) {
       var sql = "SELECT itemsite_qtyonhand, itemsite_id" +
                 "  FROM itemsite" +
                 " WHERE itemsite_id = getitemsiteid($1, $2);",
@@ -39,7 +40,7 @@
       });
     });
 
-    it("should get the wo itemsite_id and qoh",function (done) {
+    it("needs the wo itemsite_id and qoh",function (done) {
       var sql = "SELECT itemsite_qtyonhand, itemsite_id" + 
                 "  FROM itemsite" +
                 " WHERE itemsite_id = getitemsiteid($1, $2);",
@@ -55,8 +56,18 @@
       });
     });
 
-    // Create a Work Order
-    it("should create a work order", function (done) {
+    it("needs the number of unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
+
+      datasource.query(sql, adminCred, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        numUnpostedInvHist = res.rows[0].num;
+        done();
+      });
+    });
+
+    it("needs a work order", function (done) {
       var callback = function (result) {
         if (DEBUG)
           console.log("createWorkOrder callback result: ", result);
@@ -92,15 +103,12 @@
     });
 
     it.skip("should fail pPreDistributed and pItemlocSeries null", function (done) {
-      // TODO
     });
 
     it.skip("should not proceed if qty < 0", function (done) {
-      // TODO
     });
 
     it.skip("should fail itemsite has no cost category", function (done) {
-      // TODO
     });
 
     // Note: Don't handle distribution detail here, that will be done in private-extensions/test/manufacturing
@@ -115,8 +123,19 @@
       datasource.query(sql, options, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        assert.isNotNull(res.rows[0].result);
-        assert.operator(res.rows[0].result, ">", 0);
+        itemlocseries = res.rows[0].result;
+        assert.operator(itemlocseries, ">", 0);
+        done();
+      });
+    });
+
+    it("needs the itemlocseries posted", function (done) {
+      var sql     = "SELECT postItemLocSeries($1) AS result;",
+          options = _.extend({}, adminCred, { parameters: [ itemlocseries ]});
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        assert.isTrue(res.rows[0].result);
         done();
       });
     });
@@ -135,14 +154,13 @@
       }); 
     });
 
-    it("there should be no unposted invhist records", function (done) {
-      var sql = "SELECT true AS result" +
-                "  FROM invhist" +
-                " WHERE invhist_posted = false;";
+    it("there should be no new unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
 
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
-        assert.equal(res.rowCount, 0);
+        assert.equal(res.rowCount, 1);
+        assert.equal(res.rows[0].num, numUnpostedInvHist);
         done();
       });
     });

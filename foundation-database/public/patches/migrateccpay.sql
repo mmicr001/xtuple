@@ -80,17 +80,17 @@ BEGIN
         IF (_cashrcpt.cashrcpt_id NOT IN (SELECT UNNEST(_foundcashrcpts))) THEN
           FOREACH _ccpay IN ARRAY _ccpays
           LOOP
-            IF ((SELECT ((match & 2)!=0 OR ccpay_curr_id=_r.cashrcpt_curr_id)
-                        AND ((match & 1)!=0 OR ccpay_amount=_cashrcpt.cashrcpt_amount)
+            IF ((SELECT ((_cashrcpt.match & 2)!=0 OR ccpay_curr_id=_cashrcpt.cashrcpt_curr_id)
+                    AND ((_cashrcpt.match & 1)!=0 OR ccpay_amount=_cashrcpt.cashrcpt_amount)
                    FROM ccpay
                   WHERE ccpay_id=_ccpay)
                 AND _ccpay NOT IN (SELECT UNNEST(_foundccpays))) THEN
               UPDATE cashrcpt
-                 SET cashrcpt_ccpay_id=_ccpay
-               WHERE cashrcpt_id=_cashrcpt;
+                 SET cashrcpt_ccpay_id = _ccpay
+               WHERE cashrcpt_id = _cashrcpt.cashrcpt_id;
 
-              _foundcashrcpts := _foundcashrcpts || _cashrcpt;
-              _foundccpays := _foundccpays || _ccpay;
+              _foundcashrcpts := _foundcashrcpts || _cashrcpt.cashrcpt_id;
+              _foundccpays    := _foundccpays    || _ccpay;
 
               EXIT;
             END IF;

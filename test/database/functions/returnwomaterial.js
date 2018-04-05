@@ -8,10 +8,8 @@
     datasource = dblib.datasource,
     adminCred = dblib.generateCreds();
 
-  /* TODO - write tests for the other versions:
-    - returnWoMaterial(integer, numeric, timestamp with timezone)
-    - returnWoMaterial(integer, integer, timestamp with timezone, integer)
-  */
+  //describe.skip("returnWoMaterial(integer, numeric, timestamp with timezone)");
+  //describe.skip("returnWoMaterial(integer, integer, timestamp with timezone, integer)");
 
   describe("returnWoMaterial(integer, qty, integer, tiemstamp with time zone, boolean, boolean, boolean)", function () {
     this.timeout(10 * 1000);
@@ -27,6 +25,7 @@
       whCode: "WH1",
       qty: 1
     };
+    var itemlocseries, numUnpostedInvHist;
 
     it("should get the womatl itemsite_id and qoh",function (done) {
       var sql = "SELECT itemsite_qtyonhand, itemsite_id" +
@@ -60,8 +59,18 @@
       });
     });
 
-    // Create a Work Order
-    it("should create a work order", function (done) {
+    it("needs the number of unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
+
+      datasource.query(sql, adminCred, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        numUnpostedInvHist = res.rows[0].num;
+        done();
+      });
+    });
+
+    it("needs a work order", function (done) {
       var callback = function (result) {
         if (DEBUG)
           console.log("createWorkOrder callback result: ", result);
@@ -99,8 +108,19 @@
       datasource.query(sql, options, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        assert.isNotNull(res.rows[0].result);
+        itemlocseries = res.rows[0].result;
+        assert.operator(itemlocseries, ">", 0);
+        done();
+      });
+    });
 
+    it("needs the issueWoMaterial itemlocseries posted", function (done) {
+      var sql     = "SELECT postItemLocSeries($1) AS result;",
+          options = _.extend({}, adminCred, { parameters: [ itemlocseries ]});
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        assert.isTrue(res.rows[0].result);
         done();
       });
     });
@@ -119,9 +139,7 @@
       });
     });
 
-    it.skip("returnWoMaterial(integer, qty, integer, tiemstamp with time zone, boolean, boolean, boolean) should fail if pPreDistributed and no pItemlocSeries", function (done) {
-      // TODO
-    });
+    it.skip("returnWoMaterial(integer, qty, integer, tiemstamp with time zone, boolean, boolean, boolean) should fail if pPreDistributed and no pItemlocSeries");
 
     // Note: Don't handle distribution detail here, that will be done in private-extensions/test/manufacturing
 
@@ -135,7 +153,19 @@
       datasource.query(sql, options, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        assert.isNotNull(res.rows[0].result);
+        itemlocseries = res.rows[0].result;
+        assert.operator(itemlocseries, ">", 0);
+        done();
+      });
+    });
+
+    it("needs the returnWoMaterial itemlocseries posted", function (done) {
+      var sql     = "SELECT postItemLocSeries($1) AS result;",
+          options = _.extend({}, adminCred, { parameters: [ itemlocseries ]});
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        assert.isTrue(res.rows[0].result);
         done();
       });
     });
@@ -154,17 +184,17 @@
       });
     });
 
-    it("there should be no unposted invhist records", function (done) {
-      var sql = "SELECT true AS result" +
-                "  FROM invhist" +
-                " WHERE invhist_posted = false;";
+    it("there should be no new unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
 
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
-        assert.equal(res.rowCount, 0);
+        assert.equal(res.rowCount, 1);
+        assert.equal(res.rows[0].num, numUnpostedInvHist);
         done();
       });
     });
+
   });
 }());
 

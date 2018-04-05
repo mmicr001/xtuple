@@ -1,7 +1,7 @@
 -- Group: customers
 -- Name:  detail
 -- Notes: 
---        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT DISTINCT ON ( cust_number ) 
@@ -112,6 +112,9 @@ WHERE true
 <? endif ?>
 <? if exists("custtype_code_pattern") ?>
   AND (custtype_code ~* <? value("custtype_code_pattern") ?>)
+<? endif ?>
+<? if exists("custgrp") ?>
+  AND cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem WHERE groupsitem_groups_id = <? value("custgrp") ?>)
 <? endif ?>
 <? if exists("cntct_name_pattern") ?>
   AND (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?> 

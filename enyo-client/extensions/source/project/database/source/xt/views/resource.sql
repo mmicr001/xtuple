@@ -13,8 +13,8 @@ union all
 --obj_uuid
 --from xt.usrlite
 --union all
-select empgrp_name,
-coalesce(empgrp_descrip, empgrp_name),
+select groups_name,
+coalesce(groups_descrip, groups_name),
 obj_uuid
 from empgrp;
 

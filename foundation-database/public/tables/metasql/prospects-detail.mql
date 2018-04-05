@@ -1,13 +1,12 @@
 -- Group: prospects
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT 
   prospect.*, prospect_created::DATE AS created,
-  opsource_name AS prospect_source, opstage_name AS prospect_stage, 
-  incdtpriority_name AS prospect_priority, 
+  opsource_name AS prospect_source,
   cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone,
   addr.*
 <? foreach("char_id_text_list") ?>
@@ -23,8 +22,6 @@ FROM prospect
   LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id)) 
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
   LEFT OUTER JOIN opsource ON (prospect_source_id=opsource_id)
-  LEFT OUTER JOIN opstage ON (prospect_opstage_id=opstage_id)
-  LEFT OUTER JOIN incdtpriority ON (prospect_priority_id=incdtpriority_id)
 <? foreach("char_id_text_list") ?>
      LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> 
           ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='PSPCT') 
@@ -70,6 +67,9 @@ WHERE true
        OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_country,'') ~* <? value("search_pattern") ?>))
 <? endif ?>
+<? if exists("pspctgrp") ?>
+  AND prospect_id IN (SELECT groupsitem_reference_id FROM pspctgrpitem WHERE groupsitem_groups_id=<? value("pspctgrp") ?>)
+<? endif ?>
 <? if exists("prospect_number_pattern") ?>
   AND (prospect_number ~* <? value("prospect_number_pattern") ?>)
 <? endif ?>
@@ -108,12 +108,6 @@ WHERE true
 <? endif ?>
 <? if exists("source") ?>
   AND prospect_source_id=<? value("source") ?>
-<? endif ?>
-<? if exists("stage") ?>
-  AND prospect_opstage_id=<? value("stage") ?>
-<? endif ?>
-<? if exists("priority") ?>
-  AND prospect_priority_id=<? value("priority") ?>
 <? endif ?>
 <? if exists("id") ?>
   AND (prospect_id=<? value("id") ?>

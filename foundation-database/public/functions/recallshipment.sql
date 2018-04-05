@@ -208,7 +208,7 @@ BEGIN
 			  _ti.src_shipasset_accnt_id,
 			  _itemlocSeries, _timestamp,
                           (_ti.trns_cost * _ti.recall_qty * -1.0),
-        _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
+        NULL, NULL, FALSE, _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
 
       IF (_invhistid < 0) THEN
 	RETURN _invhistid;
@@ -238,7 +238,7 @@ BEGIN
   			  _ti.trns_asset_accnt_id,
   			  _itemlocSeries, _timestamp,
                             (_ti.trns_cost * _qtyFromDest * -1.0),
-          _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
+          NULL, NULL, FALSE, _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
 
         IF (_invhistid < 0) THEN
 	  RETURN _invhistid;
@@ -256,7 +256,7 @@ BEGIN
   			  _ti.trns_asset_accnt_id,
   			  _itemlocSeries, _timestamp,
                             (_ti.trns_cost * _qtyFromTransit * -1.0),
-          _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
+          NULL, NULL, FALSE, _ti.toitem_tohead_id, _ti.toitem_id) INTO _invhistid;
 
         IF (_invhistid < 0) THEN
 	  RETURN _invhistid;

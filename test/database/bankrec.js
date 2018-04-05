@@ -123,11 +123,37 @@ var _    = require("underscore"),
 
     // set up /////////////////////////////////////////////////////////////////
 
-    it("needs fiscal year and accounting periods", function (done) {
-      var sql = "SELECT createFiscalYear(NULL::DATE, 'M'::TEXT) AS result;";
+    it("needs fiscal year, open accounting periods, exchange rates, etc.", function (done) {
+      var sql = "DO $$"
+              + "DECLARE"
+              + "  _result INTEGER;"
+              + "  _rec RECORD;"
+              + "BEGIN"
+              + "  _result := createFiscalYear(NULL::DATE, 'M'::TEXT);"
+              + "  FOR _rec IN SELECT period_id FROM period"
+              + "               WHERE period_closed"
+              + "                 AND period_end > CURRENT_DATE"
+              + "               ORDER BY period_end DESC LOOP"
+              + "    _result := openAccountingPeriod(_rec.period_id);"
+              + "  END LOOP;"
+              + "  FOR _rec IN SELECT max(curr_expires) AS max, curr_id"
+              + "                FROM curr_rate"
+              + "               WHERE curr_expires < current_date"
+              + "                 AND curr_id NOT IN (SELECT curr_id"
+              + "                                       FROM curr_rate"
+              + "                                      WHERE current_date BETWEEN curr_effective AND curr_expires)"
+              + "               GROUP BY curr_id LOOP"
+              + "    INSERT INTO curr_rate (curr_id, curr_effective, curr_rate,"
+              + "                           curr_expires"
+              + "      ) SELECT _rec.curr_id, _rec.max + interval '1 day', avg(curr_rate),"
+              + "               date_trunc('year', current_date) + interval '1 year' - interval '1 day'"
+              + "          FROM curr_rate"
+              + "         WHERE curr_id = _rec.curr_id"
+              + "         GROUP BY curr_id;"
+              + "   END LOOP;"
+              + "END $$ LANGUAGE plpgsql;";
       datasource.query(sql, creds, function (err, res) {
         assert.isNull(err, 'no exception from creating periods');
-        assert.equal(res.rowCount, 1);
         done();
       });
     });
@@ -176,41 +202,6 @@ var _    = require("underscore"),
       });
     });
 
-    it('ensures there is an open accounting period', function (done) {
-      var sql = 'SELECT period_id, period_closed, period_freeze'        +
-                '  FROM period'                                         +
-                ' WHERE CURRENT_DATE BETWEEN period_start AND period_end;'
-                ;
-      datasource.query(sql, creds, function (err, res) {
-        var sql;
-        if (res.rowCount !== 1) {
-          sql = mqlToSql("INSERT INTO period ("                         +
-                "  period_closed, period_freeze, period_name,"          +
-                "  period_quarter, period_start,"                       +
-                "  period_end, period_number"                           +
-                ") VALUES (FALSE, FALSE, <? value('testTag') ?>,"       +
-                "  EXTRACT(QUARTER FROM DATE CURRENT_DATE),"            +
-                "  DATE_TRUNC(MONTH, CURRENT_DATE),"                    +
-                "  DATE_TRUNC(MONTH, CURRENT_DATE) + '1 month',"        +
-                "  EXTRACT(month FROM DATE CURRENT_DATE)"               +
-                ") RETURNING period_id;",
-                { testTag: testTag });
-        } else if (res.rows[0].period_closed === true) {
-          sql = mqlToSql('SELECT openAccountingPeriod(<? value("period") ?>)' +
-                         ' AS period_id;', { period: res.rows[0].period_id });
-        }
-        if (sql) {
-          datasource.query(sql, creds, function (err, res) {
-            assert.equal(res.rowCount, 1);
-            assert(res.period_id >= 0);
-            done();
-          });
-        } else {
-          done();
-        }
-      });
-    });
-
     it('turns on cash-based tax handling if necessary', function (done) {
       var sql = "SELECT fetchMetricBool('CashBasedTax') AS result;";
       datasource.query(sql, creds, function (err, res) {
@@ -229,31 +220,35 @@ var _    = require("underscore"),
     });
 
     it('creates a purchase order', function (done) {
-      var sql = mqlToSql("INSERT INTO pohead (pohead_number, pohead_status,"   +
-                         "  pohead_agent_username, pohead_vend_id,"            +
-                         "  pohead_taxzone_id, pohead_orderdate,"              +
-                         "  pohead_curr_id, pohead_saved, pohead_comments,"    +
-                         "  pohead_warehous_id,"                               +
-                         "  pohead_printed, pohead_terms_id,pohead_taxtype_id" +
-                         ") SELECT fetchPoNumber(), 'U',"                      +
-                         "    CURRENT_USER, vend_id,"                          +
-                         "    vend_taxzone_id, CURRENT_DATE,"                  +
-                         "    vend_curr_id, false, <? value('testTag') ?>,"    +
-                         "    (SELECT MIN(warehous_id) FROM whsinfo WHERE "    +
-                         "     warehous_active AND NOT warehous_transit),"     +
-                         "    false, vend_terms_id, taxass_taxtype_id"         +
-                         "   FROM vendinfo"                                    +
-                         "   JOIN taxass ON vend_taxzone_id=taxass_taxzone_id" +
-                         "   JOIN taxrate ON taxass_tax_id=taxrate_tax_id"     +
-                         "  WHERE vend_active"                                 +
-                         "    AND (taxrate_percent > 0 OR taxrate_amount > 0)" +
-                         " LIMIT 1 RETURNING *;",
-                         { testTag: testTag });
-      datasource.query(sql, creds, function (err, res) {
-        assert.equal(res.rowCount, 1);
-        pohead = res.rows[0];
-        done();
-      });
+      function runQuery (query) {
+        assert.isNotNull(query);
+        datasource.query(query, creds, function (err, res) {
+          assert.equal(res.rowCount, 1);
+          pohead = res.rows[0];
+          done();
+        });
+      };
+      var sql = dblib.parseMetasql("INSERT INTO pohead (pohead_number, pohead_status,"
+                                +  "  pohead_agent_username, pohead_vend_id,"
+                                +  "  pohead_taxzone_id, pohead_orderdate,"
+                                +  "  pohead_curr_id, pohead_saved, pohead_comments,"
+                                +  "  pohead_warehous_id,"
+                                +  "  pohead_printed, pohead_terms_id,pohead_taxtype_id"
+                                +  ") SELECT fetchPoNumber(), 'U',"
+                                +  "    CURRENT_USER, vend_id,"
+                                +  "    vend_taxzone_id, CURRENT_DATE,"
+                                +  "    vend_curr_id, false, <? value('testTag') ?>,"
+                                +  "    (SELECT MIN(warehous_id) FROM whsinfo WHERE "
+                                +  "     warehous_active AND NOT warehous_transit),"
+                                +  "    false, vend_terms_id, taxass_taxtype_id"
+                                +  "   FROM vendinfo"
+                                +  "   JOIN taxass ON vend_taxzone_id=taxass_taxzone_id"
+                                +  "   JOIN taxrate ON taxass_tax_id=taxrate_tax_id"
+                                +  "  WHERE vend_active"
+                                +  "    AND (taxrate_percent > 0 OR taxrate_amount > 0)"
+                                +  " LIMIT 1 RETURNING *;",
+                           { testTag: testTag },
+                           runQuery);
     });
 
     it('creates a purchase order item', function (done) {
@@ -554,7 +549,7 @@ var _    = require("underscore"),
 
     // Create a line item
     it("should add a line item to the SO",function (done) {
-      var callback = function (result) {  
+      var callback = function (result) {
         coitem.coitem_id = result;
         done();
       };
@@ -573,7 +568,7 @@ var _    = require("underscore"),
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
         assert.operator(res.rows[0].itemsite_id, ">", 0);
-      
+
         coitem.coitem_itemsite_id = res.rows[0].itemsite_id;
         coitem.item_id = res.rows[0].itemsite_item_id;
         params.itemsiteId = res.rows[0].itemsite_id;
@@ -589,7 +584,7 @@ var _    = require("underscore"),
       datasource.query(sql, options, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        
+
         cohead.cohead_number = res.rows[0].cohead_number;
         cohead.cohead_freight = res.rows[0].cohead_freight;
 

@@ -21,6 +21,7 @@ var DEBUG = false,
       whCode: "WH1",
       qty: 10
     };
+    var itemlocseries, numUnpostedInvHist;
 
     it("should fail with missing pr and no itemlocseries", function (done) {
       var sql = "select postReceipt(-1, NULL) as result;";
@@ -40,7 +41,7 @@ var DEBUG = false,
       });
     });
 
-    it("should get the itemsite_id and qoh",function (done) {
+    it("needs the itemsite_id and qoh",function (done) {
       var sql = "SELECT itemsite_qtyonhand, itemsite_id" +
                 "  FROM itemsite" +
                 " WHERE itemsite_id = getitemsiteid($1, $2);",
@@ -57,8 +58,18 @@ var DEBUG = false,
       });
     });
 
-    // Create a Purchase Order
-    it("should create a purchase order", function (done) {
+    it("needs the number of unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
+
+      datasource.query(sql, adminCred, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        numUnpostedInvHist = res.rows[0].num;
+        done();
+      });
+    });
+
+    it("needs a purchase order", function (done) {
      var callback = function (result) {
         if (DEBUG)
           console.log("createPurchaseOrder callback result: ", result);
@@ -69,8 +80,7 @@ var DEBUG = false,
       dblib.createPurchaseOrder(callback);
     });
 
-    // Create a Purchase Order Line Item
-    it("should create a purchase order line item", function (done) {
+    it("needs a purchase order line item", function (done) {
      var callback = function (result) {
         if (DEBUG)
           console.log("createPurchaseOrderLineItem callback result: ", result);
@@ -81,8 +91,7 @@ var DEBUG = false,
       dblib.createPurchaseOrderLineItem(params, callback);
     });
 
-    // just P/O for now
-    it("needs a receipt", function (done) {
+    it("needs a P/O receipt", function (done) {
       var sql  = "insert into recv ("                                           +
                  "  recv_order_type, recv_order_number, recv_orderitem_id,"     +
                  "  recv_itemsite_id, recv_vend_id, recv_vend_uom,"             +
@@ -123,6 +132,9 @@ var DEBUG = false,
       });
     });
 
+    it.skip("needs T/O receipt");
+    it.skip("needs R/A receipt");
+
     it.skip("should fail with unknown order type", function (done) {
       var sql  = "select postReceipt($1, NULL) as result;",
           cred = _.extend({}, adminCred, { parameters: [ recv[0].recv_id ]});
@@ -149,7 +161,19 @@ var DEBUG = false,
       datasource.query(sql, cred, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        assert.operator(res.rows[0].result, ">", 0);
+        itemlocseries = res.rows[0].result;
+        assert.operator(itemlocseries, ">", 0);
+        done();
+      });
+    });
+
+    it("needs the itemlocseries posted", function (done) {
+      var sql     = "SELECT postItemLocSeries($1) AS result;",
+          options = _.extend({}, adminCred, { parameters: [ itemlocseries ]});
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        assert.isTrue(res.rows[0].result);
         done();
       });
     });
@@ -177,14 +201,13 @@ var DEBUG = false,
       });
     });
 
-    it("there should be no unposted invhist records", function (done) {
-      var sql = "SELECT true AS result" +
-                "  FROM invhist" +
-                " WHERE invhist_posted = false;";
+    it("there should be no new unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
 
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
-        assert.equal(res.rowCount, 0);
+        assert.equal(res.rowCount, 1);
+        assert.equal(res.rows[0].num, numUnpostedInvHist);
         done();
       });
     });

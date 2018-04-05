@@ -16,6 +16,7 @@
       whCode: "WH1",
       qty: 1
     };
+    var itemlocseries, numUnpostedInvHist;
 
     it("should get the itemsite_id and qoh",function (done) {
       var sql = "SELECT itemsite_qtyonhand, itemsite_id, itemsite_warehous_id" +
@@ -34,8 +35,18 @@
       });
     });
 
-    // Create a Sales Order
-    it("should create a sales order", function (done) {
+    it("needs the number of unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
+
+      datasource.query(sql, adminCred, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        numUnpostedInvHist = res.rows[0].num;
+        done();
+      });
+    });
+
+    it("needs a sales order", function (done) {
      var callback = function (result) {
         params.coheadId = result;
         done();
@@ -44,8 +55,7 @@
       dblib.createSalesOrder(callback);
     });
 
-    // Create a line item
-    it("should add a line item to the SO",function (done) {
+    it("needs a sales order line item",function (done) {
       var callback = function (result) {  
         params.coitemId = result;
         done();
@@ -63,7 +73,19 @@
       datasource.query(sql, options, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
-        assert.operator(res.rows[0].result, ">", 0);
+        itemlocseries = res.rows[0].result;
+        assert.operator(itemlocseries, ">", 0);
+        done();
+      });
+    });
+
+    it("needs the issuetoshipping itemlocseries posted", function (done) {
+      var sql     = "SELECT postItemLocSeries($1) AS result;",
+          options = _.extend({}, adminCred, { parameters: [ itemlocseries ]});
+      datasource.query(sql, options, function (err, res) {
+        assert.isNull(err);
+        assert.equal(res.rowCount, 1);
+        assert.isTrue(res.rows[0].result);
         done();
       });
     });
@@ -138,17 +160,17 @@
       });
     });
 
-    it("there should be no unposted invhist records", function (done) {
-      var sql = "SELECT true AS result" +
-                "  FROM invhist" +
-                " WHERE invhist_posted = false;";
+    it("there should be no new unposted invhist records", function (done) {
+      var sql = "SELECT COUNT(*) AS num FROM invhist WHERE NOT invhist_posted;";
 
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
-        assert.equal(res.rowCount, 0);
+        assert.equal(res.rowCount, 1);
+        assert.equal(res.rows[0].num, numUnpostedInvHist);
         done();
       });
     });
+
   });
 }());
 

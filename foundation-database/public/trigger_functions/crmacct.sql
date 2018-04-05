@@ -4,8 +4,7 @@ DROP FUNCTION IF EXISTS _crmacctAfterTrigger();
 DROP FUNCTION IF EXISTS _crmacctBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _crmacctBeforeUpsertTrigger() RETURNS TRIGGER AS $$
--- TODO: add special handling for converting prospects <-> customers?
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _matchingUsrNew BOOLEAN := false;
@@ -18,12 +17,6 @@ BEGIN
 
   IF COALESCE(NEW.crmacct_owner_username, '') = '' THEN
     NEW.crmacct_owner_username := getEffectiveXtUser();
-  END IF;
-  IF NEW.crmacct_competitor_id < 0 THEN
-    NEW.crmacct_competitor_id := NULL;
-  END IF;
-  IF NEW.crmacct_partner_id < 0 THEN
-    NEW.crmacct_partner_id := NULL;
   END IF;
 
   _matchingUsrNew := EXISTS(SELECT 1 FROM usr

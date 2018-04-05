@@ -1,0 +1,160 @@
+-- Group: buildGroups
+-- Name:  generateItems
+-- Notes: Generate CRM Group items based on selected parameters
+--        WITH rows is used to return count of inserted group items back to the user
+
+WITH rows AS (
+
+INSERT INTO <? literal('groupsitem') ?> (groupsitem_groups_id, groupsitem_reference_id)
+SELECT DISTINCT <? value('groups_id') ?>, <? literal('source_id') ?> 
+FROM <? literal('source_table') ?>
+<? if exists('Account') ?>
+  LEFT OUTER JOIN crmacctaddrass ON crmacctaddrass_crmacct_id=crmacct_id
+  LEFT OUTER JOIN crmacctcntctass ON crmacctcntctass_crmacct_id=crmacct_id
+  LEFT OUTER JOIN cntct ON crmacctcntctass_cntct_id=cntct_id
+  LEFT OUTER JOIN addr ON cntct_addr_id=addr_id
+<? endif ?>
+<? if exists('Customer') ?>
+  LEFT OUTER JOIN cntct bill_cntct ON (cust_cntct_id=bill_cntct.cntct_id) 
+  LEFT OUTER JOIN addr bill_addr ON (bill_cntct.cntct_addr_id=bill_addr.addr_id)
+  LEFT OUTER JOIN cntct corr_cntct ON (cust_corrcntct_id=corr_cntct.cntct_id) 
+  LEFT OUTER JOIN addr corr_addr ON (corr_cntct.cntct_addr_id=corr_addr.addr_id)
+<? endif ?>
+<? if exists('Prospect') ?>
+  LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id)) 
+  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
+<? endif ?>
+<? if exists('Contact') ?>
+  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
+<? endif ?>
+<? if exists('Employee') ?>
+  LEFT OUTER JOIN cntct ON (emp_cntct_id=cntct_id)
+  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
+<? endif ?>
+<? foreach("char_id_text_list") ?>
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type=<? value('charass') ?>) 
+                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=<? literal('source_id') ?> )
+                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
+  LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type=<? value('charass') ?>) 
+                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=<? literal('source_id') ?> )
+                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
+  LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type=<? value('charass') ?>) 
+                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=<? literal('source_id') ?> )
+                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
+  LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
+<? endforeach ?>
+WHERE (true)
+<? literal("charClause") ?>
+<? literal("filterClause") ?>
+<? if exists("Customer") ?>
+  <? if exists("addr_street_pattern") ?>
+    AND (COALESCE(bill_addr.addr_line1,'') || ' ' || COALESCE(bill_addr.addr_line2,'') || ' ' || COALESCE(bill_addr.addr_line3,'') ~* <? value("addr_street_pattern") ?>
+     OR  COALESCE(corr_addr.addr_line1,'') || ' ' || COALESCE(corr_addr.addr_line2,'') || ' ' || COALESCE(corr_addr.addr_line3,'') ~* <? value("addr_street_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_city_pattern") ?>
+    AND (COALESCE(bill_addr.addr_city,'') ~* <? value("addr_city_pattern") ?>
+     OR  COALESCE(corr_addr.addr_city,'') ~* <? value("addr_city_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_state_pattern") ?>
+    AND (COALESCE(bill_addr.addr_state,'') ~* <? value("addr_state_pattern") ?>
+     OR  COALESCE(corr_addr.addr_state,'') ~* <? value("addr_state_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_postalcode_pattern") ?>
+    AND (COALESCE(bill_addr.addr_postalcode,'') ~* <? value("addr_postalcode_pattern") ?>
+     OR  COALESCE(corr_addr.addr_postalcode,'') ~* <? value("addr_postalcode_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_country_pattern") ?>
+    AND (COALESCE(bill_addr.addr_country,'') ~* <? value("addr_country_pattern") ?>
+     OR  COALESCE(corr_addr.addr_country,'') ~* <? value("addr_country_pattern") ?>)
+  <? endif ?>
+<? endif ?>
+<? if not exists("Customer") ?>
+  <? if exists("addr_street_pattern") ?>
+    AND (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("addr_street_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_city_pattern") ?>
+    AND (COALESCE(addr_city,'') ~* <? value("addr_city_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_state_pattern") ?>
+    AND (COALESCE(addr_state,'') ~* <? value("addr_state_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_postalcode_pattern") ?>
+    AND (COALESCE(addr_postalcode,'') ~* <? value("addr_postalcode_pattern") ?>)
+  <? endif ?>
+  <? if exists("addr_country_pattern") ?>
+    AND (COALESCE(addr_country,'') ~* <? value("addr_country_pattern") ?>)
+  <? endif ?>
+<? endif ?>
+<? if exists("Customer") ?>
+  <? if exists("salesrep_id") ?>
+    AND (cust_salesrep_id = <? value("salesrep_id") ?>)
+  <? endif ?>
+  <? if exists("custtype_id") ?>
+    AND (cust_custtype_id = <? value("custtype_id") ?>)
+  <? endif ?>
+   <? if exists("item_id") ?>
+    AND cust_id IN (SELECT cohist_cust_id 
+                    FROM public.saleshistorymisc 
+                    JOIN itemsite its ON cohist_itemsite_id=its.itemsite_id AND itemsite_item_id=<? value("item_id") ?>)  
+  <? endif ?>
+  <? if exists("itemGroup") ?>
+    AND cust_id IN (SELECT cohist_cust_id 
+                    FROM public.saleshistorymisc 
+                    JOIN itemsite its ON cohist_itemsite_id=its.itemsite_id 
+                    JOIN itemgrpitem ON itemgrpitem_item_id=itemsite_item_id
+                                     AND itemgrpitem_itemgrp_id = <? value("itemGroup") ?>)
+  <? endif ?>
+<? endif ?>
+<? if exists('Prospect') ?>
+  <? if exists("salesrep_id") ?>
+    AND (prospect_salesrep_id = <? value("salesrep_id") ?>)
+  <? endif ?>
+  <? if exists("hasQuotes") ?>
+    AND prospect_id IN (SELECT quhead_cust_id 
+                        FROM quhead 
+                        WHERE quhead_status = 'O' 
+                        AND (quhead_expire IS NULL OR quhead_expire > current_date)) 
+  <? endif ?>
+  <? if exists("item_id") ?>
+    AND prospect_id IN (SELECT quhead_cust_id FROM quhead
+                        JOIN quitem ON quitem_quhead_id=quhead_id
+                        JOIN itemsite ON quitem_itemsite_id=itemsite_id AND itemsite_item_id=<? value("item_id") ?>)
+  <? endif ?>
+  <? if exists("itemGroup") ?>
+    AND prospect_id IN (SELECT quhead_cust_id 
+                        FROM quhead
+                        JOIN quitem ON quitem_quhead_id=quhead_id
+                        JOIN itemsite ON quitem_itemsite_id=itemsite_id 
+                        JOIN itemgrpitem ON itemgrpitem_item_id=itemsite_item_id
+                                     AND itemgrpitem_itemgrp_id = <? value("itemGroup") ?>)
+  <? endif ?>
+<? endif ?>
+<? if exists('Contact') ?>
+  <? if exists("item_id") ?>
+    AND cntct_id IN (SELECT crmacctcntctass_cntct_id 
+                    FROM crmacctcntctass
+                    JOIN custinfo ON cust_crmacct_id=crmacctcntctass_crmacct_id
+                    WHERE cust_id IN (SELECT cohist_cust_id 
+                                      FROM public.saleshistorymisc 
+                                      JOIN itemsite its ON cohist_itemsite_id=its.itemsite_id AND itemsite_item_id=<? value("item_id") ?>))
+  <? endif ?>
+  <? if exists("itemGroup") ?>
+    AND cntct_id IN (SELECT crmacctcntctass_cntct_id 
+                    FROM crmacctcntctass
+                    JOIN custinfo ON cust_crmacct_id=crmacctcntctass_crmacct_id
+                    WHERE cust_id IN (SELECT cohist_cust_id 
+                                      FROM public.saleshistorymisc 
+                                      JOIN itemsite its ON cohist_itemsite_id=its.itemsite_id 
+                                      JOIN itemgrpitem ON itemgrpitem_item_id=itemsite_item_id
+                                                       AND itemgrpitem_itemgrp_id = <? value("itemGroup") ?>))
+  <? endif ?>
+<? endif ?>
+
+RETURNING 1)
+SELECT count(*) AS groupsinserted FROM rows;

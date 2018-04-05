@@ -8,8 +8,6 @@ SELECT
   xt.add_column('crmacct', 'crmacct_name',             'TEXT', NULL,           'public'),
   xt.add_column('crmacct', 'crmacct_active',        'BOOLEAN', 'DEFAULT true', 'public'),
   xt.add_column('crmacct', 'crmacct_type',     'CHARACTER(1)', NULL,      'public'),
-  xt.add_column('crmacct', 'crmacct_competitor_id', 'INTEGER', NULL,      'public'),
-  xt.add_column('crmacct', 'crmacct_partner_id',    'INTEGER', NULL,      'public'),
   xt.add_column('crmacct', 'crmacct_parent_id',     'INTEGER', NULL,      'public'),
   xt.add_column('crmacct', 'crmacct_notes',            'TEXT', NULL,      'public'),
   xt.add_column('crmacct', 'crmacct_owner_username',   'TEXT', NULL,      'public'),
@@ -52,6 +50,19 @@ BEGIN
                      WHERE crmacctcntctass_crmacct_id=crmacct_id 
                      AND crmacctcntctass_cntct_id=crmacct_cntct_id_2);
   END IF;
+
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='crmacct' and column_name='crmacct_competitor_id') THEN
+    INSERT INTO crmacctrole (crmacctrole_crmacct_id, crmacctrole_crmrole_id)
+    SELECT crmacct_id, getcrmroleid('Competitor')
+      FROM crmacct 
+      WHERE crmacct_competitor_id IS NOT NULL
+    UNION
+    SELECT crmacct_id, getcrmroleid('Partner')
+      FROM crmacct 
+      WHERE crmacct_partner_id IS NOT NULL;
+
+  END IF;
 END$$;
 
 ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1 CASCADE,
@@ -61,6 +72,8 @@ ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1 CASCADE,
                     DROP COLUMN IF EXISTS crmacct_vend_id CASCADE,
                     DROP COLUMN IF EXISTS crmacct_taxauth_id CASCADE,
                     DROP COLUMN IF EXISTS crmacct_emp_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_competitor_id CASCADE,
+                    DROP COLUMN IF EXISTS crmacct_partner_id CASCADE,
                     DROP COLUMN IF EXISTS crmacct_salesrep_id CASCADE;
 
 ALTER TABLE public.crmacct ENABLE TRIGGER ALL;
@@ -72,8 +85,6 @@ COMMENT ON COLUMN crmacct.crmacct_number IS 'Abbreviated human-readable identifi
 COMMENT ON COLUMN crmacct.crmacct_name IS 'Long name of this CRM Account.';
 COMMENT ON COLUMN crmacct.crmacct_active IS 'This CRM Account is available for new activity.';
 COMMENT ON COLUMN crmacct.crmacct_type IS 'This indicates whether the CRM Account represents an organization or an individual person.';
-COMMENT ON COLUMN crmacct.crmacct_competitor_id IS 'For now, > 0 indicates this CRM Account is a competitor. Eventually this may become a foreign key to a table of competitors.';
-COMMENT ON COLUMN crmacct.crmacct_partner_id IS 'For now, > 0 indicates this CRM Account is a partner. Eventually this may become a foreign key to a table of partners.';
 COMMENT ON COLUMN crmacct.crmacct_parent_id IS 'The internal ID of an (optional) parent CRM Account. For example, if the current CRM Account is a subsidiary of another company, the crmacct_parent_id points to the CRM Account representing that parent company.';
 COMMENT ON COLUMN crmacct.crmacct_notes IS 'Free-form comments pertaining to the CRM Account.';
 COMMENT ON COLUMN crmacct.crmacct_owner_username IS 'The application User responsible for this CRM Account.';

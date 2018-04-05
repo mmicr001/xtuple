@@ -15,8 +15,9 @@ var _      = require("underscore"),
         ;
 
     it("needs to know a date in the aropen duedate range", function (done) {
-      var sql = "SELECT aropen_duedate, random() FROM aropen" +
-                " ORDER BY 2 LIMIT 1;";
+      var sql = "SELECT MAX(aropen_duedate) - interval '90 days' AS aropen_duedate"
+              + "  FROM aropen"
+              + " WHERE aropen_duedate < CURRENT_DATE";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
@@ -89,10 +90,8 @@ var _      = require("underscore"),
         _.each(res.rows, function (row, i) {
           bool_and_date = bool_and_date && (row.aropen_docdate == row.aropen_distdate);
           _.each(row, function (field, name) {
-            assert.isNotNull(field, name);
-            if (name.indexOf('date') >=0)
-              return;
-            bool_and_val = bool_and_val && (field == agingData[i][name]);
+            if (name.indexOf('_val') >=0)
+              bool_and_val = bool_and_val && (field == agingData[i][name]);
           });
           assert.equal(row.araging_cur_val   + row.araging_thirty_val +
                        row.araging_sixty_val + row.araging_ninety_val +
@@ -114,9 +113,8 @@ var _      = require("underscore"),
         assert.equal(res.rowCount, agingData.length);
         _.each(res.rows, function (row, i) {
           _.each(row, function (field, name) {
-            if (name.indexOf('date') >=0)
-              return;
-            bool_and = bool_and && (field == agingData[i][name]);
+            if (name.indexOf('_val') >=0)
+              bool_and = bool_and && (field == agingData[i][name]);
           });
           assert.equal(row.araging_cur_val   + row.araging_thirty_val +
                        row.araging_sixty_val + row.araging_ninety_val +
