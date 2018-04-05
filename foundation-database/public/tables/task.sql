@@ -32,8 +32,6 @@ SELECT
 
 SELECT
   xt.add_constraint('task', 'task_pkey', 'PRIMARY KEY (task_id)', 'public'),
-  xt.add_constraint('task', 'task_task_parent_id_unq',
-                    'UNIQUE (task_parent_type, task_parent_id, task_number)', 'public'),
   xt.add_constraint('task', 'task_task_status_check',
                     $$CHECK (task_status IN ('N', 'D', 'P', 'O', 'C'))$$, 'public'),
   xt.add_constraint('task', 'task_recurring_task_id_fkey',

@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS _prjtasktrigger() CASCADE;
 
-CREATE OR REPLACE FUNCTION _taskTrigger() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public._taskTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
@@ -23,6 +23,15 @@ BEGIN
     RAISE EXCEPTION 'You must enter a valid name.';
   END IF;
 
+  -- Update Percent Complete based on hours
+  IF (TG_OP = 'UPDATE') THEN
+    IF ((NEW.task_hours_actual <> OLD.task_hours_actual OR
+        NEW.task_hours_budget <> OLD.task_hours_budget) 
+        AND NEW.task_hours_budget > 0) THEN
+       NEW.task_pct_complete := ROUND((NEW.task_hours_actual::NUMERIC / NEW.task_hours_budget::NUMERIC) * 100, 0);
+    END IF;
+  END IF;
+
   -- Timestamps
   IF (TG_OP = 'INSERT') THEN
     NEW.task_created := now();
@@ -41,7 +50,7 @@ CREATE TRIGGER taskTrigger
   BEFORE INSERT OR UPDATE
   ON task
   FOR EACH ROW
-  EXECUTE PROCEDURE _taskTrigger();
+  EXECUTE PROCEDURE public._taskTrigger();
 
 DROP FUNCTION IF EXISTS _prjtaskAfterTrigger() CASCADE;
 

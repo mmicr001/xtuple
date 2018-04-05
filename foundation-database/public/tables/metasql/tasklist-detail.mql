@@ -10,8 +10,9 @@ SELECT * FROM (
   SELECT task_id AS id, 
          1 AS altId, 
          <? value("task") ?> AS type, 
-         CAST(incdt_number AS text) AS number,
+         task_number AS number,
          task_name AS name,
+         prj_number,
          CASE WHEN (task_active AND task_status != 'C') THEN TRUE
               ELSE FALSE
          END AS active,
@@ -68,7 +69,8 @@ SELECT * FROM (
       LEFT OUTER JOIN ophead ON (ophead_id=task_parent_id AND task_parent_type='OPP')
       LEFT OUTER JOIN crmacct ON (crmacct_id=task_parent_id AND task_parent_type='CRMA')
       LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
-      LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id) 
+      LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id)
+      LEFT OUTER JOIN prj ON (prj_id=task_prj_id)
    WHERE true
    AND NOT task_istemplate
    AND task_parent_type <> 'J'
@@ -132,6 +134,7 @@ UNION ALL
          <? value("incident") ?> AS type, 
          CAST(incdt_number AS text) AS number,
          incdt_summary AS name, 
+         prj_number,
          incdt_status != 'L' AS active,
          CASE WHEN (incdt_status='N') THEN <? value("new") ?>
               WHEN (incdt_status='F') THEN <? value("feedback") ?>
@@ -168,6 +171,7 @@ UNION ALL
            LEFT OUTER JOIN crmacct ON (crmacct_id=incdt_crmacct_id) 
            LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
            LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=incdt_incdtpriority_id) 
+           LEFT OUTER JOIN prj ON (prj_id=incdt_prj_id)
     WHERE true
    <? if exists("incdt_id") ?>
     AND (incdt_id =<? value("incdt_id") ?>)
@@ -215,6 +219,7 @@ UNION ALL
            <? value("prjtask") ?> AS type,
            task_number AS number,
            task_name AS name, 
+           prj_number,
            task_status != 'C' AS active,
          CASE WHEN (task_status='C') THEN <? value("complete") ?>
               WHEN (task_status='D') THEN <? value("deferred") ?>
@@ -306,6 +311,7 @@ UNION
            <? value("prjtask") ?> AS type,
            task_number AS number,
            task_name AS name, 
+           prj_number,
            task_status != 'C' AS active,
          CASE WHEN (task_status='C') THEN <? value("complete") ?>
               WHEN (task_status='D') THEN <? value("deferred") ?>
@@ -370,6 +376,7 @@ UNION ALL
            <? value("project") ?> AS type,
            prj_number AS number,
            prj_name AS name, 
+           prj_number,
            prj_status != 'C' AS active,
            CASE WHEN (prj_status='P') THEN <? value("concept") ?>
                 WHEN (prj_status='O') THEN <? value("inprocess") ?>
@@ -446,6 +453,7 @@ UNION ALL
          <? value("opportunity") ?> AS type, 
          ophead_number AS number,
          ophead_name AS name, 
+         prj_number,
          ophead_active AS active,
          opstage_descrip AS stage,         
          incdtpriority_name AS priority, 
@@ -478,6 +486,7 @@ UNION ALL
       LEFT OUTER JOIN crmacct ON (crmacct_id=ophead_crmacct_id)
       LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
       LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=ophead_priority_id) 
+      LEFT OUTER JOIN prj ON (prj_id=ophead_prj_id)
     WHERE true
   <? if exists("ophead_id") ?>
     AND (ophead_id =<? value("ophead_id") ?>)
