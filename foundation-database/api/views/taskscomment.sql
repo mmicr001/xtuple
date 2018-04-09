@@ -1,4 +1,5 @@
 -- Project Task Comment
+--TODO allow this view to work for all Tasks
 
 DROP VIEW IF EXISTS api.taskcomment;
 
@@ -35,7 +36,7 @@ CREATE OR REPLACE RULE "_INSERT" AS
   VALUES (
     COALESCE(NEW.date,now()),
     'TA',
-    getPrjTaskId(NEW.project_number,NEW.task_number),
+    getTaskId(NEW.project_number,NEW.task_number),
     COALESCE(NEW.username,getEffectiveXtUser()),
     getCmntTypeId(NEW.type),
     NEW.text);

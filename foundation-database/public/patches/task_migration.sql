@@ -1,4 +1,4 @@
-DO $$
+DO $_$
 DECLARE
   _rec  RECORD;
   _nid  INTEGER;
@@ -22,7 +22,6 @@ IF EXISTS (
       prjtask_prj_id,
       prjtask_status,
       prjtask_owner_username,
-      prjtask_priority_id,
       prjtask_start_date,
       prjtask_due_date,
       prjtask_assigned_date,
@@ -31,10 +30,7 @@ IF EXISTS (
       prjtask_hours_budget,
       prjtask_hours_actual,
       prjtask_exp_budget,
-      prjtask_exp_actual,
-      prjtask_pct_complete,
-      prjtask_created,
-      prjtask_lastupdated
+      prjtask_exp_actual
     FROM prjtask
   LOOP
     INSERT INTO task (
@@ -55,12 +51,8 @@ IF EXISTS (
       task_hours_actual,
       task_exp_budget,
       task_exp_actual,
-      task_pct_complete,
-      task_notes,
-      task_recurring_task_id,
-      task_created,
-      task_created_by,
-      task_lastupdated)
+      task_notes
+    )
     VALUES  
      (_rec.prjtask_number,
       _rec.prjtask_name,
@@ -71,7 +63,7 @@ IF EXISTS (
       _rec.prjtask_prj_id,
       _rec.prjtask_status,
       _rec.prjtask_owner_username,
-      _rec.prjtask_priority_id,
+      COALESCE((SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name='Normal'),1),
       _rec.prjtask_start_date,
       _rec.prjtask_due_date,
       _rec.prjtask_completed_date,
@@ -79,12 +71,8 @@ IF EXISTS (
       _rec.prjtask_hours_actual,
       _rec.prjtask_exp_budget,
       _rec.prjtask_exp_actual,
-      _rec.prjtask_pct_complete,
-      '',
-      NULL,
-      _rec.prjtask_created,
-      NULL,
-      _rec.prjtask_lastupdated)
+      ''
+     )
     ON CONFLICT DO NOTHING
     RETURNING task_id INTO _nid;
 
@@ -113,7 +101,7 @@ IF EXISTS (
 
   END LOOP;
 
---  DROP TABLE IF EXISTS prjtask CASCADE;
+  DROP TABLE IF EXISTS prjtask CASCADE;
 END IF;
 
 IF EXISTS (
@@ -223,7 +211,8 @@ IF EXISTS (
     WHERE docass_source_type = 'TODO' AND docass_source_id = _rec.todoitem_id;
 
   END LOOP;  
---  DROP TABLE IF EXISTS todoitem CASCADE;
+
+  DROP TABLE IF EXISTS todoitem CASCADE;
 END IF;
 
 UPDATE recurtype SET recurtype_type = 'TASK', 
@@ -246,21 +235,21 @@ WHERE recurtype_type = 'TODO';
 -- =====================================
 DROP VIEW IF EXISTS api.todo;
 
-DROP FUNCTION IF EXISTS getprjtaskid(TEXT, TEXT);
-DROP FUNCTION IF EXISTS createTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, TEXT);
-DROP FUNCTION IF EXISTS createTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, TEXT, INTEGER);
-DROP FUNCTION IF EXISTS updateTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, BOOLEAN, TEXT);
-DROP FUNCTION IF EXISTS updateTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, BOOLEAN, TEXT, INTEGER);
-DROP FUNCTION IF EXISTS deleteTodoItem(INTEGER);
-DROP FUNCTION IF EXISTS copytask(INTEGER, DATE, INTEGER);
-DROP FUNCTION IF EXISTS todoitem();
-DROP FUNCTION IF EXISTS todoItemMove(INTEGER, INTEGER);
-DROP FUNCTION IF EXISTS todoItemMoveUp(INTEGER, INTEGER);
-DROP FUNCTION IF EXISTS todoItemMoveDown(INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS getprjtaskid(TEXT, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS createTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS createTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, TEXT, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS updateTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, BOOLEAN, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS updateTodoItem(INTEGER, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, DATE, DATE, CHARACTER(1), DATE, DATE, INTEGER, TEXT, BOOLEAN, TEXT, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS deleteTodoItem(INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS copytask(INTEGER, DATE, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS todoitem() CASCADE;
+DROP FUNCTION IF EXISTS todoItemMove(INTEGER, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS todoItemMoveUp(INTEGER, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS todoItemMoveDown(INTEGER, INTEGER) CASCADE;
 
 DELETE from report 
 where report_name IN ('TodoItem', 'TodoList')
 AND report_grade = 0;
 
 
-END; $$ LANGUAGE plpgsql;
+END; $_$ LANGUAGE plpgsql;
