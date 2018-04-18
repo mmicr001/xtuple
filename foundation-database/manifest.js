@@ -85,6 +85,8 @@
     "public/tables/crmacct.sql",
     "public/tables/cntct.sql",
     "public/tables/addr.sql",
+    "public/tables/task.sql",
+    "public/tables/taskass.sql",
 
     "public/functions/_docinfo.sql",
     "public/functions/_gettargetdocument.sql",
@@ -618,6 +620,7 @@
     "public/functions/getsoscheddate.sql",
     "public/functions/getsostatus.sql",
     "public/functions/getsubtax.sql",
+    "public/functions/gettaskid.sql",
     "public/functions/gettaxauthid.sql",
     "public/functions/gettaxid.sql",
     "public/functions/gettaxtypeid.sql",
@@ -1019,6 +1022,8 @@
 
     "public/tables/groups.sql",
     "public/tables/groupsitem.sql",
+    "public/tables/tasktmpl.sql",
+    "public/tables/tasktmplitem.sql",
 
     "public/tables/accnt.sql",
     "public/tables/addrgrp.sql",
@@ -1036,6 +1041,8 @@
     "public/tables/bankrecitem.sql",
     "public/tables/bomhead.sql",
     "public/tables/bomitem.sql",
+    "public/tables/custgrp.sql",
+    "public/tables/custgrpitem.sql",
     "public/tables/cashrcpt.sql",
     "public/tables/cashrcptitem.sql",
     "public/tables/cashrcptmisc.sql",
@@ -1067,8 +1074,6 @@
     "public/tables/crmacctgrpitem.sql",
     "public/tables/crmacctsel.sql",
     "public/tables/curr_rate.sql",
-    "public/tables/custgrp.sql",
-    "public/tables/custgrpitem.sql",
     "public/tables/dict.sql",
     "public/tables/docass.sql",
     "public/tables/dynamicfilter.sql",
@@ -1114,10 +1119,6 @@
     "public/tables/shiphead.sql",
     "public/tables/shiptoinfo.sql",
     "public/tables/source.sql",
-    "public/tables/task.sql",
-    "public/tables/taskass.sql",
-    "public/tables/tasktmpl.sql",
-    "public/tables/tasktmplitem.sql",
     "public/tables/tax.sql",
     "public/tables/taxass.sql",
     "public/tables/taxhist.sql",
@@ -1128,6 +1129,8 @@
     "public/tables/vendaddrinfo.sql",
     "public/tables/whsinfo.sql",
     "public/tables/wo.sql",
+
+    "public/patches/task_migration.sql",
 
     "public/indexes/accnt.sql",
     "public/indexes/apopentax.sql",

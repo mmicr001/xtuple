@@ -62,7 +62,7 @@ setTimeout:true, before:true, clearTimeout:true, exports:true, it:true, describe
     attributes: ["id", "number", "description", "category", "isPublic", "account", "contact",
     "priority", "status", "resolution", "severity", "owner", "assignedTo", "notes", "item",
     "recurrences", "created", "updated", "alarms", "history", "comments", "characteristics",
-    "uuid", "toDoRelations", "project", "documents"],
+    "uuid", "project", "documents"],
     requiredAttributes: ["description", "status", "created", "category", "account", "contact",
     "number"],
     /**

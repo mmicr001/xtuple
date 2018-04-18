@@ -62,7 +62,7 @@ setTimeout:true, before:true, clearTimeout:true, exports:true, it:true, describe
     attributes: ["id", "number", "name", "isActive", "account", "contact", "opportunityStage",
       "priority", "opportunitySource", "opportunityType", "amount", "currency", "probability",
       "startDate", "assignDate", "targetClose", "actualClose", "notes", "owner", "assignedTo",
-      "comments", "characteristics", "toDoRelations", "quoteRelations", "salesOrderRelations",
+      "comments", "characteristics", "quoteRelations", "salesOrderRelations",
       "documents"
     ],
     requiredAttributes: ["number", "name", "isActive", "account", "opportunityStage",

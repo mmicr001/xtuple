@@ -85,7 +85,7 @@ it:true, describe:true, beforeEach:true, before:true, enyo:true */
     "partialShip", "blanketPurchaseOrders", "usesPurchaseOrders", "autoUpdateStatus",
     "autoHoldOrders",
     "preferredSite", "creditCards", "account", "contactRelations", "incidentRelations",
-    "opportunityRelations", "toDoRelations", "documents", "quoteRelations", "salesOrderRelations"],
+    "opportunityRelations", "documents", "quoteRelations", "salesOrderRelations"],
     requiredAttributes: ["number", "name", "isActive", "isFreeFormShipto", "isFreeFormBillto",
     "discount", "creditStatus", "balanceMethod", "backorder", "partialShip",
     "blanketPurchaseOrders", "usesPurchaseOrders", "autoUpdateStatus",
