@@ -132,18 +132,6 @@ BEGIN
                             (SELECT opsource_name FROM opsource WHERE opsource_id=NEW.prospect_source_id));
       END IF;
 
-      IF (OLD.prospect_opstage_id <> NEW.prospect_opstage_id) THEN
-        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Stage',
-                            (SELECT opstage_name FROM opstage WHERE opstage_id=OLD.prospect_opstage_id),
-                            (SELECT opstage_name FROM opstage WHERE opstage_id=NEW.prospect_opstage_id));
-      END IF;
-
-      IF (OLD.prospect_priority_id <> NEW.prospect_priority_id) THEN
-        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Priority',
-                            (SELECT incdtpriority_name FROM incdtpriority WHERE incdtpriority_id=OLD.prospect_priority_id),
-                            (SELECT incdtpriority_name FROM incdtpriority WHERE incdtpriority_id=NEW.prospect_priority_id));
-      END IF;
-
       IF (OLD.prospect_salesrep_id <> NEW.prospect_salesrep_id) THEN
         PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Sales Rep',
                             (SELECT salesrep_number FROM salesrep WHERE salesrep_id=OLD.prospect_salesrep_id),

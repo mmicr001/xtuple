@@ -4,7 +4,7 @@
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT 
+SELECT prospect_id, prospect_crmacct_id,
   prospect.*, prospect_created::DATE AS created,
   opsource_name AS prospect_source,
   cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone,
