@@ -11,6 +11,7 @@ SELECT
   xt.add_column('task', 'task_parent_type',           'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_parent_id',          'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_prj_id',             'INTEGER', NULL,       'public'),
+  xt.add_column('task', 'task_parent_task_id',     'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_status',        'CHARACTER(1)', $$NOT NULL DEFAULT 'N' $$, 'public'),
   xt.add_column('task', 'task_owner_username',        'TEXT', NULL,       'public'),
   xt.add_column('task', 'task_priority_id',  'INTEGER', 'REFERENCES incdtpriority (incdtpriority_id)', 'public'),
@@ -34,8 +35,13 @@ SELECT
   xt.add_constraint('task', 'task_pkey', 'PRIMARY KEY (task_id)', 'public'),
   xt.add_constraint('task', 'task_task_status_check',
                     $$CHECK (task_status IN ('N', 'D', 'P', 'O', 'C'))$$, 'public'),
+  xt.add_constraint('task', 'task_task_unq', 'UNIQUE (task_parent_type, task_number, task_parent_id)', 'public'),
   xt.add_constraint('task', 'task_recurring_task_id_fkey',
                     'FOREIGN KEY (task_recurring_task_id)
+                     REFERENCES task (task_id) MATCH SIMPLE
+                     ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('task', 'task_parent_task_id_fkey',
+                    'FOREIGN KEY (task_parent_task_id)
                      REFERENCES task (task_id) MATCH SIMPLE
                      ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
   xt.add_constraint('task', 'task_prj_id_fkey',
@@ -54,3 +60,4 @@ COMMENT ON COLUMN task.task_priority_id   IS 'Task Priority';
 COMMENT ON COLUMN task.task_pct_complete  IS 'Task Percent Complete';
 COMMENT ON COLUMN task.task_istemplate  IS 'Indicates this task is used as a template';
 COMMENT ON COLUMN task.task_prj_id   IS 'Task Project relationship';
+COMMENT ON COLUMN task.task_parent_task_id   IS 'Parent Task hierarchy relationship';

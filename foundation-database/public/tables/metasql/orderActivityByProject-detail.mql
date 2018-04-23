@@ -101,6 +101,8 @@ SELECT task_id AS id,
            WHEN task_status = 'C' THEN <? value('complete') ?>
            WHEN task_status = 'O' THEN <? value('inprocess') ?>
            WHEN task_status = 'P' THEN <? value('planning') ?>
+           WHEN task_status = 'N' THEN <? value('new') ?>
+           WHEN task_status = 'D' THEN <? value('deferred') ?>
        END AS status,
        NULL::text AS project_type,
        task_name AS item,
@@ -133,6 +135,9 @@ SELECT task_id AS id,
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
 
  WHERE (task_parent_id = <? value("prj_id") ?> AND task_parent_type='J')
+   <? if not exists("showCompleted") ?>
+   AND task_status <> 'C'
+  <? endif ?>
  GROUP BY task_parent_id, custinfo.cust_name, task.task_id, addr.addr_city, addr.addr_state, cntct_name, 
           task.task_number, task.task_status, task.task_owner_username, task_name, task_descrip, 
           task_due_date, task_start_date, task_completed_date, task_hours_budget, 
