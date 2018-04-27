@@ -1540,6 +1540,8 @@
     "public/tables/metasql/opportunities-detail.mql",
     "public/tables/metasql/opportunitiesByCRM-detail.mql",
     "public/tables/metasql/orderActivityByProject-detail.mql",
+    "public/tables/metasql/orderActivityByProject-orders.mql",
+    "public/tables/metasql/orderActivityByProject-tasks.mql",
     "public/tables/metasql/orders-detail.mql",
     "public/tables/metasql/package-items.mql",
     "public/tables/metasql/packingList-getreport.mql",

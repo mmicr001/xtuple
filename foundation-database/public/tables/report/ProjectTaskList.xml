@@ -3,6 +3,9 @@
  <title>ProjectTaskList</title>
  <name>ProjectTaskList</name>
  <description></description>
+ <parameter listtype="static" type="integer" active="true" default="10" name="prj_id">
+  <description></description>
+ </parameter>
  <grid>
   <snap/>
   <show/>
@@ -17,17 +20,35 @@
  <leftmargin>50</leftmargin>
  <querysource>
   <name>detail</name>
-  <sql>SELECT prjtask_number, prjtask_name, prjtask_descrip,
-       CASE WHEN (prjtask_status='P') THEN 'Planning'
-	  WHEN (prjtask_status='O') THEN 'In-Process'
-	  ELSE 'Completed' END as status,
-       formatDate(prjtask_start_date) as f_start,
-       formatDate(prjtask_due_date) as f_due,
-       formatDate(prjtask_assigned_date) as f_assigned,
-       formatDate(prjtask_completed_date) as f_completed
-  FROM prjtask
- WHERE (prjtask_prj_id=&lt;?value("prj_id")?>)
- ORDER BY prjtask_number;</sql>
+  <sql>  WITH RECURSIVE task_hier AS (
+     SELECT task_id, task_number, task_parent_task_id, 1 AS level, ARRAY[task_id] AS path_info
+     FROM task 
+     WHERE task_parent_task_id IS NULL
+       AND task_prj_id=&lt;?value("prj_id")?>
+     UNION ALL
+     SELECT c.task_id, rpad(' ', p.level * 2) || c.task_number, c.task_parent_task_id, p.level + 1, p.path_info||c.task_id
+     FROM task c
+      JOIN task_hier p ON c.task_parent_task_id = p.task_id
+     WHERE task_prj_id=&lt;?value("prj_id")?>
+  )
+  SELECT t.task_id, h.task_number ||'-'||task_name AS task_name, 
+       t.task_descrip,
+       CASE                       
+           WHEN task_status = 'C' THEN &lt;? value('complete') ?>
+           WHEN task_status = 'O' THEN &lt;? value('inprocess') ?>
+           WHEN task_status = 'P' THEN &lt;? value('planning') ?>
+           WHEN task_status = 'N' THEN &lt;? value('new') ?>
+           WHEN task_status = 'D' THEN &lt;? value('deferred') ?>
+       END AS status,
+       formatDate(task_due_date) AS f_due,
+       formatDate((SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id=t.task_id)) AS f_assigned,
+       formatDate(task_start_date) AS f_start,
+       formatDate(task_completed_date) AS f_completed,
+       path_info
+  FROM task_hier h
+  JOIN task t ON t.task_id=h.task_id
+  WHERE (task_parent_id = &lt;?value("prj_id")?> AND task_parent_type='J')
+  ORDER BY path_info</sql>
  </querysource>
  <querysource>
   <name>head</name>
@@ -37,22 +58,6 @@
  </querysource>
  <rpthead>
   <height>102</height>
-  <label>
-   <rect>
-    <x>10</x>
-    <y>80</y>
-    <width>50</width>
-    <height>15</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>8</size>
-    <weight>normal</weight>
-   </font>
-   <left/>
-   <vcenter/>
-   <string>Number</string>
-  </label>
   <label>
    <rect>
     <x>10</x>
@@ -90,7 +95,7 @@
   </field>
   <label>
    <rect>
-    <x>355</x>
+    <x>265</x>
     <y>80</y>
     <width>100</width>
     <height>15</height>
@@ -106,7 +111,7 @@
   </label>
   <label>
    <rect>
-    <x>140</x>
+    <x>15</x>
     <y>80</y>
     <width>100</width>
     <height>15</height>
@@ -151,25 +156,6 @@
     <query>detail</query>
    </key>
    <height>43</height>
-   <field>
-    <rect>
-     <x>10</x>
-     <y>0</y>
-     <width>120</width>
-     <height>15</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>prjtask_number</column>
-    </data>
-   </field>
    <field>
     <rect>
      <x>70</x>
@@ -312,47 +298,9 @@
    </label>
    <field>
     <rect>
-     <x>140</x>
-     <y>-2</y>
-     <width>200</width>
-     <height>20</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>prjtask_name</column>
-    </data>
-   </field>
-   <field>
-    <rect>
-     <x>355</x>
-     <y>-2</y>
-     <width>385</width>
-     <height>20</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>prjtask_descrip</column>
-    </data>
-   </field>
-   <field>
-    <rect>
-     <x>660</x>
+     <x>655</x>
      <y>18</y>
-     <width>90</width>
+     <width>95</width>
      <height>20</height>
     </rect>
     <font>
@@ -369,7 +317,7 @@
    </field>
    <label>
     <rect>
-     <x>615</x>
+     <x>605</x>
      <y>18</y>
      <width>45</width>
      <height>20</height>
@@ -383,6 +331,44 @@
     <vcenter/>
     <string>Status:</string>
    </label>
+   <field>
+    <rect>
+     <x>15</x>
+     <y>-2</y>
+     <width>245</width>
+     <height>20</height>
+    </rect>
+    <font>
+     <face>Arial</face>
+     <size>8</size>
+     <weight>bold</weight>
+    </font>
+    <left/>
+    <vcenter/>
+    <data>
+     <query>detail</query>
+     <column>task_name</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>270</x>
+     <y>-2</y>
+     <width>475</width>
+     <height>20</height>
+    </rect>
+    <font>
+     <face>Arial</face>
+     <size>8</size>
+     <weight>bold</weight>
+    </font>
+    <left/>
+    <vcenter/>
+    <data>
+     <query>detail</query>
+     <column>prjtask_descrip</column>
+    </data>
+   </field>
   </detail>
  </section>
  <pgfoot>
