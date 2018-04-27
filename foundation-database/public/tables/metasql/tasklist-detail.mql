@@ -307,6 +307,71 @@ UNION ALL
   <? endif ?>
 <? endif ?>
 
+/*        ---------PROJECT TASKS ON DOCUMENTS-----------------------*/
+<? if exists("prj_id")?>
+UNION 
+  SELECT task_id AS id,
+         3 AS altId, 
+         <? value("prjtask") ?> AS type,
+         task_number AS number,
+         task_name AS name, 
+         prj_number,
+         task_status != 'C' AS active,
+       CASE WHEN (task_status='C') THEN <? value("complete") ?>
+            WHEN (task_status='D') THEN <? value("deferred") ?>
+            WHEN (task_status='P') THEN <? value("pending") ?>
+            WHEN (task_status='O') THEN <? value("inprocess") ?>
+            WHEN (task_status='N') THEN <? value("new") ?>
+            ELSE '?'
+       END AS stage,
+          incdtpriority_name AS priority, 
+          task_owner_username AS owner, 
+          (SELECT array_to_string(array_agg(taskass_username),',') AS assigned FROM taskass WHERE taskass_task_id=task_id) AS assigned,
+          firstLine(task_descrip) AS notes, 
+          task_start_date AS start, 
+          task_due_date AS due, 
+          formatDate(task_due_date) AS f_due, 
+          task_start_date is not null AS hasStartDate,
+          task_due_date is not null AS hasDueDate,
+          NULL AS crmacct_id,
+          '' AS crmacct_number, 
+          '' AS crmacct_name,
+          <? value("project") ?> || '-' || prj_number AS parent,
+          <? value("project") ?> || '-' || prj_number AS parent_qtdisplay_role,
+          <? value("project") ?> || '-' || prj_number AS f_parent,
+          task_parent_id AS parent_xtidrole,
+          false AS cust_qtdisplayrole, 
+          null AS cust,
+          CASE WHEN (task_status != 'C' AND task_due_date < CURRENT_DATE) THEN 'expired'
+               WHEN (task_status != 'C' AND task_due_date > CURRENT_DATE) THEN 'future'
+          END AS due_qtforegroundrole 
+ <? if exists("hasContext") ?>
+    FROM task
+ <? else ?>
+    FROM task('J')
+ <? endif ?>
+  JOIN prj ON (prj_id=task_parent_id AND task_parent_type = 'J')
+  LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id) 
+  WHERE task_prj_id=<? value("prj_id") ?>
+  AND task_parent_type = 'J'
+ <? if not exists("completed") ?>
+  AND (task_status != 'C')			
+ <? endif ?>
+ <? if exists("username") ?>
+   AND (task_owner_username = <? value("username") ?>
+      OR task_id IN (SELECT taskass_task_id 
+                     FROM taskass 
+                     WHERE taskass_username = <? value("username") ?>)
+     )
+ <? endif ?>
+ <? if exists("assigned_username") ?> 
+  AND ( task_id IN (SELECT taskass_task_id 
+                     FROM taskass 
+                     WHERE taskass_username = <? value("assigned_username") ?>)
+      )
+ <? endif ?>
+<? endif ?>
+
 /*        ---------PROJECT-------------- */
 <? if exists("projects")?>
 UNION ALL
