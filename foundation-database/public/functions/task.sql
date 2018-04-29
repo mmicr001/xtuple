@@ -14,9 +14,9 @@ BEGIN
   SELECT privilege, granted INTO _priv, _grant
   FROM privgranted 
   WHERE CASE WHEN pParent = 'J' THEN privilege IN ('MaintainAllProjects','ViewAllProjects','MaintainPersonalProjects','ViewPersonalProjects')
-             WHEN pParent = 'TASK' THEN privilege IN ('MaintainAllToDoItems','ViewAllToDoItems','MaintainPersonalToDoItems','ViewPersonalToDoItems') 
-             ELSE privilege IN ('MaintainAllProjects','ViewAllProjects','MaintainPersonalProjects','ViewPersonalProjects','MaintainAllToDoItems',
-                                'ViewAllToDoItems','MaintainPersonalToDoItems','ViewPersonalToDoItems' ) END
+             WHEN pParent = 'TASK' THEN privilege IN ('MaintainAllTaskItems','ViewAllTaskItems','MaintainPersonalTaskItems','ViewPersonalTaskItems') 
+             ELSE privilege IN ('MaintainAllProjects','ViewAllProjects','MaintainPersonalProjects','ViewPersonalProjects','MaintainAllTaskItems',
+                                'ViewAllTaskItems','MaintainPersonalTaskItems','ViewPersonalTaskItems' ) END
   ORDER BY granted DESC, sequence
   LIMIT 1;
 

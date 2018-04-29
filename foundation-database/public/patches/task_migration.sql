@@ -220,8 +220,8 @@ UPDATE recurtype SET recurtype_type = 'TASK',
                      recurtype_donecheck='task_completed_date IS NOT NULL',
                      recurtype_schedcol='task_due_date',
                      recurtype_copyfunc='copytask',
-                     recurtype_limit=$$checkprivilege('MaintainAllToDoItems') 
-                                     OR (checkprivilege('MaintainPersonalToDoItems') 
+                     recurtype_limit=$$checkprivilege('MaintainAllTaskItems') 
+                                     OR (checkprivilege('MaintainPersonalTaskItems') 
                                          AND (CURRENT_USER = task_owner_username 
                                               OR task_id IN (SELECT taskass_task_id 
                                                              FROM taskass 

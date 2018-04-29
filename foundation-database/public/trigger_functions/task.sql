@@ -10,12 +10,12 @@ BEGIN
     IF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects') AND NOT checkPrivilege('MaintainPersonalProjects')) THEN
       RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
     END IF;
-    IF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllToDoItems') AND NOT checkPrivilege('MaintainPersonalToDoItems')) THEN
+    IF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllTaskItems') AND NOT checkPrivilege('MaintainPersonalTaskItems')) THEN
       RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
     END IF;
   ELSIF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
-  ELSIF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllToDoItems')) THEN
+  ELSIF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllTaskItems')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
   ELSIF (LENGTH(COALESCE(NEW.task_number,'')) = 0) THEN
     RAISE EXCEPTION 'You must enter a valid number.';
