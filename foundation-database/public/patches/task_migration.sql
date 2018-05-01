@@ -57,7 +57,7 @@ IF EXISTS (
      (_rec.prjtask_number,
       _rec.prjtask_name,
       _rec.prjtask_descrip,
-      true,
+      (_rec.prjtask_status <> 'C'),
       'J',
       _rec.prjtask_prj_id,
       _rec.prjtask_prj_id,

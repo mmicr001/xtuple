@@ -9,7 +9,7 @@ SELECT  prj_id, crmacct_name, prj_number, prj_name, prjtype_code,
         CASE prj_status WHEN 'P' THEN <? value('pending') ?>
 	              WHEN 'O' THEN <? value('active') ?>
 	              WHEN 'C' THEN <? value('closed') ?>
-                        ELSE 'undefined' END AS prj_stat,
+                        ELSE prj_status END AS prj_stat,
         ROUND(SUM(CASE WHEN task_status IN ('O', 'D') THEN task_hours_budget ELSE 0.00 END),2) AS budhrs,
         ROUND(SUM(CASE WHEN task_status IN ('N', 'P') THEN task_hours_budget ELSE 0.00 END),2) AS pendbudhrs,
         ROUND(SUM(task_hours_actual),2) AS acthrs,
@@ -30,7 +30,7 @@ SELECT  prj_id, crmacct_name, prj_number, prj_name, prjtype_code,
         1 as prjcnt, 
         0 as prjcnt_xttotalrole
 FROM prj
-LEFT JOIN task ON prj_id = task_prj_id AND task_status != 'C' 
+LEFT JOIN task ON prj_id = task_prj_id 
 LEFT JOIN prjtype ON prjtype_id = prj_prjtype_id 
 LEFT JOIN usr ON usr_username = prj_username
 LEFT JOIN crmacct ON crmacct_id = prj_crmacct_id
