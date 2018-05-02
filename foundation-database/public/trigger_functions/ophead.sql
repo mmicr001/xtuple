@@ -146,6 +146,10 @@ BEGIN
   DELETE FROM docass WHERE docass_source_id = OLD.ophead_id AND docass_source_type = 'OPP';
   DELETE FROM docass WHERE docass_target_id = OLD.ophead_id AND docass_target_type = 'OPP';
 
+  DELETE FROM comment
+  WHERE comment_source='OPP'
+    AND comment_source_id = OLD.ophead_id;
+
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;

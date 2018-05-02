@@ -12,14 +12,22 @@ DECLARE
   _taskid INTEGER;
 BEGIN
   INSERT INTO task(
-            task_name,          task_number,        task_descrip,
+            task_name,          
+            task_number,        
+            task_descrip,
             task_parent_type,   task_parent_id,
             task_created_by,    task_status,
             task_active,        task_due_date,
             task_notes,        
             task_owner_username,task_priority_id,
             task_recurring_task_id, task_istemplate )
-    SELECT  task_name,          COALESCE(task_number, '10'),  task_descrip,
+    SELECT  task_name,          
+            CASE WHEN (task_istemplate 
+                       AND pParentType <> 'J' 
+                       AND fetchmetrictext('TaskNumberGeneration') <> 'M') 
+            THEN fetchTaskNumber()::TEXT              
+            ELSE COALESCE(task_number, '10') END,
+            task_descrip,
             COALESCE(pParentType, 'TASK'), pParentId,
             getEffectiveXtUser(), 'N',
             TRUE,               _duedate,
@@ -41,6 +49,23 @@ BEGIN
            CURRENT_DATE
     FROM   taskass
    WHERE   taskass_task_id = pParentTaskId;
+
+  INSERT INTO charass (charass_target_type, charass_target_id, charass_char_id,
+                       charass_value, charass_default)
+  SELECT charass_target_type, _taskid, charass_char_id,
+                       charass_value, charass_default
+  FROM charass
+  WHERE charass_target_type='TASK'
+    AND charass_target_id = pParentTaskId;
+
+  INSERT INTO docass(docass_source_id, docass_source_type,
+                     docass_target_id, docass_target_type,
+                     docass_purpose)
+  SELECT _taskid, docass_source_type,
+         docass_target_id, docass_target_type, 'S'
+  FROM docass
+  WHERE docass_source_type = 'TASK'
+    AND docass_source_id = pParentTaskId;
 
   SELECT saveAlarm(NULL, NULL, _duedate,
                    CAST(alarm_time - DATE_TRUNC('day',alarm_time) AS TIME),
