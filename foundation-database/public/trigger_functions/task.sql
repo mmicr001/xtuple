@@ -62,7 +62,7 @@ BEGIN
   IF (TG_OP = 'INSERT') THEN
     PERFORM postComment('ChangeLog', 'TA', NEW.task_id, 'Created');
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND NOT NEW.task_istemplate) THEN
     IF (OLD.task_start_date <> NEW.task_start_date) THEN
       PERFORM postComment('ChangeLog', 'TA', NEW.task_id, 'Start Date',
                           formatDate(OLD.task_start_date), formatDate(NEW.task_start_date));
