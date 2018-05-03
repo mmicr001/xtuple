@@ -3,14 +3,14 @@ SELECT xt.create_table('taskass', 'public');
 ALTER TABLE public.taskass DISABLE TRIGGER ALL;
 
 SELECT
-  xt.add_column('taskass', 'taskass_id',                  'SERIAL',  'NOT NULL', 'public'),
-  xt.add_column('taskass', 'taskass_task_id',             'INTEGER', 'NOT NULL', 'public'),
-  xt.add_column('taskass', 'taskass_username',            'TEXT',    'NOT NULL', 'public'),
-  xt.add_column('taskass', 'taskass_crmrole_id',          'INTEGER', NULL,       'public'),
-  xt.add_column('taskass', 'taskass_assigned_date',       'DATE',    NULL,       'public'),
-  xt.add_column('taskass', 'taskass_created',      'TIMESTAMP WITH TIME ZONE', 'DEFAULT now()', 'public'),
-  xt.add_column('taskass', 'taskass_created_by',      'TEXT', 'DEFAULT geteffectivextuser()', 'public'),
-  xt.add_column('taskass', 'taskass_lastupdated',  'TIMESTAMP WITH TIME ZONE', NULL, 'public');
+  xt.add_column('taskass', 'taskass_id',             'SERIAL',  'NOT NULL', 'public'),
+  xt.add_column('taskass', 'taskass_task_id',        'INTEGER', 'NOT NULL', 'public'),
+  xt.add_column('taskass', 'taskass_username',       'TEXT',    'NOT NULL', 'public'),
+  xt.add_column('taskass', 'taskass_crmrole_id',     'INTEGER', NULL,       'public'),
+  xt.add_column('taskass', 'taskass_assigned_date',  'TIMESTAMP WITH TIME ZONE',    NULL,         'public'),
+  xt.add_column('taskass', 'taskass_created',        'TIMESTAMP WITH TIME ZONE', 'DEFAULT now()', 'public'),
+  xt.add_column('taskass', 'taskass_created_by',     'TEXT', 'DEFAULT geteffectivextuser()',      'public'),
+  xt.add_column('taskass', 'taskass_lastupdated',    'TIMESTAMP WITH TIME ZONE', NULL,            'public');
 
 
 SELECT

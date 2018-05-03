@@ -37,7 +37,6 @@ IF EXISTS (
       task_number,
       task_name,
       task_descrip,
-      task_active,
       task_parent_type,
       task_parent_id,
       task_prj_id,
@@ -57,7 +56,6 @@ IF EXISTS (
      (_rec.prjtask_number,
       _rec.prjtask_name,
       _rec.prjtask_descrip,
-      true,
       'J',
       _rec.prjtask_prj_id,
       _rec.prjtask_prj_id,
@@ -118,7 +116,6 @@ IF EXISTS (
       todoitem_id, 
       todoitem_name,
       todoitem_description,
-      todoitem_active,
       CASE WHEN todoitem_incdt_id IS NOT NULL THEN 'INCDT'
            WHEN todoitem_ophead_id IS NOT NULL  THEN 'OPP'
            WHEN todoitem_crmacct_id IS NOT NULL THEN 'CRMA'
@@ -143,7 +140,6 @@ IF EXISTS (
       task_number,
       task_name,
       task_descrip,
-      task_active,
       task_parent_type,
       task_parent_id,
       task_prj_id,
@@ -167,7 +163,6 @@ IF EXISTS (
       _rec.todoitem_name,
       _rec.todoitem_name,
       _rec.todoitem_description,
-      _rec.todoitem_active,
       _rec.parent_type,
       _rec.parent_id,
       _rec.prj_id,

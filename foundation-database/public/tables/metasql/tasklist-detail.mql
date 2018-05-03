@@ -13,7 +13,7 @@ SELECT * FROM (
          task_number AS number,
          task_name AS name,
          prj_number,
-         CASE WHEN (task_active AND task_status != 'C') THEN TRUE
+         CASE WHEN (task_status != 'C') THEN TRUE
               ELSE FALSE
          END AS active,
          CASE WHEN (task_status='C') THEN <? value("complete") ?>
@@ -57,8 +57,8 @@ SELECT * FROM (
          task_parent_id AS parent_xtidrole,
          COALESCE(cust_id,-1) > 0 AS cust_qtdisplayrole,
          cust_id AS cust,
-         CASE WHEN (task_active AND task_due_date < CURRENT_DATE) THEN 'expired'
-              WHEN (task_active AND task_due_date > CURRENT_DATE) THEN 'future'
+         CASE WHEN (task_status <> 'C' AND task_due_date < CURRENT_DATE) THEN 'expired'
+              WHEN (task_status <> 'C' AND task_due_date > CURRENT_DATE) THEN 'future'
          END AS due_qtforegroundrole 
   <? if exists("hasContext") ?>
     FROM task xx
@@ -395,7 +395,7 @@ UNION ALL
          task_number AS number,
          task_name AS name, 
          prj_number,
-         task_status != 'C' AS active,
+         task_status <> 'C' AS active,
        CASE WHEN (task_status='C') THEN <? value("complete") ?>
             WHEN (task_status='D') THEN <? value("deferred") ?>
             WHEN (task_status='P') THEN <? value("pending") ?>
@@ -421,8 +421,8 @@ UNION ALL
           task_parent_id AS parent_xtidrole,
           false AS cust_qtdisplayrole, 
           null AS cust,
-          CASE WHEN (task_status != 'C' AND task_due_date < CURRENT_DATE) THEN 'expired'
-               WHEN (task_status != 'C' AND task_due_date > CURRENT_DATE) THEN 'future'
+          CASE WHEN (task_status <> 'C' AND task_due_date < CURRENT_DATE) THEN 'expired'
+               WHEN (task_status <> 'C' AND task_due_date > CURRENT_DATE) THEN 'future'
           END AS due_qtforegroundrole 
  <? if exists("hasContext") ?>
     FROM task

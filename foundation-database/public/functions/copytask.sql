@@ -17,7 +17,7 @@ BEGIN
             task_descrip,
             task_parent_type,   task_parent_id,
             task_created_by,    task_status,
-            task_active,        task_due_date,
+            task_due_date,
             task_notes,        
             task_owner_username,task_priority_id,
             task_recurring_task_id, task_istemplate )
@@ -30,7 +30,7 @@ BEGIN
             task_descrip,
             COALESCE(pParentType, 'TASK'), pParentId,
             getEffectiveXtUser(), 'N',
-            TRUE,               _duedate,
+            _duedate,
             task_notes,      
             task_owner_username,task_priority_id,
             task_recurring_task_id, false

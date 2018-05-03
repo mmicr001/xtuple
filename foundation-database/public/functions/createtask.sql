@@ -1,13 +1,15 @@
 DROP FUNCTION IF EXISTS createtask(TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT, TEXT, TEXT, TEXT,
                                  JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
                                  DATE, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS createtask(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT,
+                                 JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
+                                 DATE, TEXT) CASCADE;
 
 CREATE OR REPLACE FUNCTION createtask (
     pParentType TEXT,
     pParent TEXT,
     pNumber TEXT,
     pStatus TEXT,
-    pActive BOOLEAN,
     pName TEXT,
     pDescrip TEXT,
     pPriority TEXT,
@@ -67,7 +69,6 @@ BEGIN
     task_parent_id,
     task_number,
     task_status,
-    task_active,
     task_name,
     task_descrip,
     task_priority_id,
@@ -87,7 +88,6 @@ BEGIN
     _parentid,
     pNumber,
     _status,
-    COALESCE(pActive, true),
     pName,
     COALESCE(pDescrip,''),
     (SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=pPriority),
@@ -104,7 +104,6 @@ BEGIN
     )
   ON CONFLICT (task_parent_type, task_parent_id, task_number) DO UPDATE SET
     task_status=_status,
-    task_active=COALESCE(pActive, true),
     task_name=pName,
     task_descrip=COALESCE(pDescrip,''),
     task_priority_id=(SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=pPriority),

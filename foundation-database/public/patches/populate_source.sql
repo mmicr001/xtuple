@@ -612,8 +612,7 @@ select createDoctype(35, --pDocAssNum
                      'task_id', --pParam
                      'task', --pUi
                      'MaintainPersonalTaskItems MaintainAllTaskItems', --pPriv
-                     'CRM',             -- pModule
-                     'task_active'  -- pActive
+                     'CRM'             -- pModule
 );
 select createDoctype(36, --pDocAssNum
                      'TO', --pType

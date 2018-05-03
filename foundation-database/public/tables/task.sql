@@ -1,5 +1,7 @@
 SELECT xt.create_table('task', 'public');
 
+DROP VIEW IF EXISTS api.tasks;
+
 ALTER TABLE public.task DISABLE TRIGGER ALL;
 
 SELECT
@@ -7,17 +9,16 @@ SELECT
   xt.add_column('task', 'task_number',                'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_name',                  'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_descrip',               'TEXT', NULL,       'public'),
-  xt.add_column('task', 'task_active',             'BOOLEAN', 'NOT NULL DEFAULT true', 'public'),
   xt.add_column('task', 'task_parent_type',           'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_parent_id',          'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_prj_id',             'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_parent_task_id',     'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_status',        'CHARACTER(1)', $$NOT NULL DEFAULT 'N' $$, 'public'),
   xt.add_column('task', 'task_owner_username',        'TEXT', NULL,       'public'),
-  xt.add_column('task', 'task_priority_id',  'INTEGER', 'REFERENCES incdtpriority (incdtpriority_id)', 'public'),
-  xt.add_column('task', 'task_start_date',            'DATE', NULL,       'public'),
-  xt.add_column('task', 'task_due_date',              'DATE', NULL,       'public'),
-  xt.add_column('task', 'task_completed_date',        'DATE', NULL,       'public'),
+  xt.add_column('task', 'task_priority_id',  '      INTEGER', 'REFERENCES incdtpriority (incdtpriority_id)', 'public'),
+  xt.add_column('task', 'task_start_date',     'TIMESTAMP WITH TIME ZONE', NULL,       'public'),
+  xt.add_column('task', 'task_due_date',       'TIMESTAMP WITH TIME ZONE', NULL,       'public'),
+  xt.add_column('task', 'task_completed_date', 'TIMESTAMP WITH TIME ZONE', NULL,       'public'),
   xt.add_column('task', 'task_hours_budget', 'NUMERIC(18,6)', 'NOT NULL DEFAULT 0.00', 'public'),
   xt.add_column('task', 'task_hours_actual', 'NUMERIC(18,6)', 'NOT NULL DEFAULT 0.00', 'public'),
   xt.add_column('task', 'task_exp_budget',   'NUMERIC(16,4)', 'NOT NULL DEFAULT 0.00', 'public'),
