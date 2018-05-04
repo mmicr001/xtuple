@@ -6,18 +6,20 @@ CREATE OR REPLACE FUNCTION public._taskTrigger() RETURNS TRIGGER AS $$
 BEGIN
 
   --  Checks
-  IF (NEW.task_owner_username=getEffectiveXtUser()) THEN
-    IF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects') AND NOT checkPrivilege('MaintainPersonalProjects')) THEN
-      RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
-    END IF;
-    IF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllTaskItems') AND NOT checkPrivilege('MaintainPersonalTaskItems')) THEN
+  IF (checkPrivilege('MaintainAllTaskItems')) THEN
+    -- has privileges
+  ELSIF (checkPrivilege('MaintainPersonalTaskItems')) THEN
+    IF (NOT COALESCE((getEffectiveXtUser() = NEW.task_owner_username) 
+       OR (getEffectiveXtUser() IN (SELECT taskass_username 
+                                      FROM taskass 
+                                     WHERE taskass_task_id=NEW.task_id)), false)) THEN
       RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
     END IF;
-  ELSIF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects')) THEN
-    RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
-  ELSIF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllTaskItems')) THEN
+  ELSE  
     RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
-  ELSIF (LENGTH(COALESCE(NEW.task_number,'')) = 0) THEN
+  END IF;
+
+  IF (LENGTH(COALESCE(NEW.task_number,'')) = 0) THEN
     RAISE EXCEPTION 'You must enter a valid number.';
   ELSIF (LENGTH(COALESCE(NEW.task_name,'')) = 0) THEN
     RAISE EXCEPTION 'You must enter a valid name.';

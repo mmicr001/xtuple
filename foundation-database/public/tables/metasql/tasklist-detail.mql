@@ -63,7 +63,7 @@ SELECT * FROM (
   <? if exists("hasContext") ?>
     FROM task xx
   <? else ?>
-    FROM task('TASK') yy
+    FROM task() yy
   <? endif ?>
       LEFT OUTER JOIN incdt ON (incdt_id=task_parent_id AND task_parent_type='INCDT') 
       LEFT OUTER JOIN ophead ON (ophead_id=task_parent_id AND task_parent_type='OPP')
@@ -256,7 +256,7 @@ UNION ALL
   <? if exists("hasContext") ?>
      FROM task
   <? else ?>
-     FROM task('J')
+     FROM task()
   <? endif ?>
        JOIN prj ON (prj_id=task_parent_id AND task_parent_type = 'J')
        LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id) 
@@ -427,7 +427,7 @@ UNION ALL
  <? if exists("hasContext") ?>
     FROM task
  <? else ?>
-    FROM task('J')
+    FROM task()
  <? endif ?>
   JOIN prj ON (prj_id=task_parent_id AND task_parent_type = 'J')
   LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id) 

@@ -1,8 +1,7 @@
 CREATE OR REPLACE FUNCTION crmacct() RETURNS SETOF crmacct AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _row crmacct%ROWTYPE;
   _priv TEXT;
   _grant BOOLEAN;
 
@@ -16,19 +15,11 @@ BEGIN
 
   -- If have an 'All' privilege return all results
   IF (_priv ~ 'All' AND _grant) THEN
-    FOR _row IN 
-      SELECT * FROM crmacct
-    LOOP
-      RETURN NEXT _row;
-    END LOOP;
+    RETURN QUERY SELECT * FROM crmacct;
   -- Otherwise if have any other grant, must be personal privilege.
   ELSIF (_grant) THEN
-    FOR _row IN 
-      SELECT * FROM crmacct 
-      WHERE crmacct_owner_username = getEffectiveXtUser()
-    LOOP
-      RETURN NEXT _row;
-    END LOOP;
+    RETURN QUERY SELECT * FROM crmacct 
+                  WHERE crmacct_owner_username = getEffectiveXtUser();
   END IF;
 
   RETURN;
