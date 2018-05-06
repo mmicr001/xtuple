@@ -35,4 +35,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION task(TEXT) IS 'A table function that returns Task results according to privilege settings.';
+COMMENT ON FUNCTION task() IS 'A table function that returns Task results according to privilege settings.';
