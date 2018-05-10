@@ -17,19 +17,20 @@ BEGIN
     RAISE EXCEPTION 'Missing input parameters [xtuple: applyDefaultTasks, -1]';
   END IF;
 
-  -- First Check if Tasks already exist for object
+  -- Check if Tasks already exist for object
   IF (EXISTS(SELECT 1 FROM task 
              WHERE task_parent_id=pParentId 
                AND task_parent_type=pType)) THEN
     IF (NOT pOverride) THEN
-      RETURN -2; -- Ask whether to delete existing tasks
+      RETURN -2; -- Ask user whether to delete existing tasks
     ELSE
       DELETE FROM task 
       WHERE task_parent_type=pType 
         AND task_parent_id=pParentId;
     END IF;
   END IF;
-                       
+
+-- Set up template and check whether a template exists for this type
   _table := CASE pType WHEN 'J' THEN 'prjtype'
                        WHEN 'OPP' THEN 'optype'
                        WHEN 'INCDT' THEN 'incdtcat'
@@ -41,7 +42,7 @@ BEGIN
   IF (_template IS NULL) THEN
     RETURN 0;
   END IF;
-
+                       
   FOR _rec IN                  
     SELECT task_id, task_due_date, task_created
     FROM task
@@ -50,7 +51,7 @@ BEGIN
                       WHERE tasktmplitem_tasktmpl_id = _template)
       AND task_istemplate
   LOOP    
-    PERFORM copyTask(_rec.task_id, CURRENT_DATE+(_rec.task_due_date-_rec.task_created::DATE)::INT, pType, pParentId);
+    PERFORM copyTask(_rec.task_id, (CURRENT_DATE+(_rec.task_due_date-_rec.task_created::DATE))::DATE, pType, pParentId);
   END LOOP;    
 
   RETURN 1;

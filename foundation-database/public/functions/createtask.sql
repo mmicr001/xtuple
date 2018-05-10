@@ -35,7 +35,6 @@ DECLARE
 BEGIN
 -- Validate data
   IF ( COALESCE(pParentType,'') = '' 
-    OR COALESCE(pNumber,'') = '' 
     OR COALESCE(pStatus,'') = '' 
     OR COALESCE(pName,'') = '') THEN
     
@@ -86,7 +85,7 @@ BEGIN
   VALUES (
     _parenttype,
     _parentid,
-    pNumber,
+    COALESCE(pNumber, fetchtasknumber()::TEXT),
     _status,
     pName,
     COALESCE(pDescrip,''),
@@ -117,17 +116,16 @@ BEGIN
     task_start_date=pStartDate,
     task_completed_date=pCompletedDate,
     task_notes=pNotes
-    WHERE task_parent_type=_parenttype
-      AND task_parent_id=_parentid
-      AND task_number=pNumber
   RETURNING task_id INTO _taskid;
   
-  _assignments := json_extract_path(pAssignments, 'assigned');
-  INSERT INTO taskass (taskass_task_id,taskass_crmrole_id, taskass_username, taskass_assigned_date)
-  SELECT _taskid, getcrmroleid(json_array_elements(_assignments)->>'role'), 
-         json_array_elements(_assignments)->>'username', 
-         (json_array_elements(_assignments)->>'assigned_date')::DATE
-    ON CONFLICT DO NOTHING; 
+  IF (pAssignments IS NOT NULL) THEN 
+    _assignments := json_extract_path(pAssignments, 'assigned');
+    INSERT INTO taskass (taskass_task_id,taskass_crmrole_id, taskass_username, taskass_assigned_date)
+    SELECT _taskid, getcrmroleid(json_array_elements(_assignments)->>'role'), 
+           json_array_elements(_assignments)->>'username', 
+           (json_array_elements(_assignments)->>'assigned_date')::DATE
+      ON CONFLICT DO NOTHING; 
+  END IF;
 
   RETURN _taskid;
 

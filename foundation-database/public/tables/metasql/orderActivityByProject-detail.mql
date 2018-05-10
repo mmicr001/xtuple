@@ -42,8 +42,8 @@ SELECT prj_id AS id,
        NULL::numeric AS exp_budget,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
-       CASE WHEN (prj_status = 'O' AND prj_due_date < current_date) THEN 'red' 
-         WHEN (prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange' 
+       CASE WHEN (prj_status = 'O' AND prj_due_date < current_date) THEN 'error' 
+         WHEN (prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning' 
          END AS due_qtforegroundrole,
        0 AS xtindentrole
   FROM prj
@@ -124,8 +124,8 @@ SELECT task_id AS id,
        task_exp_budget AS exp_budget,
        task_exp_actual AS exp_actual,
        (task_exp_budget-task_exp_actual) AS exp_balance,
-       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'red' 
-         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange' 
+       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'error' 
+         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning' 
          END AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM task
@@ -405,8 +405,8 @@ SELECT quhead_id AS id,
        NULL::numeric AS exp_budget,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
-        
-	NULL::text AS due_qtforegroundrole,
+       
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM quhead
 <? if exists("owner_username") ?>
@@ -450,7 +450,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM quhead
 <? if exists("owner_username") ?>
@@ -494,7 +494,7 @@ SELECT DISTINCT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        1 AS xtindentrole
   FROM cohead
 <? if exists("owner_username") ?>
@@ -544,7 +544,7 @@ SELECT cohead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM cohead
     JOIN custinfo ON (cust_id = cohead_cust_id)
@@ -593,7 +593,7 @@ SELECT coitem_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        3 AS xtindentrole
   FROM cohead
 <? if exists("owner_username") ?>
@@ -636,7 +636,7 @@ SELECT cohead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM cohead
 <? if exists("owner_username") ?>
@@ -677,7 +677,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         	
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM cohead
 <? if exists("owner_username") ?>
@@ -718,7 +718,7 @@ SELECT DISTINCT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        1 AS xtindentrole
   FROM invchead
 <? if exists("owner_username") ?>
@@ -760,7 +760,7 @@ SELECT invchead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM invchead
     JOIN custinfo ON (cust_id=invchead_cust_id)
@@ -806,7 +806,7 @@ SELECT invcitem_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        3 AS xtindentrole
   FROM invchead
 <? if exists("owner_username") ?>
@@ -848,7 +848,7 @@ SELECT invchead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
        
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM invchead
 <? if exists("owner_username") ?>
@@ -889,7 +889,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM invchead
 <? if exists("owner_username") ?>
@@ -934,7 +934,7 @@ SELECT DISTINCT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        1 AS xtindentrole
   FROM wo
 <? if exists("owner_username") ?>
@@ -983,7 +983,7 @@ SELECT wo_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
        
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM wo
 <? if exists("owner_username") ?>
@@ -1025,7 +1025,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM wo
 <? if exists("owner_username") ?>
@@ -1069,7 +1069,7 @@ SELECT DISTINCT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        1 AS xtindentrole
   FROM pr
 <? if exists("owner_username") ?>
@@ -1108,7 +1108,7 @@ SELECT pr_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM pr
 <? if exists("owner_username") ?>
@@ -1150,7 +1150,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM pr
 <? if exists("owner_username") ?>
@@ -1192,7 +1192,7 @@ SELECT DISTINCT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        1 AS xtindentrole
   FROM poitem
 <? if exists("owner_username") ?>
@@ -1237,7 +1237,7 @@ SELECT pohead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM pohead
     JOIN poitem ON (poitem_pohead_id = pohead_id)
@@ -1284,7 +1284,7 @@ SELECT poitem_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        3 AS xtindentrole
   FROM pohead
     JOIN poitem ON (poitem_pohead_id = pohead_id)
@@ -1326,7 +1326,7 @@ SELECT pohead_id AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM pohead
     JOIN poitem ON (poitem_pohead_id = pohead_id)
@@ -1367,7 +1367,7 @@ SELECT -1 AS id,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
         
-	NULL::text AS due_qtforegroundrole,
+       NULL::text AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM pohead
     JOIN poitem ON (poitem_pohead_id = pohead_id)

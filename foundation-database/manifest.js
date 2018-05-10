@@ -277,6 +277,7 @@
     "public/functions/createrecurringinvoices.sql",
     "public/functions/createrecurringitems.sql",
     "public/functions/createtask.sql",
+    "public/functions/createtaskfromincident.sql",
     "public/functions/createtaskfromopportunity.sql",
     "public/functions/createurl.sql",
     "public/functions/createuser.sql",

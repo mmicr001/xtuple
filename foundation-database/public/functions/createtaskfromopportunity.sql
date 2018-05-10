@@ -5,10 +5,10 @@ RETURNS INTEGER AS $$
 DECLARE
   taskid   INTEGER;
 BEGIN
-  taskid := (SELECT createtask('OPP'::TEXT, pOpheadId::TEXT, pTaskName, 'N'::TEXT, true, pTaskName, pTaskName,
+  taskid := (SELECT createtask('Opportunity'::TEXT, ophead_number, NULL::TEXT, 'N'::TEXT, pTaskName, pTaskName,
                    (SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_default)::TEXT,
                    ophead_owner_username,
-                   ('{"assigned": [{"role": "primary", "username": "'||ophead_username||'","assigned_date":"'||current_date||'"}]}')::json,
+                   CASE WHEN LENGTH(ophead_username) > 0 THEN ('{"assigned": [{"role": "primary", "username": "'||ophead_username||'","assigned_date":"'||current_date||'"}]}')::json ELSE NULL::json END,
                    0, 0, 0, 0, 0,
                    ophead_target_date,
                    COALESCE(ophead_start_date, current_date),
