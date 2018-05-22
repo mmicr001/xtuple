@@ -5,7 +5,7 @@ ALTER TABLE public.orderseq DISABLE TRIGGER ALL;
 SELECT xt.add_column('orderseq','orderseq_id',     'SERIAL', 'PRIMARY KEY', 'public'),
        xt.add_column('orderseq','orderseq_name',   'TEXT',      'NOT NULL', 'public'),
        xt.add_column('orderseq','orderseq_number', 'INTEGER',        null , 'public'),
-       xt.add_column('orderseq','orderseq_numcol', 'TEXT',            null, 'public'),
+       xt.add_column('orderseq','orderseq_table',  'TEXT',            null, 'public'),
        xt.add_column('orderseq','orderseq_numcol', 'TEXT',            null, 'public'),
        xt.add_column('orderseq','orderseq_seqiss', 'seqiss[]',        null, 'public');
 

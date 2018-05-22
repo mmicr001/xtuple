@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS api.tasks;
+
 SELECT xt.create_table('task', 'public');
 
 ALTER TABLE public.task DISABLE TRIGGER ALL;
@@ -18,10 +20,10 @@ SELECT
   xt.add_column('task', 'task_start_date',            'DATE', NULL,       'public'),
   xt.add_column('task', 'task_due_date',              'DATE', NULL,       'public'),
   xt.add_column('task', 'task_completed_date',        'DATE', NULL,       'public'),
-  xt.add_column('task', 'task_hours_budget', 'NUMERIC(18,6)', 'NOT NULL DEFAULT 0.00', 'public'),
-  xt.add_column('task', 'task_hours_actual', 'NUMERIC(18,6)', 'NOT NULL DEFAULT 0.00', 'public'),
-  xt.add_column('task', 'task_exp_budget',   'NUMERIC(16,4)', 'NOT NULL DEFAULT 0.00', 'public'),
-  xt.add_column('task', 'task_exp_actual',   'NUMERIC(16,4)', 'NOT NULL DEFAULT 0.00', 'public'),
+  xt.add_column('task', 'task_hours_budget',       'NUMERIC', 'NOT NULL DEFAULT 0.00', 'public'),
+  xt.add_column('task', 'task_hours_actual',       'NUMERIC', 'NOT NULL DEFAULT 0.00', 'public'),
+  xt.add_column('task', 'task_exp_budget',         'NUMERIC', 'NOT NULL DEFAULT 0.00', 'public'),
+  xt.add_column('task', 'task_exp_actual',         'NUMERIC', 'NOT NULL DEFAULT 0.00', 'public'),
   xt.add_column('task', 'task_pct_complete',       'NUMERIC', NULL,       'public'),
   xt.add_column('task', 'task_notes',                 'TEXT', NULL,       'public'),
   xt.add_column('task', 'task_recurring_task_id',  'INTEGER', NULL,       'public'),
@@ -35,6 +37,8 @@ SELECT
   xt.add_constraint('task', 'task_pkey', 'PRIMARY KEY (task_id)', 'public'),
   xt.add_constraint('task', 'task_task_status_check',
                     $$CHECK (task_status IN ('N', 'D', 'P', 'O', 'C'))$$, 'public'),
+  xt.add_constraint('task', 'task_task_name_check',
+                    $$CHECK (NULLIF(task_name,'') IS NOT NULL AND NULLIF(task_number,'') IS NOT NULL)$$, 'public'),
   xt.add_constraint('task', 'task_task_unq', 'UNIQUE (task_parent_type, task_number, task_parent_id)', 'public'),
   xt.add_constraint('task', 'task_recurring_task_id_fkey',
                     'FOREIGN KEY (task_recurring_task_id)

@@ -72,31 +72,12 @@ BEGIN
   END IF;
 
   FOR _tasks IN
-      SELECT task_id, task_number, task_name, task_descrip,
-         task_parent_type, task_parent_id, 'P',
-         task_hours_budget, task_exp_budget, task_owner_username,
-         task_due_date, task_assigned_username
-      FROM task
-      WHERE (task_parent_type='J' AND task_parent_id=pPrjId)
+      SELECT task_id, task_due_date
+        FROM task
+       WHERE (task_parent_type='J' AND task_parent_id=pPrjId)
   LOOP
-     
-    INSERT INTO task
-    ( task_number, task_name, task_descrip,
-      task_parent_type, task_parent_id, task_status,
-      task_hours_budget, task_hours_actual,
-      task_exp_budget, task_exp_actual,
-      task_owner_username, task_start_date,
-      task_due_date, task_assigned_date,
-      task_completed_date, task_assigned_username )
-    VALUES (_tasks.task_number, _tasks.task_name, _tasks.task_descrip,
-            _tasks.task_parent_type, _prjid, 'P',
-            _tasks.task_hours_budget, 0.0,
-            _tasks.task_exp_budget, 0.0,
-            _tasks.task_owner_username, NULL,
-            (_tasks.task_due_date + COALESCE(_offset, 0)),
-            CASE WHEN (_tasks.task_assigned_username IS NULL) THEN NULL ELSE CURRENT_DATE END,
-            NULL, _tasks.task_assigned_username)
-    RETURNING task_id INTO _newTaskid;
+    SELECT copytask(_tasks.task_id, _tasks.task_due_date::DATE+COALESCE(_offset, 0)::INT,
+                    'J', _prjid) INTO _newTaskid;
 
     IF (_teExists) THEN
     -- Also insert TE billing information (if pkg exists)
@@ -108,7 +89,7 @@ BEGIN
              teprjtask_item_id, _newTaskid,
              teprjtask_curr_id
       FROM te.teprjtask
-      WHERE (teprjtask_prjtask_id=_prjtasks.prjtask_id);
+      WHERE (teprjtask_prjtask_id=_tasks.task_id);
       
     END IF; 
   END LOOP;          

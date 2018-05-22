@@ -9,8 +9,6 @@ CREATE OR REPLACE FUNCTION public.applydefaulttasks(
 DECLARE
   _table     TEXT;
   _template  INTEGER;
-  _rec       RECORD;
-  _task      INTEGER;
 BEGIN
 
   IF (pType IS NULL OR pCategory IS NULL OR pParentId IS NULL) THEN
@@ -42,16 +40,12 @@ BEGIN
     RETURN 0;
   END IF;
 
-  FOR _rec IN                  
-    SELECT task_id, task_due_date, task_created
-    FROM task
-    WHERE task_id IN (SELECT tasktmplitem_task_id 
-                      FROM tasktmplitem
-                      WHERE tasktmplitem_tasktmpl_id = _template)
-      AND task_istemplate
-  LOOP    
-    PERFORM copyTask(_rec.task_id, CURRENT_DATE+(_rec.task_due_date-_rec.task_created::DATE)::INT, pType, pParentId);
-  END LOOP;    
+  PERFORM copyTask(task_id, CURRENT_DATE+(task_due_date::DATE-task_created::DATE)::INT, pType, pParentId)
+  FROM task
+  WHERE task_id IN (SELECT tasktmplitem_task_id 
+                    FROM tasktmplitem
+                    WHERE tasktmplitem_tasktmpl_id = _template)
+    AND task_istemplate;
 
   RETURN 1;
 END;

@@ -24,10 +24,6 @@ BEGIN
     RAISE EXCEPTION 'Actual Expenses have been posted against this Task [xtuple: deleteTask, -3]';
   END IF;
 
-  DELETE FROM comment
-  WHERE ((comment_source='TA')
-  AND (comment_source_id=pTaskId));
-
   DELETE FROM task
    WHERE (task_id=pTaskId);
 
