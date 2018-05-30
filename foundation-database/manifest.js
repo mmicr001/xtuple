@@ -1287,6 +1287,7 @@
     "public/views/remitto.sql",
     "public/views/saleshistory.sql",
     "public/views/saleshistorymisc.sql",
+    "public/views/shipto.sql",
     "public/views/url.sql",
     "public/views/usr.sql",
 

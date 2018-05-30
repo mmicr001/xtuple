@@ -37,7 +37,6 @@ var _ = require("underscore"),
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
         itemcostRow = res.rows[0];
-        console.log(itemcostRow);
         done();
       });
     });

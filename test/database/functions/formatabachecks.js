@@ -34,7 +34,6 @@ var _      = require("underscore"),
         assert.isNull(err);
         if (res.rowCount === 1) {
           aud = res.rows[0].curr_id;
-console.log("exists", aud);
           done();
         } else {
           sql = "insert into curr_symbol (curr_name, curr_symbol, curr_abbr)" +
@@ -43,7 +42,6 @@ console.log("exists", aud);
             assert.isNull(err);
             assert.equal(res.rowCount, 1);
             aud = res.rows[0].curr_id;
-console.log("created", aud);
             done();
           });
         }
@@ -152,7 +150,6 @@ console.log("created", aud);
         assert.isNull(err);
         assert.operator(res.rowCount, ">", 1);
         checkhead = res.rows;
-        console.log("created", checkhead.length);
         done();
       });
     });
