@@ -94,7 +94,6 @@ var _ = require("underscore"),
         assert.isNull(err);
         assert(res.rowCount > 0);
         mfgItemId = res.rows[0].item_id;
-        console.log("Manufactured: " + mfgItemId);
         done();
       });
     });
@@ -107,7 +106,6 @@ var _ = require("underscore"),
         assert.isNull(err);
         assert(res.rowCount > 0);
         purItemId = res.rows[0].item_id;
-        console.log("Purchased: " + purItemId);
         done();
       });
     });

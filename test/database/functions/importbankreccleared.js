@@ -80,7 +80,6 @@ var _      = require("underscore"),
                         return "setMetric('" + e.name + "', '-1') as " + e.name;
                       }),
           sql   = "select " + names.join(", ") + ";";
-      console.log(sql);
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);
