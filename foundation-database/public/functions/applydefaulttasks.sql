@@ -9,33 +9,34 @@ CREATE OR REPLACE FUNCTION public.applydefaulttasks(
 DECLARE
   _table     TEXT;
   _template  INTEGER;
+
 BEGIN
 
   IF (pType IS NULL OR pCategory IS NULL OR pParentId IS NULL) THEN
     RAISE EXCEPTION 'Missing input parameters [xtuple: applyDefaultTasks, -1]';
   END IF;
 
-  -- First Check if Tasks already exist for object
-  IF (EXISTS(SELECT 1 FROM task 
-             WHERE task_parent_id=pParentId 
+  -- First check if Tasks already exist for object
+  IF (EXISTS(SELECT 1 FROM task
+             WHERE task_parent_id=pParentId
                AND task_parent_type=pType)) THEN
     IF (NOT pOverride) THEN
       RETURN -2; -- Ask whether to delete existing tasks
     ELSE
-      DELETE FROM task 
-      WHERE task_parent_type=pType 
+      DELETE FROM task
+      WHERE task_parent_type=pType
         AND task_parent_id=pParentId;
     END IF;
   END IF;
-                       
+
   _table := CASE pType WHEN 'J' THEN 'prjtype'
                        WHEN 'OPP' THEN 'optype'
                        WHEN 'INCDT' THEN 'incdtcat'
                        END;
-  
+
   EXECUTE format('SELECT %1$s_tasktmpl_id FROM %1$s WHERE %1$s_id = %2$s',
                  _table, pCategory) INTO _template;
-           
+
   IF (_template IS NULL) THEN
     RETURN 0;
   END IF;

@@ -18,7 +18,7 @@ BEGIN
   LIMIT 1;
 
   IF (_returnVal IS NULL) THEN
-	RAISE EXCEPTION 'Task Number % not found.', pTaskNumber;
+	RAISE EXCEPTION 'Task Number % not found. [xtuple: gettaskid, -1, %]', pTaskNumber, pTaskNumber;
   END IF;
 
   RETURN _returnVal;

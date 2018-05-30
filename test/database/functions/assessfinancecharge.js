@@ -36,7 +36,6 @@ var _      = require("underscore"),
         assert.isNull(err);
         assert.operator(res.rowCount, ">=", 1);
         aropen = res.rows[0];
-        console.log(JSON.stringify(aropen));
         done();
       });
     });

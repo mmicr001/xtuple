@@ -6,15 +6,16 @@ CREATE OR REPLACE FUNCTION public.taskassignment(pTaskid integer)
 -- Takes Task Assignment data and builds correctly formatted Json string
   SELECT row_to_json(ta)
   FROM (
-    SELEct (
-      select array_to_json(array_agg(row_to_json(d)))
-      from (
-        select crmrole_name AS "role", taskass_username AS "username", taskass_assigned_date AS "assigned_date"
-        from taskass
+    SELECT (
+      SELECT array_to_json(array_agg(row_to_json(d)))
+      FROM (
+        SELECT crmrole_name AS "role", taskass_username AS "username", taskass_assigned_date AS "assigned_date"
+        FROM taskass
         JOIN crmrole ON crmrole_id=taskass_crmrole_id
-        where taskass_task_id=pTaskid
-        ORDER BY crmrole_sort) d
-     ) as assigned
+        WHERE taskass_task_id=pTaskid
+        ORDER BY crmrole_sort
+      ) d
+    ) AS assigned
   ) ta;
 
 $$ LANGUAGE sql;

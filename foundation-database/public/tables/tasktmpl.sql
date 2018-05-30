@@ -16,4 +16,4 @@ SELECT
 ALTER TABLE public.tasktmpl ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE tasktmpl IS 'Task Template';
-COMMENT ON COLUMN tasktmpl.tasktmpl_assignments IS 'Documents this template can be assigned to';
+COMMENT ON COLUMN tasktmpl.tasktmpl_assignments IS 'Kinds of CRM Documents this template can be assigned to';
