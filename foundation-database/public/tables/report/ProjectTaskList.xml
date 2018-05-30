@@ -3,7 +3,7 @@
  <title>ProjectTaskList</title>
  <name>ProjectTaskList</name>
  <description></description>
- <parameter listtype="static" type="integer" active="true" default="10" name="prj_id">
+ <parameter type="integer" listtype="static" default="10" name="prj_id" active="true">
   <description></description>
  </parameter>
  <grid>
@@ -18,37 +18,10 @@
  <bottommargin>50</bottommargin>
  <rightmargin>50</rightmargin>
  <leftmargin>50</leftmargin>
- <querysource>
+ <querysource loadFromDb="true">
   <name>detail</name>
-  <sql>  WITH RECURSIVE task_hier AS (
-     SELECT task_id, task_number, task_parent_task_id, 1 AS level, ARRAY[task_id] AS path_info
-     FROM task 
-     WHERE task_parent_task_id IS NULL
-       AND task_prj_id=&lt;?value("prj_id")?>
-     UNION ALL
-     SELECT c.task_id, rpad(' ', p.level * 2) || c.task_number, c.task_parent_task_id, p.level + 1, p.path_info||c.task_id
-     FROM task c
-      JOIN task_hier p ON c.task_parent_task_id = p.task_id
-     WHERE task_prj_id=&lt;?value("prj_id")?>
-  )
-  SELECT t.task_id, h.task_number ||'-'||task_name AS task_name, 
-       t.task_descrip,
-       CASE                       
-           WHEN task_status = 'C' THEN &lt;? value('complete') ?>
-           WHEN task_status = 'O' THEN &lt;? value('inprocess') ?>
-           WHEN task_status = 'P' THEN &lt;? value('planning') ?>
-           WHEN task_status = 'N' THEN &lt;? value('new') ?>
-           WHEN task_status = 'D' THEN &lt;? value('deferred') ?>
-       END AS status,
-       formatDate(task_due_date) AS f_due,
-       formatDate((SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id=t.task_id)) AS f_assigned,
-       formatDate(task_start_date) AS f_start,
-       formatDate(task_completed_date) AS f_completed,
-       path_info
-  FROM task_hier h
-  JOIN task t ON t.task_id=h.task_id
-  WHERE (task_parent_id = &lt;?value("prj_id")?> AND task_parent_type='J')
-  ORDER BY path_info</sql>
+  <mqlgroup>orderActivityByProject</mqlgroup>
+  <mqlname>tasks</mqlname>
  </querysource>
  <querysource>
   <name>head</name>
@@ -347,7 +320,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>task_name</column>
+     <column>name</column>
     </data>
    </field>
    <field>
@@ -366,7 +339,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>prjtask_descrip</column>
+     <column>descrip</column>
     </data>
    </field>
   </detail>

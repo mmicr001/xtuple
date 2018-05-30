@@ -3,11 +3,15 @@
 -- Notes: Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT *, 
+SELECT *,
+  formatDate(due) AS f_due,
+  formatDate(assigned) AS f_assigned,
+  formatDate(started) AS f_start,
+  formatDate(completed) AS f_completed,
   'curr' AS qty_xtnumericrole,
   'curr' AS value_xtnumericrole,
-  CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'red' END AS hrs_balance_qtforegroundrole,
-  CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'red' END AS exp_balance_qtforegroundrole
+  CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'error' END AS hrs_balance_qtforegroundrole,
+  CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'error' END AS exp_balance_qtforegroundrole
 FROM (
 
 ----- TASKS -----
@@ -70,8 +74,8 @@ SELECT * FROM (
        task_exp_budget AS exp_budget,
        task_exp_actual AS exp_actual,
        (task_exp_budget-task_exp_actual) AS exp_balance,
-       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'red' 
-         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange' 
+       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'error' 
+         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning' 
          END AS due_qtforegroundrole,
        level AS xtindentrole,
        path_info
@@ -93,7 +97,7 @@ SELECT -1 AS id,
        '0' AS subtype,
        2 AS section,
        'Incidents' AS section_qtdisplayrole,
-       'Incidents ##' AS number,
+       'Incidents' AS number,
        NULL::text AS status,
        NULL::text AS name,
        NULL::text AS descrip,

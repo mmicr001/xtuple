@@ -20,7 +20,11 @@ BEGIN
   END IF;
 
   IF (LENGTH(COALESCE(NEW.task_number,'')) = 0) THEN
-    RAISE EXCEPTION 'You must enter a valid number.';
+    IF (fetchmetrictext('TaskNumberGeneration') IN ('A', 'O')) THEN
+      NEW.task_number := fetchtasknumber();
+    ELSE
+      RAISE EXCEPTION 'You must enter a valid number.';
+    END IF;
   ELSIF (LENGTH(COALESCE(NEW.task_name,'')) = 0) THEN
     RAISE EXCEPTION 'You must enter a valid name.';
   END IF;

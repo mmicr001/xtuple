@@ -30,9 +30,6 @@ WITH tasklist AS (
          firstLine(task_descrip) AS notes, 
          task_start_date as start, 
          task_due_date AS due, 
-         formatDate(task_due_date) AS f_due, 
-         task_start_date is not null AS hasStartDate,
-         task_due_date is not null AS hasDueDate,
          crmacct_id,
          crmacct_number, 
          crmacct_name, 
@@ -117,9 +114,6 @@ UNION ALL
            firstLine(prj_descrip) AS notes, 
            prj_start_date AS start, 
            prj_due_date AS due, 
-           formatDate(prj_due_date) AS f_due, 
-           prj_start_date IS NOT NULL AS hasStartDate,
-           prj_due_date IS NOT NULL AS hasDueDate,
            crmacct_id,
            crmacct_number, 
            crmacct_name,
@@ -178,9 +172,6 @@ UNION ALL
          firstLine(incdt_descrip) AS notes, 
          incdt_timestamp::DATE AS start, 
          null::DATE AS due, 
-         null AS f_due, 
-         false AS hasStartDate,
-         false AS hasDueDate,
          crmacct_id,
          crmacct_number, 
          crmacct_name,
@@ -229,9 +220,6 @@ UNION ALL
          firstLine(ophead_notes) AS notes, 
          ophead_start_date AS start, 
          ophead_target_date AS due, 
-         formatDate(ophead_target_date) AS f_due,
-         ophead_start_date is not null AS hasStartDate,
-         ophead_target_date is not null AS hasDueDate,
          crmacct_id,
          crmacct_number, 
          crmacct_name, 
@@ -263,7 +251,11 @@ UNION ALL
   <? endif ?>
 <? endif ?>
 )
-SELECT * FROM tasklist
+SELECT *,
+  formatDate(due) AS f_due, 
+  "start" IS NOT NULL AS hasStartDate,
+  due IS NOT NULL AS hasDueDate
+FROM tasklist
 WHERE true
  <? if exists("crmacct_id") ?>
    AND (crmacct_id =<? value("crmacct_id") ?>)
