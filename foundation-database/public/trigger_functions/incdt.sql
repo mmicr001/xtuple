@@ -1,18 +1,10 @@
 CREATE OR REPLACE FUNCTION _incdtBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _rec          RECORD;
   _check        BOOLEAN;
   _crmacct      INTEGER;
-
 BEGIN
-
-  IF(TG_OP = 'DELETE') THEN
-    _rec := OLD;
-  ELSE
-    _rec := NEW;
-  END IF;
 
   -- Set the incident number if blank
   IF (TG_OP = 'INSERT') THEN
@@ -60,37 +52,56 @@ CREATE TRIGGER incdtbeforetrigger
   EXECUTE PROCEDURE _incdtBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _incdtBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
   _newparentid INTEGER;
 BEGIN
-  IF (TG_OP = 'DELETE') THEN
-    SELECT recur_id INTO _recurid
-      FROM recur
-     WHERE ((recur_parent_id=OLD.incdt_id)
-        AND (recur_parent_type='INCDT'));
+  SELECT recur_id INTO _recurid
+    FROM recur
+  WHERE ((recur_parent_id=OLD.incdt_id)
+     AND (recur_parent_type='INCDT'));
 
-     IF (_recurid IS NOT NULL) THEN
-       SELECT MIN(incdt_id) INTO _newparentid
-         FROM incdt
-        WHERE ((incdt_recurring_incdt_id=OLD.incdt_id)
-           AND (incdt_id!=OLD.incdt_id));
+  IF (_recurid IS NOT NULL) THEN
+    SELECT MIN(incdt_id) INTO _newparentid
+      FROM incdt
+     WHERE ((incdt_recurring_incdt_id=OLD.incdt_id)
+       AND (incdt_id!=OLD.incdt_id));
 
-      -- client is responsible for warning about deleting a recurring incdt
-      IF (_newparentid IS NULL) THEN
-        DELETE FROM recur WHERE recur_id=_recurid;
-      ELSE
-        UPDATE recur SET recur_parent_id=_newparentid
-         WHERE recur_id=_recurid;
-      END IF;
+    -- client is responsible for warning about deleting a recurring incdt
+    IF (_newparentid IS NULL) THEN
+      DELETE FROM recur WHERE recur_id=_recurid;
+    ELSE
+      UPDATE recur SET recur_parent_id=_newparentid
+       WHERE recur_id=_recurid;
     END IF;
-
-    RETURN OLD;
   END IF;
 
-  RETURN NEW;
+  DELETE FROM task
+   WHERE task_parent_id=OLD.incdt_id 
+     AND task_parent_type='INCDT';
+
+  DELETE FROM comment
+   WHERE comment_source='INCDT'
+     AND comment_source_id=OLD.incdt_id;
+
+  DELETE FROM incdthist
+   WHERE incdthist_incdt_id=OLD.incdt_id;
+
+  DELETE FROM imageass
+  WHERE imageass_source='INCDT'
+     AND imageass_source_id=OLD.incdt_id;
+
+  DELETE FROM docass
+  WHERE docass_source_type='INCDT'
+     AND docass_source_id=OLD.incdt_id;
+
+  DELETE FROM url
+  WHERE url_source='INCDT'
+     AND url_source_id=OLD.incdt_id;
+
+  RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 

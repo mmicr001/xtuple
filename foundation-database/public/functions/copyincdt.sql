@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION copyIncdt(INTEGER, TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pparentid   ALIAS FOR $1;
@@ -7,7 +7,6 @@ DECLARE
 
   _alarmid    INTEGER;
   _incdtid    INTEGER;
-  _todoitemid INTEGER;
 
 BEGIN
   INSERT INTO incdt(incdt_number,          incdt_crmacct_id,
@@ -30,14 +29,9 @@ BEGIN
     RETURN -10;
   END IF;
 
-  SELECT MIN(copyTodoitem(todoitem_id, CAST(ptimestamp AS DATE), _incdtid))
-            INTO _todoitemid
-    FROM todoitem
-   WHERE (todoitem_incdt_id=pparentid);
-
-  IF (_todoitemid < 0) THEN
-    RETURN _todoitemid;
-  END IF;
+  SELECT MIN(copyTask(task_id, CAST(ptimestamp AS DATE), 'INCDT', _incdtid))
+    FROM task
+   WHERE (task_parent_id=pparentid AND task_parent_type='INCDT');
 
   SELECT saveAlarm(NULL, NULL, CAST(ptimestamp AS DATE),
                    CAST(alarm_time - DATE_TRUNC('day',alarm_time) AS TIME),
@@ -66,4 +60,4 @@ BEGIN
 
   RETURN _incdtid;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;

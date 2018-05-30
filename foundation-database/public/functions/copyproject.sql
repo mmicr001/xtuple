@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION copyproject(integer, text, text, date)
   RETURNS integer AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pPrjId ALIAS FOR $1;
@@ -8,7 +8,7 @@ DECLARE
   pPrjName ALIAS FOR $3;
   pDueDate ALIAS FOR $4;
   _prjid INTEGER;
-  _prjtasks RECORD;
+  _tasks RECORD;
   _offset INTEGER;
   _newTaskid INTEGER;
   _teExists BOOLEAN;
@@ -71,32 +71,32 @@ BEGIN
      WHERE (teprj_prj_id = pPrjId);
   END IF;
 
-  FOR _prjtasks IN
-      SELECT prjtask_id, prjtask_number, prjtask_name, prjtask_descrip,
-         prjtask_prj_id, prjtask_anyuser, 'P',
-         prjtask_hours_budget, prjtask_exp_budget, prjtask_owner_username,
-         prjtask_due_date, prjtask_username
-      FROM prjtask
-      WHERE (prjtask_prj_id=pPrjId)
+  FOR _tasks IN
+      SELECT task_id, task_number, task_name, task_descrip,
+         task_parent_type, task_parent_id, 'P',
+         task_hours_budget, task_exp_budget, task_owner_username,
+         task_due_date, task_assigned_username
+      FROM task
+      WHERE (task_parent_type='J' AND task_parent_id=pPrjId)
   LOOP
      
-    INSERT INTO prjtask
-    ( prjtask_number, prjtask_name, prjtask_descrip,
-      prjtask_prj_id, prjtask_anyuser, prjtask_status,
-      prjtask_hours_budget, prjtask_hours_actual,
-      prjtask_exp_budget, prjtask_exp_actual,
-      prjtask_owner_username, prjtask_start_date,
-      prjtask_due_date, prjtask_assigned_date,
-      prjtask_completed_date, prjtask_username )
-    VALUES (_prjtasks.prjtask_number, _prjtasks.prjtask_name, _prjtasks.prjtask_descrip,
-            _prjid, _prjtasks.prjtask_anyuser, 'P',
-            _prjtasks.prjtask_hours_budget, 0.0,
-            _prjtasks.prjtask_exp_budget, 0.0,
-            _prjtasks.prjtask_owner_username, NULL,
-            (_prjtasks.prjtask_due_date + COALESCE(_offset, 0)),
-            CASE WHEN (_prjtasks.prjtask_username IS NULL) THEN NULL ELSE CURRENT_DATE END,
-            NULL, _prjtasks.prjtask_username)
-    RETURNING prjtask_id INTO _newTaskid;
+    INSERT INTO task
+    ( task_number, task_name, task_descrip,
+      task_parent_type, task_parent_id, task_status,
+      task_hours_budget, task_hours_actual,
+      task_exp_budget, task_exp_actual,
+      task_owner_username, task_start_date,
+      task_due_date, task_assigned_date,
+      task_completed_date, task_assigned_username )
+    VALUES (_tasks.task_number, _tasks.task_name, _tasks.task_descrip,
+            _tasks.task_parent_type, _prjid, 'P',
+            _tasks.task_hours_budget, 0.0,
+            _tasks.task_exp_budget, 0.0,
+            _tasks.task_owner_username, NULL,
+            (_tasks.task_due_date + COALESCE(_offset, 0)),
+            CASE WHEN (_tasks.task_assigned_username IS NULL) THEN NULL ELSE CURRENT_DATE END,
+            NULL, _tasks.task_assigned_username)
+    RETURNING task_id INTO _newTaskid;
 
     IF (_teExists) THEN
     -- Also insert TE billing information (if pkg exists)

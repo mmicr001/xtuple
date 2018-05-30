@@ -1,43 +1,4 @@
 delete from xt.acttype where acttype_code = 'ToDo';
-insert into xt.acttype (
-  acttype_nsname,
-  acttype_tblname,
-  acttype_code,
-  acttype_col_uuid,
-  acttype_col_editor_key,
-  acttype_col_type,
-  acttype_col_name,
-  acttype_col_active,
-  acttype_col_status,
-  acttype_col_priority_id, 
-  acttype_col_description,
-  acttype_col_owner_username,
-  acttype_col_assigned_username,
-  acttype_col_start_date,
-  acttype_col_due_date,
-  acttype_col_assigned_date,
-  acttype_col_completed_Date,
-  acttype_col_parent_uuid
-) values (
-  'public',
-  'todoitem',
-  'ToDo',
-  'obj_uuid',
-  'obj_uuid::text',
-  'acttype_code',
-  'todoitem_name',
-  'todoitem_active',
-  'todoitem_status',
-  'todoitem_priority_id',
-  'todoitem_description',
-  'todoitem_owner_username',
-  'todoitem_username',
-  'todoitem_start_date',
-  'todoitem_due_date',
-  'todoitem_assigned_date',
-  'todoitem_completed_date',
-  'null::uuid'
-);
 
 insert into xt.acttype (
   acttype_nsname,

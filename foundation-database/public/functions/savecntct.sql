@@ -107,24 +107,24 @@ BEGIN
   _phones = json_extract_path(pphone, 'phones');
 
   IF (_isNew) THEN
-    _cntctId := COALESCE(_cntctId,pCntctId,nextval('cntct_cntct_id_seq'));
- 
     INSERT INTO cntct (
-      cntct_id,cntct_number,
+      cntct_number,
       cntct_addr_id,cntct_first_name,
       cntct_last_name,cntct_honorific,cntct_initials,
       cntct_active,cntct_email,cntct_email_optin,cntct_webaddr,
       cntct_notes,cntct_title,cntct_middle,cntct_suffix, cntct_owner_username ) 
     VALUES (
-      _cntctId, COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pAddrId,
+      COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pAddrId,
       pFirstName,pLastName,pHonorific,
       pInitials,COALESCE(pActive,true),
-      pEmail,COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername );
+      pEmail,COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername )
+    RETURNING cntct_id INTO _cntctId;
 
     -- Now insert the Contact's phone numbers
     INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
       SELECT _cntctId, getcrmroleid(json_array_elements(_phones)->>'role'), 
-                       json_array_elements(_phones)->>'number';
+                       json_array_elements(_phones)->>'number'
+    ON CONFLICT DO NOTHING;
 
     RETURN _cntctId;
 

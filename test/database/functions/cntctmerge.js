@@ -5,7 +5,7 @@ var _      = require("underscore"),
 (function () {
   "use strict";
 
-  describe('cntctMerge()', function () {
+  describe.skip('cntctMerge()', function () {
 
     var datasource = dblib.datasource,
         adminCred  = dblib.generateCreds(),
