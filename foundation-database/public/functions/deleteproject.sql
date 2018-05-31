@@ -58,22 +58,6 @@ BEGIN
     RETURN -6;
   END IF;
 
-  DELETE FROM comment
-  WHERE ((comment_source='J')
-  AND (comment_source_id=pPrjid));
-
-  DELETE FROM comment
-  WHERE comment_source='TA'
-  AND comment_source_id IN (
-    SELECT task_id
-    FROM task
-    WHERE task_parent_type='J' 
-      AND task_parent_id=pPrjId);
-
-  DELETE FROM task
-    WHERE task_parent_type='J' 
-      AND task_parent_id=pPrjId;
-
   UPDATE prj
      SET prj_recurring_prj_id=null
    WHERE(prj_recurring_prj_id=pPrjid);

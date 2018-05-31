@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.applydefaulttasks(
 DECLARE
   _table     TEXT;
   _template  INTEGER;
-  _task      INTEGER;
+
 BEGIN
 
   IF (pType IS NULL OR pCategory IS NULL OR pParentId IS NULL) THEN
@@ -42,9 +42,9 @@ BEGIN
     RETURN 0;
   END IF;
 
-  SELECT MIN(copyTask(task_id, CURRENT_DATE+(task_due_date-task_created::DATE)::INT, pType, pParentId)) INTO _task
+  PERFORM copyTask(task_id, CURRENT_DATE+(task_due_date::DATE-task_created::DATE)::INT, pType, pParentId)
   FROM task
-  WHERE task_id IN (SELECT tasktmplitem_task_id
+  WHERE task_id IN (SELECT tasktmplitem_task_id 
                     FROM tasktmplitem
                     WHERE tasktmplitem_tasktmpl_id = _template)
     AND task_istemplate;

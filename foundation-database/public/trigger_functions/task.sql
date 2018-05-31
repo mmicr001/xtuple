@@ -27,6 +27,7 @@ BEGIN
     END IF;
   ELSIF (LENGTH(COALESCE(NEW.task_name,'')) = 0) THEN
     RAISE EXCEPTION 'You must enter a valid name.';
+
   END IF;
 
   -- Update Percent Complete based on hours
@@ -156,6 +157,10 @@ BEGIN
 
   DELETE FROM docass WHERE docass_source_id = OLD.task_id AND docass_source_type = 'TA';
   DELETE FROM docass WHERE docass_target_id = OLD.task_id AND docass_target_type = 'TA';
+
+  DELETE FROM comment
+  WHERE ((comment_source='TA')
+  AND (comment_source_id=OLD.task_id));
 
   RETURN OLD;
 END;
