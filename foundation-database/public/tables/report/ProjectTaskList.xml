@@ -3,7 +3,7 @@
  <title>ProjectTaskList</title>
  <name>ProjectTaskList</name>
  <description></description>
- <parameter type="integer" listtype="static" default="10" name="prj_id" active="true">
+ <parameter type="integer" default="10" name="prj_id" listtype="static" active="true">
   <description></description>
  </parameter>
  <grid>
@@ -84,7 +84,7 @@
   </label>
   <label>
    <rect>
-    <x>15</x>
+    <x>75</x>
     <y>80</y>
     <width>100</width>
     <height>15</height>
@@ -121,6 +121,22 @@
    <vcenter/>
    <string>Project Task List</string>
   </label>
+  <label>
+   <rect>
+    <x>15</x>
+    <y>80</y>
+    <width>100</width>
+    <height>15</height>
+   </rect>
+   <font>
+    <face>Arial</face>
+    <size>8</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <vcenter/>
+   <string>Number</string>
+  </label>
  </rpthead>
  <section>
   <name>detail</name>
@@ -132,7 +148,7 @@
    <field>
     <rect>
      <x>70</x>
-     <y>18</y>
+     <y>23</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -151,7 +167,7 @@
    <field>
     <rect>
      <x>225</x>
-     <y>18</y>
+     <y>23</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -170,7 +186,7 @@
    <field>
     <rect>
      <x>375</x>
-     <y>18</y>
+     <y>23</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -189,7 +205,7 @@
    <field>
     <rect>
      <x>525</x>
-     <y>18</y>
+     <y>23</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -208,7 +224,7 @@
    <label>
     <rect>
      <x>460</x>
-     <y>18</y>
+     <y>23</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -224,7 +240,7 @@
    <label>
     <rect>
      <x>5</x>
-     <y>18</y>
+     <y>23</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -240,7 +256,7 @@
    <label>
     <rect>
      <x>310</x>
-     <y>18</y>
+     <y>23</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -256,7 +272,7 @@
    <label>
     <rect>
      <x>160</x>
-     <y>18</y>
+     <y>23</y>
      <width>60</width>
      <height>20</height>
     </rect>
@@ -272,7 +288,7 @@
    <field>
     <rect>
      <x>655</x>
-     <y>18</y>
+     <y>23</y>
      <width>95</width>
      <height>20</height>
     </rect>
@@ -291,7 +307,7 @@
    <label>
     <rect>
      <x>605</x>
-     <y>18</y>
+     <y>23</y>
      <width>45</width>
      <height>20</height>
     </rect>
@@ -306,27 +322,8 @@
    </label>
    <field>
     <rect>
-     <x>15</x>
-     <y>-2</y>
-     <width>245</width>
-     <height>20</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>name</column>
-    </data>
-   </field>
-   <field>
-    <rect>
      <x>270</x>
-     <y>-2</y>
+     <y>3</y>
      <width>475</width>
      <height>20</height>
     </rect>
@@ -340,6 +337,44 @@
     <data>
      <query>detail</query>
      <column>descrip</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>15</x>
+     <y>3</y>
+     <width>55</width>
+     <height>20</height>
+    </rect>
+    <font>
+     <face>Arial</face>
+     <size>8</size>
+     <weight>bold</weight>
+    </font>
+    <left/>
+    <vcenter/>
+    <data>
+     <query>detail</query>
+     <column>number</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>75</x>
+     <y>3</y>
+     <width>185</width>
+     <height>20</height>
+    </rect>
+    <font>
+     <face>Arial</face>
+     <size>8</size>
+     <weight>bold</weight>
+    </font>
+    <left/>
+    <vcenter/>
+    <data>
+     <query>detail</query>
+     <column>name</column>
     </data>
    </field>
   </detail>
