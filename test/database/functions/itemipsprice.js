@@ -50,7 +50,6 @@ var _      = require("underscore"),
           assert.isNull(err);
           assert.operator(res.rowCount, ">=", 1);
           i++;
-          console.log(JSON.stringify(row), "returned", res.rowCount, "rows");
           if (i >= testcases.length) { done(); }
         });
       });
@@ -74,7 +73,6 @@ var _      = require("underscore"),
           assert.isNull(err);
           assert.operator(res.rowCount, ">=", 1);
           i++;
-          console.log(JSON.stringify(row), "returned", res.rowCount, "rows");
           if (i >= testcases.length) { done(); }
         });
       });
@@ -100,7 +98,6 @@ var _      = require("underscore"),
           assert.isNull(err);
           assert.operator(res.rowCount, ">=", 1);
           i++;
-          console.log(JSON.stringify(row), "returned", res.rowCount, "rows");
           if (i >= testcases.length) { done(); }
         });
       });

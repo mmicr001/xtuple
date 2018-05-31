@@ -23,7 +23,6 @@ var _      = require("underscore"),
                     "  true, true, true, true, true, true, true);";
           datasource.query(sql, cred, function (err, res) {
             assert.isNull(err);
-            console.log(JSON.stringify(res));
             assert.operator(res.rowCount, d ? "===" : ">", 0);
             done();
           });
