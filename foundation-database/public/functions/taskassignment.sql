@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION public.taskassignment(pTaskid integer)
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
--- Takes Contact Phone data and builds correctly formatted Json string
+-- Takes Task Assignment data and builds correctly formatted Json string
   SELECT row_to_json(ta)
   FROM (
     SELECT (

@@ -29,7 +29,7 @@ BEGIN
     RETURN -10;
   END IF;
 
-  SELECT MIN(copyTask(task_id, CAST(ptimestamp AS DATE), 'INCDT', _incdtid))
+  PERFORM MIN(copyTask(task_id, CAST(ptimestamp AS DATE), 'INCDT', _incdtid))
     FROM task
    WHERE (task_parent_id=pparentid AND task_parent_type='INCDT');
 

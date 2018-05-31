@@ -18,13 +18,15 @@ BEGIN
             task_active,        task_due_date,
             task_notes,        
             task_owner_username,task_priority_id,
+            task_prj_id,
             task_recurring_task_id, task_istemplate )
     SELECT  task_name,          COALESCE(task_number, '10'),  task_descrip,
             COALESCE(pParentType, 'TASK'), pParentId,
             getEffectiveXtUser(), 'N',
             TRUE,               _duedate,
             task_notes,      
-            task_owner_username,task_priority_id,
+            COALESCE(NULLIF(task_owner_username,''), geteffectivextuser()), task_priority_id,
+            CASE WHEN pParentType = 'J' THEN pParentId END,
             task_recurring_task_id, false
       FROM task
      WHERE task_id = pParentTaskId
@@ -41,6 +43,14 @@ BEGIN
            CURRENT_DATE
     FROM   taskass
    WHERE   taskass_task_id = pParentTaskId;
+
+  IF (NOT EXISTS (SELECT 1 FROM taskass 
+                   WHERE taskass_task_id=_taskid)) THEN
+  -- If no default assignments are created, set the currenct user as assigned
+     INSERT INTO taskass(taskass_task_id, taskass_username, taskass_crmrole_id,
+                         taskass_assigned_date)
+          VALUES (_taskid, geteffectivextuser(), getcrmroleid(), CURRENT_DATE);
+  END IF;
 
   SELECT saveAlarm(NULL, NULL, _duedate,
                    CAST(alarm_time - DATE_TRUNC('day',alarm_time) AS TIME),
