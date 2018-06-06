@@ -15,6 +15,7 @@ DECLARE
   _qry  	TEXT;
   _colname      TEXT;
   _multi	BOOLEAN;
+  _created      TIMESTAMP WITH TIME ZONE;
 
 BEGIN
   -- Validate
@@ -277,6 +278,15 @@ BEGIN
     ON CONFLICT (cntctphone_cntct_id, cntctphone_crmrole_id, cntctphone_phone)
     DO NOTHING;
   END IF;
+
+  -- Use oldest create date
+  SELECT MIN(cntct_created) INTO _created
+    FROM cntct
+   WHERE cntct_id IN (pSourceCntctId, pTargetCntctId);
+
+  UPDATE cntct
+     SET cntct_created = _created
+   WHERE cntct_id = pTargetCntctId;
 
   -- Disposition source contact
   IF (pPurge) THEN

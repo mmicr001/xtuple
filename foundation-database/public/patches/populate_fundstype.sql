@@ -55,6 +55,11 @@ WHERE NOT EXISTS (
   SELECT 1 FROM fundstype WHERE fundstype_code = 'M'
 );
 
+--Patch error from 4.10.x installations
+UPDATE fundstype
+   SET fundstype_name='MasterCard'
+ WHERE fundstype_name='Master Card';
+
 INSERT INTO fundstype (
   fundstype_code,
   fundstype_name,
@@ -186,4 +191,23 @@ SELECT
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM fundstype WHERE fundstype_code = 'O'
+);
+
+INSERT INTO fundstype (
+  fundstype_code,
+  fundstype_name,
+  fundstype_descrip,
+  fundstype_creditcard,
+  fundstype_external,
+  fundstype_prepay
+)
+SELECT
+  'P',
+  'Paypal',
+  'Payment by Paypal',
+  FALSE,
+  FALSE,
+  FALSE
+WHERE NOT EXISTS (
+  SELECT 1 FROM fundstype WHERE fundstype_code = 'P'
 );
