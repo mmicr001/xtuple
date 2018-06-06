@@ -34,6 +34,7 @@
                      cohead_custponumber AS custponumber
                 FROM cohead JOIN shiphead ON (shiphead_order_id=cohead_id AND shiphead_order_type='SO')
                WHERE(shiphead_id=&lt;? value("shiphead_id") ?>)
+      &lt;? if exists('MultiWhs') ?>    
               UNION
               SELECT shiphead_number,
                      shiphead_tracknum,
@@ -44,6 +45,7 @@
                      NULL AS custponumber
                 FROM tohead JOIN shiphead ON (shiphead_order_id=tohead_id AND shiphead_order_type='TO')
                WHERE(shiphead_id=&lt;? value("shiphead_id") ?>) 
+      &lt;? endif ?>
              ) AS taborder
  WHERE(order_cust_id=cust_id);
 </sql>
