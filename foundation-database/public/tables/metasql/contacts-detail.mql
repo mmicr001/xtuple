@@ -23,7 +23,9 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
   getContactPhone(cntct_id, 'Fax') AS contact_phone3,
- cntct_email, cntct_webaddr
+ cntct_email, cntct_webaddr,
+  cntct_created, cntct_lastupdated,
+  mrkd_id IS NOT NULL AS marked
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
@@ -46,6 +48,7 @@ FROM cntct()
 <? endif ?>
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
   LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
+  LEFT OUTER JOIN mrkd ON (mrkd_target_type='T' AND mrkd_target_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='CNTCT') 
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cntct_id)
@@ -125,6 +128,21 @@ WHERE true
 <? endif ?>
 <? if exists("addr_id") ?>
   AND (addr_id=<? value("addr_id") ?>)
+<? endif ?>
+<? if exists("marked") ?>
+  AND (mrkd_id IS NOT NULL)=<? value("marked") ?>
+<? endif ?>
+<? if exists("createStartDate") ?>
+  AND cntct_created::DATE >= <? value("createStartDate") ?>
+<? endif ?>
+<? if exists("createEndDate") ?>
+  AND cntct_created::DATE <= <? value("createEndDate") ?>
+<? endif ?>
+<? if exists("updateStartDate") ?>
+  AND cntct_lastupdated::DATE >= <? value("updateStartDate") ?>
+<? endif ?>
+<? if exists("updateEndDate") ?>
+  AND cntct_lastupdated::DATE <= <? value("updateEndDate") ?>
 <? endif ?>
 <? literal("charClause") ?>
 
