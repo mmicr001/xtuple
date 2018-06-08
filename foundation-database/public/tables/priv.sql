@@ -52,3 +52,9 @@ SELECT grantPrivToAll('AllowSharedFilterEdit');
 ALTER TABLE public.priv ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE priv IS 'System Privilege information';
+
+-- Version 5.0 Task Migration
+UPDATE priv 
+SET priv_name = REPLACE(priv_name, 'ToDoItems', 'TaskItems'),
+    priv_descrip = REPLACE(priv_descrip, 'ToDoItems', 'TaskItems')
+WHERE priv_name ~* 'ToDoItems';

@@ -6,17 +6,28 @@ CREATE OR REPLACE FUNCTION public._taskTrigger() RETURNS TRIGGER AS $$
 BEGIN
 
   --  Checks
-  IF (NEW.task_owner_username=getEffectiveXtUser()) THEN
-    IF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects') AND NOT checkPrivilege('MaintainPersonalProjects')) THEN
-      RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
-    END IF;
-    IF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllToDoItems') AND NOT checkPrivilege('MaintainPersonalToDoItems')) THEN
+  IF (checkPrivilege('MaintainAllTaskItems')) THEN
+    -- has privileges
+  ELSIF (checkPrivilege('MaintainPersonalTaskItems')) THEN
+    IF (NOT COALESCE((getEffectiveXtUser() = NEW.task_owner_username) 
+       OR (getEffectiveXtUser() IN (SELECT taskass_username 
+                                      FROM taskass 
+                                     WHERE taskass_task_id=NEW.task_id)), false)) THEN
       RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
     END IF;
-  ELSIF (NEW.task_parent_type = 'J' AND NOT checkPrivilege('MaintainAllProjects')) THEN
-    RAISE EXCEPTION 'You do not have privileges to maintain Projects.';
-  ELSIF (NEW.task_parent_type <> 'J' AND NOT checkPrivilege('MaintainAllToDoItems')) THEN
+  ELSE  
     RAISE EXCEPTION 'You do not have privileges to maintain Tasks.';
+  END IF;
+
+  IF (LENGTH(COALESCE(NEW.task_number,'')) = 0) THEN
+    IF (fetchmetrictext('TaskNumberGeneration') IN ('A', 'O')) THEN
+      NEW.task_number := fetchtasknumber();
+    ELSE
+      RAISE EXCEPTION 'You must enter a valid number.';
+    END IF;
+  ELSIF (LENGTH(COALESCE(NEW.task_name,'')) = 0) THEN
+    RAISE EXCEPTION 'You must enter a valid name.';
+
   END IF;
 
   -- Update Percent Complete based on hours
@@ -58,7 +69,7 @@ BEGIN
   IF (TG_OP = 'INSERT') THEN
     PERFORM postComment('ChangeLog', 'TA', NEW.task_id, 'Created');
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND NOT NEW.task_istemplate) THEN
     IF (OLD.task_start_date <> NEW.task_start_date) THEN
       PERFORM postComment('ChangeLog', 'TA', NEW.task_id, 'Start Date',
                           formatDate(OLD.task_start_date), formatDate(NEW.task_start_date));

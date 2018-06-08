@@ -1,13 +1,15 @@
 DROP FUNCTION IF EXISTS createtask(TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT, TEXT, TEXT, TEXT,
                                  JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
                                  DATE, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS createtask(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT,
+                                 JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
+                                 DATE, TEXT) CASCADE;
 
 CREATE OR REPLACE FUNCTION createtask (
     pParentType TEXT,
     pParent TEXT,
     pNumber TEXT,
     pStatus TEXT,
-    pActive BOOLEAN,
     pName TEXT,
     pDescrip TEXT,
     pPriority TEXT,
@@ -33,7 +35,6 @@ DECLARE
 BEGIN
 -- Validate data
   IF ( COALESCE(pParentType,'') = '' 
-    OR COALESCE(pNumber,'') = '' 
     OR COALESCE(pStatus,'') = '' 
     OR COALESCE(pName,'') = '') THEN
     
@@ -67,7 +68,6 @@ BEGIN
     task_parent_id,
     task_number,
     task_status,
-    task_active,
     task_name,
     task_descrip,
     task_priority_id,
@@ -85,9 +85,8 @@ BEGIN
   VALUES (
     _parenttype,
     _parentid,
-    pNumber,
+    COALESCE(pNumber, fetchtasknumber()::TEXT),
     _status,
-    COALESCE(pActive, true),
     pName,
     COALESCE(pDescrip,''),
     (SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=pPriority),
@@ -104,7 +103,6 @@ BEGIN
     )
   ON CONFLICT (task_parent_type, task_parent_id, task_number) DO UPDATE SET
     task_status=_status,
-    task_active=COALESCE(pActive, true),
     task_name=pName,
     task_descrip=COALESCE(pDescrip,''),
     task_priority_id=(SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=pPriority),
@@ -118,17 +116,16 @@ BEGIN
     task_start_date=pStartDate,
     task_completed_date=pCompletedDate,
     task_notes=pNotes
-    WHERE task_parent_type=_parenttype
-      AND task_parent_id=_parentid
-      AND task_number=pNumber
   RETURNING task_id INTO _taskid;
   
-  _assignments := json_extract_path(pAssignments, 'assigned');
-  INSERT INTO taskass (taskass_task_id,taskass_crmrole_id, taskass_username, taskass_assigned_date)
-  SELECT _taskid, getcrmroleid(json_array_elements(_assignments)->>'role'), 
-         json_array_elements(_assignments)->>'username', 
-         (json_array_elements(_assignments)->>'assigned_date')::DATE
-    ON CONFLICT DO NOTHING; 
+  IF (pAssignments IS NOT NULL) THEN 
+    _assignments := json_extract_path(pAssignments, 'assigned');
+    INSERT INTO taskass (taskass_task_id,taskass_crmrole_id, taskass_username, taskass_assigned_date)
+    SELECT _taskid, getcrmroleid(json_array_elements(_assignments)->>'role'), 
+           json_array_elements(_assignments)->>'username', 
+           (json_array_elements(_assignments)->>'assigned_date')::DATE
+      ON CONFLICT DO NOTHING; 
+  END IF;
 
   RETURN _taskid;
 

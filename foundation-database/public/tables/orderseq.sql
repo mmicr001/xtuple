@@ -43,5 +43,6 @@ INSERT INTO public.orderseq VALUES
  (22, 'CashRcptNumber', 10000, 'cashrcpt', 'cashrcpt_number', NULL),
  (23, 'CRMAccountNumber', 33000, 'crmacct', 'crmacct_number', NULL),
  (24, 'OpportunityNumber', 1, 'ophead', 'ophead_number', NULL),
- (26, 'TaskNumber', 22000, 'task', 'task_number', NULL)
+ (26, 'TaskNumber', 22000, 'task', 'task_number', NULL),
+ (27, 'ProjectNumber', 1000, 'prj', 'prj_number', NULL)
  ON CONFLICT (orderseq_name) DO NOTHING;

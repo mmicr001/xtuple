@@ -21,7 +21,6 @@ AS
        WHEN 'O' THEN 'In-Process'
        WHEN 'C' THEN 'Completed'
        ELSE          'Error' END AS status,
-     task_active AS active,
      task_name AS name,
      task_descrip AS description,
      incdtpriority_name AS priority,
@@ -56,7 +55,6 @@ CREATE OR REPLACE RULE "_INSERT" AS
                      NEW.parent,
                      NEW.task_number,
                      NEW.status,
-                     NEW.active,
                      NEW.name,
                      NEW.description,
                      NEW.priority,
@@ -67,9 +65,9 @@ CREATE OR REPLACE RULE "_INSERT" AS
                      NEW.expenses_budgeted,
                      NEW.expenses_actual,
                      NEW.percent_complete,
-                     NEW.due,
-                     NEW.started,
-                     NEW.completed,
+                     NEW.due::DATE,
+                     NEW.started::DATE,
+                     NEW.completed::DATE,
                      NEW.notes);
 
 CREATE OR REPLACE RULE "_UPDATE" AS 
@@ -80,7 +78,6 @@ CREATE OR REPLACE RULE "_UPDATE" AS
                      OLD.task_number,
                      NEW.task_number,
                      NEW.status,
-                     NEW.active,
                      NEW.name,
                      NEW.description,
                      NEW.priority,
@@ -91,9 +88,9 @@ CREATE OR REPLACE RULE "_UPDATE" AS
                      NEW.expenses_budgeted,
                      NEW.expenses_actual,
                      NEW.percent_complete,
-                     NEW.due,
-                     NEW.started,
-                     NEW.completed,
+                     NEW.due::DATE,
+                     NEW.started::DATE,
+                     NEW.completed::DATE,
                      NEW.notes);
            
 CREATE OR REPLACE RULE "_DELETE" AS 

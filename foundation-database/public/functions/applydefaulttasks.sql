@@ -16,12 +16,12 @@ BEGIN
     RAISE EXCEPTION 'Missing input parameters [xtuple: applyDefaultTasks, -1]';
   END IF;
 
-  -- First check if Tasks already exist for object
-  IF (EXISTS(SELECT 1 FROM task
-             WHERE task_parent_id=pParentId
+  -- Check if Tasks already exist for object
+  IF (EXISTS(SELECT 1 FROM task 
+             WHERE task_parent_id=pParentId 
                AND task_parent_type=pType)) THEN
     IF (NOT pOverride) THEN
-      RETURN -2; -- Ask whether to delete existing tasks
+      RETURN -2; -- Ask user whether to delete existing tasks
     ELSE
       DELETE FROM task
       WHERE task_parent_type=pType
@@ -29,6 +29,7 @@ BEGIN
     END IF;
   END IF;
 
+-- Set up template and check whether a template exists for this type
   _table := CASE pType WHEN 'J' THEN 'prjtype'
                        WHEN 'OPP' THEN 'optype'
                        WHEN 'INCDT' THEN 'incdtcat'

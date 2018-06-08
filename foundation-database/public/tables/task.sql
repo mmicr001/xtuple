@@ -2,6 +2,8 @@ DROP VIEW IF EXISTS api.tasks;
 
 SELECT xt.create_table('task', 'public');
 
+DROP VIEW IF EXISTS api.tasks;
+
 ALTER TABLE public.task DISABLE TRIGGER ALL;
 
 SELECT
@@ -9,7 +11,6 @@ SELECT
   xt.add_column('task', 'task_number',                'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_name',                  'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_descrip',               'TEXT', NULL,       'public'),
-  xt.add_column('task', 'task_active',             'BOOLEAN', 'NOT NULL DEFAULT true', 'public'),
   xt.add_column('task', 'task_parent_type',           'TEXT', 'NOT NULL', 'public'),
   xt.add_column('task', 'task_parent_id',          'INTEGER', NULL,       'public'),
   xt.add_column('task', 'task_prj_id',             'INTEGER', NULL,       'public'),

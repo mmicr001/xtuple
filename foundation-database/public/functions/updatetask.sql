@@ -1,6 +1,9 @@
 DROP FUNCTION IF EXISTS updatetask(TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT, TEXT, TEXT, TEXT,
                                  JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
                                  DATE, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS updatetask(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT,
+                                 JSON, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, DATE, DATE,
+                                 DATE, TEXT) CASCADE;
 
 CREATE OR REPLACE FUNCTION updatetask (
     pParentType TEXT,
@@ -8,7 +11,6 @@ CREATE OR REPLACE FUNCTION updatetask (
     pOldNumber TEXT,
     pNewNumber TEXT,
     pStatus TEXT,
-    pActive BOOLEAN,
     pName TEXT,
     pDescrip TEXT,
     pPriority TEXT,
@@ -66,7 +68,6 @@ BEGIN
   UPDATE task SET
     task_number=pNewNumber,
     task_status=_status,
-    task_active=COALESCE(pActive, true),
     task_name=pName,
     task_descrip=COALESCE(pDescrip,''),
     task_priority_id=(SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name=pPriority),

@@ -37,7 +37,6 @@ IF EXISTS (
       task_number,
       task_name,
       task_descrip,
-      task_active,
       task_parent_type,
       task_parent_id,
       task_prj_id,
@@ -57,7 +56,6 @@ IF EXISTS (
      (_rec.prjtask_number,
       _rec.prjtask_name,
       _rec.prjtask_descrip,
-      (_rec.prjtask_status <> 'C'),
       'J',
       _rec.prjtask_prj_id,
       _rec.prjtask_prj_id,
@@ -118,7 +116,6 @@ IF EXISTS (
       todoitem_id, 
       todoitem_name,
       todoitem_description,
-      todoitem_active,
       CASE WHEN todoitem_incdt_id IS NOT NULL THEN 'INCDT'
            WHEN todoitem_ophead_id IS NOT NULL  THEN 'OPP'
            WHEN todoitem_crmacct_id IS NOT NULL THEN 'CRMA'
@@ -143,7 +140,6 @@ IF EXISTS (
       task_number,
       task_name,
       task_descrip,
-      task_active,
       task_parent_type,
       task_parent_id,
       task_prj_id,
@@ -167,7 +163,6 @@ IF EXISTS (
       _rec.todoitem_name,
       _rec.todoitem_name,
       _rec.todoitem_description,
-      _rec.todoitem_active,
       _rec.parent_type,
       _rec.parent_id,
       _rec.prj_id,
@@ -220,8 +215,8 @@ UPDATE recurtype SET recurtype_type = 'TASK',
                      recurtype_donecheck='task_completed_date IS NOT NULL',
                      recurtype_schedcol='task_due_date',
                      recurtype_copyfunc='copytask',
-                     recurtype_limit=$$checkprivilege('MaintainAllToDoItems') 
-                                     OR (checkprivilege('MaintainPersonalToDoItems') 
+                     recurtype_limit=$$checkprivilege('MaintainAllTaskItems') 
+                                     OR (checkprivilege('MaintainPersonalTaskItems') 
                                          AND (CURRENT_USER = task_owner_username 
                                               OR task_id IN (SELECT taskass_task_id 
                                                              FROM taskass 

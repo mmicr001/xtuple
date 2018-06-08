@@ -1,8 +1,7 @@
 CREATE OR REPLACE FUNCTION ophead() RETURNS SETOF ophead AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _row ophead%ROWTYPE;
   _priv TEXT;
   _grant BOOLEAN;
 
@@ -16,19 +15,11 @@ BEGIN
 
   -- If have an 'All' privilege return all results
   IF (_priv ~ 'All' AND _grant) THEN
-    FOR _row IN 
-      SELECT * FROM ophead
-    LOOP
-      RETURN NEXT _row;
-    END LOOP;
+    RETURN QUERY SELECT * FROM ophead;
   -- Otherwise if have any other grant, must be personal privilege.
   ELSIF (_grant) THEN
-    FOR _row IN 
-      SELECT * FROM ophead 
-      WHERE getEffectiveXtUser() IN (ophead_owner_username, ophead_username)
-    LOOP
-      RETURN NEXT _row;
-    END LOOP;
+    RETURN QUERY SELECT * FROM ophead 
+                 WHERE getEffectiveXtUser() IN (ophead_owner_username, ophead_username);
   END IF;
 
   RETURN;
