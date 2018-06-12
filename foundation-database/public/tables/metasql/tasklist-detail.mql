@@ -264,7 +264,7 @@ WHERE true
    AND crmacct_id IN (SELECT groupsitem_reference_id FROM crmacctgrpitem WHERE groupsitem_groups_id=<? value("crmacctgrp") ?>)
  <? endif ?>
  <? if exists("prj_id") ?>
-    AND prj_id = <? value("prj_id") ?>
+    AND CASE WHEN <? value("prj_id") ?> = -1 THEN true ELSE prj_id = <? value("prj_id") ?> END
  <? endif ?>
  <? if exists("startStartDate") ?>
     AND ("start" <= <? value("startStartDate") ?>)
