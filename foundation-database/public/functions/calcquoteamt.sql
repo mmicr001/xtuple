@@ -57,11 +57,7 @@ BEGIN
   WHERE (quitem_quhead_id=pQuheadid);
 
   IF (pType IN ('T', 'X')) THEN
-    SELECT COALESCE(SUM(tax), 0.0) INTO _tax
-    FROM (SELECT COALESCE(ROUND(SUM(taxdetail_tax), 2), 0.0) AS tax
-          FROM tax
-               JOIN calculateTaxDetailSummary('Q', pQuheadid, 'T', COALESCE(pTaxzoneId, -1), pOrderDate, pCurrId, COALESCE(pFreight,0.0), pQuick) ON (taxdetail_tax_id=tax_id)
-          GROUP BY tax_id) AS data;
+    _tax := getOrderTax('Q', pQuheadid);
   END IF;
 
   IF (pQuick) THEN
