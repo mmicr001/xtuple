@@ -155,7 +155,7 @@ BEGIN
       CONTINUE;
     END IF;
 
-    IF _lines = _numlines + 2 AND pMiscDiscount AND pMisc < 0 THEN
+    IF _line = _numlines + 2 AND pMiscDiscount AND pMisc < 0 THEN
         _misc := '{"taxtypeid": ' || _taxtypes[_line] || ', "taxable": ' || _amounts[_line] ||
                  ', "tax": [] }';
 
