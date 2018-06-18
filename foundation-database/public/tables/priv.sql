@@ -34,6 +34,7 @@ declare
       ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
       ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
       ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups']
+      ['System', 'ConfigureTax', 'User is allowed to alter the Tax Service Configuration']
     ];
   _p TEXT[];
 begin
