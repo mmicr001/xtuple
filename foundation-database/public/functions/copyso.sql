@@ -270,11 +270,13 @@ BEGIN
     cohead_billto_cntct_fax,
     cohead_billto_cntct_email,
     cohead_taxzone_id,
-    cohead_taxtype_id,
     cohead_ophead_id,
     cohead_status,
     cohead_saletype_id,
-    cohead_shipzone_id )
+    cohead_shipzone_id,
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount )
    SELECT
     fetchSoNumber(),
     pCustomer,
@@ -346,11 +348,13 @@ BEGIN
     _customer.billing_fax,
     _customer.billing_email,
     _customer.cust_taxzone_id,
-    cohead_taxtype_id,
     cohead_ophead_id,
     'O',
     cohead_saletype_id,
-    cohead_shipzone_id
+    cohead_shipzone_id,
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
