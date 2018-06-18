@@ -24,6 +24,9 @@ DECLARE
   _docdate DATE;
   _freight NUMERIC;
   _misc NUMERIC;
+  _freighttaxtype INTEGER;
+  _misctaxtype INTEGER;
+  _miscdiscount BOOLEAN;
   _linenums TEXT[];
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
@@ -36,12 +39,12 @@ BEGIN
            addr_state, addr_postalcode, addr_country, quhead_shiptoaddress1, quhead_shiptoaddress2,
            quhead_shiptoaddress3, quhead_shiptocity, quhead_shiptostate, quhead_shiptozipcode,
            quhead_shiptocountry, quhead_cust_id, quhead_curr_id, quhead_quotedate, quhead_freight,
-           quhead_misc
+           quhead_misc, quhead_freight_taxtype_id, quhead_misc_taxtype_id, quhead_misc_discount
       INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
            _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
            _toline3, _tocity, _tostate, _tozip,
            _tocountry, _custid, _currid, _docdate, _freight,
-           _misc
+           _misc, _freighttaxtype, _misctaxtype, _miscdiscount
       FROM quhead
       JOIN whsinfo ON quhead_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
@@ -72,12 +75,12 @@ BEGIN
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
            cohead_shiptoaddress3, cohead_shiptocity, cohead_shiptostate, cohead_shiptozipcode,
            cohead_shiptocountry, cohead_cust_id, cohead_curr_id, cohead_orderdate, cohead_freight,
-           cohead_misc
+           cohead_misc, cohead_freight_taxtype_id, cohead_misc_taxtype_id, cohead_misc_discount
       INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
            _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
            _toline3, _tocity, _tostate, _tozip,
            _tocountry, _custid, _currid, _docdate, _freight,
-           _misc
+           _misc, _freighttaxtype, _misctaxtype, _miscdiscount
       FROM cohead
       JOIN whsinfo ON cohead_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
@@ -108,12 +111,12 @@ BEGIN
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
            cohead_shiptoaddress3, cohead_shiptocity, cohead_shiptostate, cohead_shiptozipcode,
            cohead_shiptocountry, cohead_cust_id, cohead_curr_id, cohead_orderdate, cobmisc_freight,
-           cobmisc_misc
+           cobmisc_misc, cobmisc_freight_taxtype_id, cobmisc_misc_taxtype_id, cobmisc_misc_discount
       INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
            _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
            _toline3, _tocity, _tostate, _tozip,
            _tocountry, _custid, _currid, _docdate, _freight,
-           _misc
+           _misc, _freighttaxtype, _misctaxtype, _miscdiscount
       FROM cobmisc
       JOIN cohead ON cobmisc_cohead_id = cohead_id
       JOIN whsinfo ON cohead_warehous_id = warehous_id
@@ -149,7 +152,8 @@ BEGIN
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
                       _tocity, _tostate, _tozip, _tocountry, _custid, _currid, _docdate, _freight,
-                      _misc, _linenums, _qtys, _taxtypeids, _amounts);
+                      _misc, _freighttaxtype, _misctaxtype, _miscdiscount, _linenums, _qtys,
+                      _taxtypeids, _amounts);
 
 END
 $$ language plpgsql;

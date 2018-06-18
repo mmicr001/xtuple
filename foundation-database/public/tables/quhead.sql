@@ -65,13 +65,15 @@ SELECT
   xt.add_column('quhead', 'quhead_billto_cntct_fax',        'TEXT', NULL,       'public'),
   xt.add_column('quhead', 'quhead_billto_cntct_email',      'TEXT', NULL,       'public'),
   xt.add_column('quhead', 'quhead_taxzone_id',           'INTEGER', NULL,       'public'),
-  xt.add_column('quhead', 'quhead_taxtype_id',           'INTEGER', NULL,       'public'),
   xt.add_column('quhead', 'quhead_ophead_id',            'INTEGER', NULL,       'public'),
   xt.add_column('quhead', 'quhead_status',                  'TEXT', NULL,       'public'),
   xt.add_column('quhead', 'quhead_saletype_id',          'INTEGER', NULL,       'public'),
   xt.add_column('quhead', 'quhead_shipzone_id',          'INTEGER', NULL,       'public'),
   xt.add_column('quhead', 'quhead_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
-  xt.add_column('quhead', 'quhead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
+  xt.add_column('quhead', 'quhead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
+  xt.add_column('quhead', 'quhead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
+  xt.add_column('quhead', 'quhead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
+  xt.add_column('quhead', 'quhead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
 
 SELECT
   xt.add_constraint('quhead', 'quhead_pkey', 'PRIMARY KEY (quhead_id)', 'public'),
@@ -101,8 +103,6 @@ SELECT
                     'FOREIGN KEY (quhead_shipto_id) REFERENCES shiptoinfo(shipto_id)', 'public'),
   xt.add_constraint('quhead', 'quhead_quhead_shipzone_id_fkey',
                     'FOREIGN KEY (quhead_shipzone_id) REFERENCES shipzone(shipzone_id)', 'public'),
-  xt.add_constraint('quhead', 'quhead_quhead_taxtype_id_fkey',
-                    'FOREIGN KEY (quhead_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('quhead', 'quhead_quhead_taxzone_id_fkey',
                     'FOREIGN KEY (quhead_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
   xt.add_constraint('quhead', 'quhead_quhead_terms_id_fkey',
@@ -110,7 +110,13 @@ SELECT
   xt.add_constraint('quhead', 'quhead_quhead_warehous_id_fkey',
                     'FOREIGN KEY (quhead_warehous_id) REFERENCES whsinfo(warehous_id)', 'public'),
   xt.add_constraint('quhead', 'quhead_to_curr_symbol',
-                    'FOREIGN KEY (quhead_curr_id) REFERENCES curr_symbol(curr_id)', 'public');
+                    'FOREIGN KEY (quhead_curr_id) REFERENCES curr_symbol(curr_id)', 'public'),
+  xt.add_constraint('quhead', 'quhead_quhead_freight_taxtype_id_fkey',
+                    'FOREIGN KEY (quhead_freight_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
+  xt.add_constraint('quhead', 'quhead_quhead_misc_taxtype_id_fkey',
+                    'FOREIGN KEY (quhead_misc_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+
+ALTER TABLE quhead DROP COLUMN IF EXISTS quhead_taxtype_id CASCADE;
 
 ALTER TABLE public.quhead ENABLE TRIGGER ALL;
 

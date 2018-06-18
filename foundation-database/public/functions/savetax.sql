@@ -65,13 +65,13 @@ BEGIN
                     taxhist_sequence,
                     taxhist_percent, taxhist_amount, 
                     taxhist_tax, taxhist_docdate, taxhist_curr_id,
-                    taxhist_curr_rate, taxhist_doctype)
+                    taxhist_curr_rate, taxhist_doctype, taxhist_line_type)
                    SELECT %%L, %%L, (value->>'taxid')::INTEGER, %%L,
                           NULLIF((value->>'basistaxid')::INTEGER, -1),
                           (value->>'sequence')::INTEGER,
                           (value->>'percent')::NUMERIC, (value->>'amount')::NUMERIC,
                           (value->>'tax')::NUMERIC, %L, %L,
-                          %L, %%L
+                          %L, %%L, %%L
                      FROM jsonb_array_elements(%%L)$_$,
                   (pResult->>'date')::DATE, (pResult->>'currid')::INTEGER,
                   (pResult->>'currrate')::NUMERIC);
@@ -80,14 +80,14 @@ BEGIN
   IF jsonb_array_length(pResult->'freight'->'tax') != 0 THEN
     EXECUTE format(_qry, format('%stax', _tablename), pOrderId,
                    (pResult->'freight'->>'taxtypeid')::INTEGER,
-                   (pResult->'freight'->>'taxable')::NUMERIC, pOrderType,
+                   (pResult->'freight'->>'taxable')::NUMERIC, pOrderType, 'F',
                    pResult->'freight'->'tax');
   END IF;
 
   IF jsonb_array_length(pResult->'misc'->'tax') != 0 THEN
     EXECUTE format(_qry, format('%stax', _tablename), pOrderId,
                    (pResult->'misc'->>'taxtypeid')::INTEGER,
-                   (pResult->'misc'->>'taxable')::NUMERIC, pOrderType,
+                   (pResult->'misc'->>'taxable')::NUMERIC, pOrderType, 'M',
                    pResult->'misc'->'tax');
   END IF;
 
@@ -98,7 +98,7 @@ BEGIN
     EXECUTE format(_lineidqry, pOrderId, _r.value->>'line') INTO _lineid;
 
     EXECUTE format(_qry, format('%stax', _subtablename), _lineid, (_r.value->>'taxtypeid')::INTEGER,
-                   (_r.value->>'taxable')::NUMERIC, _subtype, _r.value->'tax');
+                   (_r.value->>'taxable')::NUMERIC, _subtype, 'L', _r.value->'tax');
   END LOOP;
 
   SELECT COALESCE(SUM(taxhist_tax), 0.0)

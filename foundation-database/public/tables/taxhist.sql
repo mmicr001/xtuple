@@ -19,7 +19,8 @@ SELECT
   xt.add_column('taxhist', 'taxhist_curr_rate',      'NUMERIC', NULL,       'public'),
   xt.add_column('taxhist', 'taxhist_journalnumber',  'INTEGER', NULL,       'public'),
   xt.add_column('taxhist', 'taxhist_doctype',           'TEXT', NULL,       'public'),
-  xt.add_column('taxhist', 'taxhist_reverse_charge', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+  xt.add_column('taxhist', 'taxhist_reverse_charge', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public'),
+  xt.add_column('taxhist', 'taxhist_line_type',         'TEXT', 'NOT NULL DEFAULT ''L''', 'public');
 
 SELECT
   xt.add_constraint('taxhist', 'taxhist_pkey', 'PRIMARY KEY (taxhist_id)', 'public'),
@@ -28,7 +29,9 @@ SELECT
   xt.add_constraint('taxhist', 'taxhist_taxhist_tax_id_fkey',
                     'FOREIGN KEY (taxhist_tax_id) REFERENCES tax(tax_id)', 'public'),
   xt.add_constraint('taxhist', 'taxhist_taxhist_taxtype_id_fkey',
-                    'FOREIGN KEY (taxhist_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+                    'FOREIGN KEY (taxhist_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
+  xt.add_constraint('taxhist', 'taxhist_line_type_check',
+                    $$CHECK (taxhist_line_type IN ('L', 'F', 'M'))$$, 'public');
 
 ALTER TABLE public.taxhist ENABLE TRIGGER ALL;
 

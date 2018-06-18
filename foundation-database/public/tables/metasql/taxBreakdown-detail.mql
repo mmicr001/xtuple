@@ -39,7 +39,7 @@ SELECT NULL, 1,
   FROM quhead
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'Q'
                          AND quhead_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getFreightTaxtypeId()
+                         AND taxhist_line_type = 'F'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
  GROUP BY quhead_freight
@@ -57,7 +57,7 @@ SELECT NULL, 2,
   FROM quhead
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'Q'
                          AND quhead_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getMiscTaxtypeId()
+                         AND taxhist_line_type = 'M'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
  GROUP BY quhead_misc
@@ -91,7 +91,7 @@ SELECT taxhist_id, 1,
   FROM quhead
   JOIN taxhist ON taxhist_doctype = 'Q'
               AND quhead_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getFreightTaxtypeId()
+              AND taxhist_line_type = 'F'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
 UNION
@@ -108,7 +108,7 @@ SELECT taxhist_id, 2,
   FROM quhead
   JOIN taxhist ON taxhist_doctype = 'Q'
               AND quhead_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getMiscTaxtypeId()
+              AND taxhist_line_type = 'M'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
 <? elseif exists("quitem_id") ?>
@@ -183,7 +183,7 @@ SELECT NULL, 1,
   FROM cohead
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'S'
                          AND cohead_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getFreightTaxtypeId()
+                         AND taxhist_line_type = 'F'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
  GROUP BY cohead_freight
@@ -201,7 +201,7 @@ SELECT NULL, 2,
   FROM cohead
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'S'
                          AND cohead_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getMiscTaxtypeId()
+                         AND taxhist_line_type = 'M'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
  GROUP BY cohead_misc
@@ -235,7 +235,7 @@ SELECT taxhist_id, 1,
   FROM cohead
   JOIN taxhist ON taxhist_doctype = 'S'
               AND cohead_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getFreightTaxtypeId()
+              AND taxhist_line_type = 'F'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
 UNION
@@ -252,7 +252,7 @@ SELECT taxhist_id, 2,
   FROM cohead
   JOIN taxhist ON taxhist_doctype = 'S'
               AND cohead_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getMiscTaxtypeId()
+              AND taxhist_line_type = 'M'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
 <? elseif exists("coitem_id") ?>
@@ -328,7 +328,7 @@ SELECT NULL, 1,
   FROM cobmisc
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'COB'
                          AND cobmisc_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getFreightTaxtypeId()
+                         AND taxhist_line_type = 'F'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
  GROUP BY cobmisc_freight
@@ -346,7 +346,7 @@ SELECT NULL, 2,
   FROM cobmisc
   LEFT OUTER JOIN taxhist ON taxhist_doctype = 'COB'
                          AND cobmisc_id = taxhist_parent_id
-                         AND taxhist_taxtype_id = getMiscTaxtypeId()
+                         AND taxhist_line_type = 'M'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
  GROUP BY cobmisc_misc
@@ -398,7 +398,7 @@ SELECT taxhist_id, 1,
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getFreightTaxtypeId()
+              AND taxhist_line_type = 'F'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 UNION
@@ -415,7 +415,7 @@ SELECT taxhist_id, 2,
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getMiscTaxtypeId()
+              AND taxhist_line_type = 'M'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 UNION

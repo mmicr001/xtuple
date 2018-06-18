@@ -23,32 +23,35 @@ END;
 $BODY$
   LANGUAGE 'plpgsql' VOLATILE;
 
-CREATE OR REPLACE FUNCTION calculateTax(pOrderType   TEXT,
-                                        pOrderNumber TEXT,
-                                        pTaxZoneId   INTEGER,
-                                        pFromLine1   TEXT,
-                                        pFromLine2   TEXT,
-                                        pFromLine3   TEXT,
-                                        pFromCity    TEXT,
-                                        pFromState   TEXT,
-                                        pFromZip     TEXT,
-                                        pFromCountry TEXT,
-                                        pToLine1   TEXT,
-                                        pToLine2   TEXT,
-                                        pToLine3   TEXT,
-                                        pToCity    TEXT,
-                                        pToState   TEXT,
-                                        pToZip     TEXT,
-                                        pToCountry TEXT,
-                                        pCustId      INTEGER,
-                                        pCurrId      INTEGER,
-                                        pDocDate     DATE,
-                                        pFreight     NUMERIC,
-                                        pMisc        NUMERIC,
-                                        pLines       TEXT[],
-                                        pQtys        NUMERIC[],
-                                        pTaxTypes    INTEGER[],
-                                        pAmounts     NUMERIC[]) RETURNS JSONB AS
+CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
+                                        pOrderNumber      TEXT,
+                                        pTaxZoneId        INTEGER,
+                                        pFromLine1        TEXT,
+                                        pFromLine2        TEXT,
+                                        pFromLine3        TEXT,
+                                        pFromCity         TEXT,
+                                        pFromState        TEXT,
+                                        pFromZip          TEXT,
+                                        pFromCountry      TEXT,
+                                        pToLine1          TEXT,
+                                        pToLine2          TEXT,
+                                        pToLine3          TEXT,
+                                        pToCity           TEXT,
+                                        pToState          TEXT,
+                                        pToZip            TEXT,
+                                        pToCountry        TEXT,
+                                        pCustId           INTEGER,
+                                        pCurrId           INTEGER,
+                                        pDocDate          DATE,
+                                        pFreight          NUMERIC,
+                                        pMisc             NUMERIC,
+                                        pFreightTaxtypeId INTEGER,
+                                        pMiscTaxtypeId    INTEGER,
+                                        pMiscDiscount     BOOLEAN,
+                                        pLines            TEXT[],
+                                        pQtys             NUMERIC[],
+                                        pTaxTypes         INTEGER[],
+                                        pAmounts          NUMERIC[]) RETURNS JSONB AS
 $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -74,10 +77,11 @@ BEGIN
     RETURN formatAvaTaxPayload(pOrderType, pOrderNumber, pFromLine1, pFromLine2, pFromLine3,
                                pFromCity, pFromState, pFromZip, pFromCountry, pToLine1, pToLine2,
                                pToLine3, pToCity, pToState, pToZip, pToCountry, pCustId, pCurrId,
-                               pDocDate, pFreight, pMisc, pLines, pQtys, _taxtypes, pAmounts);
+                               pDocDate, pFreight, pMisc, pFreightTaxtypeId, pMiscTaxtypeId,
+                               pMiscDiscount, pLines, pQtys, _taxtypes, pAmounts);
   ELSE
-    RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pLines, pTaxTypes,
-                        pAmounts);
+    RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,
+                        pMiscTaxtypeId, pMiscDiscount, pLines, pTaxTypes, pAmounts);
   END IF;
 
 END
@@ -88,6 +92,9 @@ CREATE OR REPLACE FUNCTION calculateTax(pTaxZoneId INTEGER,
                                         pDocDate DATE,
                                         pFreight NUMERIC,
                                         pMisc NUMERIC,
+                                        pFreightTaxtypeId INTEGER,
+                                        pMiscTaxtypeId INTEGER,
+                                        pMiscDiscount BOOLEAN,
                                         pLines TEXT[],
                                         pTaxTypes INTEGER[],
                                         pAmounts NUMERIC[]) RETURNS JSONB AS
@@ -119,8 +126,13 @@ DECLARE
 BEGIN
   _numlines := COALESCE(array_length(pLines, 1), 0);
 
-  _taxtypes := pTaxTypes || getFreightTaxtypeId() || getMiscTaxtypeId();
-  _amounts := pAmounts || COALESCE(pFreight, 0) || COALESCE(pMisc, 0);
+  _taxtypes := pTaxTypes || pFreightTaxtypeId || pMiscTaxtypeId;
+  IF pMiscDiscount AND pMisc < 0 THEN
+    _amounts := distributeDiscount(pAmounts, pMisc * -1, _precision);
+  ELSE
+    _amounts := pAmounts;
+  END IF;
+  _amounts := _amounts || COALESCE(pFreight, 0) || COALESCE(pMisc, 0);
 
   FOR _line IN 1.._numlines + 2
   LOOP
@@ -139,6 +151,13 @@ BEGIN
         _misc := '{"taxtypeid": ' || _taxtypes[_line] || ', "taxable": ' || _amounts[_line] ||
                  ', "tax": [] }';
       END IF;
+
+      CONTINUE;
+    END IF;
+
+    IF _lines = _numlines + 2 AND pMiscDiscount AND pMisc < 0 THEN
+        _misc := '{"taxtypeid": ' || _taxtypes[_line] || ', "taxable": ' || _amounts[_line] ||
+                 ', "tax": [] }';
 
       CONTINUE;
     END IF;

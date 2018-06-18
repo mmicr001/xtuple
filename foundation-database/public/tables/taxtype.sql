@@ -11,6 +11,10 @@ SELECT xt.add_constraint('taxtype', 'taxtype_taxtype_name_check', $$CHECK (trim(
 
 COMMENT ON TABLE taxtype IS 'The list of Tax Types';
 
+UPDATE taxtype
+   SET taxtype_descrip = 'Default Freight Tax Type'
+ WHERE taxtype_name = 'Freight';
+
 DO $$
 BEGIN
   IF (SELECT NOT EXISTS(SELECT 1
@@ -18,7 +22,7 @@ BEGIN
                          WHERE taxtype_name = 'Misc')) THEN
     INSERT INTO taxtype
     (taxtype_name, taxtype_descrip, taxtype_sys)
-    VALUES ('Misc', 'System Defined Misc Tax Type. DO NOT CHANGE.', true);
+    VALUES ('Misc', 'Default Misc Tax Type', true);
   END IF;
 END
 $$ LANGUAGE plpgsql;
