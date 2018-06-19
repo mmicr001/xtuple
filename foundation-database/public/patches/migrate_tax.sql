@@ -1,7 +1,7 @@
 DO $$
 BEGIN
 
-  IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0') = -1 THEN
+  IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0-alpha') = -1 THEN
     PERFORM saveTax('Q', quhead_id, calculateOrderTax('Q', quhead_id))
        FROM quhead;
 
