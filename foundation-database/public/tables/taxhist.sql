@@ -31,7 +31,13 @@ SELECT
   xt.add_constraint('taxhist', 'taxhist_taxhist_taxtype_id_fkey',
                     'FOREIGN KEY (taxhist_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('taxhist', 'taxhist_line_type_check',
-                    $$CHECK (taxhist_line_type IN ('L', 'F', 'M'))$$, 'public');
+                    $$CHECK (taxhist_line_type IN ('L', 'F', 'M', 'A'))$$, 'public');
+
+UPDATE taxhist
+   SET taxhist_line_type = CASE WHEN taxhist_taxtype_id = getFreightTaxtypeId() THEN 'F'
+                                WHEN taxhist_taxtype_id = getAdjustmentTaxtypeId() THEN 'A'
+                                ELSE 'L'
+                            END;
 
 ALTER TABLE public.taxhist ENABLE TRIGGER ALL;
 

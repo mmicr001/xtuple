@@ -364,7 +364,7 @@ SELECT NULL, 3,
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getAdjustmentTaxtypeId()
+              AND taxhist_line_type = 'A'
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
  GROUP BY cobmisc_id
 UNION
@@ -432,7 +432,7 @@ SELECT taxhist_id, 3,
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
-              AND taxhist_taxtype_id = getAdjustmentTaxtypeId()
+              AND taxhist_line_type = 'A'
   JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 <? endif ?>

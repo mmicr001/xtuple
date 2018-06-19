@@ -9,7 +9,8 @@ BEGIN
              FROM UNNEST(pLines) AS line
           )
           SELECT roundTotal(array_agg(line - pDiscount * line / total), total - pDiscount, 2)
-            FROM total, UNNEST(pLines) AS line);
+            FROM total, UNNEST(pLines) AS line
+            GROUP BY total);
 
 END
 $$ language plpgsql;
