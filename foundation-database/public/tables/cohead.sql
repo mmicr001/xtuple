@@ -76,11 +76,13 @@ SELECT
   xt.add_column('cohead', 'cohead_billto_cntct_fax',        'TEXT', NULL, 'public'),
   xt.add_column('cohead', 'cohead_billto_cntct_email',      'TEXT', NULL, 'public'),
   xt.add_column('cohead', 'cohead_taxzone_id',           'INTEGER', NULL, 'public'),
-  xt.add_column('cohead', 'cohead_taxtype_id',           'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_ophead_id',            'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_status',          'CHARACTER(1)', $$DEFAULT 'O' NOT NULL$$, 'public'),
   xt.add_column('cohead', 'cohead_saletype_id',          'INTEGER', NULL, 'public'),
-  xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public');
+  xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public'),
+  xt.add_column('cohead', 'cohead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
+  xt.add_column('cohead', 'cohead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
+  xt.add_column('cohead', 'cohead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
 
 SELECT
   xt.add_constraint('cohead', 'cohead_pkey',  'PRIMARY KEY (cohead_id)', 'public'),
@@ -111,8 +113,6 @@ SELECT
                    'FOREIGN KEY (cohead_shipto_id) REFERENCES shiptoinfo(shipto_id)', 'public'),
   xt.add_constraint('cohead', 'cohead_cohead_shipzone_id_fkey',
                    'FOREIGN KEY (cohead_shipzone_id) REFERENCES shipzone(shipzone_id)', 'public'),
-  xt.add_constraint('cohead', 'cohead_cohead_taxtype_id_fkey',
-                   'FOREIGN KEY (cohead_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('cohead', 'cohead_cohead_taxzone_id_fkey',
                    'FOREIGN KEY (cohead_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
   xt.add_constraint('cohead', 'cohead_cohead_terms_id_fkey',
@@ -120,7 +120,13 @@ SELECT
   xt.add_constraint('cohead', 'cohead_cohead_warehous_id_fkey',
                    'FOREIGN KEY (cohead_warehous_id) REFERENCES whsinfo(warehous_id)', 'public'),
   xt.add_constraint('cohead', 'cohead_to_curr_symbol',
-                   'FOREIGN KEY (cohead_curr_id) REFERENCES curr_symbol(curr_id)', 'public');
+                   'FOREIGN KEY (cohead_curr_id) REFERENCES curr_symbol(curr_id)', 'public'),
+  xt.add_constraint('cohead', 'cohead_cohead_freight_taxtype_id_fkey',
+                    'FOREIGN KEY (cohead_freight_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
+  xt.add_constraint('cohead', 'cohead_cohead_misc_taxtype_id_fkey',
+                    'FOREIGN KEY (cohead_misc_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+
+  ALTER TABLE cohead DROP COLUMN IF EXISTS cohead_taxtype_id;
 
 DO $$
 BEGIN

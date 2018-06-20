@@ -12,7 +12,6 @@ AS
      salesrep_number AS sales_rep,
      quhead_commission AS commission,
      taxzone_code AS tax_zone,
-     taxtype_name AS tax_type,
      terms_code AS terms,
      prj_number AS project_number,
      COALESCE(cust_number,prospect_number) AS customer_number,
@@ -63,7 +62,6 @@ AS
      LEFT OUTER JOIN prj ON (quhead_prj_id=prj_id)
      LEFT OUTER JOIN shiptoinfo ON (quhead_shipto_id=shipto_id)
      LEFT OUTER JOIN taxzone ON (quhead_taxzone_id=taxzone_id)
-     LEFT OUTER JOIN taxtype ON (quhead_taxtype_id=taxtype_id)
      LEFT OUTER JOIN custinfo ON (quhead_cust_id=cust_id)
      LEFT OUTER JOIN prospect ON (quhead_cust_id=prospect_id)
      LEFT OUTER JOIN salesrep ON (quhead_salesrep_id=salesrep_id)
@@ -119,7 +117,6 @@ CREATE OR REPLACE RULE "_INSERT" AS
     quhead_shiptocountry,
     quhead_curr_id,
     quhead_taxzone_id,
-    quhead_taxtype_id,
     quhead_imported,
     quhead_expire,
     quhead_status,
@@ -165,7 +162,6 @@ CREATE OR REPLACE RULE "_INSERT" AS
     NEW.shipto_country,
     getCurrId(NEW.currency),
     getTaxZoneId(NEW.tax_zone),
-    getTaxTypeId(NEW.tax_type),
     true,
     NEW.expire_date,
     CASE
@@ -220,7 +216,6 @@ CREATE OR REPLACE RULE "_UPDATE" AS
     quhead_shiptocountry=NEW.shipto_country,
     quhead_curr_id=getCurrId(NEW.currency),
     quhead_taxzone_id=getTaxZoneId(NEW.tax_zone),
-    quhead_taxtype_id=getTaxTypeId(NEW.tax_type),
     quhead_expire=NEW.expire_date,
     quhead_saletype_id=getSaleTypeId(NEW.sale_type),
     quhead_shipzone_id=getShipZoneId(NEW.shipto_shipzone)

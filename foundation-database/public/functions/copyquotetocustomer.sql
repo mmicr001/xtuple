@@ -52,7 +52,8 @@ BEGIN
     quhead_shipto_id,  
     quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
     quhead_ordercomments,  quhead_shipcomments,
-    quhead_imported,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  quhead_status,
+    quhead_imported,  quhead_curr_id,  quhead_taxzone_id,  quhead_freight_taxtype_id,
+    quhead_misc_taxtype_id,  quhead_misc_discount,  quhead_ophead_id,  quhead_status,
     quhead_shipto_cntct_id,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
     quhead_billto_cntct_first_name,  quhead_billto_cntct_middle,  quhead_billto_cntct_last_name,  quhead_billto_cntct_suffix,
     quhead_billto_cntct_phone,  quhead_billto_cntct_title,  quhead_billto_cntct_fax,  quhead_billto_cntct_email )
@@ -66,7 +67,8 @@ BEGIN
  
          quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
          quhead_ordercomments,  quhead_shipcomments,
-         FALSE,  quhead_curr_id,  quhead_taxzone_id,  quhead_taxtype_id,  quhead_ophead_id,  'O',
+         FALSE,  quhead_curr_id,  quhead_taxzone_id,  quhead_freight_taxtype_id,
+         quhead_misc_taxtype_id,  quhead_misc_discount  quhead_ophead_id,  'O',
          
  	 NULL, -- quhead_shipto_cntct_id,
 	
