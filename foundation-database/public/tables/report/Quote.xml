@@ -149,7 +149,7 @@ WHERE ( (addr_id = warehous_addr_id)
          FROM quhead
          LEFT OUTER JOIN custinfo ON quhead_cust_id = cust_id
          LEFT OUTER JOIN prospect ON quhead_cust_id = prospect_id
-         JOIN cntct ON COALESCE(cust_cntct_id, prospect_cntct_id) = cntct_id
+         JOIN cntct ON COALESCE(cust_cntct_id, getcrmaccountcontact(prospect_crmacct_id)) = cntct_id
         WHERE quhead_id = &lt;? value("quhead_id") ?>;
 </sql>
  </querysource>
