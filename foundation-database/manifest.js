@@ -462,6 +462,7 @@
     "public/functions/formatcounttagbarcode.sql",
     "public/functions/formatcreditmemonumber.sql",
     "public/functions/formatextprice.sql",
+    "public/functions/formatexternaltaxcodes.sql",
     "public/functions/formatflitemdescrip.sql",
     "public/functions/formatglaccount.sql",
     "public/functions/formatglaccountlong.sql",

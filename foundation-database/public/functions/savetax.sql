@@ -2,7 +2,6 @@ CREATE OR REPLACE FUNCTION saveTax(pOrderType TEXT, pOrderId INTEGER, pResult JS
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _service TEXT;
   _tablename TEXT;
   _subtablename TEXT;
   _lineidqry TEXT;
@@ -14,9 +13,7 @@ DECLARE
 
 BEGIN
 
-  _service := fetchMetricText('TaxService');
-
-  IF _service = 'A' THEN
+  IF (fetchMetricText('TaxService') = 'A') THEN
     RETURN saveAvaTax(pOrderType, pOrderId, pResult);
   END IF;
 
