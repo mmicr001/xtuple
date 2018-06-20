@@ -466,6 +466,7 @@
     "public/functions/formatglaccount.sql",
     "public/functions/formatglaccountlong.sql",
     "public/functions/formatindent.sql",
+    "public/functions/formatinvclinenumber.sql",
     "public/functions/formatinvcnumber.sql",
     "public/functions/formatitemsitebarcode.sql",
     "public/functions/formatlocationbarcode.sql",

@@ -45,12 +45,20 @@ BEGIN
                     WHERE cobill_cobmisc_id = %L
                       AND formatSoLineNumber(coitem_id) = %L';
     _subtype := 'COBI';
+  ELSIF pOrderType = 'INV' THEN
+    _tablename := 'invchead';
+    _subtablename := 'invcitem';
+    _lineidqry := 'SELECT invcitem_id
+                     FROM invcitem
+                    WHERE invcitem_invchead_id = %L
+                      AND formatInvcLineNumber(invcitem_id) = %L';
+    _subtype := 'INVI';
   END IF;
 
   EXECUTE format('DELETE FROM %I
                    WHERE taxhist_parent_id = %L
-                     AND taxhist_taxtype_id != getAdjustmentTaxtypeId()',
-                 format('%stax', _tablename), pOrderId);
+                     AND taxhist_line_type = %L',
+                 format('%stax', _tablename), pOrderId, 'A');
 
   EXECUTE format('DELETE FROM %I
                    WHERE taxhist_parent_id IN (SELECT %I
@@ -106,7 +114,7 @@ BEGIN
     FROM taxhist
    WHERE taxhist_doctype = pOrderType
      AND taxhist_parent_id = pOrderId
-     AND taxhist_taxtype_id = getAdjustmentTaxtypeId();
+     AND taxhist_line_type = 'A';
 
   RETURN (pResult->>'total')::NUMERIC + _adjustment;
 

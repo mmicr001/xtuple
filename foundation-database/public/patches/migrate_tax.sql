@@ -10,6 +10,10 @@ BEGIN
 
     PERFORM saveTax('COB', cobmisc_id, calculateOrderTax('COB', cobmisc_id))
        FROM cobmisc;
+
+    PERFORM saveTax('INV', invchead_id, calculateOrderTax('INV', invchead_id))
+       FROM invchead
+      WHERE NOT invchead_posted;
   END IF;
 
 END
