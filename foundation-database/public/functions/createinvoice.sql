@@ -42,7 +42,8 @@ BEGIN
 	invchead_misc_amount,invchead_misc_descrip,invchead_misc_accnt_id,invchead_payment,
 	invchead_paymentref,invchead_notes,invchead_prj_id,invchead_curr_id,
 	invchead_taxzone_id, invchead_shipchrg_id,
-        invchead_saletype_id, invchead_shipzone_id
+        invchead_saletype_id, invchead_shipzone_id, invchead_freight_taxtype_id,
+        invchead_misc_taxtype_id, invchead_misc_discount
    )
   SELECT 
 	_invcheadid,cohead_cust_id,cohead_shipto_id,cohead_number,cohead_orderdate,
@@ -55,7 +56,8 @@ BEGIN
 	COALESCE(cobmisc_misc, 0.00),cobmisc_misc_descrip,cobmisc_misc_accnt_id,cobmisc_payment,
 	cobmisc_paymentref,cobmisc_notes,cohead_prj_id,cobmisc_curr_id,
 	cobmisc_taxzone_id, cohead_shipchrg_id,
-        cohead_saletype_id, cohead_shipzone_id
+        cohead_saletype_id, cohead_shipzone_id, cobmisc_freight_taxtype_id,
+        cobmisc_misc_taxtype_id, cobmisc_misc_discount
     FROM cobmisc, cohead, custinfo
     LEFT OUTER JOIN cntct ON (cust_cntct_id=cntct_id)
   WHERE ( (cobmisc_cohead_id=cohead_id)

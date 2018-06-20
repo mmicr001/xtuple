@@ -147,6 +147,47 @@ BEGIN
                         JOIN coitem ON cobill_coitem_id = coitem_id
                        WHERE cobill_cobmisc_id = pOrderId
                        ORDER BY coitem_linenumber, coitem_subnumber);
+  ELSIF pOrderType = 'INV' THEN
+    SELECT invchead_invcnumber, invchead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
+           addr_state, addr_postalcode, addr_country, invchead_shipto_address1,
+           invchead_shipto_address2, invchead_shipto_address3, invchead_shipto_city,
+           invchead_shipto_state, invchead_shipto_zipcode, invchead_shipto_country,
+           invchead_cust_id, invchead_curr_id, invchead_invcdate, invchead_freight,
+           invchead_misc_amount, invchead_freight_taxtype_id, invchead_misc_taxtype_id,
+           invchead_misc_discount
+      INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
+           _fromstate, _fromzip, _fromcountry, _toline1,
+           _toline2, _toline3, _tocity,
+           _tostate, _tozip, _tocountry,
+           _custid, _currid, _docdate, _freight,
+           _misc, _freighttaxtype, _misctaxtype,
+           _miscdiscount
+      FROM invchead
+      JOIN cohead ON invchead_ordernumber = cohead_number
+      JOIN whsinfo ON cohead_warehous_id = warehous_id
+      LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+     WHERE invchead_id = pOrderId;
+
+    _linenums := ARRAY(SELECT formatInvcLineNumber(invcitem_id)
+                         FROM invcitem
+                        WHERE invcitem_invchead_id = pOrderId
+                        ORDER BY invcitem_linenumber, invcitem_subnumber);
+
+    _qtys := ARRAY(SELECT ROUND(invcitem_billed * invcitem_qty_invuomratio, 6)
+                     FROM invcitem
+                    WHERE invcitem_invchead_id = pOrderId
+                    ORDER BY invcitem_linenumber, invcitem_subnumber);
+
+    _taxtypeids := ARRAY(SELECT invcitem_taxtype_id
+                           FROM invcitem
+                          WHERE invcitem_invchead_id = pOrderId
+                          ORDER BY invcitem_linenumber, invcitem_subnumber);
+
+    _amounts := ARRAY(SELECT ROUND(invcitem_billed * invcitem_qty_invuomratio *
+                                   invcitem_price / invcitem_price_invuomratio, _precision)
+                        FROM invcitem
+                       WHERE invcitem_invchead_id = pOrderId
+                       ORDER BY invcitem_linenumber, invcitem_subnumber);
   END IF;
 
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
