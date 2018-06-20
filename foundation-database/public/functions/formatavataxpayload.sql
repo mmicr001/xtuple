@@ -44,7 +44,7 @@ BEGIN
   FROM  custinfo
   WHERE cust_id = pcustid;
 
-  _payload = format('{
+  _payload = format('{ "createTransactionModel": {
     "type": "%s",
     "code": "%s",
     "companyCode": "%s",
@@ -100,7 +100,7 @@ BEGIN
     END IF;
   END LOOP;
 
-  _payload = _payload || ']}';
+  _payload = _payload || ']}}';
 
   RETURN _payload;
 
