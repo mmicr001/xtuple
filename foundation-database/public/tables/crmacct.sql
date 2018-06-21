@@ -37,18 +37,21 @@ BEGIN
             WHERE table_name='crmacct' and column_name='crmacct_cntct_id_1') THEN
 
      INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
-     SELECT crmacct_id, crmacct_cntct_id_1, getcrmroleid('Primary')
-     FROM crmacct WHERE crmacct_cntct_id_1 IS NOT NULL
-     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
-                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
-                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_1);
+                           SELECT crmacct_id, crmacct_cntct_id_1, getcrmroleid('Primary')
+                             FROM crmacct
+                            WHERE EXISTS(SELECT 1 FROM cntct WHERE cntct_id = crmacct_cntct_id_1)
+                              AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                                               WHERE crmacctcntctass_crmacct_id = crmacct_id 
+                                                 AND crmacctcntctass_cntct_id   = crmacct_cntct_id_1);
 
      INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
-     SELECT crmacct_id, crmacct_cntct_id_2, getcrmroleid('Secondary')
-     FROM crmacct WHERE crmacct_cntct_id_2 IS NOT NULL
-     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
-                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
-                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_2);
+                           SELECT crmacct_id, crmacct_cntct_id_2, getcrmroleid('Secondary')
+                             FROM crmacct
+                            WHERE EXISTS(SELECT 1 FROM cntct WHERE cntct_id = crmacct_cntct_id_2)
+                              AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                                               WHERE crmacctcntctass_crmacct_id = crmacct_id 
+                                                 AND crmacctcntctass_cntct_id   = crmacct_cntct_id_2);
+
   END IF;
 
   IF EXISTS(SELECT column_name FROM information_schema.columns 

@@ -4637,28 +4637,9 @@ SELECT pg_catalog.setval('misc_index_seq', 1166, true);
 
 ALTER TABLE orderseq DISABLE TRIGGER ALL;
 
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (10, 'PlanNumber', 10000, 'planord', 'planord_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (15, 'ToNumber', 100, 'tohead', 'tohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (17, 'ContactNumber', 3, 'cntct', 'cntct_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (18, 'LsRegNumber', 1, 'lsreg', 'lsreg_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (19, 'AlarmNumber', 1, 'alarm', 'alarm_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (21, 'ACHBatch', 1, 'checkhead', 'checkhead_ach_batch', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (23, 'OpportunityNumber', 1, 'ophead', 'ophead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (16, 'AddressNumber', 4, 'addr', 'addr_number', '{}');
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (12, 'APMemoNumber', 20000, 'apmemo', 'apopen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (11, 'ARMemoNumber', 70000, 'armemo', 'aropen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (20, 'CashRcptNumber', 10000, 'cashrcpt', 'cashrcpt_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (6, 'PoNumber', 20000, 'pohead', 'pohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (7, 'VcNumber', 30000, 'vohead', 'vohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (8, 'PrNumber', 10000, 'pr', 'pr_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (1, 'WoNumber', 20000, 'wo', 'wo_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (13, 'IncidentNumber', 10000, 'incdt', 'incdt_number', NULL);
+INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (16, 'AddressNumber',    4, 'addr',    'addr_number',    '{}');
+INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (17, 'ContactNumber',    3, 'cntct',   'cntct_number',   NULL);
 INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (22, 'CRMAccountNumber', 0, 'crmacct', 'crmacct_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (2, 'SoNumber', 50000, 'cohead', 'cohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (3, 'QuNumber', 40000, 'quhead', 'quhead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (4, 'CmNumber', 60000, 'armemo', 'aropen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (5, 'InvcNumber', 70000, 'invchead', 'invchead_invcnumber', NULL);
-
 
 ALTER TABLE orderseq ENABLE TRIGGER ALL;
 
@@ -5451,7 +5432,7 @@ do $$
     LOOP
       execute format('select max(%I) from %I.%I;',
                      _row.attname, _row.nspname, _row.relname) into _sequenceMax;
-      if _row.relname = 'custinfo' or _row.relname = 'prospect' then 
+      if _row.relname = 'custinfo' or _row.relname = 'prospect' then
         _custMax := greatest(_custMax, _sequenceMax);
         _sequenceMax := _custMax;
       elsif _row.relname = 'gltrans' or _row.relname = 'sltrans' then
@@ -5921,33 +5902,40 @@ DO $$
 DECLARE
   _addr  INTEGER;
   _cntct INTEGER;
-  _vend  INTEGER;
   _sql   TEXT;
+  _vend  INTEGER;
 BEGIN
+  _addr  := saveAddr(-1, NULL, '119 West York Street', '', '',
+                     'Norfolk', 'VA', '23510', 'United States', TRUE, NULL, 'CHECK');
+  _cntct := saveCntct(NULL, NULL, NULL, _addr, '', 'xTuple', '', 'Sales', '', '', TRUE,
+                      '+1-757-461-3022', '', '', '', 'www.xtuple.com', '', '', 'CHECK', 'admin');
 
-  _vend := (SELECT vend_id FROM vendinfo WHERE vend_number = 'XTUPLE');
-  IF FOUND THEN 
-    RETURN;
+  SELECT vend_id INTO _vend FROM vendinfo WHERE vend_number = 'XTUPLE';
+  IF _vend IS NULL THEN
+    _sql = $f$INSERT INTO vendinfo (vend_number, vend_accntnum, vend_active, vend_vendtype_id,
+                                    vend_name, vend_cntct1_id, vend_addr_id, vend_po,
+                                    vend_restrictpurch, vend_1099, vend_qualified, vend_comments,
+                                    vend_pocomments, vend_fobsource, vend_fob, vend_terms_id,
+                                    vend_shipvia, vend_curr_id, vend_match, vend_ach_enabled,
+                                    vend_ach_routingnumber, vend_ach_accntnumber,
+                                    vend_ach_use_vendinfo, vend_ach_accnttype)
+                            VALUES ('XTUPLE', '', TRUE, 18,
+                                    'xTuple ERP',  %s,  %s, FALSE,
+                                    FALSE, FALSE, FALSE, '',
+                                    '', 'W',  '', 43,
+                                    '',  1,   FALSE,  FALSE,
+                                    '',  '',
+                                    FALSE, 'K')
+                RETURNING vend_id;$f$;
+    EXECUTE format(_sql, _cntct, _addr) INTO _vend;
   END IF;
 
-  _addr := (SELECT saveAddr(-1,NULL,'119 West York Street','','','Norfolk','VA','23510','United States',TRUE,NULL,'CHECK'));
-
-  _cntct := (SELECT NEXTVAL('cntct_cntct_id_seq'));
-
-  PERFORM saveCntct(_cntct, fetchNextNumber('ContactNumber'),NULL, _addr,'','xTuple','','Sales','','',TRUE,'+1-757-461-3022','','','','www.xtuple.com','','','CHECK','admin');
-
-  _vend := (SELECT NEXTVAL('vend_vend_id_seq'));
-
-  RAISE NOTICE 'Creating XTUPLE Vendor with id: %, contact id: %, address id: %', _vend, _cntct, _addr;
-
-  _sql = 'INSERT INTO vendinfo ( vend_id, vend_number, vend_accntnum,  vend_active, vend_vendtype_id, vend_name,  vend_cntct1_id, vend_cntct2_id, vend_addr_id,  vend_po, 
-                       vend_restrictpurch,  vend_1099, vend_qualified,  vend_comments, vend_pocomments,  vend_fobsource, vend_fob,  vend_terms_id, vend_shipvia, 
-                       vend_curr_id,  vend_taxzone_id, vend_match, vend_ach_enabled,  vend_ach_routingnumber, vend_ach_accntnumber,  vend_ach_use_vendinfo,  vend_ach_accnttype, 
-                       vend_ach_indiv_number,  vend_ach_indiv_name,  vend_accnt_id, vend_expcat_id, vend_tax_id) 
-          VALUES ( %s ,  ''XTUPLE'' ,  '''' ,  TRUE ,  18 ,  ''xTuple ERP'' ,  %s ,  NULL ,  %s ,  FALSE ,  FALSE ,  FALSE ,  FALSE ,  
-                '''' ,  '''' ,  ''W'' ,  '''' ,  43 ,  '''' ,  1 ,   NULL ,  FALSE ,  FALSE ,  '''',  '''',  FALSE ,  ''K'' ,  '''' ,  '''' ,-1,-1 ,-1);';
-  EXECUTE format(_sql, _vend, _cntct, _addr);
-
+  IF NOT EXISTS(SELECT 1 FROM crmacct WHERE crmacct_number = 'XTUPLE') THEN
+    _sql = $f$INSERT INTO crmacct(crmacct_number, crmacct_name,    crmacct_active,
+                                  crmacct_type,   crmacct_vend_id, crmacct_cntct_id_1)
+                   VALUES ('XTUPLE', 'xTuple ERP', TRUE, 'O', %s, %s);$f$;
+    EXECUTE format(_sql, _vend, _addr);
+  END IF;
 END;
 $$ language plpgsql;
 
