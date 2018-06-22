@@ -98,12 +98,30 @@ SELECT
 -- Version 5.0 data migration
 DO $$
 BEGIN
-
-  IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='crmacct' and column_name='crmacct_cust_id') THEN
-
-     UPDATE custinfo SET cust_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_cust_id=cust_id);
+  IF EXISTS(SELECT 1 FROM information_schema.columns
+             WHERE table_name = 'crmacct' and column_name = 'crmacct_cust_id') THEN
+    INSERT INTO crmacct (crmacct_number, crmacct_name, crmacct_active, crmacct_type, crmacct_cust_id)
+                  SELECT cust_number, cust_name, cust_active, 'O', cust_id
+                    FROM custinfo
+                   WHERE cust_crmacct_id IS NULL
+                     AND cust_number NOT IN (SELECT crmacct_number FROM crmacct);
   END IF;
+
+  UPDATE custinfo SET cust_crmacct_id = crmacct_id
+    FROM crmacct
+   WHERE cust_number = crmacct_number
+     AND cust_crmacct_id IS NULL;
+
+  INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id,
+                               crmacctcntctass_crmrole_id)
+    SELECT cust_crmacct_id, cust_cntct_id, getcrmroleid('Billing')
+      FROM custinfo
+     WHERE cust_cntct_id IS NOT NULL
+    UNION
+    SELECT cust_crmacct_id, cust_corrcntct_id, getcrmroleid('Correspondence')
+      FROM custinfo
+     WHERE cust_corrcntct_id IS NOT NULL
+    ON CONFLICT DO NOTHING;
 END$$;
 
 ALTER TABLE custinfo ALTER COLUMN cust_crmacct_id SET NOT NULL;

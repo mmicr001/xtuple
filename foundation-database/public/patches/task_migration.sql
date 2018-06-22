@@ -2,7 +2,19 @@ DO $_$
 DECLARE
   _rec  RECORD;
   _nid  INTEGER;
+  _defaultpriority INTEGER;
+  _tab  TEXT;
+  _tabs TEXT[] := ARRAY[ 'alarm', 'charass', 'comment', 'docass',
+                         'prjtask', 'task', 'taskass', 'todoitem' ];
 BEGIN
+FOREACH _tab IN ARRAY _tabs LOOP
+  IF EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = _tab) THEN
+    EXECUTE format('ALTER TABLE %I DISABLE TRIGGER ALL;', _tab);
+  END IF;
+END LOOP;
+
+_defaultpriority := COALESCE((SELECT incdtpriority_id FROM incdtpriority
+                               WHERE incdtpriority_name='Normal'), 1);
 
 IF EXISTS (
    SELECT 1
@@ -61,7 +73,7 @@ IF EXISTS (
       _rec.prjtask_prj_id,
       _rec.prjtask_status,
       _rec.prjtask_owner_username,
-      COALESCE((SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_name='Normal'),1),
+      _defaultpriority,
       _rec.prjtask_start_date,
       _rec.prjtask_due_date,
       _rec.prjtask_completed_date,
@@ -111,15 +123,24 @@ IF EXISTS (
 -- =====================================
 -- Migrate ToDo Items
 -- =====================================
+
+  UPDATE todoitem
+     SET todoitem_priority_id = _defaultpriority
+   WHERE todoitem_priority_id NOT IN (SELECT incdtpriority_id FROM incdtpriority);
+
+  -- we must map recurring todoitems to the tasks they become to preserve the chain
+  CREATE TEMPORARY TABLE todorecurrences ON COMMIT DROP AS
+    SELECT DISTINCT todoitem_recurring_todoitem_id AS todoitem_id, -1 AS task_id FROM todoitem;
+
   FOR _rec IN 
     SELECT
       todoitem_id, 
       todoitem_name,
       todoitem_description,
-      CASE WHEN todoitem_incdt_id IS NOT NULL THEN 'INCDT'
-           WHEN todoitem_ophead_id IS NOT NULL  THEN 'OPP'
+      CASE WHEN todoitem_incdt_id   IS NOT NULL THEN 'INCDT'
+           WHEN todoitem_ophead_id  IS NOT NULL THEN 'OPP'
            WHEN todoitem_crmacct_id IS NOT NULL THEN 'CRMA'
-           WHEN todoitem_cntct_id IS NOT NULL THEN 'T' 
+           WHEN todoitem_cntct_id   IS NOT NULL THEN 'T' 
            ELSE 'TASK' END AS parent_type,
       COALESCE(todoitem_incdt_id, todoitem_ophead_id, todoitem_crmacct_id, todoitem_cntct_id, todoitem_id) AS parent_id,
       CASE WHEN todoitem_incdt_id IS NOT NULL THEN (SELECT incdt_prj_id FROM incdt WHERE incdt_id=todoitem_incdt_id) END AS prj_id,
@@ -135,6 +156,7 @@ IF EXISTS (
       todoitem_recurring_todoitem_id,
       todoitem_creator_username
     FROM todoitem
+   ORDER BY todoitem_recurring_todoitem_id
   LOOP
     INSERT INTO task (
       task_number,
@@ -149,13 +171,8 @@ IF EXISTS (
       task_start_date,
       task_due_date,
       task_completed_date,
-      task_hours_budget,
-      task_hours_actual,
-      task_exp_budget,
-      task_exp_actual,
       task_pct_complete,
       task_notes,
-      task_recurring_task_id,
       task_created,
       task_created_by,
       task_lastupdated)
@@ -173,37 +190,40 @@ IF EXISTS (
       _rec.todoitem_due_date,
       _rec.todoitem_completed_date,
       0,
-      0,
-      0,
-      0,
-      0,
       _rec.todoitem_notes,
-      _rec.todoitem_recurring_todoitem_id,
       now(),
       _rec.todoitem_creator_username,
       now())
     ON CONFLICT DO NOTHING
     RETURNING task_id INTO _nid;
 
-    IF (_rec.todoitem_username IS NOT NULL) THEN
-      INSERT INTO taskass (
-        taskass_task_id,
-        taskass_username,
-        taskass_assigned_date)
-      VALUES 
-       (_nid,
-        _rec.todoitem_username,
-        _rec.todoitem_assigned_date);
+    IF _nid IS NOT NULL THEN
+      UPDATE todorecurrences SET task_id = _nid WHERE todoitem_id = _rec.todoitem_id;
+
+      UPDATE task
+         SET task_recurring_task_id = (SELECT task_id FROM todorecurrences
+                                        WHERE todoitem_id = _rec.todoitem_recurring_todoitem_id);
+
+      IF _rec.todoitem_username IS NOT NULL THEN
+        INSERT INTO taskass (
+          taskass_task_id,
+          taskass_username,
+          taskass_assigned_date)
+        VALUES 
+         (_nid,
+          _rec.todoitem_username,
+          _rec.todoitem_assigned_date);
+      END IF;
+
+      UPDATE alarm SET alarm_source_id = _nid
+      WHERE alarm_source = 'TODO' AND alarm_source_id = _rec.todoitem_id;
+
+      UPDATE comment SET comment_source_id = _nid
+      WHERE comment_source = 'TD' AND comment_source_id = _rec.todoitem_id;
+
+      UPDATE docass SET docass_source_id = _nid
+      WHERE docass_source_type = 'TODO' AND docass_source_id = _rec.todoitem_id;
     END IF;
-
-    UPDATE alarm SET alarm_source_id = _nid
-    WHERE alarm_source = 'TODO' AND alarm_source_id = _rec.todoitem_id;
-
-    UPDATE comment SET comment_source_id = _nid
-    WHERE comment_source = 'TD' AND comment_source_id = _rec.todoitem_id;
-
-    UPDATE docass SET docass_source_id = _nid
-    WHERE docass_source_type = 'TODO' AND docass_source_id = _rec.todoitem_id;
 
   END LOOP;  
 
@@ -246,5 +266,10 @@ DELETE from report
 where report_name IN ('TodoItem', 'TodoList')
 AND report_grade = 0;
 
+FOREACH _tab IN ARRAY _tabs LOOP
+  IF EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name = _tab) THEN
+    EXECUTE format('ALTER TABLE %I ENABLE TRIGGER ALL;', _tab);
+  END IF;
+END LOOP;
 
 END; $_$ LANGUAGE plpgsql;

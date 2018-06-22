@@ -4639,7 +4639,6 @@ ALTER TABLE orderseq DISABLE TRIGGER ALL;
 
 INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (16, 'AddressNumber',    4, 'addr',    'addr_number',    '{}');
 INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (17, 'ContactNumber',    3, 'cntct',   'cntct_number',   NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (22, 'CRMAccountNumber', 0, 'crmacct', 'crmacct_number', NULL);
 
 ALTER TABLE orderseq ENABLE TRIGGER ALL;
 
@@ -5934,7 +5933,7 @@ BEGIN
     _sql = $f$INSERT INTO crmacct(crmacct_number, crmacct_name,    crmacct_active,
                                   crmacct_type,   crmacct_vend_id, crmacct_cntct_id_1)
                    VALUES ('XTUPLE', 'xTuple ERP', TRUE, 'O', %s, %s);$f$;
-    EXECUTE format(_sql, _vend, _addr);
+    EXECUTE format(_sql, _vend, _cntct);
   END IF;
 END;
 $$ language plpgsql;

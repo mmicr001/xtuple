@@ -43,31 +43,35 @@ SELECT
 -- Version 5.0 data migration
 DO $$
 BEGIN
+  IF EXISTS(SELECT 1 FROM information_schema.columns 
+             WHERE table_name = 'crmacct' and column_name = 'crmacct_prospect_id') THEN
+    INSERT INTO crmacct (crmacct_number, crmacct_name, crmacct_active, crmacct_type, crmacct_prospect_id)
+                  SELECT prospect_number, prospect_name, prospect_active, 'O', prospect_id
+                    FROM prospect
+                   WHERE prospect_crmacct_id IS NULL
+                     AND prospect_number NOT IN (SELECT crmacct_number FROM crmacct);
 
-  IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='crmacct' and column_name='crmacct_prospect_id') THEN
-
-     UPDATE prospect SET prospect_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_prospect_id=prospect_id);
   END IF;
 
-  IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='prospect' and column_name='prospect_cntct_id') THEN
+  UPDATE prospect SET prospect_crmacct_id = crmacct_id
+    FROM crmacct
+   WHERE prospect_number = crmacct_number
+     AND prospect_crmacct_id IS NULL;
 
-  -- Migrate Prospect Contacts to CRM Contact assignment
+  IF EXISTS(SELECT 1 FROM information_schema.columns 
+             WHERE table_name = 'prospect' and column_name = 'prospect_cntct_id') THEN
     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
-    SELECT prospect_crmacct_id, prospect_cntct_id, getcrmroleid('Primary')
-      FROM prospect 
-      WHERE prospect_crmacct_id IS NOT NULL AND prospect_cntct_id IS NOT NULL
-      AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
-                      WHERE crmacctcntctass_crmacct_id=prospect_crmacct_id 
-                      AND crmacctcntctass_cntct_id=prospect_cntct_id);
+                          SELECT prospect_crmacct_id, prospect_cntct_id, getcrmroleid('Primary')
+                            FROM prospect 
+                           WHERE prospect_crmacct_id IS NOT NULL AND prospect_cntct_id IS NOT NULL
+                            AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                                             WHERE crmacctcntctass_crmacct_id = prospect_crmacct_id 
+                                               AND crmacctcntctass_cntct_id   = prospect_cntct_id);
   END IF;
 END$$;
 
 ALTER TABLE prospect DROP COLUMN IF EXISTS prospect_cntct_id CASCADE;
 ALTER TABLE prospect ALTER COLUMN prospect_crmacct_id SET NOT NULL;
-
 ALTER TABLE public.prospect ENABLE TRIGGER ALL;
-
 
 COMMENT ON TABLE prospect IS 'Prospect Information';
