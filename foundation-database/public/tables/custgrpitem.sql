@@ -11,8 +11,10 @@ BEGIN
 
     ALTER TABLE public.custgrpitem DROP COLUMN IF EXISTS obj_uuid CASCADE;
 
-    INSERT INTO tempgrpitem SELECT * FROM custgrpitem
-                             WHERE custgrpitem_cust_id IN (SELECT cust_id FROM custinfo);
+    INSERT INTO tempgrpitem (groupsitem_id,  groupsitem_groups_id,   groupsitem_reference_id)
+		      SELECT custgrpitem_id, custgrpitem_custgrp_id, custgrpitem_cust_id
+                        FROM custgrpitem
+                       WHERE custgrpitem_cust_id IN (SELECT cust_id FROM custinfo);
 
     DROP TABLE custgrpitem;
     ALTER TABLE tempgrpitem RENAME TO custgrpitem;
