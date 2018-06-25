@@ -16,17 +16,18 @@ END LOOP;
 _defaultpriority := COALESCE((SELECT incdtpriority_id FROM incdtpriority
                                WHERE incdtpriority_name='Normal'), 1);
 
-IF EXISTS (
-   SELECT 1
-   FROM   information_schema.tables 
-   WHERE  table_schema = 'public'
-   AND    table_name = 'prjtask') THEN
-
 -- =====================================
 -- Migrate Project Tasks
 -- =====================================
-  FOR _rec IN 
-    SELECT 
+IF EXISTS (SELECT 1
+             FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_name = 'prjtask') THEN
+
+  CREATE TEMPORARY TABLE prjtaskmap (prjtask_id INTEGER, task_id INTEGER) ON COMMIT DROP;
+
+  FOR _rec IN
+    SELECT
       prjtask_id,
       prjtask_number,
       prjtask_name,
@@ -54,7 +55,7 @@ IF EXISTS (
       task_prj_id,
       task_status,
       task_owner_username,
-      task_priority_id, 
+      task_priority_id,
       task_start_date,
       task_due_date,
       task_completed_date,
@@ -64,7 +65,7 @@ IF EXISTS (
       task_exp_actual,
       task_notes
     )
-    VALUES  
+    VALUES
      (_rec.prjtask_number,
       _rec.prjtask_name,
       _rec.prjtask_descrip,
@@ -86,61 +87,59 @@ IF EXISTS (
     ON CONFLICT DO NOTHING
     RETURNING task_id INTO _nid;
 
-    IF (_rec.prjtask_username IS NOT NULL) THEN
-      INSERT INTO taskass (
-        taskass_task_id,
-        taskass_username,
-        taskass_assigned_date)
-      VALUES 
-       (_nid,
-        _rec.prjtask_username,
-        _rec.prjtask_assigned_date);
+    IF _nid IS NOT NULL THEN
+      INSERT INTO prjtaskmap (task_id, prjtask_id) VALUES (_nid, _rec.prjtask_id);
     END IF;
-
-    UPDATE alarm SET alarm_source_id = _nid
-    WHERE alarm_source = 'J' AND alarm_source_id = _rec.prjtask_id;
-
-    UPDATE comment SET comment_source_id = _nid
-    WHERE comment_source = 'TA' AND comment_source_id = _rec.prjtask_id;
-
-    UPDATE docass SET docass_source_id = _nid
-    WHERE docass_source_type = 'TASK' AND docass_source_id = _rec.prjtask_id;
-
-    UPDATE charass SET charass_target_id = _nid
-    WHERE charass_target_type = 'TASK' AND charass_target_id = _rec.prjtask_id;
-
   END LOOP;
+
+  INSERT INTO taskass (taskass_task_id, taskass_username, taskass_assigned_date)
+                SELECT task_id,         prjtask_username, prjtask_assigned_date
+                  FROM prjtask
+                  NATURAL JOIN prjtaskmap
+                 WHERE prjtask_username IS NOT NULL;
+
+  UPDATE alarm SET alarm_source_id = _nid
+    FROM prjtaskmap
+   WHERE alarm_source = 'J' AND alarm_source_id = prjtask_id;
+
+  UPDATE comment SET comment_source_id = _nid
+    FROM prjtaskmap
+   WHERE comment_source = 'TA' AND comment_source_id = prjtask_id;
+
+  UPDATE docass SET docass_source_id = _nid
+    FROM prjtaskmap
+   WHERE docass_source_type = 'TASK' AND docass_source_id = prjtask_id;
+
+  UPDATE charass SET charass_target_id = _nid
+    FROM prjtaskmap
+   WHERE charass_target_type = 'TASK' AND charass_target_id = prjtask_id;
 
   DROP TABLE IF EXISTS prjtask CASCADE;
 END IF;
 
-IF EXISTS (
-   SELECT 1
-   FROM   information_schema.tables 
-   WHERE  table_schema = 'public'
-   AND    table_name = 'todoitem') THEN
-
 -- =====================================
 -- Migrate ToDo Items
 -- =====================================
+IF EXISTS (SELECT 1
+             FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_name = 'todoitem') THEN
 
   UPDATE todoitem
      SET todoitem_priority_id = _defaultpriority
    WHERE todoitem_priority_id NOT IN (SELECT incdtpriority_id FROM incdtpriority);
 
-  -- we must map recurring todoitems to the tasks they become to preserve the chain
-  CREATE TEMPORARY TABLE todorecurrences ON COMMIT DROP AS
-    SELECT DISTINCT todoitem_recurring_todoitem_id AS todoitem_id, -1 AS task_id FROM todoitem;
+  CREATE TEMPORARY TABLE todotaskmap (todoitem_id INTEGER, task_id INTEGER) ON COMMIT DROP;
 
-  FOR _rec IN 
+  FOR _rec IN
     SELECT
-      todoitem_id, 
+      todoitem_id,
       todoitem_name,
       todoitem_description,
       CASE WHEN todoitem_incdt_id   IS NOT NULL THEN 'INCDT'
            WHEN todoitem_ophead_id  IS NOT NULL THEN 'OPP'
            WHEN todoitem_crmacct_id IS NOT NULL THEN 'CRMA'
-           WHEN todoitem_cntct_id   IS NOT NULL THEN 'T' 
+           WHEN todoitem_cntct_id   IS NOT NULL THEN 'T'
            ELSE 'TASK' END AS parent_type,
       COALESCE(todoitem_incdt_id, todoitem_ophead_id, todoitem_crmacct_id, todoitem_cntct_id, todoitem_id) AS parent_id,
       CASE WHEN todoitem_incdt_id IS NOT NULL THEN (SELECT incdt_prj_id FROM incdt WHERE incdt_id=todoitem_incdt_id) END AS prj_id,
@@ -167,7 +166,7 @@ IF EXISTS (
       task_prj_id,
       task_status,
       task_owner_username,
-      task_priority_id, 
+      task_priority_id,
       task_start_date,
       task_due_date,
       task_completed_date,
@@ -176,7 +175,7 @@ IF EXISTS (
       task_created,
       task_created_by,
       task_lastupdated)
-    VALUES ( 
+    VALUES (
       _rec.todoitem_name,
       _rec.todoitem_name,
       _rec.todoitem_description,
@@ -198,48 +197,46 @@ IF EXISTS (
     RETURNING task_id INTO _nid;
 
     IF _nid IS NOT NULL THEN
-      UPDATE todorecurrences SET task_id = _nid WHERE todoitem_id = _rec.todoitem_id;
-
-      UPDATE task
-         SET task_recurring_task_id = (SELECT task_id FROM todorecurrences
-                                        WHERE todoitem_id = _rec.todoitem_recurring_todoitem_id);
-
-      IF _rec.todoitem_username IS NOT NULL THEN
-        INSERT INTO taskass (
-          taskass_task_id,
-          taskass_username,
-          taskass_assigned_date)
-        VALUES 
-         (_nid,
-          _rec.todoitem_username,
-          _rec.todoitem_assigned_date);
-      END IF;
-
-      UPDATE alarm SET alarm_source_id = _nid
-      WHERE alarm_source = 'TODO' AND alarm_source_id = _rec.todoitem_id;
-
-      UPDATE comment SET comment_source_id = _nid
-      WHERE comment_source = 'TD' AND comment_source_id = _rec.todoitem_id;
-
-      UPDATE docass SET docass_source_id = _nid
-      WHERE docass_source_type = 'TODO' AND docass_source_id = _rec.todoitem_id;
+      INSERT INTO todotaskmap (task_id, todoitem_id) VALUES (_nid, _rec.todoitem_id);
     END IF;
+  END LOOP;
 
-  END LOOP;  
+  UPDATE task
+     SET task_recurring_task_id = map.task_id
+    FROM todotaskmap map
+   WHERE task_recurring_task_id = map.todoitem_id;
+
+  INSERT INTO taskass (taskass_task_id, taskass_username,  taskass_assigned_date)
+                SELECT task_id,         todoitem_username, todoitem_assigned_date
+                  FROM todoitem
+                  NATURAL JOIN todotaskmap
+                 WHERE todoitem_username IS NOT NULL;
+
+  UPDATE alarm SET alarm_source_id = task_id
+    FROM todotaskmap
+   WHERE alarm_source = 'TODO' AND alarm_source_id = todoitem_id;
+
+  UPDATE comment SET comment_source_id = task_id
+    FROM todotaskmap
+   WHERE comment_source = 'TD' AND comment_source_id = todoitem_id;
+
+  UPDATE docass SET docass_source_id = task_id
+    FROM todotaskmap
+   WHERE docass_source_type = 'TODO' AND docass_source_id = todoitem_id;
 
   DROP TABLE IF EXISTS todoitem CASCADE;
 END IF;
 
-UPDATE recurtype SET recurtype_type = 'TASK', 
-                     recurtype_table = 'task', 
+UPDATE recurtype SET recurtype_type = 'TASK',
+                     recurtype_table = 'task',
                      recurtype_donecheck='task_completed_date IS NOT NULL',
                      recurtype_schedcol='task_due_date',
                      recurtype_copyfunc='copytask',
-                     recurtype_limit=$$checkprivilege('MaintainAllTaskItems') 
-                                     OR (checkprivilege('MaintainPersonalTaskItems') 
-                                         AND (CURRENT_USER = task_owner_username 
-                                              OR task_id IN (SELECT taskass_task_id 
-                                                             FROM taskass 
+                     recurtype_limit=$$checkprivilege('MaintainAllTaskItems')
+                                     OR (checkprivilege('MaintainPersonalTaskItems')
+                                         AND (CURRENT_USER = task_owner_username
+                                              OR task_id IN (SELECT taskass_task_id
+                                                             FROM taskass
                                                              WHERE taskass_username = CURRENT_USER)
                                              )
                                         )$$
@@ -262,7 +259,7 @@ DROP FUNCTION IF EXISTS todoItemMove(INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS todoItemMoveUp(INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS todoItemMoveDown(INTEGER, INTEGER) CASCADE;
 
-DELETE from report 
+DELETE from report
 where report_name IN ('TodoItem', 'TodoList')
 AND report_grade = 0;
 
