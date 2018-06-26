@@ -31,39 +31,47 @@ SELECT
 
 -- Version 5.0 data migration
 DO $$
+DECLARE
+  _cols TEXT[];
 BEGIN
+  SELECT array_agg(column_name::TEXT) INTO _cols
+    FROM information_schema.columns
+   WHERE table_name = 'crmacct';
 
-  IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='crmacct' and column_name='crmacct_cntct_id_1') THEN
-
-     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
-     SELECT crmacct_id, crmacct_cntct_id_1, getcrmroleid('Primary')
-     FROM crmacct WHERE crmacct_cntct_id_1 IS NOT NULL
-     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
-                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
-                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_1);
-
-     INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
-     SELECT crmacct_id, crmacct_cntct_id_2, getcrmroleid('Secondary')
-     FROM crmacct WHERE crmacct_cntct_id_2 IS NOT NULL
-     AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
-                     WHERE crmacctcntctass_crmacct_id=crmacct_id 
-                     AND crmacctcntctass_cntct_id=crmacct_cntct_id_2);
+  IF 'crmacct_cntct_id_1' = ANY(_cols) THEN
+   INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+                         SELECT crmacct_id, crmacct_cntct_id_1, getcrmroleid('Primary')
+                           FROM crmacct
+                          WHERE EXISTS(SELECT 1 FROM cntct WHERE cntct_id = crmacct_cntct_id_1)
+                            AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                                             WHERE crmacctcntctass_crmacct_id = crmacct_id 
+                                               AND crmacctcntctass_cntct_id   = crmacct_cntct_id_1);
   END IF;
 
-  IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='crmacct' and column_name='crmacct_competitor_id') THEN
+  IF 'crmacct_cntct_id_2' = ANY(_cols) THEN
+   INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+                         SELECT crmacct_id, crmacct_cntct_id_2, getcrmroleid('Secondary')
+                           FROM crmacct
+                          WHERE EXISTS(SELECT 1 FROM cntct WHERE cntct_id = crmacct_cntct_id_2)
+                            AND NOT EXISTS (SELECT 1 FROM crmacctcntctass 
+                                             WHERE crmacctcntctass_crmacct_id = crmacct_id 
+                                               AND crmacctcntctass_cntct_id   = crmacct_cntct_id_2);
+  END IF;
+
+  IF 'crmacct_competitor_id' = ANY(_cols) THEN
     INSERT INTO crmacctrole (crmacctrole_crmacct_id, crmacctrole_crmrole_id)
-    SELECT crmacct_id, getcrmroleid('Competitor')
-      FROM crmacct 
-      WHERE crmacct_competitor_id IS NOT NULL
-    UNION
-    SELECT crmacct_id, getcrmroleid('Partner')
-      FROM crmacct 
-      WHERE crmacct_partner_id IS NOT NULL;
-
+      SELECT crmacct_id, getcrmroleid('Competitor')
+        FROM crmacct 
+        WHERE crmacct_competitor_id IS NOT NULL;
   END IF;
-END$$;
+
+  IF 'crmacct_partner_id' = ANY(_cols) THEN
+    INSERT INTO crmacctrole (crmacctrole_crmacct_id, crmacctrole_crmrole_id)
+      SELECT crmacct_id, getcrmroleid('Partner')
+        FROM crmacct 
+        WHERE crmacct_partner_id IS NOT NULL;
+  END IF;
+END;$$;
 
 ALTER TABLE crmacct DROP COLUMN IF EXISTS crmacct_cntct_id_1 CASCADE,
                     DROP COLUMN IF EXISTS crmacct_cntct_id_2 CASCADE,
@@ -89,5 +97,4 @@ COMMENT ON COLUMN crmacct.crmacct_parent_id IS 'The internal ID of an (optional)
 COMMENT ON COLUMN crmacct.crmacct_notes IS 'Free-form comments pertaining to the CRM Account.';
 COMMENT ON COLUMN crmacct.crmacct_owner_username IS 'The application User responsible for this CRM Account.';
 COMMENT ON COLUMN crmacct.crmacct_usr_username IS 'If this is not null, this CRM Account is an application User.';
-
 

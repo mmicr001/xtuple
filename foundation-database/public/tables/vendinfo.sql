@@ -113,7 +113,7 @@ BEGIN
 
 -- Version 5.0 data migration
   IF EXISTS(SELECT column_name FROM information_schema.columns 
-            WHERE table_name='crmacct' and column_name='crmacct_cust_id') THEN
+            WHERE table_name='crmacct' and column_name='crmacct_vend_id') THEN
 
      UPDATE vendinfo SET vend_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_vend_id=vend_id);
   END IF;
