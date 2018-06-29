@@ -54,7 +54,7 @@ BEGIN
 
   EXECUTE format('DELETE FROM %I
                    WHERE taxhist_parent_id = %L
-                     AND taxhist_line_type = %L',
+                     AND taxhist_line_type != %L',
                  format('%stax', _tablename), pOrderId, 'A');
 
   EXECUTE format('DELETE FROM %I
