@@ -59,6 +59,8 @@ DECLARE
   _service TEXT;
   _taxtypeid INTEGER;
   _taxtypes TEXT[] := ARRAY[]::TEXT[];
+  _freighttaxtype TEXT;
+  _misctaxtype TEXT;
 
 BEGIN
 
@@ -71,13 +73,23 @@ BEGIN
                                    FROM taxtype
                                   WHERE taxtype_id = _taxtypeid);
     END LOOP;
+
+    SELECT taxtype_external_code
+      INTO _freighttaxtype
+      FROM taxtype
+     WHERE taxtype_id = pFreightTaxtypeId;
+
+    SELECT taxtype_external_code
+      INTO _misctaxtype
+      FROM taxtype
+     WHERE taxtype_id = pMiscTaxtypeId;
   END IF;
 
   IF _service = 'A' THEN
     RETURN formatAvaTaxPayload(pOrderType, pOrderNumber, pFromLine1, pFromLine2, pFromLine3,
                                pFromCity, pFromState, pFromZip, pFromCountry, pToLine1, pToLine2,
                                pToLine3, pToCity, pToState, pToZip, pToCountry, pCustId, pCurrId,
-                               pDocDate, pFreight, pMisc, pFreightTaxtypeId, pMiscTaxtypeId,
+                               pDocDate, pFreight, pMisc, _freighttaxtype, _misctaxtype,
                                pMiscDiscount, pLines, pQtys, _taxtypes, pAmounts);
   ELSE
     RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,

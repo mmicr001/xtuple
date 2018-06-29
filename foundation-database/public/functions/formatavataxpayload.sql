@@ -37,10 +37,14 @@ BEGIN
 
   _transactionType := (CASE pordertype
                        WHEN 'S' THEN 'SalesOrder'
-                       WHEN 'I' THEN 'SalesInvoice'
+                       WHEN 'INV' THEN 'SalesInvoice'
                        WHEN 'P' THEN 'PurchaseOrder'
                        WHEN 'V' THEN 'PurchaseInvoice'
                        ELSE 'SalesOrder' END);
+
+  IF (fetchMetricBool('NoAvaTaxCommit')) THEN
+    _transactionType := replace(_transactionType, 'Invoice', 'Order');
+  END IF;
 
   _numlines := COALESCE(array_length(pLines, 1), 0);
 
@@ -60,7 +64,16 @@ BEGIN
     "customerCode": "%s",
     "businessIdentificationNo": "%s",
     "addresses": {
-        "singleLocation": {
+        "shipFrom": {
+            "line1": "%s",
+            "line2": "%s",
+            "line3": "%s",
+            "city": "%s",
+            "region": "%s",
+            "country": "%s",
+            "postalCode": "%s"
+        },
+        "shipTo": {
             "line1": "%s",
             "line2": "%s",
             "line3": "%s",
@@ -73,6 +86,7 @@ BEGIN
     "commit": false,
     "currencyCode": "%s",
     "description": "%s",
+    "discount": %s,
     "lines": [',
     _transactionType,
     pordernumber,
@@ -80,6 +94,13 @@ BEGIN
     pdocdate,
     _rec.cust_number,
     COALESCE(_rec.taxreg, ' '),
+    pfromline1,
+    pfromline2,
+    pfromline3,
+    pfromcity,
+    pfromstate,
+    pfromcountry,
+    pfromzip,
     ptoline1,
     ptoline2,
     ptoline3,
@@ -88,7 +109,8 @@ BEGIN
     ptocountry,
     ptozip,
     (SELECT curr_abbr FROM curr_symbol WHERE curr_id=pcurrid),
-    'xTuple-' || _transactionType);
+    'xTuple-' || _transactionType,
+    CASE WHEN pMiscDiscount AND pMisc < 0 THEN pMisc * -1 ELSE 0 END);
 
   FOR _line IN 1.._numlines
   LOOP
@@ -97,16 +119,40 @@ BEGIN
             "number": "%s",
             "quantity": %s,
             "amount": %s,
-            "taxCode": "%s"
+            "taxCode": "%s",
+            "discounted": "true"
             }',
             plines[_line],
             pqtys[_line],
             pamounts[_line],
             ptaxtypes[_line]);
-    IF (_line < _numlines) THEN
-      _payload = _payload || ',';
+    IF _line !=_numlines THEN
+      _payload := _payload || ',';
     END IF;
   END LOOP;
+
+  IF pFreight != 0.0 THEN
+    _payload = _payload ||
+              format(',{
+              "number": "Freight",
+              "amount": %s,
+              "taxCode": "%s",
+              "discounted": "true"
+              }',
+              pfreight,
+              pfreighttaxtype);
+  END IF;
+
+  IF pMisc != 0.0 AND (NOT pMiscDiscount OR pMisc > 0) THEN
+    _payload = _payload ||
+              format(',{
+              "number": "Misc",
+              "amount": %s,
+              "taxCode": "%s"
+              }',
+              pmisc,
+              pmisctaxtype);
+  END IF;
 
   _payload = _payload || ']}}';
 

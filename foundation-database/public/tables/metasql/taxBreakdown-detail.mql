@@ -7,7 +7,7 @@
 <? if exists("quhead_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        quitem_linenumber AS linenumber, quitem_subnumber AS subnumber,
-       formatSoLineNumber(quitem_id) AS line, item_number,
+       formatSoLineNumber(quitem_id, 'QI') AS line, item_number,
        quitem_qtyord * quitem_qty_invuomratio AS qty,
        quitem_price / quitem_price_invuomratio AS amount,
        quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio AS extended,
@@ -66,13 +66,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM quitem
   JOIN taxhist ON taxhist_doctype = 'QI'
               AND quitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quitem_quhead_id = <? value("quhead_id") ?>
 UNION
 SELECT taxhist_id, 1,
@@ -82,14 +82,14 @@ SELECT taxhist_id, 1,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM quhead
   JOIN taxhist ON taxhist_doctype = 'Q'
               AND quhead_id = taxhist_parent_id
               AND taxhist_line_type = 'F'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
 UNION
 SELECT taxhist_id, 2,
@@ -99,19 +99,19 @@ SELECT taxhist_id, 2,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM quhead
   JOIN taxhist ON taxhist_doctype = 'Q'
               AND quhead_id = taxhist_parent_id
               AND taxhist_line_type = 'M'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quhead_id = <? value("quhead_id") ?>
 <? elseif exists("quitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        quitem_linenumber AS linenumber, quitem_subnumber AS subnumber,
-       formatSoLineNumber(quitem_id) AS line, item_number,
+       formatSoLineNumber(quitem_id, 'QI') AS line, item_number,
        quitem_qtyord * quitem_qty_invuomratio AS qty,
        quitem_price / quitem_price_invuomratio AS amount,
        quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio AS extended,
@@ -136,13 +136,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM quitem
   JOIN taxhist ON taxhist_doctype = 'QI'
               AND quitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE quitem_id = <? value("quitem_id") ?>
 <? elseif exists("cohead_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
@@ -206,13 +206,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM coitem
   JOIN taxhist ON taxhist_doctype = 'SI'
               AND coitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE coitem_cohead_id = <? value("cohead_id") ?>
 UNION
 SELECT taxhist_id, 1,
@@ -222,14 +222,14 @@ SELECT taxhist_id, 1,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM cohead
   JOIN taxhist ON taxhist_doctype = 'S'
               AND cohead_id = taxhist_parent_id
               AND taxhist_line_type = 'F'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
 UNION
 SELECT taxhist_id, 2,
@@ -239,14 +239,14 @@ SELECT taxhist_id, 2,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM cohead
   JOIN taxhist ON taxhist_doctype = 'S'
               AND cohead_id = taxhist_parent_id
               AND taxhist_line_type = 'M'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cohead_id = <? value("cohead_id") ?>
 <? elseif exists("coitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
@@ -276,13 +276,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis, 
-       tax_code, tax_descrip, taxhist_sequence, 
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM coitem
   JOIN taxhist ON taxhist_doctype = 'SI'
               AND coitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE coitem_id = <? value("coitem_id") ?>
 <? elseif exists("cobmisc_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
@@ -364,14 +364,14 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM cobill
   JOIN coitem ON cobill_coitem_id = coitem_id
   JOIN taxhist ON taxhist_doctype = 'COBI'
               AND cobill_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobill_cobmisc_id = <? value("cobmisc_id") ?>
 UNION
 SELECT taxhist_id, 1,
@@ -381,14 +381,14 @@ SELECT taxhist_id, 1,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
               AND taxhist_line_type = 'F'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 UNION
 SELECT taxhist_id, 2,
@@ -398,14 +398,14 @@ SELECT taxhist_id, 2,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
               AND taxhist_line_type = 'M'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 UNION
 SELECT taxhist_id, 3,
@@ -415,14 +415,14 @@ SELECT taxhist_id, 3,
        NULL,
        NULL,
        0.0,
-       tax_code, tax_descrip, 0,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
        taxhist_tax,
        NULL, 1
   FROM cobmisc
   JOIN taxhist ON taxhist_doctype = 'COB'
               AND cobmisc_id = taxhist_parent_id
               AND taxhist_line_type = 'A'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE cobmisc_id = <? value("cobmisc_id") ?>
 <? elseif exists("invchead_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
@@ -503,13 +503,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM invcitem
   JOIN taxhist ON taxhist_doctype = 'INVI'
               AND invcitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE invcitem_invchead_id = <? value("invchead_id") ?>
 UNION
 SELECT taxhist_id, 1,
@@ -519,14 +519,14 @@ SELECT taxhist_id, 1,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM invchead
   JOIN taxhist ON taxhist_doctype = 'INV'
               AND invchead_id = taxhist_parent_id
               AND taxhist_line_type = 'F'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE invchead_id = <? value("invchead_id") ?>
 UNION
 SELECT taxhist_id, 2,
@@ -536,14 +536,14 @@ SELECT taxhist_id, 2,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM invchead
   JOIN taxhist ON taxhist_doctype = 'INV'
               AND invchead_id = taxhist_parent_id
               AND taxhist_line_type = 'M'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE invchead_id = <? value("invchead_id") ?>
 UNION
 SELECT taxhist_id, 3,
@@ -553,14 +553,14 @@ SELECT taxhist_id, 3,
        NULL,
        NULL,
        0.0,
-       tax_code, tax_descrip, 0,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
        taxhist_tax,
        NULL, 1
   FROM invchead
   JOIN taxhist ON taxhist_doctype = 'INV'
               AND invchead_id = taxhist_parent_id
               AND taxhist_line_type = 'A'
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE invchead_id = <? value("invchead_id") ?>
 <? elseif exists("invcitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
@@ -590,13 +590,13 @@ SELECT taxhist_id, 0,
        NULL,
        NULL,
        taxhist_basis,
-       tax_code, tax_descrip, taxhist_sequence,
+       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
   FROM invcitem
   JOIN taxhist ON taxhist_doctype = 'INVI'
               AND invcitem_id = taxhist_parent_id
-  JOIN tax ON taxhist_tax_id = tax_id
+  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE invcitem_id = <? value("invcitem_id") ?>
 <? endif ?>
 ORDER BY linetype, linenumber, subnumber, xtindentrole, taxhist_sequence;

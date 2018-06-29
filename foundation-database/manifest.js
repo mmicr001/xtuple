@@ -145,6 +145,8 @@
     "public/functions/bomworkexpired.sql",
     "public/functions/bomworkitemsequence.sql",
     "public/functions/bomworksequence.sql",
+    "public/functions/buildavalaraheaders.sql",
+    "public/functions/buildavalaraurl.sql",
     "public/functions/buildinvbal.sql",
     "public/functions/buildsearchpath.sql",
     "public/functions/buildsimplephonejson.sql",
