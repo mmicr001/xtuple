@@ -132,8 +132,12 @@ BEGIN
   END LOOP;
 
   IF pFreight != 0.0 THEN
+    IF _numlines > 0 THEN
+      _payload := _payload || ',';
+    END IF;
+
     _payload = _payload ||
-              format(',{
+              format('{
               "number": "Freight",
               "amount": %s,
               "taxCode": "%s",
@@ -144,8 +148,12 @@ BEGIN
   END IF;
 
   IF pMisc != 0.0 AND (NOT pMiscDiscount OR pMisc > 0) THEN
+    IF _numlines > 0 OR pFreight != 0.0 THEN
+      _payload := _payload || ',';
+    END IF;
+
     _payload = _payload ||
-              format(',{
+              format('{
               "number": "Misc",
               "amount": %s,
               "taxCode": "%s"
