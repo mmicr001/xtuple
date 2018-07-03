@@ -1167,6 +1167,7 @@
     "public/tables/tax.sql",
     "public/tables/taxass.sql",
     "public/tables/taxhist.sql",
+    "public/tables/taxlog.sql",
     "public/tables/taxpay.sql",
     "public/tables/uiform.sql",
     "public/tables/updaterhist.sql",
