@@ -120,7 +120,7 @@ BEGIN
      AND taxhist_parent_id = pOrderId
      AND taxhist_line_type = 'A';
 
-  RETURN (pResult->>'totalTax')::NUMERIC + _adjustment;
+  RETURN (pResult->>'totalTaxCalculated')::NUMERIC + _adjustment;
 
 END
 $$ language plpgsql;

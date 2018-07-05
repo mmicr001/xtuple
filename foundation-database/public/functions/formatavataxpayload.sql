@@ -25,7 +25,9 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pLines          TEXT[],
                                                pQtys           NUMERIC[],
                                                pTaxTypes       TEXT[],
-                                               pAmounts        NUMERIC[]) RETURNS JSONB AS $$
+                                               pAmounts        NUMERIC[],
+                                               pOverride       NUMERIC,
+                                               pRecord         BOOLEAN) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -42,7 +44,7 @@ BEGIN
                        WHEN 'V' THEN 'PurchaseInvoice'
                        ELSE 'SalesOrder' END);
 
-  IF (fetchMetricBool('NoAvaTaxCommit')) THEN
+  IF (NOT pRecord OR fetchMetricBool('NoAvaTaxCommit')) THEN
     _transactionType := replace(_transactionType, 'Invoice', 'Order');
   END IF;
 
@@ -162,7 +164,19 @@ BEGIN
               pmisctaxtype);
   END IF;
 
-  _payload = _payload || ']}}';
+  _payload := _payload || ']';
+
+  IF pOverride IS NOT NULL THEN
+    _payload := _payload ||
+                format(', "taxOverride": {
+                "type": "taxAmount",
+                "taxAmount": %s,
+                "reason": "Tax Adjustment"
+                }',
+                pOverride);
+  END IF;
+
+  _payload = _payload || '}}';
 
   RETURN _payload;
 
