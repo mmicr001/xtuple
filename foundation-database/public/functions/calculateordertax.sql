@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION calculateOrderTax(pOrderType TEXT, pOrderId INTEGER) RETURNS JSONB AS $$
+CREATE OR REPLACE FUNCTION calculateOrderTax(pOrderType TEXT, pOrderId INTEGER, pRecord BOOLEAN DEFAULT TRUE) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -31,6 +31,7 @@ DECLARE
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
   _amounts NUMERIC[];
+  _override NUMERIC;
 
 BEGIN
  
@@ -188,13 +189,21 @@ BEGIN
                         FROM invcitem
                        WHERE invcitem_invchead_id = pOrderId
                        ORDER BY invcitem_linenumber, invcitem_subnumber);
+
+    IF EXISTS(SELECT 1
+                FROM taxhist
+               WHERE taxhist_doctype = 'INV'
+                 AND taxhist_parent_id = pOrderId
+                 AND taxhist_line_type = 'A') THEN
+      _override := getOrderTax('INV', pOrderId);
+    END IF;
   END IF;
 
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
                       _tocity, _tostate, _tozip, _tocountry, _custid, _currid, _docdate, _freight,
                       _misc, _freighttaxtype, _misctaxtype, _miscdiscount, _linenums, _qtys,
-                      _taxtypeids, _amounts);
+                      _taxtypeids, _amounts, _override, pRecord);
 
 END
 $$ language plpgsql;

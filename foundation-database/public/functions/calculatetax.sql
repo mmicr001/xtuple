@@ -51,7 +51,9 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pLines            TEXT[],
                                         pQtys             NUMERIC[],
                                         pTaxTypes         INTEGER[],
-                                        pAmounts          NUMERIC[]) RETURNS JSONB AS
+                                        pAmounts          NUMERIC[],
+                                        pOverride         NUMERIC,
+                                        pRecord           BOOLEAN) RETURNS JSONB AS
 $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -90,7 +92,8 @@ BEGIN
                                pFromCity, pFromState, pFromZip, pFromCountry, pToLine1, pToLine2,
                                pToLine3, pToCity, pToState, pToZip, pToCountry, pCustId, pCurrId,
                                pDocDate, pFreight, pMisc, _freighttaxtype, _misctaxtype,
-                               pMiscDiscount, pLines, pQtys, _taxtypes, pAmounts);
+                               pMiscDiscount, pLines, pQtys, _taxtypes, pAmounts, pOverride,
+                               pRecord);
   ELSE
     RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,
                         pMiscTaxtypeId, pMiscDiscount, pLines, pTaxTypes, pAmounts);

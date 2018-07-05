@@ -798,6 +798,7 @@
     "public/functions/postsoitemproduction.sql",
     "public/functions/poststandardjournal.sql",
     "public/functions/poststandardjournalgroup.sql",
+    "public/functions/posttax.sql",
     "public/functions/postvoucher.sql",
     "public/functions/postvouchers.sql",
     "public/functions/primarykeyfields.sql",
