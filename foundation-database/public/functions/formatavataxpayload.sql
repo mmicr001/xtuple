@@ -22,10 +22,25 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pFreightTaxtype TEXT,
                                                pMiscTaxtype    TEXT,
                                                pMiscDiscount   BOOLEAN,
+                                               pFreightLine1   TEXT[],
+                                               pFreightLine2   TEXT[],
+                                               pFreightLine3   TEXT[],
+                                               pFreightCity    TEXT[],
+                                               pFreightState   TEXT[],
+                                               pFreightZip     TEXT[],
+                                               pFreightCountry TEXT[],
+                                               pFreightSplit   NUMERIC[],
                                                pLines          TEXT[],
                                                pQtys           NUMERIC[],
                                                pTaxTypes       TEXT[],
                                                pAmounts        NUMERIC[],
+                                               pLineLine1      TEXT[],
+                                               pLineLine2      TEXT[],
+                                               pLineLine3      TEXT[],
+                                               pLineCity       TEXT[],
+                                               pLineState      TEXT[],
+                                               pLineZip        TEXT[],
+                                               pLineCountry    TEXT[],
                                                pOverride       NUMERIC,
                                                pRecord         BOOLEAN) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
@@ -35,6 +50,10 @@ DECLARE
   _rec             RECORD;
   _payload         TEXT;
   _numlines        INTEGER;
+  _numfreight      INTEGER;
+  _freightsplit    INTEGER;
+  _freight         NUMERIC;
+  _freightname     TEXT;
 BEGIN
 
   _transactionType := (CASE pordertype
@@ -49,6 +68,7 @@ BEGIN
   END IF;
 
   _numlines := COALESCE(array_length(pLines, 1), 0);
+  _numfreight := COALESCE(array_length(pFreightSplit, 1), 0);
 
   SELECT cust_number, (SELECT taxreg_number FROM taxreg WHERE taxreg_rel_type = 'C'
                                                           AND taxreg_rel_id = pcustid
@@ -122,12 +142,53 @@ BEGIN
             "quantity": %s,
             "amount": %s,
             "taxCode": "%s",
-            "discounted": "true"
-            }',
+            "discounted": "true"',
             plines[_line],
             pqtys[_line],
             pamounts[_line],
             ptaxtypes[_line]);
+
+    IF pLineLine1[_line] != pFromLine1 OR pLineLine2[_line] != pFromLine2 OR
+       pLineLine3[_line] != pFromLine3 OR pLineCity[_line] != pFromCity OR
+       pLineState[_line] != pFromState OR pLineZip[_line] != pFromZip OR
+       pLineCountry[_line] != pFromCountry THEN
+      _payload := _payload ||
+                format(',"addresses": {
+                "shipFrom": {
+                "line1": "%s",
+                "line2": "%s",
+                "line3": "%s",
+                "city": "%s",
+                "region": "%s",
+                "country": "%s",
+                "postalCode": "%s"
+                },
+                "shipTo": {
+                "line1": "%s",
+                "line2": "%s",
+                "line3": "%s",
+                "city": "%s",
+                "region": "%s",
+                "country": "%s",
+                "postalCode": "%s"
+                }}',
+                pLineLine1[_line],
+                pLineLine2[_line],
+                pLineLine3[_line],
+                pLineCity[_line],
+                pLineState[_line],
+                pLineCountry[_line],
+                pLineZip[_line],
+                pToLine1,
+                pToLine2,
+                pToLine3,
+                pToCity,
+                pToState,
+                pToCountry,
+                pToZip);
+    END IF;
+
+    _payload := _payload || '}';
     IF _line !=_numlines THEN
       _payload := _payload || ',';
     END IF;
@@ -138,15 +199,71 @@ BEGIN
       _payload := _payload || ',';
     END IF;
 
-    _payload = _payload ||
-              format('{
-              "number": "Freight",
-              "amount": %s,
-              "taxCode": "%s",
-              "discounted": "true"
-              }',
-              pfreight,
-              pfreighttaxtype);
+    FOR _freightsplit IN 1.._numfreight
+    LOOP
+      IF _numfreight = 1 THEN
+        _freight = pFreight;
+        _freightname = 'Freight';
+      ELSE
+        _freight = pFreightSplit[_freightsplit];
+        _freightname = 'Freight' || _freightsplit;
+      END IF;
+
+      _payload = _payload ||
+                format('{
+                "number": "%s",
+                "amount": %s,
+                "taxCode": "%s",
+                "discounted": "true"',
+                _freightname,
+                _freight,
+                pfreighttaxtype);
+
+      IF pFreightLine1[_freightsplit] != pFromLine1 OR pFreightLine2[_freightsplit] != pFromLine2 OR
+         pFreightLine3[_freightsplit] != pFromLine3 OR pFreightCity[_freightsplit] != pFromCity OR
+         pFreightState[_freightsplit] != pFromState OR pFreightZip[_freightsplit] != pFromZip OR
+         pFreightCountry[_freightsplit] != pFromCountry THEN
+        _payload := _payload ||
+                  format(',"addresses": {
+                  "shipFrom": {
+                  "line1": "%s",
+                  "line2": "%s",
+                  "line3": "%s",
+                  "city": "%s",
+                  "region": "%s",
+                  "country": "%s",
+                  "postalCode": "%s"
+                  },
+                  "shipTo": {
+                  "line1": "%s",
+                  "line2": "%s",
+                  "line3": "%s",
+                  "city": "%s",
+                  "region": "%s",
+                  "country": "%s",
+                  "postalCode": "%s"
+                  }}',
+                  pFreightLine1[_freightsplit],
+                  pFreightLine2[_freightsplit],
+                  pFreightLine3[_freightsplit],
+                  pFreightCity[_freightsplit],
+                  pFreightState[_freightsplit],
+                  pFreightCountry[_freightsplit],
+                  pFreightZip[_freightsplit],
+                  pToLine1,
+                  pToLine2,
+                  pToLine3,
+                  pToCity,
+                  pToState,
+                  pToCountry,
+                  pToZip);
+      END IF;
+
+      _payload := _payload || '}';
+      IF _freightsplit !=_numfreight THEN
+        _payload := _payload || ',';
+      END IF;
+    END LOOP;
   END IF;
 
   IF pMisc != 0.0 AND (NOT pMiscDiscount OR pMisc > 0) THEN
