@@ -27,10 +27,25 @@ DECLARE
   _freighttaxtype INTEGER;
   _misctaxtype INTEGER;
   _miscdiscount BOOLEAN;
+  _freightline1 TEXT[];
+  _freightline2 TEXT[];
+  _freightline3 TEXT[];
+  _freightcity TEXT[];
+  _freightstate TEXT[];
+  _freightzip TEXT[];
+  _freightcountry TEXT[];
+  _freightsplit NUMERIC[];
   _linenums TEXT[];
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
   _amounts NUMERIC[];
+  _lineline1 TEXT[];
+  _lineline2 TEXT[];
+  _lineline3 TEXT[];
+  _linecity TEXT[];
+  _linestate TEXT[];
+  _linezip TEXT[];
+  _linecountry TEXT[];
   _override NUMERIC;
 
 BEGIN
@@ -51,26 +66,85 @@ BEGIN
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
      WHERE quhead_id = pOrderId;
 
-    _linenums := ARRAY(SELECT formatSoLineNumber(quitem_id, 'QI')
-                         FROM quitem
-                        WHERE quitem_quhead_id = pOrderId
-                        ORDER BY quitem_linenumber, quitem_subnumber);
+    SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
+           array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
+           array_agg(addr_country),
+           array_agg(freight)
+      INTO _freightline1, _freightline2, _freightline3,
+           _freightcity, _freightstate, _freightzip,
+           _freightcountry,
+           _freightsplit
+      FROM
+      (
+       SELECT addr_line1, addr_line2, addr_line3,
+              addr_city, addr_state, addr_postalcode, addr_country,
+              SUM((freight).freightdata_total) AS freight
+         FROM
+         (
+          SELECT itemsite_warehous_id,
+                 calculateFreightDetail(cust_id, custtype_id, custtype_code,
+                                        COALESCE(shipto_id, -1),
+                                        shipto_shipzone_id, COALESCE(shipto_num, ''),
+                                        quhead_quotedate,
+                                        quhead_shipvia, quhead_curr_id, currConcat(quhead_curr_id),
+                                        itemsite_warehous_id, item_freightclass_id,
+                                        SUM(quitem_qtyord * quitem_qty_invuomratio *
+                                            (item_prodweight +
+                                             CASE WHEN fetchMetricBool('IncludePackageWeight')
+                                                  THEN item_packweight
+                                                  ELSE 0
+                                              END
+                                            )
+                                           )
+                                       ) AS freight
+            FROM quhead
+            JOIN custinfo ON quhead_cust_id = cust_id
+            JOIN custtype ON cust_custtype_id = custtype_id
+            JOIN shiptoinfo ON quhead_shipto_id = shipto_id
+            JOIN quitem ON quhead_id = quitem_quhead_id
+            JOIN itemsite ON quitem_itemsite_id = itemsite_id
+            JOIN item ON itemsite_item_id = item_id
+           WHERE quhead_id = pOrderId
+           GROUP BY itemsite_warehous_id, cust_id, custtype_id, custtype_code, shipto_id,
+                    shipto_shipzone_id, shipto_num, quhead_quotedate, quhead_shipvia,
+                    quhead_curr_id, item_freightclass_id
+         ) freights
+         JOIN whsinfo ON itemsite_warehous_id = warehous_id
+         LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+        GROUP BY addr_line1, addr_line2, addr_line3,
+                 addr_city, addr_state, addr_postalcode, addr_country
+      ) data;
 
-    _qtys := ARRAY(SELECT ROUND(quitem_qtyord * quitem_qty_invuomratio, 6)
-                     FROM quitem
-                    WHERE quitem_quhead_id = pOrderId
-                    ORDER BY quitem_linenumber, quitem_subnumber);
-
-    _taxtypeids := ARRAY(SELECT quitem_taxtype_id
-                           FROM quitem
-                          WHERE quitem_quhead_id = pOrderId
-                          ORDER BY quitem_linenumber, quitem_subnumber);
-
-    _amounts := ARRAY(SELECT ROUND(quitem_qtyord * quitem_qty_invuomratio *
-                                   quitem_price / quitem_price_invuomratio, _precision)
-                        FROM quitem
-                       WHERE quitem_quhead_id = pOrderId
-                       ORDER BY quitem_linenumber, quitem_subnumber);
+    SELECT array_agg(formatSoLineNumber(quitem_id, 'QI')),
+           array_agg(ROUND(quitem_qtyord * quitem_qty_invuomratio, 6)),
+           array_agg(quitem_taxtype_id),
+           array_agg(ROUND(quitem_qtyord * quitem_qty_invuomratio *
+                     quitem_price / quitem_price_invuomratio, _precision)),
+           array_agg(addr_line1),
+           array_agg(addr_line2),
+           array_agg(addr_line3),
+           array_agg(addr_city),
+           array_agg(addr_state),
+           array_agg(addr_postalcode),
+           array_agg(addr_country)
+      INTO _linenums,
+           _qtys,
+           _taxtypeids,
+           _amounts,
+           _lineline1,
+           _lineline2,
+           _lineline3,
+           _linecity,
+           _linestate,
+           _linezip,
+           _linecountry
+      FROM quitem
+      JOIN itemsite ON quitem_itemsite_id = itemsite_id
+      JOIN whsinfo ON itemsite_warehous_id = warehous_id
+      LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+     WHERE quitem_quhead_id = pOrderId
+     GROUP BY quitem_linenumber, quitem_subnumber
+     ORDER BY quitem_linenumber, quitem_subnumber;
   ELSIF pOrderType = 'S' THEN
     SELECT cohead_number, cohead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
@@ -87,26 +161,84 @@ BEGIN
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
      WHERE cohead_id = pOrderId;
 
-    _linenums := ARRAY(SELECT formatSoLineNumber(coitem_id)
-                         FROM coitem
-                        WHERE coitem_cohead_id = pOrderId
-                        ORDER BY coitem_linenumber, coitem_subnumber);
+    SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
+           array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
+           array_agg(addr_country),
+           array_agg(freight)
+      INTO _freightline1, _freightline2, _freightline3,
+           _freightcity, _freightstate, _freightzip,
+           _freightcountry,
+           _freightsplit
+      FROM
+      (
+       SELECT addr_line1, addr_line2, addr_line3,
+              addr_city, addr_state, addr_postalcode, addr_country,
+              SUM((freight).freightdata_total) AS freight
+         FROM
+         (
+          SELECT itemsite_warehous_id,
+                 calculateFreightDetail(cust_id, custtype_id, custtype_code,
+                                        COALESCE(shipto_id, -1), shipto_shipzone_id,
+                                        COALESCE(shipto_num, ''), cohead_orderdate, cohead_shipvia,
+                                        cohead_curr_id, currConcat(cohead_curr_id),
+                                        itemsite_warehous_id, item_freightclass_id,
+                                        SUM(coitem_qtyord * coitem_qty_invuomratio *
+                                            (item_prodweight +
+                                             CASE WHEN fetchMetricBool('IncludePackageWeight')
+                                                  THEN item_packweight
+                                                  ELSE 0
+                                              END
+                                            )
+                                           )
+                                       ) AS freight
+            FROM cohead
+            JOIN custinfo ON cohead_cust_id = cust_id
+            JOIN custtype ON cust_custtype_id = custtype_id
+            JOIN shiptoinfo ON cohead_shipto_id = shipto_id
+            JOIN coitem ON cohead_id = coitem_cohead_id
+            JOIN itemsite ON coitem_itemsite_id = itemsite_id
+            JOIN item ON itemsite_item_id = item_id
+           WHERE cohead_id = pOrderId
+           GROUP BY itemsite_warehous_id, cust_id, custtype_id, custtype_code, shipto_id,
+                    shipto_shipzone_id, shipto_num, cohead_orderdate, cohead_shipvia,
+                    cohead_curr_id, item_freightclass_id
+         ) freights
+         JOIN whsinfo ON itemsite_warehous_id = warehous_id
+         LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+        GROUP BY addr_line1, addr_line2, addr_line3,
+                 addr_city, addr_state, addr_postalcode, addr_country
+      ) data;
 
-    _qtys := ARRAY(SELECT ROUND(coitem_qtyord * coitem_qty_invuomratio, 6)
-                     FROM coitem
-                    WHERE coitem_cohead_id = pOrderId
-                    ORDER BY coitem_linenumber, coitem_subnumber);
-
-    _taxtypeids := ARRAY(SELECT coitem_taxtype_id
-                           FROM coitem
-                          WHERE coitem_cohead_id = pOrderId
-                          ORDER BY coitem_linenumber, coitem_subnumber);
-
-    _amounts := ARRAY(SELECT ROUND(coitem_qtyord * coitem_qty_invuomratio *
-                                   coitem_price / coitem_price_invuomratio, _precision)
-                        FROM coitem
-                       WHERE coitem_cohead_id = pOrderId
-                       ORDER BY coitem_linenumber, coitem_subnumber);
+    SELECT array_agg(formatSoLineNumber(coitem_id)),
+           array_agg(ROUND(coitem_qtyord * coitem_qty_invuomratio, 6)),
+           array_agg(coitem_taxtype_id),
+           array_agg(ROUND(coitem_qtyord * coitem_qty_invuomratio *
+                     coitem_price / coitem_price_invuomratio, _precision)),
+           array_agg(addr_line1),
+           array_agg(addr_line2),
+           array_agg(addr_line3),
+           array_agg(addr_city),
+           array_agg(addr_state),
+           array_agg(addr_postalcode),
+           array_agg(addr_country)
+      INTO _linenums,
+           _qtys,
+           _taxtypeids,
+           _amounts,
+           _lineline1,
+           _lineline2,
+           _lineline3,
+           _linecity,
+           _linestate,
+           _linezip,
+           _linecountry
+      FROM coitem
+      JOIN itemsite ON coitem_itemsite_id = itemsite_id
+      JOIN whsinfo ON itemsite_warehous_id = warehous_id
+      LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+     WHERE coitem_cohead_id = pOrderId
+     GROUP BY coitem_linenumber, coitem_subnumber
+     ORDER BY coitem_linenumber, coitem_subnumber;
   ELSIF pOrderType = 'COB' THEN
     SELECT cohead_number, cobmisc_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
@@ -124,30 +256,88 @@ BEGIN
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
      WHERE cobmisc_id = pOrderId;
 
-    _linenums := ARRAY(SELECT formatSoLineNumber(coitem_id)
-                         FROM cobill
-                         JOIN coitem ON cobill_coitem_id = coitem_id
-                        WHERE cobill_cobmisc_id = pOrderId
-                        ORDER BY coitem_linenumber, coitem_subnumber);
+    SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
+           array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
+           array_agg(addr_country),
+           array_agg(freight)
+      INTO _freightline1, _freightline2, _freightline3,
+           _freightcity, _freightstate, _freightzip,
+           _freightcountry,
+           _freightsplit
+      FROM
+      (
+       SELECT addr_line1, addr_line2, addr_line3,
+              addr_city, addr_state, addr_postalcode, addr_country,
+              SUM((freight).freightdata_total) AS freight
+         FROM
+         (
+          SELECT itemsite_warehous_id,
+                 calculateFreightDetail(cust_id, custtype_id, custtype_code,
+                                        COALESCE(shipto_id, -1), shipto_shipzone_id,
+                                        COALESCE(shipto_num, ''), cohead_orderdate,
+                                        cobmisc_shipvia, cobmisc_curr_id,
+                                        currConcat(cobmisc_curr_id), itemsite_warehous_id,
+                                        item_freightclass_id,
+                                        SUM(cobill_qty * coitem_qty_invuomratio *
+                                            (item_prodweight +
+                                             CASE WHEN fetchMetricBool('IncludePackageWeight')
+                                                  THEN item_packweight
+                                                  ELSE 0
+                                              END
+                                            )
+                                           )
+                                       ) AS freight
+            FROM cobmisc
+            JOIN cohead ON cobmisc_cohead_id = cohead_id
+            JOIN custinfo ON cohead_cust_id = cust_id
+            JOIN custtype ON cust_custtype_id = custtype_id
+            JOIN shiptoinfo ON cohead_shipto_id = shipto_id
+            JOIN cobill ON cobmisc_id = cobill_cobmisc_id
+            JOIN coitem ON cobill_coitem_id = coitem_id
+            JOIN itemsite ON coitem_itemsite_id = itemsite_id
+            JOIN item ON itemsite_item_id = item_id
+           WHERE cobmisc_id = pOrderId
+           GROUP BY itemsite_warehous_id, cust_id, custtype_id, custtype_code, shipto_id,
+                    shipto_shipzone_id, shipto_num, cohead_orderdate, cobmisc_shipvia,
+                    cobmisc_curr_id, item_freightclass_id
+         ) freights
+         JOIN whsinfo ON itemsite_warehous_id = warehous_id
+         LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+        GROUP BY addr_line1, addr_line2, addr_line3,
+                 addr_city, addr_state, addr_postalcode, addr_country
+      ) data;
 
-    _qtys := ARRAY(SELECT ROUND(cobill_qty * coitem_qty_invuomratio, 6)
-                     FROM cobill
-                     JOIN coitem ON cobill_coitem_id = coitem_id
-                    WHERE cobill_cobmisc_id = pOrderId
-                    ORDER BY coitem_linenumber, coitem_subnumber);
-
-    _taxtypeids := ARRAY(SELECT cobill_taxtype_id
-                           FROM cobill
-                           JOIN coitem ON cobill_coitem_id = coitem_id
-                          WHERE cobill_cobmisc_id = pOrderId
-                          ORDER BY coitem_linenumber, coitem_subnumber);
-
-    _amounts := ARRAY(SELECT ROUND(cobill_qty * coitem_qty_invuomratio *
-                                   coitem_price / coitem_price_invuomratio, _precision)
-                        FROM cobill
-                        JOIN coitem ON cobill_coitem_id = coitem_id
-                       WHERE cobill_cobmisc_id = pOrderId
-                       ORDER BY coitem_linenumber, coitem_subnumber);
+    SELECT array_agg(formatSoLineNumber(coitem_id)),
+           array_agg(ROUND(cobill_qty * coitem_qty_invuomratio, 6)),
+           array_agg(cobill_taxtype_id),
+           array_agg(ROUND(cobill_qty * coitem_qty_invuomratio *
+                     coitem_price / coitem_price_invuomratio, _precision)),
+           array_agg(addr_line1),
+           array_agg(addr_line2),
+           array_agg(addr_line3),
+           array_agg(addr_city),
+           array_agg(addr_state),
+           array_agg(addr_postalcode),
+           array_agg(addr_country)
+      INTO _linenums,
+           _qtys,
+           _taxtypeids,
+           _amounts,
+           _lineline1,
+           _lineline2,
+           _lineline3,
+           _linecity,
+           _linestate,
+           _linezip,
+           _linecountry
+      FROM cobill
+      JOIN coitem ON cobill_coitem_id = coitem_id
+      JOIN itemsite ON coitem_itemsite_id = itemsite_id
+      JOIN whsinfo ON itemsite_warehous_id = warehous_id
+      LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+     WHERE cobill_cobmisc_id = pOrderId
+     GROUP BY coitem_linenumber, coitem_subnumber
+     ORDER BY coitem_linenumber, coitem_subnumber;
   ELSIF pOrderType = 'INV' THEN
     SELECT invchead_invcnumber, invchead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, invchead_shipto_address1,
@@ -169,26 +359,84 @@ BEGIN
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
      WHERE invchead_id = pOrderId;
 
-    _linenums := ARRAY(SELECT formatInvcLineNumber(invcitem_id)
-                         FROM invcitem
-                        WHERE invcitem_invchead_id = pOrderId
-                        ORDER BY invcitem_linenumber, invcitem_subnumber);
+    SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
+           array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
+           array_agg(addr_country),
+           array_agg(freight)
+      INTO _freightline1, _freightline2, _freightline3,
+           _freightcity, _freightstate, _freightzip,
+           _freightcountry,
+           _freightsplit
+      FROM
+      (
+       SELECT addr_line1, addr_line2, addr_line3,
+              addr_city, addr_state, addr_postalcode, addr_country,
+              SUM((freight).freightdata_total) AS freight
+         FROM
+         (
+          SELECT invcitem_warehous_id,
+                 calculateFreightDetail(cust_id, custtype_id, custtype_code,
+                                        COALESCE(shipto_id, -1), shipto_shipzone_id,
+                                        COALESCE(shipto_num, ''), invchead_invcdate,
+                                        invchead_shipvia, invchead_curr_id,
+                                        currConcat(invchead_curr_id), invcitem_warehous_id,
+                                        item_freightclass_id,
+                                        SUM(invcitem_billed * invcitem_qty_invuomratio *
+                                            (item_prodweight +
+                                             CASE WHEN fetchMetricBool('IncludePackageWeight')
+                                                  THEN item_packweight
+                                                  ELSE 0
+                                              END
+                                            )
+                                           )
+                                       ) AS freight
+            FROM invchead
+            JOIN custinfo ON invchead_cust_id = cust_id
+            JOIN custtype ON cust_custtype_id = custtype_id
+            JOIN shiptoinfo ON invchead_shipto_id = shipto_id
+            JOIN invcitem ON invchead_id = invcitem_invchead_id
+            JOIN item ON invcitem_item_id = item_id
+           WHERE invchead_id = pOrderId
+           GROUP BY warehous_id, cust_id, custtype_id, custtype_code, shipto_id, shipto_shipzone_id,
+                    shipto_num, invchead_invcdate, invchead_shipvia, invchead_curr_id,
+                    item_freightclass_id
+         ) freights
+         JOIN whsinfo ON invcitem_warehous_id = warehous_id
+         LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+        GROUP BY addr_line1, addr_line2, addr_line3,
+                 addr_city, addr_state, addr_postalcode, addr_country
+      ) data;
 
-    _qtys := ARRAY(SELECT ROUND(invcitem_billed * invcitem_qty_invuomratio, 6)
-                     FROM invcitem
-                    WHERE invcitem_invchead_id = pOrderId
-                    ORDER BY invcitem_linenumber, invcitem_subnumber);
-
-    _taxtypeids := ARRAY(SELECT invcitem_taxtype_id
-                           FROM invcitem
-                          WHERE invcitem_invchead_id = pOrderId
-                          ORDER BY invcitem_linenumber, invcitem_subnumber);
-
-    _amounts := ARRAY(SELECT ROUND(invcitem_billed * invcitem_qty_invuomratio *
-                                   invcitem_price / invcitem_price_invuomratio, _precision)
-                        FROM invcitem
-                       WHERE invcitem_invchead_id = pOrderId
-                       ORDER BY invcitem_linenumber, invcitem_subnumber);
+    SELECT array_agg(formatInvcLineNumber(invcitem_id)),
+           array_agg(ROUND(invcitem_billed * invcitem_qty_invuomratio, 6)),
+           array_agg(invcitem_taxtype_id),
+           array_agg(ROUND(invcitem_billed * invcitem_qty_invuomratio *
+                     invcitem_price / invcitem_price_invuomratio, _precision)),
+           array_agg(addr_line1),
+           array_agg(addr_line2),
+           array_agg(addr_line3),
+           array_agg(addr_city),
+           array_agg(addr_state),
+           array_agg(addr_postalcode),
+           array_agg(addr_country)
+      INTO _linenums,
+           _qtys,
+           _taxtypeids,
+           _amounts,
+           _lineline1,
+           _lineline2,
+           _lineline3,
+           _linecity,
+           _linestate,
+           _linezip,
+           _linecountry
+      FROM invcitem
+      JOIN itemsite ON invcitem_itemsite_id = itemsite_id
+      JOIN whsinfo ON itemsite_warehous_id = warehous_id
+      LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+     WHERE invcitem_invchead_id = pOrderId
+     GROUP BY invcitem_linenumber, invcitem_subnumber
+     ORDER BY invcitem_linenumber, invcitem_subnumber;
 
     IF EXISTS(SELECT 1
                 FROM taxhist
@@ -202,8 +450,11 @@ BEGIN
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
                       _tocity, _tostate, _tozip, _tocountry, _custid, _currid, _docdate, _freight,
-                      _misc, _freighttaxtype, _misctaxtype, _miscdiscount, _linenums, _qtys,
-                      _taxtypeids, _amounts, _override, pRecord);
+                      _misc, _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1,
+                      _freightline2, _freightline3, _freightcity, _freightstate, _freightzip,
+                      _freightcountry, _freightsplit, _linenums, _qtys, _taxtypeids, _amounts,
+                      _lineline1, _lineline2, _lineline3, _linecity, _linestate, _linezip,
+                      _linecountry, _override, pRecord);
 
 END
 $$ language plpgsql;
