@@ -142,9 +142,7 @@ BEGIN
       JOIN itemsite ON quitem_itemsite_id = itemsite_id
       JOIN whsinfo ON itemsite_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
-     WHERE quitem_quhead_id = pOrderId
-     GROUP BY quitem_linenumber, quitem_subnumber
-     ORDER BY quitem_linenumber, quitem_subnumber;
+     WHERE quitem_quhead_id = pOrderId;
   ELSIF pOrderType = 'S' THEN
     SELECT cohead_number, cohead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
@@ -236,9 +234,7 @@ BEGIN
       JOIN itemsite ON coitem_itemsite_id = itemsite_id
       JOIN whsinfo ON itemsite_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
-     WHERE coitem_cohead_id = pOrderId
-     GROUP BY coitem_linenumber, coitem_subnumber
-     ORDER BY coitem_linenumber, coitem_subnumber;
+     WHERE coitem_cohead_id = pOrderId;
   ELSIF pOrderType = 'COB' THEN
     SELECT cohead_number, cobmisc_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, cohead_shiptoaddress1, cohead_shiptoaddress2,
@@ -335,9 +331,7 @@ BEGIN
       JOIN itemsite ON coitem_itemsite_id = itemsite_id
       JOIN whsinfo ON itemsite_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
-     WHERE cobill_cobmisc_id = pOrderId
-     GROUP BY coitem_linenumber, coitem_subnumber
-     ORDER BY coitem_linenumber, coitem_subnumber;
+     WHERE cobill_cobmisc_id = pOrderId;
   ELSIF pOrderType = 'INV' THEN
     SELECT invchead_invcnumber, invchead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
            addr_state, addr_postalcode, addr_country, invchead_shipto_address1,
@@ -434,9 +428,7 @@ BEGIN
       JOIN itemsite ON invcitem_itemsite_id = itemsite_id
       JOIN whsinfo ON itemsite_warehous_id = warehous_id
       LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
-     WHERE invcitem_invchead_id = pOrderId
-     GROUP BY invcitem_linenumber, invcitem_subnumber
-     ORDER BY invcitem_linenumber, invcitem_subnumber;
+     WHERE invcitem_invchead_id = pOrderId;
 
     IF EXISTS(SELECT 1
                 FROM taxhist
