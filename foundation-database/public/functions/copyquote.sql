@@ -55,6 +55,18 @@ BEGIN
   FROM quhead
   WHERE (quhead_id=pQuheadid);
 
+  INSERT INTO quheadtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT _quheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'Q',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM quheadtax
+   WHERE taxhist_parent_id = pQuheadid;
+
   INSERT INTO quitem
   ( quitem_quhead_id, quitem_linenumber, quitem_itemsite_id,
     quitem_scheddate, quitem_promdate, quitem_qtyord,
@@ -78,6 +90,21 @@ BEGIN
   FROM quitem, itemsite
   WHERE ( (quitem_itemsite_id=itemsite_id)
    AND (quitem_quhead_id=pQuheadid));
+
+  INSERT INTO quitemtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT new.quitem_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'QI',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM quitem new
+    JOIN quitem old ON new.quitem_linenumber = old.quitem_linenumber
+                   AND new.quitem_subnumber = old.quitem_subnumber
+    JOIN quitemtax ON taxhist_parent_id = old.quitem_id
+   WHERE new.quitem_quhead_id = _quheadid;
 
   INSERT INTO charass
         (charass_target_type, charass_target_id,

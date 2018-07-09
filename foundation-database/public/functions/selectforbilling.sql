@@ -100,6 +100,18 @@ BEGIN
       CURRENT_DATE, getEffectiveXtUser(),
       pQty, pClose,
       ptaxtypeid);
+
+    INSERT INTO cobilltax
+    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+    SELECT _cobillid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'COBI',
+           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+      FROM coitemtax
+     WHERE taxhist_parent_id = _r.coitem_id;
   END IF;
 
   RETURN _cobillid;

@@ -184,6 +184,18 @@ BEGIN
   FROM quhead JOIN custinfo ON (cust_id=quhead_cust_id)
   WHERE (quhead_id=pQuheadid);
 
+  INSERT INTO invcheadtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT _iheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INV',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM quheadtax
+   WHERE taxhist+parent_id = pQuheadid;
+
   -- Copy characteristics from the quhead to the invoice head   
   INSERT INTO charass
         ( charass_target_type, charass_target_id, charass_char_id,
@@ -259,6 +271,18 @@ BEGIN
       _r.quitem_qty_uom_id, _r.quitem_qty_invuomratio,
       _r.quitem_price_uom_id, _r.quitem_price_invuomratio,
       _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id );
+
+    INSERT INTO invcitemtax
+    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+    SELECT _iitemid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INVI',
+           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+      FROM quitemtax
+     WHERE taxhist_parent_id = _r.quitem_id;
 
     IF (fetchMetricBool('enablextcommissionission')) THEN
       PERFORM xtcommission.getSalesReps(quhead_cust_id, quhead_shipto_id,
