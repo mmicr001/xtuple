@@ -365,6 +365,18 @@ BEGIN
     RAISE EXCEPTION 'Could not find sales order to copy [xtuple: copyso, -1, %]', _soheadid;
   END IF;
 
+  INSERT INTO coheadtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT _soheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'S',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM coheadtax
+   WHERE taxhist_parent_id = pSoheadid;
+
   INSERT INTO charass
         (charass_target_type, charass_target_id,
          charass_char_id, charass_value)
@@ -455,6 +467,18 @@ BEGIN
       _soitem.coitem_taxtype_id,
       _soitem.coitem_dropship )
     RETURNING coitem_id INTO _soitemid;
+
+  INSERT INTO coitemtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT _soitemid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'SI',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM coitemtax
+   WHERE taxhist_parent_id = _soitem.coitem_id;
 
     -- insert characteristics first so they can be copied to associated supply order
     INSERT INTO charass

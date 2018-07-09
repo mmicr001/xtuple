@@ -64,13 +64,18 @@ BEGIN
    AND (cohead_cust_id=cust_id)
    AND (cobmisc_id=pCobmiscid) );
 
-	INSERT INTO invcheadtax(taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-			taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate)
-        SELECT _invcheadid,taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-			taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate
-        FROM cobmisctax 
-	WHERE taxhist_parent_id = pCobmiscid 
-	AND taxhist_taxtype_id = getadjustmenttaxtypeid();
+  INSERT INTO invcheadtax
+  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+  SELECT _invcheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INV',
+         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+    FROM cobmisctax
+   WHERE taxhist_parent_id = pCobmiscid;
+
 
 --  Create the Invoice Characteristic Assignments
     INSERT INTO charass
@@ -84,7 +89,7 @@ BEGIN
 
 --  Create the Invoice items
   FOR _r IN SELECT coitem_id, coitem_linenumber, coitem_subnumber, coitem_custpn,
-                   coitem_qtyord, cobill_qty,
+                   coitem_qtyord, cobill_id, cobill_qty,
                    coitem_qty_uom_id, coitem_qty_invuomratio,
                    coitem_custprice, coitem_price, coitem_listprice,
                    coitem_price_uom_id, coitem_price_invuomratio,
@@ -131,6 +136,18 @@ BEGIN
       _r.coitem_memo, _r.cobill_taxtype_id,
       _r.coitem_id, _r.coitem_rev_accnt_id,
       _lastsubnumber );
+
+    INSERT INTO invcitemtax
+    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
+     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
+    SELECT _invcitemid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
+           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
+           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INVI',
+           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
+      FROM cobilltax
+     WHERE taxhist_parent_id = _r.cobill_id;
 
 --  Create the Invoice Item Characteristic Assignments
     INSERT INTO charass
