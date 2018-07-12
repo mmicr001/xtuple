@@ -67,36 +67,10 @@ BEGIN
 -- Insert new row
   IF (TG_OP = 'INSERT') THEN
       PERFORM postComment('ChangeLog', 'INVI', NEW.invcitem_id, 'Created');
-  -- Calculate Tax
-      PERFORM calculateTaxHist( 'invcitemtax',
-                                NEW.invcitem_id,
-                                COALESCE(_r.invchead_taxzone_id, -1),
-                                NEW.invcitem_taxtype_id,
-                                COALESCE(_r.invchead_invcdate, CURRENT_DATE),
-                                COALESCE(_r.invchead_curr_id, -1),
-                                (NEW.invcitem_billed * NEW.invcitem_qty_invuomratio) *
-                                (NEW.invcitem_price / NEW.invcitem_price_invuomratio) );
   END IF;
 
 -- Update row
   IF (TG_OP = 'UPDATE') THEN
-
-  -- Calculate Tax
-    IF ( (NEW.invcitem_billed <> OLD.invcitem_billed) OR
-         (NEW.invcitem_qty_invuomratio <> OLD.invcitem_qty_invuomratio) OR
-         (NEW.invcitem_price <> OLD.invcitem_price) OR
-         (NEW.invcitem_price_invuomratio <> OLD.invcitem_price_invuomratio) OR
-         (COALESCE(NEW.invcitem_taxtype_id, -1) <> COALESCE(OLD.invcitem_taxtype_id, -1)) ) THEN
-      PERFORM calculateTaxHist( 'invcitemtax',
-                                NEW.invcitem_id,
-                                COALESCE(_r.invchead_taxzone_id, -1),
-                                NEW.invcitem_taxtype_id,
-                                COALESCE(_r.invchead_invcdate, CURRENT_DATE),
-                                COALESCE(_r.invchead_curr_id, -1),
-                                (NEW.invcitem_billed * NEW.invcitem_qty_invuomratio) *
-                                (NEW.invcitem_price / NEW.invcitem_price_invuomratio) );
-    END IF;
-
   -- Record Changes
     IF (NEW.invcitem_billed <> OLD.invcitem_billed) THEN
        PERFORM postComment('ChangeLog', 'INVI', NEW.invcitem_id, 'Billed Qty',
