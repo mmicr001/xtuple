@@ -4,341 +4,62 @@
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
-<? if exists("quhead_id") ?>
+<? if exists("dochead_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       quitem_linenumber AS linenumber, quitem_subnumber AS subnumber,
-       formatSoLineNumber(quitem_id, 'QI') AS line, item_number,
-       quitem_qtyord * quitem_qty_invuomratio AS qty,
-       quitem_price / quitem_price_invuomratio AS amount,
-       quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio AS extended,
+       docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
+       docitem_number AS line, item_number,
+       docitem_qty AS qty,
+       docitem_unitprice AS amount,
+       docitem_price AS extended,
        COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
        NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM quitem
-  JOIN itemsite ON quitem_itemsite_id = itemsite_id
+       docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
+  FROM docitem
+  JOIN itemsite ON docitem_itemsite_id = itemsite_id
   JOIN item ON itemsite_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'QI'
-                         AND quitem_id = taxhist_parent_id
- WHERE quitem_quhead_id = <? value("quhead_id") ?>
- GROUP BY quitem_id, quitem_linenumber, quitem_subnumber, quitem_qtyord, quitem_qty_invuomratio,
-          quitem_price, quitem_price_invuomratio, item_number
+  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
+                         AND docitem_id = taxhist_parent_id
+ WHERE docitem_type = <? value("headtype") ?>
+   AND docitem_dochead_id = <? value("dochead_id") ?>
+ GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
+          docitem_unitprice, docitem_price, item_number
 UNION
 SELECT NULL, 1,
        1, 0,
        <? value("freight") ?>, NULL,
        1.0,
-       quhead_freight,
-       quhead_freight,
+       dochead_freight,
+       dochead_freight,
        COALESCE(MAX(taxhist_basis), 0.0),
        NULL, NULL, NULL,
        COALESCE(SUM(taxhist_tax), 0.0),
-       quhead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM quhead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'Q'
-                         AND quhead_id = taxhist_parent_id
+       dochead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
+  FROM dochead
+  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+                         AND dochead_id = taxhist_parent_id
                          AND taxhist_line_type = 'F'
- WHERE quhead_id = <? value("quhead_id") ?>
- GROUP BY quhead_freight
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
+ GROUP BY dochead_freight
 UNION
 SELECT NULL, 2,
        1, 0,
        <? value("misc") ?>, NULL,
        1.0,
-       quhead_misc,
-       quhead_misc,
+       dochead_misc,
+       dochead_misc,
        COALESCE(MAX(taxhist_basis), 0.0),
        NULL, NULL, NULL,
        COALESCE(SUM(taxhist_tax), 0.0),
-       quhead_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM quhead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'Q'
-                         AND quhead_id = taxhist_parent_id
+       dochead_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
+  FROM dochead
+  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+                         AND dochead_id = taxhist_parent_id
                          AND taxhist_line_type = 'M'
- WHERE quhead_id = <? value("quhead_id") ?>
- GROUP BY quhead_misc
-UNION
-SELECT taxhist_id, 0,
-       quitem_linenumber, quitem_subnumber,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM quitem
-  JOIN taxhist ON taxhist_doctype = 'QI'
-              AND quitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE quitem_quhead_id = <? value("quhead_id") ?>
-UNION
-SELECT taxhist_id, 1,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM quhead
-  JOIN taxhist ON taxhist_doctype = 'Q'
-              AND quhead_id = taxhist_parent_id
-              AND taxhist_line_type = 'F'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE quhead_id = <? value("quhead_id") ?>
-UNION
-SELECT taxhist_id, 2,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM quhead
-  JOIN taxhist ON taxhist_doctype = 'Q'
-              AND quhead_id = taxhist_parent_id
-              AND taxhist_line_type = 'M'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE quhead_id = <? value("quhead_id") ?>
-<? elseif exists("quitem_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       quitem_linenumber AS linenumber, quitem_subnumber AS subnumber,
-       formatSoLineNumber(quitem_id, 'QI') AS line, item_number,
-       quitem_qtyord * quitem_qty_invuomratio AS qty,
-       quitem_price / quitem_price_invuomratio AS amount,
-       quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       quitem_qtyord * quitem_qty_invuomratio * quitem_price / quitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM quitem
-  JOIN itemsite ON quitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'QI'
-                         AND quitem_id = taxhist_parent_id
- WHERE quitem_id = <? value("quitem_id") ?>
- GROUP BY quitem_id, quitem_linenumber, quitem_subnumber, quitem_qtyord, quitem_qty_invuomratio,
-          quitem_price, quitem_price_invuomratio, item_number
-UNION
-SELECT taxhist_id, 0,
-       quitem_linenumber, quitem_subnumber,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM quitem
-  JOIN taxhist ON taxhist_doctype = 'QI'
-              AND quitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE quitem_id = <? value("quitem_id") ?>
-<? elseif exists("cohead_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       coitem_linenumber AS linenumber, coitem_subnumber AS subnumber,
-       formatSoLineNumber(coitem_id) AS line, item_number,
-       coitem_qtyord * coitem_qty_invuomratio AS qty,
-       coitem_price / coitem_price_invuomratio AS amount,
-       coitem_qtyord * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       coitem_qtyord * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM coitem
-  JOIN itemsite ON coitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'SI'
-                         AND coitem_id = taxhist_parent_id
- WHERE coitem_cohead_id = <? value("cohead_id") ?>
- GROUP BY coitem_id, coitem_linenumber, coitem_subnumber, coitem_qtyord, coitem_qty_invuomratio,
-          coitem_price, coitem_price_invuomratio, item_number
-UNION
-SELECT NULL, 1,
-       1, 0,
-       <? value("freight") ?>, NULL,
-       1.0,
-       cohead_freight,
-       cohead_freight,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       cohead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM cohead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'S'
-                         AND cohead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'F'
- WHERE cohead_id = <? value("cohead_id") ?>
- GROUP BY cohead_freight
-UNION
-SELECT NULL, 2,
-       1, 0,
-       <? value("misc") ?>, NULL,
-       1.0,
-       cohead_misc,
-       cohead_misc,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       cohead_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM cohead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'S'
-                         AND cohead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'M'
- WHERE cohead_id = <? value("cohead_id") ?>
- GROUP BY cohead_misc
-UNION
-SELECT taxhist_id, 0,
-       coitem_linenumber, coitem_subnumber,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM coitem
-  JOIN taxhist ON taxhist_doctype = 'SI'
-              AND coitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE coitem_cohead_id = <? value("cohead_id") ?>
-UNION
-SELECT taxhist_id, 1,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM cohead
-  JOIN taxhist ON taxhist_doctype = 'S'
-              AND cohead_id = taxhist_parent_id
-              AND taxhist_line_type = 'F'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cohead_id = <? value("cohead_id") ?>
-UNION
-SELECT taxhist_id, 2,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM cohead
-  JOIN taxhist ON taxhist_doctype = 'S'
-              AND cohead_id = taxhist_parent_id
-              AND taxhist_line_type = 'M'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cohead_id = <? value("cohead_id") ?>
-<? elseif exists("coitem_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       coitem_linenumber AS linenumber, coitem_subnumber AS subnumber,
-       formatSoLineNumber(coitem_id) AS line, item_number,
-       coitem_qtyord * coitem_qty_invuomratio AS qty,
-       coitem_price / coitem_price_invuomratio AS amount,
-       coitem_qtyord * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       coitem_qtyord * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM coitem
-  JOIN itemsite ON coitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'SI'
-                         AND coitem_id = taxhist_parent_id
- WHERE coitem_id = <? value("coitem_id") ?>
- GROUP BY coitem_id, coitem_linenumber, coitem_subnumber, coitem_qtyord, coitem_qty_invuomratio,
-          coitem_price, coitem_price_invuomratio, item_number
-UNION
-SELECT taxhist_id, 0,
-       coitem_linenumber, coitem_subnumber,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis, 
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM coitem
-  JOIN taxhist ON taxhist_doctype = 'SI'
-              AND coitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE coitem_id = <? value("coitem_id") ?>
-<? elseif exists("cobmisc_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       coitem_linenumber AS linenumber, coitem_subnumber AS subnumber,
-       formatSoLineNumber(coitem_id) AS line, item_number,
-       cobill_qty * coitem_qty_invuomratio AS qty,
-       coitem_price / coitem_price_invuomratio AS amount,
-       cobill_qty * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       cobill_qty * coitem_qty_invuomratio * coitem_price / coitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM cobill
-  JOIN coitem ON cobill_coitem_id = coitem_id
-  JOIN itemsite ON coitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'COBI'
-                         AND cobill_id = taxhist_parent_id
- WHERE cobill_cobmisc_id = <? value("cobmisc_id") ?>
- GROUP BY cobill_id, cobill_qty, coitem_id, coitem_linenumber, coitem_subnumber, coitem_qty_invuomratio,
-          coitem_price, coitem_price_invuomratio, item_number
-UNION
-SELECT NULL, 1,
-       1, 0,
-       <? value("freight") ?>, NULL,
-       1.0,
-       cobmisc_freight,
-       cobmisc_freight,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       cobmisc_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM cobmisc
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'COB'
-                         AND cobmisc_id = taxhist_parent_id
-                         AND taxhist_line_type = 'F'
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
- GROUP BY cobmisc_freight
-UNION
-SELECT NULL, 2,
-       1, 0,
-       <? value("misc") ?>, NULL,
-       1.0,
-       cobmisc_misc,
-       cobmisc_misc,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       cobmisc_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM cobmisc
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'COB'
-                         AND cobmisc_id = taxhist_parent_id
-                         AND taxhist_line_type = 'M'
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
- GROUP BY cobmisc_misc
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
+ GROUP BY dochead_misc
 UNION
 SELECT NULL, 3,
        1, 0,
@@ -350,15 +71,16 @@ SELECT NULL, 3,
        NULL, NULL, NULL,
        SUM(taxhist_tax),
        SUM(taxhist_tax), 0
-  FROM cobmisc
-  JOIN taxhist ON taxhist_doctype = 'COB'
-              AND cobmisc_id = taxhist_parent_id
+  FROM dochead
+  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+              AND dochead_id = taxhist_parent_id
               AND taxhist_line_type = 'A'
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
- GROUP BY cobmisc_id
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
+ GROUP BY dochead_id
 UNION
 SELECT taxhist_id, 0,
-       coitem_linenumber, coitem_subnumber,
+       docitem_linenumber, docitem_subnumber,
        NULL, NULL,
        NULL,
        NULL,
@@ -367,12 +89,12 @@ SELECT taxhist_id, 0,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
-  FROM cobill
-  JOIN coitem ON cobill_coitem_id = coitem_id
-  JOIN taxhist ON taxhist_doctype = 'COBI'
-              AND cobill_id = taxhist_parent_id
+  FROM docitem
+  JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
+              AND docitem_id = taxhist_parent_id
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cobill_cobmisc_id = <? value("cobmisc_id") ?>
+ WHERE docitem_type = <? value("headtype") ?>
+   AND docitem_dochead_id = <? value("dochead_id") ?>
 UNION
 SELECT taxhist_id, 1,
        1, 0,
@@ -384,12 +106,13 @@ SELECT taxhist_id, 1,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
-  FROM cobmisc
-  JOIN taxhist ON taxhist_doctype = 'COB'
-              AND cobmisc_id = taxhist_parent_id
+  FROM dochead
+  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+              AND dochead_id = taxhist_parent_id
               AND taxhist_line_type = 'F'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
 UNION
 SELECT taxhist_id, 2,
        1, 0,
@@ -401,12 +124,13 @@ SELECT taxhist_id, 2,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
-  FROM cobmisc
-  JOIN taxhist ON taxhist_doctype = 'COB'
-              AND cobmisc_id = taxhist_parent_id
+  FROM dochead
+  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+              AND dochead_id = taxhist_parent_id
               AND taxhist_line_type = 'M'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
 UNION
 SELECT taxhist_id, 3,
        1, 0,
@@ -418,86 +142,36 @@ SELECT taxhist_id, 3,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
        taxhist_tax,
        NULL, 1
-  FROM cobmisc
-  JOIN taxhist ON taxhist_doctype = 'COB'
-              AND cobmisc_id = taxhist_parent_id
+  FROM dochead
+  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
+              AND dochead_id = taxhist_parent_id
               AND taxhist_line_type = 'A'
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE cobmisc_id = <? value("cobmisc_id") ?>
-<? elseif exists("invchead_id") ?>
+ WHERE dochead_type = <? value("headtype") ?>
+   AND dochead_id = <? value("dochead_id") ?>
+<? elseif exists("docitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       invcitem_linenumber AS linenumber, invcitem_subnumber AS subnumber,
-       formatInvcLineNumber(invcitem_id) AS line, item_number,
-       invcitem_billed * invcitem_qty_invuomratio AS qty,
-       invcitem_price / invcitem_price_invuomratio AS amount,
-       invcitem_billed * invcitem_qty_invuomratio *
-       invcitem_price / invcitem_price_invuomratio AS extended,
+       docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
+       docitem_number AS line, item_number,
+       docitem_qty AS qty,
+       docitem_unitprice AS amount,
+       docitem_price AS extended,
        COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
        NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       invcitem_billed * invcitem_qty_invuomratio * invcitem_price / invcitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM invcitem
-  JOIN item ON invcitem_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'INVI'
-                         AND invcitem_id = taxhist_parent_id
- WHERE invcitem_invchead_id = <? value("invchead_id") ?>
- GROUP BY invcitem_id, invcitem_linenumber, invcitem_subnumber, invcitem_billed,
-          invcitem_qty_invuomratio, invcitem_price, invcitem_price_invuomratio, item_number
-UNION
-SELECT NULL, 1,
-       1, 0,
-       <? value("freight") ?>, NULL,
-       1.0,
-       invchead_freight,
-       invchead_freight,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       invchead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM invchead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'INV'
-                         AND invchead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'F'
- WHERE invchead_id = <? value("invchead_id") ?>
- GROUP BY invchead_freight
-UNION
-SELECT NULL, 2,
-       1, 0,
-       <? value("misc") ?>, NULL,
-       1.0,
-       invchead_misc_amount,
-       invchead_misc_amount,
-       COALESCE(MAX(taxhist_basis), 0.0),
-       NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       invchead_misc_amount + COALESCE(SUM(taxhist_tax), 0.0), 0
-  FROM invchead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'INV'
-                         AND invchead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'M'
- WHERE invchead_id = <? value("invchead_id") ?>
- GROUP BY invchead_misc_amount
-UNION
-SELECT NULL, 3,
-       1, 0,
-       <? value("adjustment") ?>, NULL,
-       NULL,
-       NULL,
-       NULL,
-       0.0,
-       NULL, NULL, NULL,
-       SUM(taxhist_tax),
-       SUM(taxhist_tax), 0
-  FROM invchead
-  JOIN taxhist ON taxhist_doctype = 'INV'
-              AND invchead_id = taxhist_parent_id
-              AND taxhist_line_type = 'A'
- WHERE invchead_id = <? value("invchead_id") ?>
- GROUP BY invchead_id
+       docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
+  FROM docitem
+  JOIN itemsite ON quitem_itemsite_id = itemsite_id
+  JOIN item ON itemsite_item_id = item_id
+  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
+                         AND docitem_id = taxhist_parent_id
+ WHERE docitem_type = <? value("headtype") ?>
+   AND docitem_id = <? value("docitem_id") ?>
+ GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
+          docitem_unitprice, docitem_price, item_number
 UNION
 SELECT taxhist_id, 0,
-       invcitem_linenumber, invcitem_subnumber,
+       docitem_linenumber, docitem_subnumber,
        NULL, NULL,
        NULL,
        NULL,
@@ -506,97 +180,11 @@ SELECT taxhist_id, 0,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
        taxhist_tax,
        NULL, 1
-  FROM invcitem
-  JOIN taxhist ON taxhist_doctype = 'INVI'
-              AND invcitem_id = taxhist_parent_id
+  FROM docitem
+  JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
+              AND docitem_id = taxhist_parent_id
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE invcitem_invchead_id = <? value("invchead_id") ?>
-UNION
-SELECT taxhist_id, 1,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM invchead
-  JOIN taxhist ON taxhist_doctype = 'INV'
-              AND invchead_id = taxhist_parent_id
-              AND taxhist_line_type = 'F'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE invchead_id = <? value("invchead_id") ?>
-UNION
-SELECT taxhist_id, 2,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM invchead
-  JOIN taxhist ON taxhist_doctype = 'INV'
-              AND invchead_id = taxhist_parent_id
-              AND taxhist_line_type = 'M'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE invchead_id = <? value("invchead_id") ?>
-UNION
-SELECT taxhist_id, 3,
-       1, 0,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       0.0,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
-       taxhist_tax,
-       NULL, 1
-  FROM invchead
-  JOIN taxhist ON taxhist_doctype = 'INV'
-              AND invchead_id = taxhist_parent_id
-              AND taxhist_line_type = 'A'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE invchead_id = <? value("invchead_id") ?>
-<? elseif exists("invcitem_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
-       invcitem_linenumber AS linenumber, invcitem_subnumber AS subnumber,
-       formatInvcLineNumber(invcitem_id) AS line, item_number,
-       invcitem_billed * invcitem_qty_invuomratio AS qty,
-       invcitem_price / invcitem_price_invuomratio AS amount,
-       invcitem_billed * invcitem_qty_invuomratio *
-       invcitem_price / invcitem_price_invuomratio AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       invcitem_billed * invcitem_qty_invuomratio * invcitem_price / invcitem_price_invuomratio +
-       COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
-  FROM invcitem
-  JOIN item ON invcitem_item_id = item_id
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = 'INVI'
-                         AND invcitem_id = taxhist_parent_id
- WHERE invcitem_id = <? value("invcitem_id") ?>
- GROUP BY invcitem_id, invcitem_linenumber, invcitem_subnumber, invcitem_billed,
-          invcitem_qty_invuomratio, invcitem_price, invcitem_price_invuomratio, item_number
-UNION
-SELECT taxhist_id, 0,
-       invcitem_linenumber, invcitem_subnumber,
-       NULL, NULL,
-       NULL,
-       NULL,
-       NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_tax,
-       NULL, 1
-  FROM invcitem
-  JOIN taxhist ON taxhist_doctype = 'INVI'
-              AND invcitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
- WHERE invcitem_id = <? value("invcitem_id") ?>
+ WHERE docitem_type = <? value("headtype") ?>
+   AND docitem_id = <? value("docitem_id") ?>
 <? endif ?>
 ORDER BY linetype, linenumber, subnumber, xtindentrole, taxhist_sequence;

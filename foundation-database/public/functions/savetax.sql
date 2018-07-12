@@ -4,7 +4,6 @@ CREATE OR REPLACE FUNCTION saveTax(pOrderType TEXT, pOrderId INTEGER, pResult JS
 DECLARE
   _tablename TEXT;
   _subtablename TEXT;
-  _lineidqry TEXT;
   _subtype TEXT;
   _qry TEXT;
   _r RECORD;
@@ -18,51 +17,34 @@ BEGIN
   END IF;
 
   IF pOrderType = 'Q' THEN
-    _tablename := 'quhead';
-    _subtablename := 'quitem';
-    _lineidqry := 'SELECT quitem_id
-                     FROM quitem
-                    WHERE quitem_quhead_id = %L
-                      AND formatSoLineNumber(quitem_id, ''QI'') = %L';
+    _tablename := 'quheadtax';
+    _subtablename := 'quitemtax';
     _subtype := 'QI';
   ELSIF pOrderType = 'S' THEN
-    _tablename := 'cohead';
-    _subtablename := 'coitem';
-    _lineidqry := 'SELECT coitem_id
-                     FROM coitem
-                    WHERE coitem_cohead_id = %L
-                      AND formatSoLineNumber(coitem_id) = %L';
+    _tablename := 'coheadtax';
+    _subtablename := 'coitemtax';
     _subtype := 'SI';
   ELSIF pOrderType = 'COB' THEN
-    _tablename := 'cobmisc';
-    _subtablename := 'cobill';
-    _lineidqry := 'SELECT cobill_id
-                     FROM cobill
-                     JOIN coitem ON cobill_coitem_id = coitem_id
-                    WHERE cobill_cobmisc_id = %L
-                      AND formatSoLineNumber(coitem_id) = %L';
+    _tablename := 'cobmisctax';
+    _subtablename := 'cobilltax';
     _subtype := 'COBI';
   ELSIF pOrderType = 'INV' THEN
-    _tablename := 'invchead';
-    _subtablename := 'invcitem';
-    _lineidqry := 'SELECT invcitem_id
-                     FROM invcitem
-                    WHERE invcitem_invchead_id = %L
-                      AND formatInvcLineNumber(invcitem_id) = %L';
+    _tablename := 'invcheadtax';
+    _subtablename := 'invcitemtax';
     _subtype := 'INVI';
   END IF;
 
   EXECUTE format('DELETE FROM %I
                    WHERE taxhist_parent_id = %L
-                     AND taxhist_line_type != %L',
-                 format('%stax', _tablename), pOrderId, 'A');
+                     AND taxhist_line_type != ''A''',
+                 _tablename, pOrderId);
 
   EXECUTE format('DELETE FROM %I
-                   WHERE taxhist_parent_id IN (SELECT %I
-                                                 FROM %I
-                                                WHERE %I = %L)',
-                 format('%stax', _subtablename), format('%s_id', _subtablename), _subtablename,
-                 format('%s_%s_id', _subtablename, _tablename), pOrderId);
+                   WHERE taxhist_parent_id IN (SELECT docitem_id
+                                                 FROM docitem
+                                                WHERE docitem_type = %L
+                                                  AND docitem_dochead_id = %L)',
+                 _subtablename, pOrderType, pOrderId);
 
   _qry := format($_$INSERT INTO %%I
                    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
@@ -83,14 +65,14 @@ BEGIN
 
 
   IF jsonb_array_length(pResult->'freight'->'tax') != 0 THEN
-    EXECUTE format(_qry, format('%stax', _tablename), pOrderId,
+    EXECUTE format(_qry, _tablename, pOrderId,
                    (pResult->'freight'->>'taxtypeid')::INTEGER,
                    (pResult->'freight'->>'taxable')::NUMERIC, pOrderType, 'F',
                    pResult->'freight'->'tax');
   END IF;
 
   IF jsonb_array_length(pResult->'misc'->'tax') != 0 THEN
-    EXECUTE format(_qry, format('%stax', _tablename), pOrderId,
+    EXECUTE format(_qry, _tablename, pOrderId,
                    (pResult->'misc'->>'taxtypeid')::INTEGER,
                    (pResult->'misc'->>'taxable')::NUMERIC, pOrderType, 'M',
                    pResult->'misc'->'tax');
@@ -100,9 +82,14 @@ BEGIN
   SELECT value
     FROM jsonb_array_elements(pResult->'lines')
   LOOP
-    EXECUTE format(_lineidqry, pOrderId, _r.value->>'line') INTO _lineid;
+    SELECT docitem_id
+      INTO _lineid
+      FROM docitem
+     WHERE docitem_type = pOrderType
+       AND docitem_dochead_id = pOrderId
+       AND docitem_number = _r.value->>'line';
 
-    EXECUTE format(_qry, format('%stax', _subtablename), _lineid, (_r.value->>'taxtypeid')::INTEGER,
+    EXECUTE format(_qry, _subtablename, _lineid, (_r.value->>'taxtypeid')::INTEGER,
                    (_r.value->>'taxable')::NUMERIC, _subtype, 'L', _r.value->'tax');
   END LOOP;
 

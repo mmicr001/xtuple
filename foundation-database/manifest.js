@@ -1336,6 +1336,8 @@
     "public/views/creditmemoitem.sql",
     "public/views/cust.sql",
     "public/views/url.sql",
+    "public/views/dochead.sql",
+    "public/views/docitem.sql",
     "public/views/docinfo.sql",
     "public/views/document_import.sql",
     "public/views/flaccnt.sql",
