@@ -236,7 +236,8 @@ BEGIN
                     currToCurr(taxrate_curr_id, pCurrId, taxrate_amount, pDocDate), _precision)
               AS tax, tax_id, COALESCE(tax_basis_tax_id, -1) AS tax_basis_tax_id,
               COALESCE(taxrate_percent, 0.0) AS taxrate_percent,
-              COALESCE(taxrate_amount, 0.0) AS taxrate_amount
+              COALESCE(currToCurr(taxrate_curr_id, pCurrId, taxrate_amount, pDocDate), 0.0)
+              AS taxrate_amount
          FROM tax
          LEFT OUTER JOIN taxrate ON tax_id = taxrate_tax_id
                                 AND pDocDate BETWEEN COALESCE(taxrate_effective, startOfTime())

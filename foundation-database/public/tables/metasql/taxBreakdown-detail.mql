@@ -13,6 +13,8 @@ SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        docitem_price AS extended,
        COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
        NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
+       COALESCE(SUM(taxhist_amount), 0.0) AS taxhist_amount,
+       COALESCE(SUM(taxhist_percent), 0.0) * 100 AS taxhist_percent,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
        docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
@@ -33,6 +35,8 @@ SELECT NULL, 1,
        dochead_freight,
        COALESCE(MAX(taxhist_basis), 0.0),
        NULL, NULL, NULL,
+       COALESCE(SUM(taxhist_amount), 0.0),
+       COALESCE(SUM(taxhist_percent), 0.0) * 100,
        COALESCE(SUM(taxhist_tax), 0.0),
        dochead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
   FROM dochead
@@ -51,6 +55,8 @@ SELECT NULL, 2,
        dochead_misc,
        COALESCE(MAX(taxhist_basis), 0.0),
        NULL, NULL, NULL,
+       COALESCE(SUM(taxhist_amount), 0.0),
+       COALESCE(SUM(taxhist_percent), 0.0) * 100,
        COALESCE(SUM(taxhist_tax), 0.0),
        dochead_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
   FROM dochead
@@ -69,6 +75,8 @@ SELECT NULL, 3,
        NULL,
        0.0,
        NULL, NULL, NULL,
+       NULL,
+       NULL,
        SUM(taxhist_tax),
        SUM(taxhist_tax), 0
   FROM dochead
@@ -87,6 +95,8 @@ SELECT taxhist_id, 0,
        NULL,
        taxhist_basis,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
+       taxhist_amount,
+       taxhist_percent * 100,
        taxhist_tax,
        NULL, 1
   FROM docitem
@@ -104,6 +114,8 @@ SELECT taxhist_id, 1,
        NULL,
        taxhist_basis,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
+       taxhist_amount,
+       taxhist_percent * 100,
        taxhist_tax,
        NULL, 1
   FROM dochead
@@ -122,6 +134,8 @@ SELECT taxhist_id, 2,
        NULL,
        taxhist_basis,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
+       taxhist_amount,
+       taxhist_percent * 100,
        taxhist_tax,
        NULL, 1
   FROM dochead
@@ -140,6 +154,8 @@ SELECT taxhist_id, 3,
        NULL,
        0.0,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
+       NULL,
+       NULL,
        taxhist_tax,
        NULL, 1
   FROM dochead
@@ -149,6 +165,71 @@ SELECT taxhist_id, 3,
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
+UNION
+SELECT NULL, 4,
+       1, 0,
+       <? value("total") ?>, NULL,
+       NULL,
+       NULL,
+       SUM(docitem_price),
+       SUM(taxhist_basis),
+       NULL, NULL, NULL,
+       SUM(taxhist_amount),
+       CASE WHEN MIN(taxhist_percent) = MAX(taxhist_percent)
+            THEN MAX(taxhist_percent)
+            ELSE (SUM(taxhist_tax) - SUM(taxhist_amount)) /
+                 COALESCE(NULLIF(SUM(taxhist_basis), 0.0), 1.0)
+        END * 100,
+       SUM(taxhist_tax),
+       SUM(docitem_price) + SUM(taxhist_tax), 0
+  FROM
+  (
+   SELECT dochead_freight + dochead_misc AS docitem_price,
+          COALESCE(MAX(freight.taxhist_basis), 0.0) +
+          COALESCE(MAX(misc.taxhist_basis), 0.0) AS taxhist_basis,
+          COALESCE(SUM(freight.taxhist_tax), 0.0) +
+          COALESCE(SUM(misc.taxhist_tax), 0.0) +
+          COALESCE(SUM(adj.taxhist_tax), 0.0) AS taxhist_tax,
+          COALESCE(SUM(freight.taxhist_amount), 0.0) +
+          COALESCE(SUM(misc.taxhist_amount), 0.0) AS taxhist_amount,
+          CASE WHEN COALESCE(MAX(freight.taxhist_basis), 0.0) = 0.0
+                AND COALESCE(MAX(misc.taxhist_basis), 0.0) = 0.0
+               THEN NULL
+               WHEN COALESCE(MAX(freight.taxhist_basis), 0.0) = 0.0
+               THEN COALESCE(SUM(misc.taxhist_percent), 0.0)
+               WHEN COALESCE(MAX(misc.taxhist_basis), 0.0) = 0.0
+               THEN COALESCE(SUM(freight.taxhist_percent), 0.0)
+               WHEN COALESCE(SUM(freight.taxhist_percent), 0.0) =
+                    COALESCE(SUM(misc.taxhist_percent), 0.0)
+               THEN COALESCE(SUM(freight.taxhist_percent), 0.0)
+               ELSE -1
+           END AS taxhist_percent
+     FROM dochead
+     LEFT OUTER JOIN taxhist freight ON freight.taxhist_doctype = <? value("headtype") ?>
+                                    AND dochead_id = freight.taxhist_parent_id
+                                    AND freight.taxhist_line_type = 'F'
+     LEFT OUTER JOIN taxhist misc ON misc.taxhist_doctype = <? value("headtype") ?>
+                                 AND dochead_id = misc.taxhist_parent_id
+                                 AND misc.taxhist_line_type = 'M'
+     LEFT OUTER JOIN taxhist adj ON adj.taxhist_doctype = <? value("headtype") ?>
+                                AND dochead_id = adj.taxhist_parent_id
+                                AND adj.taxhist_line_type = 'A'
+    WHERE dochead_type = <? value("headtype") ?>
+      AND dochead_id = <? value("dochead_id") ?>
+    GROUP BY dochead_id, dochead_freight, dochead_misc
+   UNION ALL
+   SELECT docitem_price, COALESCE(MAX(taxhist_basis), 0.0), COALESCE(SUM(taxhist_tax), 0.0),
+          COALESCE(SUM(taxhist_amount), 0.0), CASE WHEN COALESCE(MAX(taxhist_basis), 0.0) = 0.0
+                                                   THEN NULL
+                                                   ELSE COALESCE(SUM(taxhist_percent), 0.0)
+                                               END
+     FROM docitem
+     LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
+                            AND docitem_id = taxhist_parent_id
+    WHERE docitem_type = <? value("headtype") ?>
+      AND docitem_dochead_id = <? value("dochead_id") ?>
+    GROUP BY docitem_id, docitem_price
+  ) sub
 <? elseif exists("docitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
@@ -158,10 +239,12 @@ SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        docitem_price AS extended,
        COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
        NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
+       COALESCE(SUM(taxhist_amount), 0.0) AS taxhist_amount,
+       COALESCE(SUM(taxhist_percent), 0.0) * 100 AS taxhist_percent,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
        docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
-  JOIN itemsite ON quitem_itemsite_id = itemsite_id
+  JOIN itemsite ON docitem_itemsite_id = itemsite_id
   JOIN item ON itemsite_item_id = item_id
   LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
                          AND docitem_id = taxhist_parent_id
@@ -178,6 +261,8 @@ SELECT taxhist_id, 0,
        NULL,
        taxhist_basis,
        COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
+       taxhist_amount,
+       taxhist_percent * 100,
        taxhist_tax,
        NULL, 1
   FROM docitem
