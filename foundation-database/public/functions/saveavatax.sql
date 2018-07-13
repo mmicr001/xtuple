@@ -62,13 +62,13 @@ BEGIN
                     taxhist_sequence,
                     taxhist_percent, taxhist_amount, 
                     taxhist_tax, taxhist_docdate, taxhist_curr_id,
-                    taxhist_curr_rate, taxhist_doctype, taxhist_line_type)
+                    taxhist_curr_rate, taxhist_doctype, taxhist_line_type, taxhist_freightgroup)
                    SELECT %%L, %%L, (value->>'taxName'), %%L,
                           NULL,
                           0,
                           (value->>'rate')::NUMERIC, 0,
                           (value->>'tax')::NUMERIC, %L, %L,
-                          %L, %%L, %%L
+                          %L, %%L, %%L, %%L
                      FROM jsonb_array_elements(%%L)
                     WHERE (value->>'tax')::NUMERIC != 0.0$_$,
                   (pResult->>'date')::DATE, _currid,
@@ -78,7 +78,7 @@ BEGIN
   SELECT value
     FROM jsonb_array_elements(pResult->'lines')
   LOOP
-    IF _r.value->>'lineNumber' NOT IN ('Freight', 'Misc') THEN
+    IF NOT _r.value->>'lineNumber' ~ 'Freight' AND NOT _r.value->>'lineNumber' = 'Misc' THEN
       SELECT docitem_id, docitem_taxtype_id
         INTO _lineid, _taxtypeid
         FROM docitem
@@ -87,15 +87,18 @@ BEGIN
          AND docitem_number = _r.value->>'lineNumber';
 
       EXECUTE format(_qry, _subtablename, _lineid, _taxtypeid,
-                     (_r.value->>'taxableAmount')::NUMERIC, _subtype, 'L', _r.value->'details');
-    ELSIF _r.value->>'lineNumber' = 'Freight' THEN
+                     (_r.value->>'taxableAmount')::NUMERIC, _subtype, 'L', NULL,
+                      _r.value->'details');
+    ELSIF _r.value->>'lineNumber' ~ 'Freight' THEN
       EXECUTE format(_qry, _tablename, pOrderId,
                      _freighttaxtypeid,
-                     (_r.value->>'taxableAmount')::NUMERIC, pOrderType, 'F', _r.value->'details');
+                     (_r.value->>'taxableAmount')::NUMERIC, pOrderType, 'F',
+                      right(_r.value->>'lineNumber', -7)::INTEGER, _r.value->'details');
     ELSIF _r.value->>'lineNumber' = 'Misc' THEN
       EXECUTE format(_qry, _tablename, pOrderId,
                      _misctaxtypeid,
-                     (_r.value->>'taxableAmount')::NUMERIC, pOrderType, 'M', _r.value->'details');
+                     (_r.value->>'taxableAmount')::NUMERIC, pOrderType, 'M', NULL,
+                      _r.value->'details');
     END IF;
   END LOOP;
 
