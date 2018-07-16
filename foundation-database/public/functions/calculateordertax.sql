@@ -81,11 +81,11 @@ BEGIN
             SUM((freight).freightdata_total) AS freight
        FROM
        (
-        SELECT itemsite_warehous_id,
+        SELECT docitem_warehous_id,
                calculateFreightDetail(cust_id, custtype_id, custtype_code, COALESCE(shipto_id, -1),
                                       shipto_shipzone_id, COALESCE(shipto_num, ''), dochead_date,
                                       dochead_shipvia, dochead_curr_id, currConcat(dochead_curr_id),
-                                      itemsite_warehous_id, item_freightclass_id,
+                                      docitem_warehous_id, item_freightclass_id,
                                       SUM(docitem_qty *
                                           (item_prodweight +
                                            CASE WHEN fetchMetricBool('IncludePackageWeight')
@@ -100,15 +100,14 @@ BEGIN
           JOIN custtype ON cust_custtype_id = custtype_id
           JOIN shiptoinfo ON dochead_shipto_id = shipto_id
           JOIN docitem ON dochead_id = docitem_dochead_id
-          JOIN itemsite ON docitem_itemsite_id = itemsite_id
-          JOIN item ON itemsite_item_id = item_id
+          JOIN item ON docitem_item_id = item_id
          WHERE dochead_type = pOrderType
            AND dochead_id = pOrderId
-         GROUP BY itemsite_warehous_id, cust_id, custtype_id, custtype_code, shipto_id,
+         GROUP BY docitem_warehous_id, cust_id, custtype_id, custtype_code, shipto_id,
                   shipto_shipzone_id, shipto_num, dochead_date, dochead_shipvia, dochead_curr_id,
                   item_freightclass_id
        ) freights
-       JOIN whsinfo ON itemsite_warehous_id = warehous_id
+       JOIN whsinfo ON docitem_warehous_id = warehous_id
        LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
       GROUP BY addr_line1, addr_line2, addr_line3,
                addr_city, addr_state, addr_postalcode, addr_country
@@ -125,8 +124,7 @@ BEGIN
          _linecity, _linestate, _linezip,
          _linecountry
     FROM docitem
-    JOIN itemsite ON docitem_itemsite_id = itemsite_id
-    JOIN whsinfo ON itemsite_warehous_id = warehous_id
+    JOIN whsinfo ON docitem_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
    WHERE docitem_type = pOrderType
      AND docitem_dochead_id = pOrderId;

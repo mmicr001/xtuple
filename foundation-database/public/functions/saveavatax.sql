@@ -93,7 +93,7 @@ BEGIN
       EXECUTE format(_qry, _tablename, pOrderId,
                      _freighttaxtypeid,
                      (_r.value->>'taxableAmount')::NUMERIC, pOrderType, 'F',
-                      right(_r.value->>'lineNumber', -7)::INTEGER, _r.value->'details');
+                      NULLIF(right(_r.value->>'lineNumber', -7), '')::INTEGER, _r.value->'details');
     ELSIF _r.value->>'lineNumber' = 'Misc' THEN
       EXECUTE format(_qry, _tablename, pOrderId,
                      _misctaxtypeid,

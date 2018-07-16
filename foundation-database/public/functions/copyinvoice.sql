@@ -48,8 +48,8 @@ BEGIN
          invchead_prj_id, invchead_curr_id,
          invchead_taxzone_id,
          invchead_recurring_invchead_id,
-         invchead_saletype_id, invchead_shipzone_id, invchead_freight_taxtype_id,
-         invchead_misc_taxtype_id, invchead_misc_discount)
+         invchead_saletype_id, invchead_shipzone_id, invchead_warehous_id,
+         invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount)
   VALUES(_invcheadid,
          _i.invchead_cust_id, _i.invchead_shipto_id,
          _i.invchead_ordernumber, _i.invchead_orderdate,
@@ -75,8 +75,8 @@ BEGIN
          _i.invchead_prj_id, _i.invchead_curr_id,
          _i.invchead_taxzone_id,
          _i.invchead_recurring_invchead_id,
-         _i.invchead_saletype_id, _i.invchead_shipzone_id, _i.invchead_freight_taxtype_id,
-         _i.invchead_misc_taxtype_id, _i.invchead_misc_discount);
+         _i.invchead_saletype_id, _i.invchead_shipzone_id, _i.invchead_warehous_id,
+         _i.invchead_freight_taxtype_id, _i.invchead_misc_taxtype_id, _i.invchead_misc_discount);
 
     INSERT INTO invcheadtax
     (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,

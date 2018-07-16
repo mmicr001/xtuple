@@ -59,6 +59,7 @@ SELECT
   xt.add_column('invchead', 'invchead_shipzone_id', 'INTEGER', NULL,            'public'),
   xt.add_column('invchead', 'invchead_created', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('invchead', 'invchead_lastupdated',  'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
+  xt.add_column('invchead', 'invchead_warehous_id', 'INTEGER', 'NULL', 'public'),
   xt.add_column('invchead', 'invchead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
   xt.add_column('invchead', 'invchead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
   xt.add_column('invchead', 'invchead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
@@ -83,6 +84,8 @@ SELECT
                     'FOREIGN KEY (invchead_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_to_curr_symbol',
                     'FOREIGN KEY (invchead_curr_id) REFERENCES curr_symbol(curr_id)', 'public'),
+  xt.add_constraint('invchead', 'invchead_warehous_id',
+                    'FOREIGN KEY (invchead_warehous_id) REFERENCES whsinfo(warehous_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_invchead_freight_taxtype_id_fkey',
                     'FOREIGN KEY (invchead_freight_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_invchead_misc_taxtype_id_fkey',
