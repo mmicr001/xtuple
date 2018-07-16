@@ -7,7 +7,7 @@
 <? if exists("dochead_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
-       docitem_number AS line, item_number,
+       docitem_number AS line, docitem_item_number AS item_number,
        docitem_qty AS qty,
        docitem_unitprice AS amount,
        docitem_price AS extended,
@@ -18,14 +18,12 @@ SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
        docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
-  JOIN itemsite ON docitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
   LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
                          AND docitem_id = taxhist_parent_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_dochead_id = <? value("dochead_id") ?>
  GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
-          docitem_unitprice, docitem_price, item_number
+          docitem_unitprice, docitem_price, docitem_item_number
 UNION
 SELECT NULL, 1,
        taxhist_freightgroup, 0,
@@ -246,7 +244,7 @@ SELECT NULL, 4,
 <? elseif exists("docitem_id") ?>
 SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
-       docitem_number AS line, item_number,
+       docitem_number AS line, docitem_item_number AS item_number,
        docitem_qty AS qty,
        docitem_unitprice AS amount,
        docitem_price AS extended,
@@ -257,14 +255,12 @@ SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
        COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
        docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
-  JOIN itemsite ON docitem_itemsite_id = itemsite_id
-  JOIN item ON itemsite_item_id = item_id
   LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
                          AND docitem_id = taxhist_parent_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_id = <? value("docitem_id") ?>
  GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
-          docitem_unitprice, docitem_price, item_number
+          docitem_unitprice, docitem_price, docitem_item_number
 UNION
 SELECT taxhist_id, 0,
        docitem_linenumber, docitem_subnumber,

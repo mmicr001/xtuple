@@ -80,7 +80,7 @@ SELECT 'INV',
        invchead_curr_id,
        invchead_invcdate,
        invchead_taxzone_id,
-       cohead_warehous_id,
+       invchead_warehous_id,
        invchead_shipvia,
        invchead_shipto_id,
        invchead_shipto_address1,
@@ -95,5 +95,4 @@ SELECT 'INV',
        invchead_freight_taxtype_id,
        invchead_misc_taxtype_id,
        invchead_misc_discount
-  FROM invchead
-  LEFT OUTER JOIN cohead ON invchead_ordernumber = cohead_number;
+  FROM invchead;
