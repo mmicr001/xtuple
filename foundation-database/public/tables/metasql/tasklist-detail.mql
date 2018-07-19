@@ -88,7 +88,8 @@ WITH tasklist AS (
        <? endif ?>)
   <? if exists("parent") ?>
     OR (task_parent_type = 'J'
-        AND task_parent_id=<? value("prj_id") ?>)
+        AND task_parent_id=<? value("prj_id") ?>
+        AND task_status='O')
   <? endif ?>
 <? endif ?>
 
