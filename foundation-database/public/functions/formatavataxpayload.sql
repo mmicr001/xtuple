@@ -14,7 +14,8 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pToState        TEXT,
                                                pToZip          TEXT,
                                                pToCountry      TEXT,
-                                               pCustId         INTEGER,
+                                               pCust           TEXT,
+                                               pTaxReg         TEXT,
                                                pCurrId         INTEGER,
                                                pDocDate        DATE,
                                                pFreight        NUMERIC,
@@ -47,7 +48,6 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _transactionType TEXT;
-  _rec             RECORD;
   _payload         TEXT;
   _numlines        INTEGER;
   _numfreight      INTEGER;
@@ -69,14 +69,6 @@ BEGIN
 
   _numlines := COALESCE(array_length(pLines, 1), 0);
   _numfreight := COALESCE(array_length(pFreightSplit, 1), 0);
-
-  SELECT cust_number, (SELECT taxreg_number FROM taxreg WHERE taxreg_rel_type = 'C'
-                                                          AND taxreg_rel_id = pcustid
-                                                          AND CURRENT_DATE BETWEEN taxreg_effective AND taxreg_expires
-                                                          LIMIT 1) AS taxreg
-  INTO _rec
-  FROM  custinfo
-  WHERE cust_id = pcustid;
 
   _payload = format('{ "createTransactionModel": {
     "type": "%s",
@@ -114,8 +106,8 @@ BEGIN
     pordernumber,
     fetchmetrictext('AvalaraCompany'),
     pdocdate,
-    _rec.cust_number,
-    COALESCE(_rec.taxreg, ' '),
+    pCust,
+    pTaxReg,
     pfromline1,
     pfromline2,
     pfromline3,
