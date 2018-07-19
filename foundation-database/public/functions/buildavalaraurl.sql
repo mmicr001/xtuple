@@ -24,13 +24,14 @@ BEGIN
     RETURN _base || 'transactions/createoradjust?$include=Details';
   ELSIF pType = 'committransaction' THEN
     IF pOrderType = 'INV' THEN
-      SELECT invchead_number
+      SELECT invchead_invcnumber
         INTO _number
         FROM invchead
        WHERE invchead_id = pOrderId;
     END IF;
 
-    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' || _number '/commit';
+    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' ||
+           _number || '/commit';
   ELSE
     RETURN _base || 'utilities/ping';
   END IF;
