@@ -1,4 +1,4 @@
--- Group: tasklist
+	-- Group: tasklist
 -- Name:  detail
 -- Notes: 
 --        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
@@ -41,6 +41,8 @@ WITH tasklist AS (
                <? value("incident") ?> || '-' || incdt_number
               WHEN 'CRMA' THEN
                <? value("account") ?> || '-' || crmacct_number
+              WHEN 'PSPCT' THEN
+               <? value("prospect") ?> || '-' || prospect_number
               WHEN 'J' THEN
                <? value("project") ?> || '-' || COALESCE(pr1.prj_number,pr2.prj_number)  
               ELSE task_parent_type
@@ -52,6 +54,8 @@ WITH tasklist AS (
                <? value("incident") ?> || '-' || incdt_number
               WHEN 'CRMA' THEN
                <? value("account") ?> || '-' || crmacct_number
+              WHEN 'PSPCT' THEN
+               <? value("prospect") ?> || '-' || prospect_number
               WHEN 'J' THEN
                <? value("project") ?> || '-' || COALESCE(pr1.prj_number,pr2.prj_number)
               ELSE task_parent_type
@@ -71,6 +75,7 @@ WITH tasklist AS (
       LEFT OUTER JOIN ophead ON (ophead_id=task_parent_id AND task_parent_type='OPP')
       LEFT OUTER JOIN crmacct ON (crmacct_id=task_parent_id AND task_parent_type='CRMA')
       LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
+      LEFT OUTER JOIN prospect ON (prospect_id=task_parent_id AND task_parent_type='PSPCT')
       LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id)
       LEFT OUTER JOIN prj pr1 ON (pr1.prj_id=task_parent_id AND task_parent_type = 'J')
       LEFT OUTER JOIN prj pr2 ON (pr2.prj_id=task_prj_id)
@@ -88,7 +93,8 @@ WITH tasklist AS (
        <? endif ?>)
   <? if exists("parent") ?>
     OR (task_parent_type = 'J'
-        AND task_parent_id=<? value("prj_id") ?>)
+        AND task_parent_id=<? value("prj_id") ?>
+        AND task_status='O')
   <? endif ?>
 <? endif ?>
 
@@ -263,6 +269,8 @@ WHERE true
  <? if exists("crmacctgrp") ?>
    AND crmacct_id IN (SELECT groupsitem_reference_id FROM crmacctgrpitem WHERE groupsitem_groups_id=<? value("crmacctgrp") ?>)
  <? endif ?>
+ <? if exists("prospect_id") ?>
+    AND (parent='PSPCT' AND parent_xtidrole = <? value("prospect_id") ?>)
  <? if exists("prj_id") ?>
     AND CASE WHEN <? value("prj_id") ?> = -1 THEN true ELSE prj_id = <? value("prj_id") ?> END
  <? endif ?>
