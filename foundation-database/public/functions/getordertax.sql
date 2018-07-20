@@ -66,6 +66,21 @@ BEGIN
              WHERE taxhist_doctype = 'INV'
                AND taxhist_parent_id = pOrderId
            ) tax;
+  ELSIF pOrderType = 'P' THEN
+    SELECT SUM(taxhist_tax)
+      INTO _result
+      FROM (
+            SELECT taxhist_tax
+              FROM poitem
+              JOIN taxhist ON taxhist_doctype = 'PI'
+                          AND taxhist_parent_id = poitem_id
+             WHERE poitem_pohead_id = pOrderId
+            UNION
+            SELECT taxhist_tax
+              FROM taxhist
+             WHERE taxhist_doctype = 'P'
+               AND taxhist_parent_id = pOrderId
+           ) tax;
   END IF;
 
   RETURN COALESCE(_result, 0.0);

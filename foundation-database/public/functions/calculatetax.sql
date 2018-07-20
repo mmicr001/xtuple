@@ -137,6 +137,7 @@ $$
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _precision INTEGER := 2;
+  _includemisc BOOLEAN;
   _taxtypes INTEGER[] := ARRAY[]::INTEGER[];
   _amounts NUMERIC[] := ARRAY[]::NUMERIC[];
   _numlines NUMERIC;
@@ -155,20 +156,28 @@ DECLARE
   _freight TEXT;
   _misc TEXT;
   _lines TEXT := '';
-  _result JSONB;
+  _result TEXT;
 
 BEGIN
   _numlines := COALESCE(array_length(pLines, 1), 0);
+  _includemisc := pMiscTaxtypeId IS NOT NULL;
 
-  _taxtypes := pTaxTypes || pFreightTaxtypeId || pMiscTaxtypeId;
+  _taxtypes := pTaxTypes || pFreightTaxtypeId;
+  IF _includemisc THEN
+    _taxtypes := _taxtypes || pMiscTaxtypeId;
+  END IF;
+
   IF pMiscDiscount AND pMisc < 0 THEN
     _amounts := distributeDiscount(pAmounts, pMisc * -1, _precision);
   ELSE
     _amounts := pAmounts;
   END IF;
-  _amounts := _amounts || COALESCE(pFreight, 0) || COALESCE(pMisc, 0);
+  _amounts := _amounts || COALESCE(pFreight, 0);
+  IF _includemisc IS NOT NULL THEN 
+    _amounts := _amounts || COALESCE(pMisc, 0);
+  END IF;
 
-  FOR _line IN 1.._numlines + 2
+  FOR _line IN 1.._numlines + CASE WHEN _includemisc THEN 2 ELSE 1 END
   LOOP
     IF pTaxZoneId IS NULL OR _taxtypes[_line] IS NULL THEN
       IF _line <= _numlines THEN
@@ -293,11 +302,17 @@ BEGIN
     END IF;
   END LOOP;
 
-  _result := ('{"currid": ' || pCurrId || ', "currrate": ' || currRate(pCurrId, pDocDate) ||
-              ', "date": "' || pDocDate || '", "total": ' || _total || ', "lines": [' || _lines ||
-              '], "freight": ' || _freight || ', "misc": ' || _misc || '}')::JSONB;
+  _result := '{"currid": ' || pCurrId || ', "currrate": ' || currRate(pCurrId, pDocDate) ||
+             ', "date": "' || pDocDate || '", "total": ' || _total || ', "lines": [' || _lines ||
+             '], "freight": ' || _freight;
 
-  RETURN _result;
+  IF _includemisc THEN
+    _result := _result || ', "misc": ' || _misc;
+  END IF;
+
+  _result := _result || '}';
+
+  RETURN _result::JSONB;
 
 END
 $$ language plpgsql;
