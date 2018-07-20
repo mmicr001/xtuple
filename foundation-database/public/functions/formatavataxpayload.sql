@@ -258,7 +258,7 @@ BEGIN
     END LOOP;
   END IF;
 
-  IF pMisc != 0.0 AND (NOT pMiscDiscount OR pMisc > 0) THEN
+  IF pMisc != 0.0 AND (NOT pMiscDiscount OR pMisc > 0) AND pMiscTaxtype IS NOT NULL THEN
     IF _numlines > 0 OR pFreight != 0.0 THEN
       _payload := _payload || ',';
     END IF;

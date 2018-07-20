@@ -32,6 +32,10 @@ BEGIN
     _tablename := 'invcheadtax';
     _subtablename := 'invcitemtax';
     _subtype := 'INVI';
+  ELSIF pOrderType = 'P' THEN
+    _tablename := 'poheadtax';
+    _subtablename := 'poitemtax';
+    _subtype := 'PI';
   END IF;
 
   EXECUTE format('DELETE FROM %I
