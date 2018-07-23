@@ -124,4 +124,30 @@ SELECT 'P',
        pohead_freight_taxtype_id,
        NULL,
        FALSE
-  FROM pohead;
+  FROM pohead
+UNION ALL
+SELECT 'VCH',
+       vohead_id,
+       vohead_number,
+       NULL,
+       vohead_vend_id,
+       vohead_curr_id,
+       vohead_docdate,
+       vohead_taxzone_id,
+       pohead_warehous_id,
+       pohead_shipvia,
+       NULL,
+       pohead_shiptoaddress1,
+       pohead_shiptoaddress2,
+       pohead_shiptoaddress3,
+       pohead_shiptocity,
+       pohead_shiptostate,
+       pohead_shiptozipcode,
+       pohead_shiptocountry,
+       vohead_freight,
+       0.0,
+       vohead_freight_taxtype_id,
+       NULL,
+       FALSE
+  FROM vohead
+  JOIN pohead ON vohead_pohead_id = pohead_id;
