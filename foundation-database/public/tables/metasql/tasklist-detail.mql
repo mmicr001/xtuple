@@ -1,4 +1,4 @@
-	-- Group: tasklist
+-- Group: tasklist
 -- Name:  detail
 -- Notes: 
 --        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
@@ -116,7 +116,7 @@ UNION ALL
            END AS stage,
            incdtpriority_name AS priority, 
            prj_owner_username AS owner, 
-            prj_username AS assigned,
+           prj_username AS assigned,
            firstLine(prj_descrip) AS notes, 
            prj_start_date AS start, 
            prj_due_date AS due, 
@@ -174,7 +174,7 @@ UNION ALL
          END AS stage,
          incdtpriority_name AS priority,
          incdt_owner_username AS owner, 
-          incdt_assigned_username AS assigned,
+         incdt_assigned_username AS assigned,
          firstLine(incdt_descrip) AS notes, 
          incdt_timestamp::DATE AS start, 
          null::DATE AS due, 
@@ -222,7 +222,7 @@ UNION ALL
          opstage_descrip AS stage,         
          incdtpriority_name AS priority, 
          ophead_owner_username AS owner, 
-          ophead_username AS assigned,
+         ophead_username AS assigned,
          firstLine(ophead_notes) AS notes, 
          ophead_start_date AS start, 
          ophead_target_date AS due, 
@@ -271,6 +271,7 @@ WHERE true
  <? endif ?>
  <? if exists("prospect_id") ?>
     AND (parent='PSPCT' AND parent_xtidrole = <? value("prospect_id") ?>)
+ <? endif ?>
  <? if exists("prj_id") ?>
     AND CASE WHEN <? value("prj_id") ?> = -1 THEN true ELSE prj_id = <? value("prj_id") ?> END
  <? endif ?>
@@ -296,10 +297,10 @@ WHERE true
          OR assigned ~ <? value("username") ?>)
   <? endif ?>
   <? if exists("assigned_username") ?> 
-    AND assigned ~ <? value("assigned_username") ?>)
+    AND assigned ~ <? value("assigned_username") ?>
   <? endif ?>
   <? if exists("assigned_usr_pattern") ?>
-    AND assigned ~ <? value("assigned_usr_pattern") ?>)
+    AND assigned ~ <? value("assigned_usr_pattern") ?>
   <? endif ?>
   <? if exists("owner_username") ?> 
     AND ("owner"=<? value("owner_username") ?>) 
