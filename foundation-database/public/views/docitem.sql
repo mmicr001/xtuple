@@ -95,4 +95,25 @@ SELECT 'P',
   JOIN pohead ON poitem_pohead_id = pohead_id
   LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
   LEFT OUTER JOIN item ON itemsite_item_id = item_id
+  LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
+UNION ALL
+SELECT 'VCH',
+       voitem_id,
+       voitem_vohead_id,
+       poitem_linenumber,
+       0,
+       formatPoLineNumber(poitem_id),
+       item_id,
+       COALESCE(NULLIF(itemsite_warehous_id, -1), pohead_warehous_id),
+       COALESCE(item_number, expcat_code),
+       voitem_qty,
+       poitem_unitprice,
+       voitem_qty * poitem_unitprice,
+       voitem_taxtype_id,
+       voitem_freight
+  FROM voitem
+  JOIN poitem ON voitem_poitem_id = poitem_id
+  JOIN pohead ON poitem_pohead_id = pohead_id
+  LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
+  LEFT OUTER JOIN item ON itemsite_item_id = item_id
   LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id;

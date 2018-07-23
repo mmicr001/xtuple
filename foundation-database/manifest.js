@@ -1175,6 +1175,8 @@
     "public/tables/uiform.sql",
     "public/tables/updaterhist.sql",
     "public/tables/vohead.sql",
+    "public/tables/voheadtax.sql",
+    "public/tables/voitemtax.sql",
     "public/tables/vodist.sql",
     "public/tables/vendaddrinfo.sql",
     "public/tables/whsinfo.sql",

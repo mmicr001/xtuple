@@ -36,6 +36,10 @@ BEGIN
     _tablename := 'poheadtax';
     _subtablename := 'poitemtax';
     _subtype := 'PI';
+  ELSIF pOrderType = 'VCH' THEN
+    _tablename := 'voheadtax';
+    _subtablename := 'voitemtax';
+    _subtype := 'VCHI';
   END IF;
 
   EXECUTE format('DELETE FROM %I
