@@ -60,7 +60,7 @@ BEGIN
                        WHEN 'S' THEN 'SalesOrder'
                        WHEN 'INV' THEN 'SalesInvoice'
                        WHEN 'P' THEN 'PurchaseOrder'
-                       WHEN 'V' THEN 'PurchaseInvoice'
+                       WHEN 'VCH' THEN 'PurchaseInvoice'
                        ELSE 'SalesOrder' END);
 
   IF (NOT pRecord OR fetchMetricBool('NoAvaTaxCommit')) THEN

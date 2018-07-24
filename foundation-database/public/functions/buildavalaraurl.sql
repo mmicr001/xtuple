@@ -18,20 +18,22 @@ BEGIN
 
   _base := _base || 'api/v2/';
 
+  SELECT dochead_number
+    INTO _number
+    FROM dochead
+   WHERE dochead_type = pOrderType
+     AND dochead_id = pOrderId;
+
   IF pType = 'taxcodes' THEN
     RETURN _base || 'definitions/taxcodes';
   ELSIF pType = 'createtransaction' THEN
     RETURN _base || 'transactions/createoradjust?$include=Details';
   ELSIF pType = 'committransaction' THEN
-    IF pOrderType = 'INV' THEN
-      SELECT invchead_invcnumber
-        INTO _number
-        FROM invchead
-       WHERE invchead_id = pOrderId;
-    END IF;
-
     RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' ||
            _number || '/commit';
+  ELSIF pType = 'voidtransaction' THEN
+    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' ||
+           _number || '/void';
   ELSE
     RETURN _base || 'utilities/ping';
   END IF;
