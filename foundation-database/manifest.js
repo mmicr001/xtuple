@@ -993,6 +993,7 @@
     "public/functions/voidinvoice.sql",
     "public/functions/voidpostedapcheck.sql",
     "public/functions/voidpostedcheck.sql",
+    "public/functions/voidtax.sql",
     "public/functions/woeffectivedate.sql",
     "public/functions/woinvavail.sql",
     "public/functions/woinvavailmatl.sql",
