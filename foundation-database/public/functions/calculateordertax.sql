@@ -20,6 +20,7 @@ DECLARE
   _tozip TEXT;
   _tocountry TEXT;
   _cust TEXT;
+  _usage TEXT;
   _taxreg TEXT;
   _currid INTEGER;
   _docdate DATE;
@@ -59,13 +60,15 @@ BEGIN
               THEN COALESCE(cust_number, prospect_number)
               ELSE fetchMetricText('remitto_name')
           END,
-         COALESCE(taxreg_number, ' '),
+         cust_tax_exemption, COALESCE(taxreg_number, ' '),
          dochead_curr_id, dochead_date, dochead_freight + SUM(docitem_freight), dochead_misc,
          dochead_freight_taxtype_id, dochead_misc_taxtype_id, dochead_misc_discount
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
          _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
          _toline3, _tocity, _tostate, _tozip,
-         _tocountry, _cust, _taxreg,
+         _tocountry,
+         _cust,
+         _usage, _taxreg,
          _currid, _docdate, _freight, _misc,
          _freighttaxtype, _misctaxtype, _miscdiscount
     FROM dochead
@@ -85,7 +88,8 @@ BEGIN
             dochead_tocountry, dochead_cust_id, dochead_vend_id, dochead_curr_id, dochead_date,
             dochead_freight, dochead_misc, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
-            addr_postalcode, addr_country, cust_number, prospect_number, taxreg_number;
+            addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
+            taxreg_number;
 
   SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
          array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
@@ -169,7 +173,7 @@ BEGIN
 
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
-                      _tocity, _tostate, _tozip, _tocountry, _cust, _taxreg, _currid,
+                      _tocity, _tostate, _tozip, _tocountry, _cust, _usage, _taxreg, _currid,
                       _docdate, _freight, _misc, _freighttaxtype, _misctaxtype, _miscdiscount,
                       _freightline1, _freightline2, _freightline3, _freightcity, _freightstate,
                       _freightzip, _freightcountry, _freightsplit, _linenums, _qtys, _taxtypeids,

@@ -26,6 +26,8 @@ BEGIN
 
   IF pType = 'taxcodes' THEN
     RETURN _base || 'definitions/taxcodes';
+  ELSIF pType = 'taxexempt' THEN
+    RETURN _base || 'definitions/entityusecodes';
   ELSIF pType = 'createtransaction' THEN
     RETURN _base || 'transactions/createoradjust?$include=Details';
   ELSIF pType = 'committransaction' THEN
