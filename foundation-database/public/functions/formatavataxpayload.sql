@@ -15,6 +15,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pToZip          TEXT,
                                                pToCountry      TEXT,
                                                pCust           TEXT,
+                                               pUsage          TEXT,
                                                pTaxReg         TEXT,
                                                pCurrId         INTEGER,
                                                pDocDate        DATE,
@@ -76,6 +77,7 @@ BEGIN
     "companyCode": "%s",
     "date": "%s",
     "customerCode": "%s",
+    "customerUsageType": "%s",
     "businessIdentificationNo": "%s",
     "addresses": {
         "shipFrom": {
@@ -107,6 +109,7 @@ BEGIN
     fetchmetrictext('AvalaraCompany'),
     pdocdate,
     pCust,
+    pUsage,
     pTaxReg,
     pfromline1,
     pfromline2,
