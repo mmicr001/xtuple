@@ -512,6 +512,7 @@
     "public/functions/getaddrid.sql",
     "public/functions/getadjustmenttaxtypeid.sql",
     "public/functions/getaropenid.sql",
+    "public/functions/getavataxdoctype.sql",
     "public/functions/getbankaccntid.sql",
     "public/functions/getbomitemid.sql",
     "public/functions/getbooitemseqid.sql",
