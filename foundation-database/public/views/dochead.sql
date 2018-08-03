@@ -150,4 +150,30 @@ SELECT 'VCH',
        NULL,
        FALSE
   FROM vohead
-  JOIN pohead ON vohead_pohead_id = pohead_id;
+  JOIN pohead ON vohead_pohead_id = pohead_id
+UNION ALL
+SELECT 'CM',
+       cmhead_id,
+       cmhead_number,
+       cmhead_cust_id,
+       NULL,
+       cmhead_curr_id,
+       cmhead_docdate,
+       cmhead_taxzone_id,
+       COALESCE(invchead_warehous_id, cmhead_warehous_id),
+       COALESCE(invchead_shipvia, cmhead_shipvia),
+       cmhead_shipto_id,
+       COALESCE(invchead_shipto_address1, cmhead_shipto_address1),
+       COALESCE(invchead_shipto_address2, cmhead_shipto_address2),
+       COALESCE(invchead_shipto_address3, cmhead_shipto_address3),
+       COALESCE(invchead_shipto_city, cmhead_shipto_city),
+       COALESCE(invchead_shipto_state, cmhead_shipto_state),
+       COALESCE(invchead_shipto_zipcode, cmhead_shipto_zipcode),
+       COALESCE(invchead_shipto_country, cmhead_shipto_country),
+       cmhead_freight,
+       cmhead_misc,
+       COALESCE(invchead_freight_taxtype_id, cmhead_freight_taxtype_id),
+       COALESCE(invchead_misc_taxtype_id, cmhead_misc_taxtype_id),
+       cmhead_misc_discount
+  FROM cmhead
+  LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber;

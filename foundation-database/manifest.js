@@ -1095,6 +1095,7 @@
     "public/tables/checkheadtax.sql",
     "public/tables/checkitem.sql",
     "public/tables/classcodetax.sql",
+    "public/tables/cmhead.sql",
     "public/tables/cmitem.sql",
     "public/tables/cmnttypesource.sql",
     "public/tables/cntctaddr.sql",
