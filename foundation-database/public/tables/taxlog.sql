@@ -11,7 +11,7 @@ SELECT xt.add_column('taxlog', 'taxlog_start', 'TIMESTAMP WITH TIME ZONE', 'NOT 
 SELECT xt.add_column('taxlog', 'taxlog_time', 'INTEGER', 'NOT NULL', 'public');
 
 SELECT xt.add_constraint('taxlog', 'taxlog_taxlog_service_check', $$CHECK (taxlog_service IN ('A'))$$, 'public');
-SELECT xt.add_constraint('taxlog', 'taxlog_taxlog_order_type_check', $$CHECK (taxlog_order_type IN ('Q', 'S', 'COB', 'INV'))$$, 'public');
+SELECT xt.add_constraint('taxlog', 'taxlog_taxlog_order_type_check', $$CHECK (taxlog_order_type IN ('Q', 'S', 'COB', 'INV', 'P', 'VCH', 'CM'))$$, 'public');
 SELECT xt.add_constraint('taxlog', 'taxlog_taxlog_time_check', 'CHECK (taxlog_time > 0)', 'public');
 
 COMMENT ON TABLE taxlog IS 'Log of tax service requests';

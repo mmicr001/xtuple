@@ -18,6 +18,8 @@ BEGIN
     _subtype := 'PI';
   ELSIF pOrderType = 'VCH' THEN
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'CM' THEN
+    _subtype := 'CMI';
   END IF;
  
   SELECT SUM(taxhist_tax)

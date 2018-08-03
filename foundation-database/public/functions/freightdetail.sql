@@ -72,6 +72,26 @@ BEGIN
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=quhead_shipto_id)
     WHERE (quhead_id=pOrderId);
 
+  ELSIF (pOrderType = 'CM') THEN
+    SELECT
+      cust_id AS cust_id,
+      custtype_id,
+      custtype_code,
+      COALESCE(shipto_id, -1) AS shipto_id,
+      COALESCE(shipto_num, '') AS shipto_num,
+      COALESCE(pOrderDate, invchead_orderdate, cmhead_docdate) AS orderdate,
+      COALESCE(invchead_shipvia, cmhead_shipvia) AS shipvia,
+      shipto_shipzone_id AS shipzone_id,
+      COALESCE(pCurrId, invchead_curr_id, cmhead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, invchead_curr_id, cmhead_curr_id)) AS currAbbr
+    INTO _order
+      FROM cmhead
+      JOIN custinfo ON (cust_id=COALESCE(pCustId, cmhead_cust_id))
+      JOIN custtype ON (custtype_id=cust_custtype_id)
+      LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, cmhead_shipto_id))
+      LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber
+    WHERE (cmhead_id=pOrderId);
+
   ELSIF (pOrderType = 'RA') THEN
     SELECT
       cust_id AS cust_id,
@@ -133,6 +153,21 @@ BEGIN
       AND (orderitem_orderhead_id=' || quote_literal(pOrderId) || ')
       AND (orderitem_status <> ''X'') )
     GROUP BY itemsite_warehous_id, item_freightclass_id;';
+
+  IF pOrderType = 'CM' THEN
+    IF (_includePkgWeight) THEN
+      _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * (item_prodweight + item_packweight)) AS weight, ';
+  ELSE
+    _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * item_prodweight) AS weight, ';
+  END IF;
+
+  _qry := _qry || 'itemsite_warehous_id, COALESCE(item_freightclass_id, -1) AS item_freightclass_id
+    FROM cmitem
+    JOIN itemsite ON (itemsite_id=cmitem_itemsite_id)
+    JOIN item ON (item_id=itemsite_item_id)
+    WHERE ( (cmitem_cmhead_id=' || quote_literal(pOrderId) || ') )
+    GROUP BY itemsite_warehous_id, item_freightclass_id;';
+  END IF;
 
   FOR _weights IN
     EXECUTE _qry LOOP

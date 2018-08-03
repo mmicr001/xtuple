@@ -81,41 +81,6 @@ BEGIN
     RAISE EXCEPTION 'Credit Memo head not found';
   END IF;
 
--- Insert new row
-  IF (TG_OP = 'INSERT') THEN
-
-  -- Calculate Tax
-      PERFORM calculateTaxHist( 'cmitemtax',
-                                NEW.cmitem_id,
-                                COALESCE(_r.cmhead_taxzone_id, -1),
-                                NEW.cmitem_taxtype_id,
-                                COALESCE(_r.cmhead_docdate, CURRENT_DATE),
-                                COALESCE(_r.cmhead_curr_id, -1),
-                                (NEW.cmitem_qtycredit * NEW.cmitem_qty_invuomratio) *
-                                (NEW.cmitem_unitprice / NEW.cmitem_price_invuomratio) * -1);
-  END IF;
-
--- Update row
-  IF (TG_OP = 'UPDATE') THEN
-
-  -- Calculate Tax
-    IF ( (NEW.cmitem_qtycredit <> OLD.cmitem_qtycredit) OR
-         (NEW.cmitem_qty_invuomratio <> OLD.cmitem_qty_invuomratio) OR
-         (NEW.cmitem_unitprice <> OLD.cmitem_unitprice) OR
-         (NEW.cmitem_price_invuomratio <> OLD.cmitem_price_invuomratio) OR
-         (COALESCE(NEW.cmitem_taxtype_id, -1) <> COALESCE(OLD.cmitem_taxtype_id, -1)) ) THEN
-      PERFORM calculateTaxHist( 'cmitemtax',
-                                NEW.cmitem_id,
-                                COALESCE(_r.cmhead_taxzone_id, -1),
-                                NEW.cmitem_taxtype_id,
-                                COALESCE(_r.cmhead_docdate, CURRENT_DATE),
-                                COALESCE(_r.cmhead_curr_id, -1),
-                                (NEW.cmitem_qtycredit * NEW.cmitem_qty_invuomratio) *
-                                (NEW.cmitem_unitprice / NEW.cmitem_price_invuomratio) * -1);
-    END IF;
-  END IF;
-
-
   RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';

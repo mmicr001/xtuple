@@ -49,6 +49,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _transactionType TEXT;
+  _return          BOOLEAN;
   _payload         TEXT;
   _numlines        INTEGER;
   _numfreight      INTEGER;
@@ -62,7 +63,10 @@ BEGIN
                        WHEN 'INV' THEN 'SalesInvoice'
                        WHEN 'P' THEN 'PurchaseOrder'
                        WHEN 'VCH' THEN 'PurchaseInvoice'
+                       WHEN 'CM' THEN 'ReturnInvoice'
                        ELSE 'SalesOrder' END);
+
+  _return := pOrderType IN ('CM');
 
   IF (NOT pRecord OR fetchMetricBool('NoAvaTaxCommit')) THEN
     _transactionType := replace(_transactionType, 'Invoice', 'Order');
@@ -127,7 +131,13 @@ BEGIN
     ptozip,
     (SELECT curr_abbr FROM curr_symbol WHERE curr_id=pcurrid),
     'xTuple-' || _transactionType,
-    CASE WHEN pMiscDiscount AND pMisc < 0 THEN pMisc * -1 ELSE 0 END);
+    CASE WHEN pMiscDiscount AND pMisc < 0
+         THEN pMisc * CASE WHEN _return
+                           THEN 1
+                           ELSE -1
+                       END
+         ELSE 0
+     END);
 
   FOR _line IN 1.._numlines
   LOOP
@@ -140,7 +150,7 @@ BEGIN
             "discounted": "true"',
             plines[_line],
             pqtys[_line],
-            pamounts[_line],
+            pamounts[_line] * CASE WHEN _return THEN -1 ELSE 1 END,
             ptaxtypes[_line]);
 
     IF pLineLine1[_line] != pFromLine1 OR pLineLine2[_line] != pFromLine2 OR
@@ -211,7 +221,7 @@ BEGIN
                 "taxCode": "%s",
                 "discounted": "true"',
                 _freightname,
-                _freight,
+                _freight * CASE WHEN _return THEN -1 ELSE 1 END,
                 pfreighttaxtype);
 
       IF pFreightLine1[_freightsplit] != pFromLine1 OR pFreightLine2[_freightsplit] != pFromLine2 OR
@@ -272,7 +282,7 @@ BEGIN
               "amount": %s,
               "taxCode": "%s"
               }',
-              pmisc,
+              pmisc * CASE WHEN _return THEN -1 ELSE 1 END,
               pmisctaxtype);
   END IF;
 

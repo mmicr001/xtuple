@@ -40,6 +40,10 @@ BEGIN
     _tablename := 'voheadtax';
     _subtablename := 'voitemtax';
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'CM' THEN
+    _tablename := 'cmheadtax';
+    _subtablename := 'cmitemtax';
+    _subtype := 'CMI';
   END IF;
 
   EXECUTE format('DELETE FROM %I

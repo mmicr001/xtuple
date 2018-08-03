@@ -107,7 +107,7 @@ BEGIN
        FROM
        (
         SELECT docitem_warehous_id,
-               CASE WHEN pOrderType IN ('Q', 'S', 'COB', 'INV')
+               CASE WHEN pOrderType IN ('Q', 'S', 'COB', 'INV', 'CM')
                     THEN (SELECT freightdata_total
                             FROM calculateFreightDetail(cust_id, custtype_id, custtype_code,
                                                         COALESCE(shipto_id, -1), shipto_shipzone_id,

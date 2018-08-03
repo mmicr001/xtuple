@@ -5,6 +5,7 @@ DECLARE
   _tablename TEXT;
   _subtablename TEXT;
   _subtype TEXT;
+  _return BOOLEAN := FALSE;
   _currid INTEGER;
   _qry TEXT;
   _r RECORD;
@@ -40,6 +41,11 @@ BEGIN
     _tablename := 'voheadtax';
     _subtablename := 'voitemtax';
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'CM' THEN
+    _tablename := 'cmheadtax';
+    _subtablename := 'cmitemtax';
+    _subtype := 'CMI';
+    _return := TRUE;
   END IF;
 
   SELECT curr_id
@@ -71,14 +77,16 @@ BEGIN
                     taxhist_percent, taxhist_amount, 
                     taxhist_tax, taxhist_docdate, taxhist_curr_id,
                     taxhist_curr_rate, taxhist_doctype, taxhist_line_type, taxhist_freightgroup)
-                   SELECT %%L, %%L, (value->>'taxName'), (value->>'taxableAmount')::NUMERIC,
+                   SELECT %%L, %%L, (value->>'taxName'), (value->>'taxableAmount')::NUMERIC * %L,
                           NULL,
                           0,
                           (value->>'rate')::NUMERIC, 0,
-                          (value->>'tax')::NUMERIC, %L, %L,
+                          (value->>'tax')::NUMERIC * %L, %L, %L,
                           %L, %%L, %%L, %%L
                      FROM jsonb_array_elements(%%L)
                     WHERE (value->>'tax')::NUMERIC != 0.0$_$,
+                  CASE WHEN _return THEN -1 ELSE 1 END,
+                  CASE WHEN _return THEN -1 ELSE 1 END,
                   (pResult->>'date')::DATE, _currid,
                   (pResult->>'exchangeRate')::NUMERIC);
 
@@ -117,7 +125,7 @@ BEGIN
      AND taxhist_parent_id = pOrderId
      AND taxhist_line_type = 'A';
 
-  RETURN (pResult->>'totalTaxCalculated')::NUMERIC + _adjustment;
+  RETURN (pResult->>'totalTaxCalculated')::NUMERIC * CASE WHEN _return THEN -1 ELSE 1 END + _adjustment;
 
 END
 $$ language plpgsql;
