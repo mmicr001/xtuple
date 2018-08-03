@@ -5,7 +5,7 @@ DECLARE
   _tablename TEXT;
   _subtablename TEXT;
   _subtype TEXT;
-  _return BOOLEAN := FALSE;
+  _return BOOLEAN;
   _currid INTEGER;
   _qry TEXT;
   _r RECORD;
@@ -13,7 +13,6 @@ DECLARE
   _taxtypeid INTEGER;
   _freighttaxtypeid INTEGER;
   _misctaxtypeid INTEGER;
-  _adjustment NUMERIC;
 
 BEGIN
 
@@ -41,12 +40,17 @@ BEGIN
     _tablename := 'voheadtax';
     _subtablename := 'voitemtax';
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'RA' THEN -- Temporary reference to commercial table
+    _tablename := 'raheadtax';
+    _subtablename := 'raitemtax';
+    _subtype := 'RI';
   ELSIF pOrderType = 'CM' THEN
     _tablename := 'cmheadtax';
     _subtablename := 'cmitemtax';
     _subtype := 'CMI';
-    _return := TRUE;
   END IF;
+
+  _return := pOrderType NOT IN ('Q', 'S', 'COB', 'INV', 'P', 'VCH');
 
   SELECT curr_id
     INTO _currid
@@ -118,14 +122,7 @@ BEGIN
     END IF;
   END LOOP;
 
-  SELECT COALESCE(SUM(taxhist_tax), 0.0)
-    INTO _adjustment
-    FROM taxhist
-   WHERE taxhist_doctype = pOrderType
-     AND taxhist_parent_id = pOrderId
-     AND taxhist_line_type = 'A';
-
-  RETURN (pResult->>'totalTaxCalculated')::NUMERIC * CASE WHEN _return THEN -1 ELSE 1 END + _adjustment;
+  RETURN (pResult->>'totalTaxCalculated')::NUMERIC * CASE WHEN _return THEN -1 ELSE 1 END;
 
 END
 $$ language plpgsql;

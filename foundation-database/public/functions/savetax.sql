@@ -40,6 +40,10 @@ BEGIN
     _tablename := 'voheadtax';
     _subtablename := 'voitemtax';
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'RA' THEN -- Temporary reference to commercial table
+    _tablename := 'raheadtax';
+    _subtablename := 'raitemtax';
+    _subtype := 'RI';
   ELSIF pOrderType = 'CM' THEN
     _tablename := 'cmheadtax';
     _subtablename := 'cmitemtax';

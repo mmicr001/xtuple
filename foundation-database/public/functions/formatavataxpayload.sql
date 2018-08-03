@@ -19,6 +19,8 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pTaxReg         TEXT,
                                                pCurrId         INTEGER,
                                                pDocDate        DATE,
+                                               pOrigDate       DATE,
+                                               pOrigOrder      TEXT,
                                                pFreight        NUMERIC,
                                                pMisc           NUMERIC,
                                                pFreightTaxtype TEXT,
@@ -43,7 +45,6 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType      TEXT,
                                                pLineState      TEXT[],
                                                pLineZip        TEXT[],
                                                pLineCountry    TEXT[],
-                                               pOverride       NUMERIC,
                                                pRecord         BOOLEAN) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -58,15 +59,9 @@ DECLARE
   _freightname     TEXT;
 BEGIN
 
-  _transactionType := (CASE pordertype
-                       WHEN 'S' THEN 'SalesOrder'
-                       WHEN 'INV' THEN 'SalesInvoice'
-                       WHEN 'P' THEN 'PurchaseOrder'
-                       WHEN 'VCH' THEN 'PurchaseInvoice'
-                       WHEN 'CM' THEN 'ReturnInvoice'
-                       ELSE 'SalesOrder' END);
+  _transactionType := getAvaTaxDoctype(pOrderType);
 
-  _return := pOrderType IN ('CM');
+  _return := _transactionType ~ 'Return';
 
   IF (NOT pRecord OR fetchMetricBool('NoAvaTaxCommit')) THEN
     _transactionType := replace(_transactionType, 'Invoice', 'Order');
@@ -288,14 +283,14 @@ BEGIN
 
   _payload := _payload || ']';
 
-  IF pOverride IS NOT NULL THEN
+  IF pOrigDate IS NOT NULL THEN
     _payload := _payload ||
                 format(', "taxOverride": {
-                "type": "taxAmount",
-                "taxAmount": %s,
-                "reason": "Tax Adjustment"
+                "type": "taxDate",
+                "taxDate": "%s",
+                "reason": "Refund for %s"
                 }',
-                pOverride);
+                pOrigDate, pOrigOrder);
   END IF;
 
   _payload = _payload || '}}';

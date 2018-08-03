@@ -18,6 +18,8 @@ BEGIN
     _subtype := 'PI';
   ELSIF pOrderType = 'VCH' THEN
     _subtype := 'VCHI';
+  ELSIF pOrderType = 'RA' THEN -- Temporary reference to commercial table
+    _subtype := 'RI';
   ELSIF pOrderType = 'CM' THEN
     _subtype := 'CMI';
   END IF;

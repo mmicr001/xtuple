@@ -79,17 +79,19 @@ BEGIN
       custtype_code,
       COALESCE(shipto_id, -1) AS shipto_id,
       COALESCE(shipto_num, '') AS shipto_num,
-      COALESCE(pOrderDate, invchead_orderdate, cmhead_docdate) AS orderdate,
-      COALESCE(invchead_shipvia, cmhead_shipvia) AS shipvia,
+      COALESCE(pOrderDate, invchead_orderdate, cohead_orderdate, cmhead_docdate) AS orderdate,
+      COALESCE(pShipVia, invchead_shipvia, cohead_shipvia, cmhead_shipvia) AS shipvia,
       shipto_shipzone_id AS shipzone_id,
-      COALESCE(pCurrId, invchead_curr_id, cmhead_curr_id) AS curr_id,
-      currConcat(COALESCE(pCurrId, invchead_curr_id, cmhead_curr_id)) AS currAbbr
+      COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id)) AS currAbbr
     INTO _order
       FROM cmhead
       JOIN custinfo ON (cust_id=COALESCE(pCustId, cmhead_cust_id))
       JOIN custtype ON (custtype_id=cust_custtype_id)
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, cmhead_shipto_id))
       LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber
+      LEFT OUTER JOIN rahead ON cmhead_rahead_id = rahead_id
+      LEFT OUTER JOIN cohead ON rahead_orig_cohead_id = cohead_id
     WHERE (cmhead_id=pOrderId);
 
   ELSIF (pOrderType = 'RA') THEN
@@ -99,16 +101,17 @@ BEGIN
       custtype_code,
       COALESCE(shipto_id, -1) AS shipto_id,
       COALESCE(shipto_num, '') AS shipto_num,
-      COALESCE(pOrderDate, rahead_authdate) AS orderdate,
-      ''::text AS shipvia,
+      COALESCE(pOrderDate, cohead_orderdate, rahead_authdate) AS orderdate,
+      COALESCE(pShipVia, cohead_shipvia, rahead_shipvia) AS shipvia,
       shipto_shipzone_id AS shipzone_id,
-      COALESCE(pCurrId, rahead_curr_id) AS curr_id,
-      currConcat(COALESCE(pCurrId, rahead_curr_id)) AS currAbbr
+      COALESCE(pCurrId, cohead_curr_id, rahead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, cohead_curr_id, rahead_curr_id)) AS currAbbr
     INTO _order
       FROM rahead
       JOIN custinfo ON (cust_id=COALESCE(pCustId, rahead_cust_id))
       JOIN custtype ON (custtype_id=cust_custtype_id)
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, rahead_shipto_id))
+      LEFT OUTER JOIN cohead ON rahead_orig_cohead_id = cohead_id
     WHERE (rahead_id=pOrderId);
 
   ELSE

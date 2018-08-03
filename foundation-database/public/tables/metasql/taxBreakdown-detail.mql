@@ -64,7 +64,7 @@ SELECT NULL, 2,
                          AND taxhist_line_type = 'M'
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
-   AND dochead_type IN ('Q', 'S', 'COB', 'INV')
+   AND dochead_type NOT IN ('P', 'VCH')
  GROUP BY dochead_misc
 UNION
 SELECT NULL, 3,
@@ -145,7 +145,7 @@ SELECT taxhist_id, 2,
   LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
-   AND dochead_type IN ('Q', 'S', 'COB', 'INV')
+   AND dochead_type NOT IN ('P', 'VCH')
 UNION
 SELECT taxhist_id, 3,
        1, 0,
