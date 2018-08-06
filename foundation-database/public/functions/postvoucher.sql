@@ -98,14 +98,7 @@ BEGIN
     FROM voitem
    WHERE (voitem_vohead_id=pVoheadid)
   UNION ALL
-  SELECT SUM(tax*-1)
-  FROM 
-    (SELECT round(sum(taxdetail_tax),2) AS tax,
-              currToBase(_p.vohead_curr_id, round(sum(taxdetail_tax),2), _p.vohead_docdate) AS taxbasevalue
-     FROM tax 
-     JOIN calculateTaxDetailSummary('VO', pVoheadid, 'T') ON (taxdetail_tax_id=tax_id)
-     GROUP BY tax_id, tax_sales_accnt_id
-    ) AS taxdata
+  SELECT getOrderTax('VCH', pVoheadid)
   ) AS data;
 
   IF (_tmpTotal IS NULL OR _tmpTotal <= 0) THEN
