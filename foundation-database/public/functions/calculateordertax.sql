@@ -28,6 +28,7 @@ DECLARE
   _origorder TEXT;
   _freight NUMERIC;
   _misc NUMERIC;
+  _miscdescrip TEXT;
   _freighttaxtype INTEGER;
   _misctaxtype INTEGER;
   _miscdiscount BOOLEAN;
@@ -40,6 +41,8 @@ DECLARE
   _freightcountry TEXT[];
   _freightsplit NUMERIC[];
   _linenums TEXT[];
+  _linecodes TEXT[];
+  _linedescrips TEXT[];
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
   _amounts NUMERIC[];
@@ -64,7 +67,7 @@ BEGIN
           END,
          cust_tax_exemption, COALESCE(taxreg_number, ' '),
          dochead_curr_id, dochead_date, dochead_origdate, dochead_origorder,
-         dochead_freight + SUM(docitem_freight), dochead_misc,
+         dochead_freight + SUM(docitem_freight), dochead_misc, dochead_misc_descrip,
          dochead_freight_taxtype_id, dochead_misc_taxtype_id, dochead_misc_discount
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
          _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
@@ -73,7 +76,7 @@ BEGIN
          _cust,
          _usage, _taxreg,
          _currid, _docdate, _origdate, _origorder,
-         _freight, _misc,
+         _freight, _misc, _miscdescrip,
          _freighttaxtype, _misctaxtype, _miscdiscount
     FROM dochead
     JOIN whsinfo ON dochead_warehous_id = warehous_id
@@ -91,9 +94,10 @@ BEGIN
             dochead_toaddr2, dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip,
             dochead_tocountry, dochead_cust_id, dochead_vend_id, dochead_curr_id, dochead_date,
             dochead_origdate, dochead_origorder, dochead_freight, dochead_misc,
-            dochead_freight_taxtype_id, dochead_misc_taxtype_id, dochead_misc_discount,
-            addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
-            addr_country, cust_number, cust_tax_exemption, prospect_number, taxreg_number;
+            dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
+            dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
+            addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
+            taxreg_number;
 
   SELECT COALESCE(array_agg(addr_line1), ARRAY[_toline1]),
          COALESCE(array_agg(addr_line2), ARRAY[_toline2]),
@@ -158,6 +162,8 @@ BEGIN
     ) data;
 
   SELECT COALESCE(array_agg(docitem_number), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(docitem_item_number), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(docitem_item_descrip), ARRAY[]::TEXT[]),
          COALESCE(array_agg(ROUND(docitem_qty, 6)), ARRAY[]::NUMERIC[]),
          COALESCE(array_agg(docitem_taxtype_id), ARRAY[]::INTEGER[]),
          COALESCE(array_agg(ROUND(docitem_price, _precision)), ARRAY[]::NUMERIC[]),
@@ -169,6 +175,8 @@ BEGIN
          COALESCE(array_agg(addr_postalcode), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_country), ARRAY[]::TEXT[])
     INTO _linenums,
+         _linecodes,
+         _linedescrips,
          _qtys,
          _taxtypeids,
          _amounts,
@@ -194,11 +202,12 @@ BEGIN
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
                       _tocity, _tostate, _tozip, _tocountry, _cust, _usage, _taxreg, _currid,
-                      _docdate, _origdate, _origorder, _freight, _misc, _freighttaxtype,
-                      _misctaxtype, _miscdiscount, _freightline1, _freightline2, _freightline3,
-                      _freightcity, _freightstate, _freightzip, _freightcountry, _freightsplit,
-                      _linenums, _qtys, _taxtypeids, _amounts, _lineline1, _lineline2, _lineline3,
-                      _linecity, _linestate, _linezip, _linecountry, pRecord);
+                      _docdate, _origdate, _origorder, _freight, _misc, _miscdescrip,
+                      _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1, _freightline2,
+                      _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
+                      _freightsplit, _linenums, _linecodes, _linedescrips, _qtys, _taxtypeids,
+                      _amounts, _lineline1, _lineline2, _lineline3, _linecity, _linestate, _linezip,
+                      _linecountry, pRecord);
 
 END
 $$ language plpgsql;
