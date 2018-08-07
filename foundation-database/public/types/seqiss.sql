@@ -1,15 +1,10 @@
-CREATE FUNCTION tmpcreateTypeSeqiss() RETURNS VOID AS $$
+DO $$
 BEGIN
-  BEGIN
-    CREATE TYPE seqiss AS (
-      seqiss_number INTEGER,
-      seqiss_time   TIMESTAMP WITH TIME ZONE
-    );
-  EXCEPTION WHEN OTHERS THEN
-    RAISE WARNING 'Type seqiss already exists';
-  END;
+  CREATE TYPE seqiss AS (
+    seqiss_number INTEGER,
+    seqiss_time   TIMESTAMP WITH TIME ZONE
+  );
+EXCEPTION WHEN OTHERS THEN
+  NULL;
 END;
-$$ LANGUAGE PLPGSQL;
-
-SELECT tmpcreateTypeSeqiss();
-DROP FUNCTION tmpcreateTypeSeqiss();
+$$ LANGUAGE plpgsql;

@@ -1540,37 +1540,6 @@ ALTER TABLE metric ENABLE TRIGGER ALL;
 SELECT pg_catalog.setval('misc_index_seq', 1166, true);
 
 --
--- Data for Name: orderseq; Type: TABLE DATA; Schema: public; Owner: admin
---
-
-ALTER TABLE orderseq DISABLE TRIGGER ALL;
-
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (12, 'IncidentNumber', 1, 'incdt', 'incdt_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (5, 'InvcNumber', 1, 'invchead', 'invchead_invcnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (10, 'PlanNumber', 1, 'planord', 'planord_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (6, 'PoNumber', 1, 'pohead', 'pohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (8, 'PrNumber', 1, 'pr', 'pr_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (3, 'QuNumber', 1, 'quhead', 'quhead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (2, 'SoNumber', 1, 'cohead', 'cohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (7, 'VcNumber', 1, 'vohead', 'vohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (1, 'WoNumber', 1, 'wo', 'wo_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (15, 'ToNumber', 100, 'tohead', 'tohead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (20, 'LsRegNumber', 1, 'lsreg', 'lsreg_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (18, 'AddressNumber', 1, 'addr', 'addr_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (19, 'ContactNumber', 1, 'cntct', 'cntct_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (21, 'AlarmNumber', 1, 'alarm', 'alarm_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (23, 'CashRcptNumber', 10000, 'cashrcpt', 'cashrcpt_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (24, 'ACHBatch', 1, 'checkhead', 'checkhead_ach_batch', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (13, 'APMemoNumber', 1, 'apmemo', 'apopen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (11, 'ARMemoNumber', 1, 'armemo', 'aropen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (4, 'CmNumber', 1, 'armemo', 'aropen_docnumber', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (25, 'OpportunityNumber', 1, 'ophead', 'ophead_number', NULL);
-INSERT INTO orderseq (orderseq_id, orderseq_name, orderseq_number, orderseq_table, orderseq_numcol, orderseq_seqiss) VALUES (26, 'CRMAccountNumber', 0, 'crmacct', 'crmacct_number', NULL);
-
-ALTER TABLE orderseq ENABLE TRIGGER ALL;
-
-
---
 -- Data for Name: recurtype; Type: TABLE DATA; Schema: public; Owner: admin
 --
 

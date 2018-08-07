@@ -1,7 +1,7 @@
 <!DOCTYPE openRPTDef>
 <report>
  <title>Task List</title>
- <name>TodoList</name>
+ <name>TaskList</name>
  <description></description>
  <grid>
   <snap/>
@@ -17,7 +17,7 @@
  <leftmargin>50</leftmargin>
  <querysource loadFromDb="true">
   <name>detail</name>
-  <mqlgroup>todolist</mqlgroup>
+  <mqlgroup>tasklist</mqlgroup>
   <mqlname>detail</mqlname>
  </querysource>
  <querysource>

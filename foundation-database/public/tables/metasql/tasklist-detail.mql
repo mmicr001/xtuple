@@ -41,6 +41,8 @@ WITH tasklist AS (
                <? value("incident") ?> || '-' || incdt_number
               WHEN 'CRMA' THEN
                <? value("account") ?> || '-' || crmacct_number
+              WHEN 'PSPCT' THEN
+               <? value("prospect") ?> || '-' || prospect_number
               WHEN 'J' THEN
                <? value("project") ?> || '-' || COALESCE(pr1.prj_number,pr2.prj_number)  
               ELSE task_parent_type
@@ -52,6 +54,8 @@ WITH tasklist AS (
                <? value("incident") ?> || '-' || incdt_number
               WHEN 'CRMA' THEN
                <? value("account") ?> || '-' || crmacct_number
+              WHEN 'PSPCT' THEN
+               <? value("prospect") ?> || '-' || prospect_number
               WHEN 'J' THEN
                <? value("project") ?> || '-' || COALESCE(pr1.prj_number,pr2.prj_number)
               ELSE task_parent_type
@@ -71,6 +75,7 @@ WITH tasklist AS (
       LEFT OUTER JOIN ophead ON (ophead_id=task_parent_id AND task_parent_type='OPP')
       LEFT OUTER JOIN crmacct ON (crmacct_id=task_parent_id AND task_parent_type='CRMA')
       LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
+      LEFT OUTER JOIN prospect ON (prospect_id=task_parent_id AND task_parent_type='PSPCT')
       LEFT OUTER JOIN incdtpriority ON (incdtpriority_id=task_priority_id)
       LEFT OUTER JOIN prj pr1 ON (pr1.prj_id=task_parent_id AND task_parent_type = 'J')
       LEFT OUTER JOIN prj pr2 ON (pr2.prj_id=task_prj_id)
@@ -88,7 +93,8 @@ WITH tasklist AS (
        <? endif ?>)
   <? if exists("parent") ?>
     OR (task_parent_type = 'J'
-        AND task_parent_id=<? value("prj_id") ?>)
+        AND task_parent_id=<? value("prj_id") ?>
+        AND task_status='O')
   <? endif ?>
 <? endif ?>
 
@@ -110,7 +116,7 @@ UNION ALL
            END AS stage,
            incdtpriority_name AS priority, 
            prj_owner_username AS owner, 
-            prj_username AS assigned,
+           prj_username AS assigned,
            firstLine(prj_descrip) AS notes, 
            prj_start_date AS start, 
            prj_due_date AS due, 
@@ -168,7 +174,7 @@ UNION ALL
          END AS stage,
          incdtpriority_name AS priority,
          incdt_owner_username AS owner, 
-          incdt_assigned_username AS assigned,
+         incdt_assigned_username AS assigned,
          firstLine(incdt_descrip) AS notes, 
          incdt_timestamp::DATE AS start, 
          null::DATE AS due, 
@@ -216,7 +222,7 @@ UNION ALL
          opstage_descrip AS stage,         
          incdtpriority_name AS priority, 
          ophead_owner_username AS owner, 
-          ophead_username AS assigned,
+         ophead_username AS assigned,
          firstLine(ophead_notes) AS notes, 
          ophead_start_date AS start, 
          ophead_target_date AS due, 
@@ -263,6 +269,9 @@ WHERE true
  <? if exists("crmacctgrp") ?>
    AND crmacct_id IN (SELECT groupsitem_reference_id FROM crmacctgrpitem WHERE groupsitem_groups_id=<? value("crmacctgrp") ?>)
  <? endif ?>
+ <? if exists("prospect_id") ?>
+    AND (parent='PSPCT' AND parent_xtidrole = <? value("prospect_id") ?>)
+ <? endif ?>
  <? if exists("prj_id") ?>
     AND CASE WHEN <? value("prj_id") ?> = -1 THEN true ELSE prj_id = <? value("prj_id") ?> END
  <? endif ?>
@@ -288,10 +297,10 @@ WHERE true
          OR assigned ~ <? value("username") ?>)
   <? endif ?>
   <? if exists("assigned_username") ?> 
-    AND assigned ~ <? value("assigned_username") ?>)
+    AND assigned ~ <? value("assigned_username") ?>
   <? endif ?>
   <? if exists("assigned_usr_pattern") ?>
-    AND assigned ~ <? value("assigned_usr_pattern") ?>)
+    AND assigned ~ <? value("assigned_usr_pattern") ?>
   <? endif ?>
   <? if exists("owner_username") ?> 
     AND ("owner"=<? value("owner_username") ?>) 

@@ -1,14 +1,15 @@
 -- Group: contacts
 -- Name: detail
 -- Notes: 
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if exists("hasContext") ?>
 SELECT * FROM (
 <? endif ?>
 
-SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number) 
+  SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0,
+                      cntct_last_name, cntct_first_name, cntct_number)
   cntct_id AS id
 <? if exists("hasContext") ?>
 , crmrole_sort, crmrole_name AS crmrole
@@ -23,9 +24,9 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
   getContactPhone(cntct_id, 'Fax') AS contact_phone3,
- cntct_email, cntct_webaddr,
-  cntct_created, cntct_lastupdated,
-  mrkd_id IS NOT NULL AS marked
+  cntct_email, cntct_webaddr,
+  min(cntct_created), max(cntct_lastupdated),
+  EXISTS(SELECT 1 FROM mrkd WHERE mrkd_target_type = 'T' and mrkd_target_id = cntct_id) AS marked
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
@@ -37,7 +38,7 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
 <? endforeach ?>
 <? endif ?>
 <? if exists("hasContext") ?>
-FROM cntct
+  FROM cntct
   LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
   LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
   LEFT OUTER JOIN crmrole ON (crmrole_id=crmacctcntctass_crmrole_id)
@@ -48,7 +49,6 @@ FROM cntct()
 <? endif ?>
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
   LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
-  LEFT OUTER JOIN mrkd ON (mrkd_target_type='T' AND mrkd_target_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='CNTCT') 
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cntct_id)
@@ -166,8 +166,9 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
   , charass_alias<? literal("char_id_date_list") ?>.charass_value::date
 <? endforeach ?>
 <? endif ?>
-ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc
-
+ ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0,
+         cntct_last_name, cntct_first_name, cntct_number,
+         cntcteml_primary desc
 <? if exists("hasContext") ?>
 ) foo
 ORDER BY crmrole_sort
