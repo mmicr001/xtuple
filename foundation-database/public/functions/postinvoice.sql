@@ -98,14 +98,21 @@ BEGIN
 
 --  Start by handling taxes
   FOR _r IN SELECT tax_sales_accnt_id,
-              round(sum(taxdetail_tax),2) AS tax,
-              currToBase(_p.invchead_curr_id, round(sum(taxdetail_tax),2), _firstExchDate) AS taxbasevalue
-            FROM tax
-             JOIN calculateTaxDetailSummary('I', pInvcheadid, 'T') ON (taxdetail_tax_id=tax_id)
+              round(sum(taxhist_tax),2) AS tax,
+              currToBase(_p.invchead_curr_id, round(sum(taxhist_tax),2), _firstExchDate) AS taxbasevalue
+            FROM taxhist
+            LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+            WHERE (taxhist_doctype = 'INV' AND taxhist_parent_id = pInvcheadid)
+            OR (taxhist_doctype = 'INVI' AND taxhist_parent_id IN (SELECT invcitem_id
+                                                                     FROM invcitem
+                                                                    WHERE invcitem_invchead_id = pInvcheadid))
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _p.sequence, 'A/R', 'IN', _p.invchead_invcnumber,
-                                _r.tax_sales_accnt_id,
+                                CASE WHEN fetchMetricText('TaxService') = 'A'
+                                     THEN fetchMetricValue('AvalaraGLAccountId')::INTEGER
+                                     ELSE _r.tax_sales_accnt_id
+                                 END,
                                 _r.taxbasevalue,
                                 _glDate, _p.invchead_billto_name );
 
