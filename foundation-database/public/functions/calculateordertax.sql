@@ -83,8 +83,8 @@ BEGIN
     LEFT OUTER JOIN taxreg ON ((taxreg_rel_type = 'C' AND dochead_cust_id = taxreg_rel_id)
                                OR (taxreg_rel_type = 'V' AND dochead_vend_id = taxreg_rel_id))
                           AND CURRENT_DATE BETWEEN taxreg_effective AND taxreg_expires
-    JOIN docitem ON dochead_type = docitem_type 
-                AND dochead_id = docitem_dochead_id
+    LEFT OUTER JOIN docitem ON dochead_type = docitem_type
+                           AND dochead_id = docitem_dochead_id
    WHERE dochead_type = pOrderType
      AND dochead_id = pOrderId
    GROUP BY dochead_id, dochead_number, dochead_taxzone_id, dochead_warehous_id, dochead_toaddr1,
@@ -95,12 +95,20 @@ BEGIN
             addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
             addr_country, cust_number, cust_tax_exemption, prospect_number, taxreg_number;
 
-  SELECT array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
-         array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
-         array_agg(addr_country),
-         array_agg(freight)
-    INTO _freightline1, _freightline2, _freightline3,
-         _freightcity, _freightstate, _freightzip,
+  SELECT COALESCE(array_agg(addr_line1), ARRAY[_toline1]),
+         COALESCE(array_agg(addr_line2), ARRAY[_toline2]),
+         COALESCE(array_agg(addr_line3), ARRAY[_toline3]),
+         COALESCE(array_agg(addr_city), ARRAY[_tocity]),
+         COALESCE(array_agg(addr_state), ARRAY[_tostate]),
+         COALESCE(array_agg(addr_postalcode), ARRAY[_tozip]),
+         COALESCE(array_agg(addr_country), ARRAY[_tocountry]),
+         COALESCE(array_agg(freight), ARRAY[_freight])
+    INTO _freightline1,
+         _freightline2,
+         _freightline3,
+         _freightcity,
+         _freightstate,
+         _freightzip,
          _freightcountry,
          _freightsplit
     FROM
@@ -149,21 +157,39 @@ BEGIN
                addr_city, addr_state, addr_postalcode, addr_country
     ) data;
 
-  SELECT array_agg(docitem_number), array_agg(ROUND(docitem_qty, 6)),
-         array_agg(docitem_taxtype_id), array_agg(ROUND(docitem_price, _precision)),
-         array_agg(addr_line1), array_agg(addr_line2), array_agg(addr_line3),
-         array_agg(addr_city), array_agg(addr_state), array_agg(addr_postalcode),
-         array_agg(addr_country)
-    INTO _linenums, _qtys,
-         _taxtypeids, _amounts,
-         _lineline1, _lineline2, _lineline3,
-         _linecity, _linestate, _linezip,
+  SELECT COALESCE(array_agg(docitem_number), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(ROUND(docitem_qty, 6)), ARRAY[]::NUMERIC[]),
+         COALESCE(array_agg(docitem_taxtype_id), ARRAY[]::INTEGER[]),
+         COALESCE(array_agg(ROUND(docitem_price, _precision)), ARRAY[]::NUMERIC[]),
+         COALESCE(array_agg(addr_line1), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_line2), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_line3), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_city), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_state), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_postalcode), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(addr_country), ARRAY[]::TEXT[])
+    INTO _linenums,
+         _qtys,
+         _taxtypeids,
+         _amounts,
+         _lineline1,
+         _lineline2,
+         _lineline3,
+         _linecity,
+         _linestate,
+         _linezip,
          _linecountry
     FROM docitem
     JOIN whsinfo ON docitem_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
    WHERE docitem_type = pOrderType
      AND docitem_dochead_id = pOrderId;
+
+  IF COALESCE(array_length(_amounts, 1), 0) = 0 AND
+     COALESCE(_freight, 0.0) = 0.0 AND
+     (COALESCE(_misc, 0.0) = 0.0 OR _miscdiscount) THEN
+    RETURN NULL;
+  END IF;
 
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
