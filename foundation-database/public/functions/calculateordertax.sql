@@ -67,7 +67,7 @@ BEGIN
           END,
          cust_tax_exemption, COALESCE(taxreg_number, ' '),
          dochead_curr_id, dochead_date, dochead_origdate, dochead_origorder,
-         dochead_freight + SUM(docitem_freight), dochead_misc, dochead_misc_descrip,
+         dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc, dochead_misc_descrip,
          dochead_freight_taxtype_id, dochead_misc_taxtype_id, dochead_misc_discount
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
          _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
