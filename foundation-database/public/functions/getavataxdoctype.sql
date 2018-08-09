@@ -5,7 +5,7 @@ BEGIN
 
   RETURN CASE pOrderType WHEN 'S' THEN 'SalesOrder'
                          WHEN 'INV' THEN 'SalesInvoice'
-                         WHEN 'P' THEN 'PurchaseOrder'
+                         WHEN 'P' THEN 'SalesOrder'
                          WHEN 'VCH' THEN 'PurchaseInvoice'
                          WHEN 'CM' THEN 'ReturnInvoice'
                          ELSE 'SalesOrder'
