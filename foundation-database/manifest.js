@@ -1119,6 +1119,7 @@
     "public/tables/item.sql",
     "public/tables/itemalias.sql",
     "public/tables/itemsite.sql",
+    "public/tables/itemsrc.sql",
     "public/tables/itemuomconv.sql",
     "public/tables/location.sql",
     "public/tables/metric.sql",
