@@ -37,6 +37,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType       TEXT,
                                                pFreightSplit    NUMERIC[],
                                                pLines           TEXT[],
                                                pLineCodes       TEXT[],
+                                               pLineUpc         TEXT[],
                                                pLineDescrips    TEXT[],
                                                pQtys            NUMERIC[],
                                                pTaxTypes        TEXT[],
@@ -110,7 +111,7 @@ BEGIN
     pordernumber,
     fetchmetrictext('AvalaraCompany'),
     pdocdate,
-    pCust,
+    COALESCE(pCust, fetchMetricText('AvalaraCompany')),
     pUsage,
     pTaxReg,
     pfromline1,
@@ -149,7 +150,10 @@ BEGIN
             "taxCode": "%s",
             "discounted": "true"',
             plines[_line],
-            plinecodes[_line],
+            CASE WHEN fetchMetricBool('AvalaraUPC')
+                 THEN COALESCE(plineupc[_line], plinecodes[_line])
+                 ELSE plinecodes[_line]
+             END,
             plinedescrips[_line],
             pqtys[_line],
             pamounts[_line] * CASE WHEN _return THEN -1 ELSE 1 END,

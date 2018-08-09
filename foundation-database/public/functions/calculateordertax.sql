@@ -42,6 +42,7 @@ DECLARE
   _freightsplit NUMERIC[];
   _linenums TEXT[];
   _linecodes TEXT[];
+  _lineupc TEXT[];
   _linedescrips TEXT[];
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
@@ -63,7 +64,7 @@ BEGIN
          dochead_tocountry,
          CASE WHEN dochead_cust_id IS NOT NULL
               THEN COALESCE(cust_number, prospect_number)
-              ELSE fetchMetricText('remitto_name')
+              ELSE NULL
           END,
          cust_tax_exemption, COALESCE(taxreg_number, ' '),
          dochead_curr_id, dochead_date, dochead_origdate, dochead_origorder,
@@ -163,6 +164,7 @@ BEGIN
 
   SELECT COALESCE(array_agg(docitem_number), ARRAY[]::TEXT[]),
          COALESCE(array_agg(docitem_item_number), ARRAY[]::TEXT[]),
+         COALESCE(array_agg(item_upccode), ARRAY[]::TEXT[]),
          COALESCE(array_agg(docitem_item_descrip), ARRAY[]::TEXT[]),
          COALESCE(array_agg(ROUND(docitem_qty, 6)), ARRAY[]::NUMERIC[]),
          COALESCE(array_agg(docitem_taxtype_id), ARRAY[]::INTEGER[]),
@@ -176,6 +178,7 @@ BEGIN
          COALESCE(array_agg(addr_country), ARRAY[]::TEXT[])
     INTO _linenums,
          _linecodes,
+         _lineupc,
          _linedescrips,
          _qtys,
          _taxtypeids,
@@ -190,6 +193,7 @@ BEGIN
     FROM docitem
     JOIN whsinfo ON docitem_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
+    LEFT OUTER JOIN item ON docitem_item_id = item_id
    WHERE docitem_type = pOrderType
      AND docitem_dochead_id = pOrderId;
 
@@ -205,9 +209,9 @@ BEGIN
                       _docdate, _origdate, _origorder, _freight, _misc, _miscdescrip,
                       _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1, _freightline2,
                       _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
-                      _freightsplit, _linenums, _linecodes, _linedescrips, _qtys, _taxtypeids,
-                      _amounts, _lineline1, _lineline2, _lineline3, _linecity, _linestate, _linezip,
-                      _linecountry, pRecord);
+                      _freightsplit, _linenums, _linecodes, _lineupc, _linedescrips, _qtys,
+                      _taxtypeids, _amounts, _lineline1, _lineline2, _lineline3, _linecity,
+                      _linestate, _linezip, _linecountry, pRecord);
 
 END
 $$ language plpgsql;
