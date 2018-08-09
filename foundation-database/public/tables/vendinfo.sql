@@ -42,6 +42,7 @@ SELECT
   xt.add_column('vendinfo', 'vend_ach_routingnumber',  'BYTEA', $$NOT NULL$$, 'public'),
   xt.add_column('vendinfo', 'vend_ach_accntnumber',    'BYTEA', $$NOT NULL$$, 'public'),
   xt.add_column('vendinfo', 'vend_taxzone_id',       'INTEGER', NULL,                            'public'),
+  xt.add_column('vendinfo', 'vend_tax_exemption',       'TEXT', 'NULL',                          'public'),
   xt.add_column('vendinfo', 'vend_accnt_id',         'INTEGER', NULL,                            'public'),
   xt.add_column('vendinfo', 'vend_expcat_id',        'INTEGER', NULL,                            'public'),
   xt.add_column('vendinfo', 'vend_tax_id',           'INTEGER', NULL,                            'public'),
