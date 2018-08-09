@@ -63,6 +63,7 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pFreightSplit     NUMERIC[],
                                         pLines            TEXT[],
                                         pLineCodes        TEXT[],
+                                        pLineUpc          TEXT[],
                                         pLineDescrips     TEXT[],
                                         pQtys             NUMERIC[],
                                         pTaxTypes         INTEGER[],
@@ -116,8 +117,8 @@ BEGIN
                                pMiscDescrip, _freighttaxtype, _misctaxtype, pMiscDiscount,
                                pFreightLine1, pFreightLine2, pFreightLine3, pFreightCity,
                                pFreightState, pFreightZip, pFreightCountry, pFreightSplit, pLines,
-                               pLineCodes, pLineDescrips, pQtys, _taxtypes, pAmounts, pLineLine1,
-                               pLineLine2, pLineLine3, pLineCity, pLineState, pLineZip,
+                               pLineCodes, pLineUpc, pLineDescrips, pQtys, _taxtypes, pAmounts,
+                               pLineLine1, pLineLine2, pLineLine3, pLineCity, pLineState, pLineZip,
                                pLineCountry, pRecord);
   ELSE
     RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,
