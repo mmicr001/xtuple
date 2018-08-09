@@ -98,7 +98,9 @@ BEGIN
     FROM voitem
    WHERE (voitem_vohead_id=pVoheadid)
   UNION ALL
-  SELECT getOrderTax('VCH', pVoheadid)
+  SELECT vohead_tax_charged
+    FROM vohead
+   WHERE vohead_id = pVoheadid
   ) AS data;
 
   IF (_tmpTotal IS NULL OR _tmpTotal <= 0) THEN
