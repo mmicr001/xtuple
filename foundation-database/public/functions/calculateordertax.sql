@@ -54,7 +54,7 @@ DECLARE
   _linestate TEXT[];
   _linezip TEXT[];
   _linecountry TEXT[];
-  _override NUMERIC;
+  _taxpaid NUMERIC;
 
 BEGIN
  
@@ -204,6 +204,12 @@ BEGIN
     RETURN NULL;
   END IF;
 
+  IF pOrderType = 'VCH' THEN
+    SELECT NULLIF(vohead_tax_charged, 0.0) INTO _taxpaid
+      FROM vohead
+     WHERE vohead_id = pOrderId;
+  END IF;
+
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
                       _tocity, _tostate, _tozip, _tocountry, _cust, _usage, _taxreg, _currid,
@@ -212,7 +218,7 @@ BEGIN
                       _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
                       _freightsplit, _linenums, _linecodes, _lineupc, _linedescrips, _qtys,
                       _taxtypeids, _amounts, _lineline1, _lineline2, _lineline3, _linecity,
-                      _linestate, _linezip, _linecountry, pRecord);
+                      _linestate, _linezip, _linecountry, _taxpaid, pRecord);
 
 END
 $$ language plpgsql;
