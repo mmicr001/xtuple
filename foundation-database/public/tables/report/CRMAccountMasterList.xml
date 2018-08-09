@@ -40,23 +40,7 @@
   </label>
   <label>
    <rect>
-    <x>550</x>
-    <y>125</y>
-    <width>60</width>
-    <height>15</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>8</size>
-    <weight>normal</weight>
-   </font>
-   <hcenter/>
-   <vcenter/>
-   <string>Competitor</string>
-  </label>
-  <label>
-   <rect>
-    <x>680</x>
+    <x>555</x>
     <y>125</y>
     <width>60</width>
     <height>15</height>
@@ -77,22 +61,6 @@
    <yend>156.293</yend>
    <weight>2</weight>
   </line>
-  <label>
-   <rect>
-    <x>615</x>
-    <y>125</y>
-    <width>60</width>
-    <height>15</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>8</size>
-    <weight>normal</weight>
-   </font>
-   <hcenter/>
-   <vcenter/>
-   <string>Partner</string>
-  </label>
   <label>
    <rect>
     <x>355</x>
@@ -266,22 +234,6 @@
   </label>
   <label>
    <rect>
-    <x>615</x>
-    <y>0</y>
-    <width>60</width>
-    <height>15</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>8</size>
-    <weight>normal</weight>
-   </font>
-   <hcenter/>
-   <vcenter/>
-   <string>Partner</string>
-  </label>
-  <label>
-   <rect>
     <x>115</x>
     <y>0</y>
     <width>95</width>
@@ -321,8 +273,8 @@
   </label>
   <label>
    <rect>
-    <x>678.471</x>
-    <y>0</y>
+    <x>560</x>
+    <y>-1</y>
     <width>60</width>
     <height>15</height>
    </rect>
@@ -366,22 +318,6 @@
    <hcenter/>
    <vcenter/>
    <string>Customer</string>
-  </label>
-  <label>
-   <rect>
-    <x>550</x>
-    <y>0</y>
-    <width>60</width>
-    <height>15</height>
-   </rect>
-   <font>
-    <face>Arial</face>
-    <size>8</size>
-    <weight>normal</weight>
-   </font>
-   <hcenter/>
-   <vcenter/>
-   <string>Competitor</string>
   </label>
   <label>
    <rect>
@@ -441,25 +377,6 @@
    <height>32</height>
    <field>
     <rect>
-     <x>550</x>
-     <y>0</y>
-     <width>60</width>
-     <height>15</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>competitor</column>
-    </data>
-   </field>
-   <field>
-    <rect>
      <x>10</x>
      <y>0</y>
      <width>100</width>
@@ -475,25 +392,6 @@
     <data>
      <query>detail</query>
      <column>crmacct_number</column>
-    </data>
-   </field>
-   <field>
-    <rect>
-     <x>615</x>
-     <y>0</y>
-     <width>60</width>
-     <height>15</height>
-    </rect>
-    <font>
-     <face>Arial</face>
-     <size>8</size>
-     <weight>bold</weight>
-    </font>
-    <left/>
-    <vcenter/>
-    <data>
-     <query>detail</query>
-     <column>partner</column>
     </data>
    </field>
    <field>
@@ -536,7 +434,7 @@
    </field>
    <field>
     <rect>
-     <x>680</x>
+     <x>560</x>
      <y>0</y>
      <width>60</width>
      <height>15</height>
@@ -593,21 +491,21 @@
    </field>
    <field>
     <rect>
-     <x>302.941</x>
-     <y>15.3526</y>
+     <x>305</x>
+     <y>15</y>
      <width>100</width>
      <height>15</height>
     </rect>
     <font>
-     <face>Arial</face>
-     <size>8</size>
+     <face>Open Sans,Helvetica,Verdana,sans-serif</face>
+     <size>10</size>
      <weight>bold</weight>
     </font>
     <left/>
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>cntct_phone</column>
+     <column>contact_phone</column>
     </data>
    </field>
    <field>

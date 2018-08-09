@@ -1,32 +1,42 @@
-CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
-                                      pContactNumber   TEXT,
-                                      pCrmAcctId       INTEGER,
-                                      pAddrId          INTEGER,
-                                      pHonorific       TEXT,
-                                      pFirstName       TEXT,
-                                      pMiddleName      TEXT,
-                                      pLastName        TEXT,
-                                      pSuffix          TEXT,
-                                      pInitials        TEXT,
-                                      pActive          BOOL,
-                                      pPhone           TEXT,
-                                      pPhone2          TEXT,
-                                      pFax             TEXT,
-                                      pEmail           TEXT,
-                                      pWebAddr         TEXT,
-                                      pNotes           TEXT,
-                                      pTitle           TEXT,
-                                      pFlag            TEXT,
-                                      pOwnerUsername   TEXT ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- ===================================================================
+--Remove the legacy functions
+-- ===================================================================
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT ) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,JSON,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+
+CREATE OR REPLACE FUNCTION public.savecntct(
+    pCntctid integer,
+    pContactNumber text,
+    pAddrid integer,
+    pHonorific text,
+    pFirstname text,
+    pMiddlename text,
+    pLastname text,
+    pSuffix text,
+    pInitials text,
+    pActive boolean,
+    pPhone JSON,
+    pEmail text,
+    pWebaddr text,
+    pNotes text,
+    pTitle text,
+    pFlag text,
+    pOwnerUsername text DEFAULT NULL,
+    pEmailOptIn boolean DEFAULT fetchmetricbool('DefaultEmailOptIn'))
+  RETURNS integer AS
+$$
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _cntctId INTEGER;
-  _cntctNumber TEXT;
-  _isNew BOOLEAN;
-  _flag TEXT;
+  _cntctId      INTEGER;
+  _cntctNumber  TEXT;
+  _isNew        BOOLEAN;
+  _flag         TEXT;
+  _phones       JSON;
   _contactCount INTEGER := 0;
-
+  _upd          RECORD;
 BEGIN
   --Validate
   IF ((pFlag IS NULL) OR (pFlag = '') OR (pFlag = 'CHECK') OR (pFlag = 'CHANGEONE') OR (pFlag = 'CHANGEALL')) THEN
@@ -48,9 +58,6 @@ BEGIN
 	AND (COALESCE(pSuffix, '') = '')
 	AND (COALESCE(pHonorific, '') = '')
 	AND (COALESCE(pInitials, '') = '')
-	AND (COALESCE(pPhone, '') = '')
-	AND (COALESCE(pPhone2, '') = '')
-	AND (COALESCE(pFax, '') = '')
 	AND (COALESCE(pEmail, '') = '')
 	AND (COALESCE(pWebAddr, '') = '')
 	AND (COALESCE(pNotes, '') = '')
@@ -97,38 +104,41 @@ BEGIN
     _cntctNumber := COALESCE(_cntctNumber,pContactNumber,fetchNextNumber('ContactNumber'));
   END IF;
 
+  _phones = json_extract_path(pphone, 'phones');
+
   IF (_isNew) THEN
-    _cntctId := COALESCE(_cntctId,pCntctId,nextval('cntct_cntct_id_seq'));
- 
     INSERT INTO cntct (
-      cntct_id,cntct_number,
-      cntct_crmacct_id,cntct_addr_id,cntct_first_name,
+      cntct_number,
+      cntct_addr_id,cntct_first_name,
       cntct_last_name,cntct_honorific,cntct_initials,
-      cntct_active,cntct_phone,cntct_phone2,
-      cntct_fax,cntct_email,cntct_webaddr,
+      cntct_active,cntct_email,cntct_email_optin,cntct_webaddr,
       cntct_notes,cntct_title,cntct_middle,cntct_suffix, cntct_owner_username ) 
     VALUES (
-      _cntctId, COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pCrmAcctId,pAddrId,
+      COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pAddrId,
       pFirstName,pLastName,pHonorific,
-      pInitials,COALESCE(pActive,true),pPhone,pPhone2,pFax,
-      pEmail,pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername );
+      pInitials,COALESCE(pActive,true),
+      pEmail,COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername )
+    RETURNING cntct_id INTO _cntctId;
+
+    -- Now insert the Contact's phone numbers
+    INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
+      SELECT _cntctId, getcrmroleid(json_array_elements(_phones)->>'role'), 
+                       json_array_elements(_phones)->>'number'
+    ON CONFLICT DO NOTHING;
 
     RETURN _cntctId;
 
   ELSE
     UPDATE cntct SET
       cntct_number=COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')),
-      cntct_crmacct_id=COALESCE(pCrmAcctId,cntct_crmacct_id),
       cntct_addr_id=COALESCE(pAddrId,cntct_addr_id),
       cntct_first_name=COALESCE(pFirstName,cntct_first_name),
       cntct_last_name=COALESCE(pLastName,cntct_last_name),
       cntct_honorific=COALESCE(pHonorific,cntct_honorific),
       cntct_initials=COALESCE(pInitials,cntct_initials),
       cntct_active=COALESCE(pActive,cntct_active),
-      cntct_phone=COALESCE(pPhone,cntct_phone),
-      cntct_phone2=COALESCE(pPhone2,cntct_phone2),
-      cntct_fax=COALESCE(pFax,cntct_fax),
       cntct_email=COALESCE(pEmail,cntct_email),
+      cntct_email_optin=COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),
       cntct_webaddr=COALESCE(pWebAddr,cntct_webaddr),
       cntct_notes=COALESCE(pNotes,cntct_notes),
       cntct_title=COALESCE(pTitle,cntct_title),
@@ -136,45 +146,25 @@ BEGIN
       cntct_suffix=COALESCE(pSuffix,cntct_suffix),
       cntct_owner_username=COALESCE(pOwnerUsername, cntct_owner_username) 
     WHERE (cntct_id=pCntctId);
+
+    -- Now insert the Contact's phone numbers
+    -- There's no primary key available so we have to delete no longer existing numbers
+    -- and insert new ones.
+    DELETE FROM cntctphone 
+      WHERE cntctphone_cntct_id = pCntctId
+        AND cntctphone_phone NOT IN (SELECT json_array_elements(_phones)->>'number');
+
+    INSERT INTO cntctphone (cntctphone_cntct_id,cntctphone_crmrole_id, cntctphone_phone)
+      SELECT pCntctId, getcrmroleid(json_array_elements(_phones)->>'role'), 
+                       json_array_elements(_phones)->>'number'
+    ON CONFLICT DO NOTHING; 
     
     RETURN pCntctId;
 
   END IF;
 END;
-$$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
-                                      pContactNumber   TEXT,
-                                      pCrmAcctId       INTEGER,
-                                      pAddrId          INTEGER,
-                                      pHonorific       TEXT,
-                                      pFirstName       TEXT,
-                                      pMiddleName      TEXT,
-                                      pLastName        TEXT,
-                                      pSuffix          TEXT,
-                                      pInitials        TEXT,
-                                      pActive          BOOL,
-                                      pPhone           TEXT,
-                                      pPhone2          TEXT,
-                                      pFax             TEXT,
-                                      pEmail           TEXT,
-                                      pWebAddr         TEXT,
-                                      pNotes           TEXT,
-                                      pTitle           TEXT,
-                                      pFlag            TEXT ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  _returnVal INTEGER;
-
-BEGIN
-  
-  SELECT saveCntct( pCntctId, pContactNumber, pCrmAcctId, pAddrId, pHonorific, pFirstName, pMiddleName, pLastName, pSuffix, pInitials, 
-	pActive, pPhone, pPhone2, pFax, pEmail, pWebAddr, pNotes, pTitle, pFlag, NULL) INTO _returnVal;
-  RETURN _returnVal;
-
-END;
-$$ LANGUAGE 'plpgsql';
+$$
+  LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
                                       pContactNumber   TEXT,
@@ -184,22 +174,20 @@ CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
                                       pMiddleName      TEXT,
                                       pLastName        TEXT,
                                       pSuffix          TEXT,
-                                      pPhone           TEXT,
-                                      pPhone2          TEXT,
-                                      pFax             TEXT,
+                                      pPhone           JSON,
                                       pEmail           TEXT,
                                       pWebAddr         TEXT,
                                       pTitle           TEXT,
                                       pFlag            TEXT ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
 
 BEGIN
   
-  SELECT saveCntct(pCntctId,pContactNumber,NULL,pAddrId,pHonorific,pFirstName,pMiddleName,pLastName,pSuffix,NULL,
-        NULL,pPhone,pPhone2,pFax,pEmail,pWebAddr,NULL,pTitle,pFlag, NULL) INTO _returnVal;
+  SELECT saveCntct(pCntctId,pContactNumber,pAddrId,pHonorific,pFirstName,pMiddleName,pLastName,pSuffix,NULL,
+        NULL,pPhone,pEmail,pWebAddr,NULL,pTitle,pFlag, NULL) INTO _returnVal;
   
   RETURN _returnVal;
 

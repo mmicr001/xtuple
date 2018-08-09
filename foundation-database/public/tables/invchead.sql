@@ -4,7 +4,7 @@ ALTER TABLE public.invchead DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('invchead', 'invchead_id',         'SERIAL', 'NOT NULL', 'public'),
-  xt.add_column('invchead', 'invchead_cust_id',   'INTEGER', 'NOT NULL', 'public'),
+  xt.add_column('invchead', 'invchead_cust_id',   'INTEGER', NULL, 'public'),
   xt.add_column('invchead', 'invchead_shipto_id', 'INTEGER', NULL,       'public'),
   xt.add_column('invchead', 'invchead_ordernumber',  'TEXT', NULL,       'public'),
   xt.add_column('invchead', 'invchead_orderdate',    'DATE', NULL,       'public'),
@@ -60,12 +60,21 @@ SELECT
   xt.add_column('invchead', 'invchead_created', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('invchead', 'invchead_lastupdated',  'TIMESTAMP WITH TIME ZONE', NULL, 'public');
 
+-- Found some placeholder invoice customer numbers (unposted).  Clean up first then remove NULL constraint.
+DELETE FROM invchead WHERE invchead_cust_id = -1;
+ALTER TABLE public.invchead ALTER COLUMN invchead_cust_id DROP NOT NULL;
+
+UPDATE invchead SET invchead_salesrep_id = NULL
+ WHERE invchead_salesrep_id NOT IN (SELECT salesrep_id FROM salesrep);
+
 SELECT
   xt.add_constraint('invchead', 'invchead_pkey', 'PRIMARY KEY (invchead_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_invchead_invcnumber_check',
                     $$CHECK (invchead_invcnumber <> ''::text)$$, 'public'),
   xt.add_constraint('invchead', 'invchead_invcnumber_unique',
                     'UNIQUE (invchead_invcnumber)', 'public'),
+  xt.add_constraint('invchead', 'invchead_salesrep_id_fk', 'FOREIGN KEY (invchead_salesrep_id) REFERENCES salesrep(salesrep_id)', 'public'),
+  xt.add_constraint('invchead', 'invchead_cust_id_fk', 'FOREIGN KEY (invchead_cust_id) REFERENCES custinfo(cust_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_invchead_saletype_id_fkey',
                     'FOREIGN KEY (invchead_saletype_id) REFERENCES saletype(saletype_id)', 'public'),
   xt.add_constraint('invchead', 'invchead_invchead_shipzone_id_fkey',

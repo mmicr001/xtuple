@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _taxauthBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
@@ -17,6 +17,27 @@ BEGIN
 
   NEW.taxauth_code := UPPER(NEW.taxauth_code);
 
+  IF (TG_OP = 'INSERT') THEN
+    LOOP
+      UPDATE crmacct SET crmacct_name=NEW.taxauth_name
+       WHERE crmacct_number=NEW.taxauth_code
+       RETURNING crmacct_id INTO NEW.taxauth_crmacct_id;
+      IF (FOUND) THEN
+        EXIT;
+      END IF;
+      BEGIN
+        INSERT INTO crmacct(crmacct_number, crmacct_name, crmacct_active, crmacct_type)
+                    VALUES (NEW.taxauth_code, NEW.taxauth_name, TRUE, 'O')
+        RETURNING crmacct_id INTO NEW.taxauth_crmacct_id;
+        EXIT;
+      EXCEPTION WHEN unique_violation THEN
+            -- do nothing, and loop to try the UPDATE again
+      END;
+    END LOOP;
+
+    /* TODO: default characteristic assignments based on what? */
+  END IF;
+
   -- Timestamps
   IF (TG_OP = 'INSERT') THEN
     NEW.taxauth_created := now();
@@ -33,38 +54,17 @@ CREATE TRIGGER taxauthBeforeTrigger BEFORE INSERT OR UPDATE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
-  IF (TG_OP = 'INSERT') THEN
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
-    LOOP
-      UPDATE crmacct SET crmacct_taxauth_id=NEW.taxauth_id,
-                         crmacct_name=NEW.taxauth_name
-       WHERE crmacct_number=NEW.taxauth_code;
-      IF (FOUND) THEN
-        EXIT;
-      END IF;
-      BEGIN
-        INSERT INTO crmacct(crmacct_number,   crmacct_name,     crmacct_active,
-                            crmacct_type,     crmacct_taxauth_id
-                  ) VALUES (NEW.taxauth_code, NEW.taxauth_name, TRUE, 
-                            'O',              NEW.taxauth_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
-            -- do nothing, and loop to try the UPDATE again
-      END;
-    END LOOP;
 
-    /* TODO: default characteristic assignments based on what? */
-
-  ELSIF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.taxauth_crmacct_id=NEW.taxauth_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.taxauth_code
-    WHERE ((crmacct_taxauth_id=NEW.taxauth_id)
+    WHERE ((crmacct_id=NEW.taxauth_crmacct_id)
       AND  (crmacct_number!=NEW.taxauth_code));
 
     UPDATE crmacct SET crmacct_name = NEW.taxauth_name
-    WHERE ((crmacct_taxauth_id=NEW.taxauth_id)
+    WHERE ((crmacct_id=NEW.taxauth_crmacct_id)
       AND  (crmacct_name!=NEW.taxauth_name));
 
   END IF;
@@ -120,15 +120,12 @@ CREATE TRIGGER taxauthAfterTrigger AFTER INSERT OR UPDATE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Tax Authorities.';
   END IF;
-
-  UPDATE crmacct SET crmacct_taxauth_id = NULL
-   WHERE crmacct_taxauth_id = OLD.taxauth_id;
 
   RETURN OLD;
 END;
@@ -139,7 +136,7 @@ CREATE TRIGGER taxauthBeforeDeleteTrigger BEFORE DELETE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthAfterDeleteTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (EXISTS(SELECT 1

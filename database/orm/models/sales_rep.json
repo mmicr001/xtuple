@@ -44,6 +44,14 @@
         }
       },
       {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "salesrep_crmacct_id",
+          "required": true
+        }
+      },
+      {
         "name": "name",
         "attr": {
           "type": "String",
@@ -65,8 +73,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_salesrep_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "crmacct"
           }
         ],
         "properties": [

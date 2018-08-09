@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION releasePR(pPrId INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _pr RECORD;
@@ -37,7 +37,9 @@ BEGIN
   END IF;
 
   SELECT cntct_id, cntct_honorific, cntct_first_name, cntct_middle,
-         cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_fax,
+         cntct_last_name, cntct_suffix, cntct_title,
+         getcontactphone(cntct_id, 'Office') AS contact_phone, 
+         getcontactphone(cntct_id, 'Fax') AS contact_fax,
          cntct_email, addr.* INTO _w
   FROM itemsite JOIN whsinfo ON (warehous_id = itemsite_warehous_id)
                 LEFT OUTER JOIN addr ON (warehous_addr_id = addr_id)
@@ -69,8 +71,10 @@ BEGIN
          itemsrc_manuf_item_descrip, itemsrc_manuf_name, itemsrc_manuf_item_number,
          vend_curr_id, vend_terms_id, vend_shipvia, vend_taxzone_id,
          vend_fob, vend_fobsource,
-         cntct_id, cntct_honorific, cntct_first_name, cntct_middle, cntct_fax,
-         cntct_last_name, cntct_suffix, cntct_phone, cntct_title, cntct_email,
+         cntct_id, cntct_honorific, cntct_first_name, cntct_middle, 
+         getcontactphone(cntct_id, 'Office') AS contact_phone, 
+         getcontactphone(cntct_id, 'Fax') AS contact_fax,
+         cntct_last_name, cntct_suffix, cntct_title, cntct_email,
          addr_line1, addr_line2, addr_line3, addr_city, addr_state,
          addr_postalcode, addr_country
     INTO _i
@@ -140,8 +144,8 @@ BEGIN
         COALESCE(_i.vend_terms_id, -1), _w.cntct_id,
         _w.cntct_honorific, _w.cntct_first_name,
         _w.cntct_middle, _w.cntct_last_name,
-        _w.cntct_suffix, _w.cntct_phone,
-        _w.cntct_title, _w.cntct_fax,
+        _w.cntct_suffix, _w.contact_phone,
+        _w.cntct_title, _w.contact_fax,
         _w.cntct_email, _w.addr_id,
         COALESCE(_w.addr_line1, ''),
         COALESCE(_w.addr_line2, ''),
@@ -151,8 +155,8 @@ BEGIN
         COALESCE(_w.addr_country, ''), _i.cntct_id,
         COALESCE(_i.cntct_honorific, TEXT('')), COALESCE(_i.cntct_first_name, TEXT('')),
         COALESCE(_i.cntct_middle, TEXT('')), COALESCE(_i.cntct_last_name, TEXT('')),
-        COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.cntct_phone, TEXT('')),
-        COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.cntct_fax, TEXT('')),
+        COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.contact_phone, TEXT('')),
+        COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.contact_fax, TEXT('')),
         COALESCE(_i.cntct_email, TEXT('')), COALESCE(_i.addr_line1, TEXT('')),
         COALESCE(_i.addr_line2, TEXT('')), COALESCE(_i.addr_line3, TEXT('')),
         COALESCE(_i.addr_city, TEXT('')), COALESCE(_i.addr_state, TEXT('')),

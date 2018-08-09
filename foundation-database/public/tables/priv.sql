@@ -21,7 +21,19 @@ declare
       ['Purchase', 'MaintainPurchaseTypes', 'Can Maintain Purchase Types'],
       ['Purchase', 'ViewPurchaseTypes', 'Can View Purchase Types'],
       ['Accounting', 'ReverseARApplication', 'Allows A/R Applications to be reversed'],
-      ['Accounting', 'ReverseAPApplication', 'Allows A/P Applications to be reversed']
+      ['Accounting', 'ReverseAPApplication', 'Allows A/P Applications to be reversed'],
+      ['CRM', 'MaintainCRMRoles', 'Allows Maintenance of CRM Roles'],
+      ['CRM', 'ViewCRMRoles', 'Can View CRM Roles'],
+      ['CRM', 'MaintainTaskTemplates', 'Can maintain Task templates and template tasks'],
+      ['CRM', 'MaintainAccountGroups', 'Allows Maintenance of CRM Account Groups'],
+      ['CRM', 'ViewAccountGroups', 'Allows Viewing of CRM Account Groups'],
+      ['CRM', 'MaintainAddressGroups', 'Allows Maintenance of Address Groups'],
+      ['CRM', 'ViewAddressGroups', 'Allows Viewing of Address Groups'],
+      ['CRM', 'MaintainProspectGroups', 'Allows Maintenance of Prospect Groups'],
+      ['CRM', 'ViewProspectGroups', 'Allows Viewing of Prospect Groups'],
+      ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
+      ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
+      ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups']
     ];
   _p TEXT[];
 begin
@@ -40,3 +52,9 @@ SELECT grantPrivToAll('AllowSharedFilterEdit');
 ALTER TABLE public.priv ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE priv IS 'System Privilege information';
+
+-- Version 5.0 Task Migration
+UPDATE priv 
+SET priv_name = REPLACE(priv_name, 'ToDoItems', 'TaskItems'),
+    priv_descrip = REPLACE(priv_descrip, 'ToDoItems', 'TaskItems')
+WHERE priv_name ~* 'ToDoItems';

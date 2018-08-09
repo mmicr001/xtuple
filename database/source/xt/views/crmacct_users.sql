@@ -33,9 +33,9 @@ select xt.create_view('xt.crmacct_users', $$
     crmacct.crmacct_id,
     crmacct_rep.crmacct_usr_username AS username
   FROM crmacct
-  JOIN custinfo ON crmacct_cust_id = cust_id
+  JOIN custinfo ON cust_crmacct_id = crmacct_id
   JOIN salesrep ON cust_salesrep_id = salesrep_id
-  JOIN crmacct crmacct_rep ON crmacct_rep.crmacct_salesrep_id = salesrep_id
+  JOIN crmacct crmacct_rep ON crmacct_rep.crmacct_id = salesrep_crmacct_id
   WHERE 1=1
     AND crmacct_rep.crmacct_usr_username IS NOT NULL;
 

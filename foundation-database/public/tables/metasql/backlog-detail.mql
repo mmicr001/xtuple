@@ -1,7 +1,7 @@
 -- Group: backlog
 -- Name: detail
 -- Notes: 
---        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT
@@ -30,7 +30,6 @@ SELECT
        0 AS coitem_qtyreturned_xttotalrole,
        0 AS qtybalance_xttotalrole,
        0 AS baseextprice_xttotalrole,
-       0 AS extpricebalance_xttotalrole,
        0 AS baseextpricebalance_xttotalrole
 FROM (
   SELECT
@@ -151,19 +150,19 @@ FROM (
                                WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
   <? endif ?>
   <? if exists("custgrp") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem))
   <? endif ?>
   <? if exists("custgrp_id") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem
-                     WHERE (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)))
+                     WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
   <? endif ?>
   <? if exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrp, custgrpitem
-                     WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                       AND   (custgrp_name ~ <? value("custgrp_pattern") ?>) )) )
+                     WHERE ( (groupsitem_groups_id=groups_id)
+                       AND   (groups_name ~ <? value("custgrp_pattern") ?>) )) )
   <? endif ?>
 
   <? if exists("item_id") ?>
@@ -307,19 +306,19 @@ FROM (
                                WHERE (custtype_code ~ <? value("custtype_pattern") ?>)))
   <? endif ?>
   <? if exists("custgrp") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem))
   <? endif ?>
   <? if exists("custgrp_id") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem
-                     WHERE (custgrpitem_custgrp_id=<? value("custgrp_id") ?>)))
+                     WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
   <? endif ?>
   <? if exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrp, custgrpitem
-                     WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                       AND   (custgrp_name ~ <? value("custgrp_pattern") ?>) )) )
+                     WHERE ( (groupsitem_groups_id=groups_id)
+                       AND   (groups_name ~ <? value("custgrp_pattern") ?>) )) )
   <? endif ?>
 
   <? if exists("item_id") ?>

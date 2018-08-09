@@ -146,7 +146,8 @@ SELECT coitem_id,
        JOIN uom AS puom ON (puom.uom_id=coitem_price_uom_id)
        LEFT OUTER JOIN itemalias ON ((itemalias_item_id=item_id) AND (itemalias_number=coitem_custpn)
                                       AND (itemalias_crmacct_id IS NULL
-                                           OR itemalias_crmacct_id = (SELECT crmacct_id FROM crmacct WHERE crmacct_cust_id=cohead_cust_id)))
+                                           OR itemalias_crmacct_id = (SELECT cust_crmacct_id
+                                                                      FROM custinfo WHERE cust_id=cohead_cust_id)))
  WHERE (cohead_id=<? value("sohead_id") ?>)
 
 <? if exists("excludeCancelled") ?>

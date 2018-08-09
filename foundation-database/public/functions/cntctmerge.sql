@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION cntctmerge(integer, integer, boolean) RETURNS boolean AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSourceCntctId ALIAS FOR $1;
@@ -7,11 +7,13 @@ DECLARE
   pPurge ALIAS FOR $3;
   _fk		RECORD;
   _pk   	RECORD;
-  _sel		RECORD;
+  _coldesc      RECORD;
+  _mrgcol       BOOLEAN;
   _seq  	INTEGER;
   _col		TEXT;
   _pkcol  	TEXT;
   _qry  	TEXT;
+  _colname      TEXT;
   _multi	BOOLEAN;
   _created      TIMESTAMP WITH TIME ZONE;
 
@@ -33,7 +35,7 @@ BEGIN
     AND conrelid=con.oid
     AND f.relname = 'cntct'
     AND con.relnamespace=pg_namespace.oid
-    AND con.relname NOT IN ('cntctsel', 'cntctmrgd', 'mrghist','trgthist')
+    AND con.relname NOT IN ('cntctsel', 'cntctmrgd', 'mrghist','trgthist', 'crmacctcntctass')
   LOOP
     -- Validate
     IF (ARRAY_UPPER(_fk.seq,1) > 1) THEN
@@ -54,12 +56,12 @@ BEGIN
     -- Cache what we're going to do so we can restore if need be.
     -- Start by determining the primary key column for this table.
       _multi := false;
-      _qry := 'SELECT pg_attribute.attname AS key
+      _qry := format('SELECT pg_attribute.attname AS key
                FROM pg_attribute, pg_class 
                WHERE pg_class.relnamespace = (
                  SELECT oid 
                  FROM pg_namespace 
-                 WHERE pg_namespace.nspname = ''' || _fk.schemaname || ''') 
+                 WHERE pg_namespace.nspname = %L) 
                 AND  pg_class.oid IN (
                  SELECT indexrelid 
                  FROM pg_index 
@@ -67,10 +69,10 @@ BEGIN
                   AND indrelid IN (
                     SELECT oid 
                     FROM pg_class 
-                    WHERE lower(relname) = ''' || _fk.tablename || ''')) 
+                    WHERE lower(relname) = %L)) 
                 AND pg_attribute.attrelid = pg_class.oid 
                 AND pg_attribute.attisdropped = false 
-               ORDER BY pg_attribute.attnum;';
+               ORDER BY pg_attribute.attnum;', _fk.schemaname, _fk.tablename);
 
       FOR _pk IN 
         EXECUTE _qry
@@ -83,24 +85,23 @@ BEGIN
       END LOOP;
 
       -- Gather and store the history
-      _qry := 'INSERT INTO mrghist 
-               SELECT ' || pSourceCntctId || ', ''' 
-                        || _fk.schemaname || '.' || _fk.tablename || ''', ''' 
-                        || _pkcol || ''', ' 
-                        || _pkcol || ', '''
-                        || _col || ''' 
-               FROM ' || _fk.schemaname || '.' || _fk.tablename || '
-               WHERE (' || _col || '=' || pSourceCntctId || ');';
-                   --           raise exception '%',_qry;
+      _qry := format($f$INSERT INTO mrghist 
+                      SELECT %s, '%s.%s', '%s', %s, '%s'
+                      FROM %I.%I
+                      WHERE ( %I = %L);$f$,
+                      pSourceCntctId, _fk.schemaname, _fk.tablename,
+                      _pkcol, _pkcol, _col,
+                      _fk.schemaname, _fk.tablename,
+                      _col, pSourceCntctId);    
       EXECUTE _qry;
       
     END IF;
 
     -- Merge references
-    _qry := 'UPDATE ' || _fk.schemaname || '.' || _fk.tablename ||
-            ' SET ' || _col || '=' || pTargetCntctId ||
-            ' WHERE (' || _col || '=' || pSourceCntctId || ');';
-            
+    _qry := format('UPDATE %I.%I SET %I=%L
+                    WHERE (%I=%L);',
+                    _fk.schemaname, _fk.tablename,
+                    _col, pTargetCntctId, _col, pSourceCntctId);
     EXECUTE _qry;
          
   END LOOP;
@@ -207,167 +208,75 @@ BEGIN
     END IF;
   END IF;
 
+ -- TODO Switch the following logic to also use changefkeypointers().  That requires a rewrite
+ --      of the undo functionality but will also deprecate trgthist table
  -- Merge field detail to target
-  SELECT cntctsel.*,
-         cntct_id, cntct_crmacct_id, cntct_addr_id, cntct_first_name,
-         cntct_last_name, cntct_honorific, cntct_initials, cntct_active,
-         cntct_phone, cntct_phone2, cntct_fax, cntct_email, cntct_webaddr,
-         cntct_notes, cntct_title, cntct_number, cntct_middle, cntct_suffix,
-         cntct_owner_username, cntct_name
-  INTO _sel 
-  FROM cntctsel 
-    JOIN cntct ON (cntctsel_cntct_id=cntct_id)
-  WHERE (cntctsel_cntct_id=pSourceCntctId);
-  
-  IF (FOUND) THEN
-    IF (_sel.cntctsel_mrg_crmacct_id) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_crmacct_id', cntct_crmacct_id::text || '::integer'
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_crmacct_id=_sel.cntct_crmacct_id WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_addr_id) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_addr_id', cntct_addr_id::text || '::integer'
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_addr_id=_sel.cntct_addr_id WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_first_name) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_first_name', '''' || cntct_first_name || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_first_name=_sel.cntct_first_name WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_last_name) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_last_name', '''' || cntct_last_name || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_last_name=_sel.cntct_last_name WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_honorific) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_honorific', '''' || cntct_honorific || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_honorific=_sel.cntct_honorific WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_initials) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_initials', '''' || cntct_initials || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_initials=_sel.cntct_initials WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_phone) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_phone', '''' || cntct_phone || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_phone=_sel.cntct_phone WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_phone2) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_phone2', '''' || cntct_phone2 || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_phone2=_sel.cntct_phone2 WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_fax)  THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_fax', '''' || cntct_fax || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_fax=_sel.cntct_fax WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_email)  THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_email', '''' || cntct_email || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_email=_sel.cntct_email WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_webaddr) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_webaddr', '''' || cntct_webaddr || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_webaddr=_sel.cntct_webaddr WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_notes) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_notes', '''' || cntct_notes || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_notes=cntct_notes || '
+  FOR _coldesc IN SELECT attname, typname
+                    FROM pg_attribute
+                    JOIN pg_type      ON (atttypid=pg_type.oid)
+                    JOIN pg_class     ON (attrelid=pg_class.oid)
+                    JOIN pg_namespace ON (relnamespace=pg_namespace.oid)
+                   WHERE (attnum >= 0)
+                     AND (relname='cntct')
+                     AND (nspname='public')
+                     AND (attname NOT IN ('cntct_id', 'cntct_number', 'cntct_name', 
+                                  'cntct_created', 'cntct_lastupdated', 'cntct_active', 'obj_uuid'))
+  LOOP
 
-      ' || _sel.cntct_notes WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_title) THEN
+    -- if we're supposed to merge this column at all
+    EXECUTE format('SELECT cntctsel_mrg_%I FROM cntctsel
+                    WHERE (cntctsel_cntct_id=%L)', 
+                    _coldesc.attname, pSourceCntctId)
+            INTO _mrgcol;
+
+    IF (_mrgcol) THEN
+      _colname := _coldesc.attname;
+
       IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_title', '''' || cntct_title || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
+        _qry = format('INSERT INTO trgthist
+                        SELECT %s, %s, %L, ''%s::%s''
+                        FROM cntct WHERE (cntct_id=%s)',
+                        pSourceCntctId, pTargetCntctId,
+                        _colname, _colname, _coldesc.typname,
+                        pTargetCntctId);
+        EXECUTE _qry;
       END IF;
-      UPDATE cntct SET cntct_title=_sel.cntct_title WHERE (cntct_id=pTargetCntctId);
+
+      EXECUTE format('UPDATE cntct dest SET %I=src.%I
+                      FROM cntct src
+                      WHERE ((dest.cntct_id=%L)
+                      AND (src.cntct_id=%L));',
+                      _colname, _colname,
+                      pTargetCntctId, pSourceCntctId);
     END IF;
-    IF (_sel.cntctsel_mrg_middle) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_middle', '''' || cntct_middle || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_middle=_sel.cntct_middle WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_suffix) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_suffix', '''' || cntct_suffix || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_suffix=_sel.cntct_suffix WHERE (cntct_id=pTargetCntctId);
-    END IF;
-    IF (_sel.cntctsel_mrg_owner_username) THEN
-      IF (NOT pPurge) THEN
-        INSERT INTO trgthist
-        SELECT pSourceCntctId,pTargetCntctId,'cntct_owner_username', '''' || cntct_owner_username || ''''
-        FROM cntct
-        WHERE (cntct_id=pTargetCntctId);
-      END IF;
-      UPDATE cntct SET cntct_owner_username=_sel.cntct_owner_username WHERE (cntct_id=pTargetCntctId);
-    END IF;
-  ELSE
-    RAISE EXCEPTION 'Source Contact not Found';
+  END LOOP;
+
+  -- Separately check for CRM Acct merge criteria
+  -- TODO there is no history saved for these combinations
+  SELECT cntctsel_mrg_cntct_crmacct_id INTO _mrgcol
+  FROM cntctsel
+   WHERE (cntctsel_cntct_id=pSourceCntctId);
+
+  IF (_mrgcol) THEN
+    INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+    SELECT crmacctcntctass_crmacct_id, pTargetCntctId, crmacctcntctass_crmrole_id
+    FROM crmacctcntctass WHERE crmacctcntctass_cntct_id=pSourceCntctId
+    ON CONFLICT (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, crmacctcntctass_crmrole_id)
+    DO NOTHING;
+  END IF;
+
+  -- Separately check for Contact Phones merge criteria
+  -- TODO there is no history saved for these combinations
+  SELECT cntctsel_mrg_cntct_phones INTO _coldesc
+  FROM cntctsel
+   WHERE (cntctsel_cntct_id=pSourceCntctId);
+
+  IF (_mrgcol) THEN
+    INSERT INTO cntctphone (cntctphone_cntct_id, cntctphone_crmrole_id, cntctphone_phone)
+    SELECT pTargetCntctId, cntctphone_crmrole_id, cntctphone_phone
+    FROM cntctphone WHERE cntctphone_cntct_id=pSourceCntctId
+    ON CONFLICT (cntctphone_cntct_id, cntctphone_crmrole_id, cntctphone_phone)
+    DO NOTHING;
   END IF;
 
   -- Use oldest create date
@@ -382,6 +291,8 @@ BEGIN
   -- Disposition source contact
   IF (pPurge) THEN
     DELETE FROM cntct WHERE cntct_id = pSourceCntctId;
+    DELETE FROM cntctphone WHERE cntctphone_cntct_id = pSourceCntctId;
+    DELETE FROM crmacctcntctass WHERE crmacctcntctass_cntct_id = pSourceCntctId;
   END IF;
 
   -- Deactivate contact

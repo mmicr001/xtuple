@@ -3,16 +3,14 @@ DROP TYPE IF EXISTS cntctdup CASCADE;
 CREATE TYPE cntctdup AS
 (
     cntct_id integer,
-    cntct_crmacct_id integer,
+    crmacct_id integer,
     cntct_addr_id integer,
     cntct_first_name text,
     cntct_last_name text,
     cntct_honorific text,
     cntct_initials text,
     cntct_active boolean,
-    cntct_phone text,
-    cntct_phone2 text,
-    cntct_fax text,
+    contact_phones text,
     cntct_email text,
     cntct_webaddr text,
     cntct_notes text,

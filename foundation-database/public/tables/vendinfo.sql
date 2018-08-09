@@ -4,6 +4,7 @@ ALTER TABLE public.vendinfo DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('vendinfo', 'vend_id',                'SERIAL', 'NOT NULL',                      'public'),
+  xt.add_column('vendinfo', 'vend_crmacct_id',       'INTEGER', NULL,                            'public'),
   xt.add_column('vendinfo', 'vend_name',                'TEXT', NULL,                            'public'),
   xt.add_column('vendinfo', 'vend_lastpurchdate',       'DATE', NULL,                            'public'),
   xt.add_column('vendinfo', 'vend_active',           'BOOLEAN', NULL,                            'public'),
@@ -67,6 +68,10 @@ SELECT
                     $$CHECK (vend_ach_accnttype IN ('K', 'C'))$$, 'public'),
   xt.add_constraint('vendinfo', 'vendinfo_vend_number_check',
                     $$CHECK (vend_number <> '')$$, 'public'),
+  xt.add_constraint('vendinfo', 'vendinfo_crmacct_id_fkey',
+                    'FOREIGN KEY (vend_crmacct_id) REFERENCES crmacct(crmacct_id)
+                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('vendinfo', 'vend_crmacct_id_key', 'UNIQUE (vend_crmacct_id)', 'public'),
   xt.add_constraint('vendinfo', 'vend_to_curr_symbol',
                     'FOREIGN KEY (vend_curr_id) REFERENCES curr_symbol(curr_id)', 'public'),
   xt.add_constraint('vendinfo', 'vend_vend_cntct1_id_fkey',
@@ -105,8 +110,18 @@ BEGIN
 
     DROP TABLE xt.vendinfoext;
   END IF;
+
+-- Version 5.0 data migration
+  IF EXISTS(SELECT column_name FROM information_schema.columns 
+            WHERE table_name='crmacct' and column_name='crmacct_vend_id') THEN
+
+     UPDATE vendinfo SET vend_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_vend_id=vend_id);
+  END IF;
+
 END
 $$ LANGUAGE plpgsql;
+
+ALTER TABLE vendinfo ALTER COLUMN vend_crmacct_id SET NOT NULL;
 
 ALTER TABLE public.vendinfo ENABLE TRIGGER ALL;
 

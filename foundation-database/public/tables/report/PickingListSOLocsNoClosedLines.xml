@@ -3,7 +3,7 @@
  <title>Picking List SO With Locations</title>
  <name>PickingListSOLocsNoClosedLines</name>
  <description>This report definition shows location / lot / serial information on an SO Pick List.  If the item is not Location Controlled it shows the contents of its Location Comment in the corresponding Item Site record.</description>
- <parameter default="3349" active="true" listtype="static" type="string" name="sohead_id">
+ <parameter type="string" active="true" name="sohead_id" listtype="static" default="3349">
   <description></description>
  </parameter>
  <grid>
@@ -39,7 +39,7 @@
        cohead_billtoaddress2,
        cohead_billtoaddress3,
        (cohead_billtocity || '  ' || cohead_billtostate || '  ' || cohead_billtozipcode) AS billtocitystatezip,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        cohead_shiptoname,
        cohead_shiptoaddress1,
        cohead_shiptoaddress2,

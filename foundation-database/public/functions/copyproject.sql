@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION copyproject(integer, text, text, date)
   RETURNS integer AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pPrjId ALIAS FOR $1;
@@ -8,7 +8,7 @@ DECLARE
   pPrjName ALIAS FOR $3;
   pDueDate ALIAS FOR $4;
   _prjid INTEGER;
-  _prjtasks RECORD;
+  _tasks RECORD;
   _offset INTEGER;
   _newTaskid INTEGER;
   _teExists BOOLEAN;
@@ -71,32 +71,13 @@ BEGIN
      WHERE (teprj_prj_id = pPrjId);
   END IF;
 
-  FOR _prjtasks IN
-      SELECT prjtask_id, prjtask_number, prjtask_name, prjtask_descrip,
-         prjtask_prj_id, prjtask_anyuser, 'P',
-         prjtask_hours_budget, prjtask_exp_budget, prjtask_owner_username,
-         prjtask_due_date, prjtask_username
-      FROM prjtask
-      WHERE (prjtask_prj_id=pPrjId)
+  FOR _tasks IN
+      SELECT task_id, task_due_date
+        FROM task
+       WHERE (task_parent_type='J' AND task_parent_id=pPrjId)
   LOOP
-     
-    INSERT INTO prjtask
-    ( prjtask_number, prjtask_name, prjtask_descrip,
-      prjtask_prj_id, prjtask_anyuser, prjtask_status,
-      prjtask_hours_budget, prjtask_hours_actual,
-      prjtask_exp_budget, prjtask_exp_actual,
-      prjtask_owner_username, prjtask_start_date,
-      prjtask_due_date, prjtask_assigned_date,
-      prjtask_completed_date, prjtask_username )
-    VALUES (_prjtasks.prjtask_number, _prjtasks.prjtask_name, _prjtasks.prjtask_descrip,
-            _prjid, _prjtasks.prjtask_anyuser, 'P',
-            _prjtasks.prjtask_hours_budget, 0.0,
-            _prjtasks.prjtask_exp_budget, 0.0,
-            _prjtasks.prjtask_owner_username, NULL,
-            (_prjtasks.prjtask_due_date + COALESCE(_offset, 0)),
-            CASE WHEN (_prjtasks.prjtask_username IS NULL) THEN NULL ELSE CURRENT_DATE END,
-            NULL, _prjtasks.prjtask_username)
-    RETURNING prjtask_id INTO _newTaskid;
+    SELECT copytask(_tasks.task_id, _tasks.task_due_date::DATE+COALESCE(_offset, 0)::INT,
+                    'J', _prjid) INTO _newTaskid;
 
     IF (_teExists) THEN
     -- Also insert TE billing information (if pkg exists)
@@ -108,7 +89,7 @@ BEGIN
              teprjtask_item_id, _newTaskid,
              teprjtask_curr_id
       FROM te.teprjtask
-      WHERE (teprjtask_prjtask_id=_prjtasks.prjtask_id);
+      WHERE (teprjtask_prjtask_id=_tasks.task_id);
       
     END IF; 
   END LOOP;          

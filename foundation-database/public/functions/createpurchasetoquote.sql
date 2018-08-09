@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION createpurchasetoquote(pQuitemId     integer,
                                                  pDropShip     boolean,
                                                  pPrice        numeric = NULL::numeric)
   RETURNS integer AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _pohead INTEGER := NULL; -- Legacy parameter
@@ -40,9 +40,11 @@ BEGIN
     quhead_shiptocountry, quhead_shiptoname, quhead_shiptostate, quhead_shiptozipcode,
     quhead_warehous_id, quitem_itemsite_id, quitem_memo, quitem_scheddate, addr_city,
     addr_country, addr_id, addr_line1, addr_line2, addr_line3, addr_postalcode,
-    addr_state, cntct_email, cntct_fax, cntct_first_name, cntct_honorific, cntct_last_name
-    cntct_middle, cntct_phone, cntct_suffix, cntct_title, itemsite_id, shipto_addr_id
-    shipto_cntct_id, shipto_name,
+    addr_state, cntct_email, cntct_first_name, cntct_honorific, cntct_last_name
+    cntct_middle, cntct_suffix, cntct_title, 
+    getcontactphone(cntct_id, 'Office') AS contact_phone, 
+    getcontactphone(cntct_id, 'Fax') AS contact_fax,
+    itemsite_id, shipto_addr_id, shipto_cntct_id, shipto_name,
     COALESCE(roundQty(item_fractional, (quitem_qtyord * quitem_qty_invuomratio)), 0.0) AS orderqty
   INTO _s
   FROM quitem JOIN quhead ON (quhead_id = quitem_quhead_id)
@@ -57,9 +59,11 @@ BEGIN
   END IF;
 
   SELECT addr_city, addr_country, addr_id, addr_line1, addr_line2,
-    addr_line3, addr_postalcode, addr_state, cntct_email, cntct_fax,
+    addr_line3, addr_postalcode, addr_state, cntct_email, 
     cntct_first_name, cntct_honorific, cntct_id, cntct_last_name,
-    cntct_middle, cntct_phone, cntct_suffix, cntct_title
+    cntct_middle,  cntct_suffix, cntct_title,
+    getcontactphone(cntct_id, 'Office') AS contact_phone, 
+    getcontactphone(cntct_id, 'Fax') AS contact_fax
   INTO _w
   FROM itemsite JOIN whsinfo ON (warehous_id = itemsite_warehous_id)
                 LEFT OUTER JOIN addr ON (warehous_addr_id = addr_id)
@@ -68,8 +72,10 @@ BEGIN
 
   SELECT itemsrc_vend_id, vend_taxzone_id, vend_curr_id, vend_shipvia,
     vend_terms_id, cntct_id, addr_city, addr_country, addr_line1, addr_line2,
-    addr_line3, addr_postalcode, addr_state, cntct_email, cntct_fax, cntct_first_name,
-    cntct_honorific, cntct_last_name, cntct_middle, cntct_phone, cntct_suffix, cntct_title,
+    addr_line3, addr_postalcode, addr_state, cntct_email, cntct_first_name,
+    cntct_honorific, cntct_last_name, cntct_middle, cntct_suffix, cntct_title,
+    getcontactphone(cntct_id, 'Office') AS contact_phone, 
+    getcontactphone(cntct_id, 'Fax') AS contact_fax,
     itemsrc_invvendoruomratio, itemsrc_item_id, itemsrc_manuf_item_descrip,
     itemsrc_manuf_item_number, itemsrc_manuf_name, itemsrc_vend_item_descrip,
     itemsrc_vend_item_number, itemsrc_vend_uom
@@ -160,8 +166,8 @@ BEGIN
           COALESCE(_i.vend_terms_id, -1), COALESCE(_s.quhead_shipto_cntct_id, _s.shipto_cntct_id),
           COALESCE(_s.quhead_shipto_cntct_honorific, _s.cntct_honorific), COALESCE(_s.quhead_shipto_cntct_first_name, _s.cntct_first_name),
           COALESCE(_s.quhead_shipto_cntct_middle, _s.cntct_middle), COALESCE(_s.quhead_shipto_cntct_last_name, _s.cntct_last_name),
-          COALESCE(_s.quhead_shipto_cntct_suffix, _s.cntct_suffix), COALESCE(_s.quhead_shipto_cntct_phone, _s.cntct_phone),
-          COALESCE(_s.quhead_shipto_cntct_title, _s.cntct_title), COALESCE(_s.quhead_shipto_cntct_fax, _s.cntct_fax),
+          COALESCE(_s.quhead_shipto_cntct_suffix, _s.cntct_suffix), COALESCE(_s.quhead_shipto_cntct_phone, _s.contact_phone),
+          COALESCE(_s.quhead_shipto_cntct_title, _s.cntct_title), COALESCE(_s.quhead_shipto_cntct_fax, _s.contact_fax),
           COALESCE(_s.quhead_shipto_cntct_email, _s.cntct_email), COALESCE(_s.shipto_addr_id, _s.addr_id),
           COALESCE(_s.quhead_shiptoname, _s.shipto_name, ''),
           COALESCE(_s.quhead_shiptoaddress1, _s.addr_line1, ''),
@@ -172,8 +178,8 @@ BEGIN
           COALESCE(_s.quhead_shiptocountry, _s.addr_country, ''), _i.cntct_id,
           COALESCE(_i.cntct_honorific, TEXT('')), COALESCE(_i.cntct_first_name, TEXT('')),
           COALESCE(_i.cntct_middle, TEXT('')), COALESCE(_i.cntct_last_name, TEXT('')),
-          COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.cntct_phone, TEXT('')),
-          COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.cntct_fax, TEXT('')),
+          COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.contact_phone, TEXT('')),
+          COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.contact_fax, TEXT('')),
           COALESCE(_i.cntct_email, TEXT('')), COALESCE(_i.addr_line1, TEXT('')),
           COALESCE(_i.addr_line2, TEXT('')), COALESCE(_i.addr_line3, TEXT('')),
           COALESCE(_i.addr_city, TEXT('')), COALESCE(_i.addr_state, TEXT('')),
@@ -212,8 +218,8 @@ BEGIN
           COALESCE(_i.vend_terms_id, -1), _w.cntct_id,
           _w.cntct_honorific, _w.cntct_first_name,
           _w.cntct_middle, _w.cntct_last_name,
-          _w.cntct_suffix, _w.cntct_phone,
-          _w.cntct_title, _w.cntct_fax,
+          _w.cntct_suffix, _w.contact_phone,
+          _w.cntct_title, _w.contact_fax,
           _w.cntct_email, _w.addr_id,
           COALESCE(_w.addr_line1, ''),
           COALESCE(_w.addr_line2, ''),
@@ -223,8 +229,8 @@ BEGIN
           COALESCE(_w.addr_country, ''), _i.cntct_id,
           COALESCE(_i.cntct_honorific, TEXT('')), COALESCE(_i.cntct_first_name, TEXT('')),
           COALESCE(_i.cntct_middle, TEXT('')), COALESCE(_i.cntct_last_name, TEXT('')),
-          COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.cntct_phone, TEXT('')),
-          COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.cntct_fax, TEXT('')),
+          COALESCE(_i.cntct_suffix, TEXT('')), COALESCE(_i.contact_phone, TEXT('')),
+          COALESCE(_i.cntct_title, TEXT('')), COALESCE(_i.contact_fax, TEXT('')),
           COALESCE(_i.cntct_email, TEXT('')), COALESCE(_i.addr_line1, TEXT('')),
           COALESCE(_i.addr_line2, TEXT('')), COALESCE(_i.addr_line3, TEXT('')),
           COALESCE(_i.addr_city, TEXT('')), COALESCE(_i.addr_state, TEXT('')),

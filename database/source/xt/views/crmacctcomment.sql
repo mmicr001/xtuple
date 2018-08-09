@@ -7,22 +7,22 @@ select xt.create_view('xt.crmacctcomment', $$
     where (comment_source='CRMA')
     union
     -- Customer comments
-    select comment_id, crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
+    select comment_id, cust_crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
     from comment
-      join crmacct on (comment_source_id=crmacct_cust_id)
+      join custinfo on (comment_source_id=cust_crmacct_id)
     where (comment_source='C')
     union
     -- Vendor comments
-    select comment_id, crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
+    select comment_id, vend_crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
     from comment
-      join crmacct on (comment_source_id=crmacct_vend_id)
+      join vendinfo on (comment_source_id=vend_crmacct_id)
     where (comment_source='V')
     union
     -- Contact comments
-    select comment_id, crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
+    select comment_id, crmacctcntctass_crmacct_id, comment_date, comment_user, comment_text, comment_cmnttype_id, comment_source, comment_public, comment.obj_uuid
     from comment
       join cntct on (comment_source_id=cntct_id)
-      join crmacct on (cntct_crmacct_id=crmacct_id)
+      join crmacctcntctass on (crmacctcntctass_cntct_id=cntct_id)
     where (comment_source='T');
 
 $$, false);

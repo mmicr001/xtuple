@@ -461,14 +461,14 @@
     </rect>
     <font>
      <face>Arial</face>
-     <size>8</size>
+     <size>10</size>
      <weight>bold</weight>
     </font>
     <left/>
     <top/>
     <data>
      <query>detail</query>
-     <column>cntct_phone2</column>
+     <column>contact_phone2</column>
     </data>
    </field>
    <field>
@@ -480,14 +480,14 @@
     </rect>
     <font>
      <face>Arial</face>
-     <size>8</size>
+     <size>10</size>
      <weight>bold</weight>
     </font>
     <left/>
     <top/>
     <data>
      <query>detail</query>
-     <column>cntct_phone</column>
+     <column>contact_phone</column>
     </data>
    </field>
    <field>
@@ -518,14 +518,14 @@
     </rect>
     <font>
      <face>Arial</face>
-     <size>8</size>
+     <size>10</size>
      <weight>bold</weight>
     </font>
     <left/>
     <top/>
     <data>
      <query>detail</query>
-     <column>cntct_fax</column>
+     <column>contact_phone3</column>
     </data>
    </field>
    <text>

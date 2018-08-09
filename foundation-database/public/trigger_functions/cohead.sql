@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION _soheadTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _p RECORD;
@@ -62,6 +62,8 @@ BEGIN
 	     cust_ffshipto,cust_name,cust_salesrep_id,cust_terms_id,cust_shipvia,
 	     cust_shipchrg_id,cust_shipform_id,cust_commprcnt,cust_curr_id,cust_taxzone_id,
   	     cntct.*,
+             getcontactphone(cntct_id, 'Office') AS contact_phone, 
+             getcontactphone(cntct_id, 'Fax') AS contact_fax,
              addr.addr_line1, addr.addr_line2, addr.addr_line3, addr.addr_city,
              addr.addr_state, addr.addr_postalcode, addr.addr_country,
 	     shipto_id,shipto_addr_id,shipto_name,shipto_salesrep_id,shipto_shipvia,
@@ -82,6 +84,8 @@ BEGIN
 	     cust_ffshipto,cust_name,cust_salesrep_id,cust_terms_id,cust_shipvia,
 	     cust_shipchrg_id,cust_shipform_id,cust_commprcnt,cust_curr_id,cust_taxzone_id,
   	     cntct.*,
+             getcontactphone(cntct_id, 'Office') AS contact_phone, 
+             getcontactphone(cntct_id, 'Fax') AS contact_fax,
              addr.addr_line1, addr.addr_line2, addr.addr_line3, addr.addr_city,
              addr.addr_state, addr.addr_postalcode, addr.addr_country,
 	     shipto_id,shipto_addr_id,shipto_name,shipto_salesrep_id,shipto_shipvia,
@@ -258,7 +262,8 @@ BEGIN
                  NULL, crmacct_id,
                  NEW.cohead_billto_cntct_id, NULL
           FROM crmacct
-          WHERE (crmacct_cust_id=NEW.cohead_cust_id);
+          JOIN custinfo ON (crmacct_id=cust_crmacct_id)
+          WHERE (cust_id=NEW.cohead_cust_id);
         END IF;
       END IF;
 
@@ -299,9 +304,9 @@ BEGIN
           NEW.cohead_billto_cntct_first_name=COALESCE(NEW.cohead_billto_cntct_first_name,_p.cntct_first_name,'');
           NEW.cohead_billto_cntct_middle=COALESCE(NEW.cohead_billto_cntct_middle,_p.cntct_middle,'');
           NEW.cohead_billto_cntct_last_name=COALESCE(NEW.cohead_billto_cntct_last_name,_p.cntct_last_name,'');
-          NEW.cohead_billto_cntct_phone=COALESCE(NEW.cohead_billto_cntct_phone,_p.cntct_phone,'');
+          NEW.cohead_billto_cntct_phone=COALESCE(NEW.cohead_billto_cntct_phone,_p.contact_phone,'');
           NEW.cohead_billto_cntct_title=COALESCE(NEW.cohead_billto_cntct_title,_p.cntct_title,'');
-          NEW.cohead_billto_cntct_fax=COALESCE(NEW.cohead_billto_cntct_fax,_p.cntct_fax,'');
+          NEW.cohead_billto_cntct_fax=COALESCE(NEW.cohead_billto_cntct_fax,_p.contact_fax,'');
           NEW.cohead_billto_cntct_email=COALESCE(NEW.cohead_billto_cntct_email,_p.cntct_email,'');
           NEW.cohead_billtoname=COALESCE(NEW.cohead_billtoname,_p.cust_name,'');
           NEW.cohead_billtoaddress1=COALESCE(NEW.cohead_billtoaddress1,_p.addr_line1,'');
@@ -318,9 +323,9 @@ BEGIN
           NEW.cohead_billto_cntct_first_name=COALESCE(_p.cntct_first_name,'');
           NEW.cohead_billto_cntct_middle=COALESCE(_p.cntct_middle,'');
           NEW.cohead_billto_cntct_last_name=COALESCE(_p.cntct_last_name,'');
-          NEW.cohead_billto_cntct_phone=COALESCE(_p.cntct_phone,'');
+          NEW.cohead_billto_cntct_phone=COALESCE(_p.contact_phone,'');
           NEW.cohead_billto_cntct_title=COALESCE(_p.cntct_title,'');
-          NEW.cohead_billto_cntct_fax=COALESCE(_p.cntct_fax,'');
+          NEW.cohead_billto_cntct_fax=COALESCE(_p.contact_fax,'');
           NEW.cohead_billto_cntct_email=COALESCE(_p.cntct_email,'');
           NEW.cohead_billtoname=COALESCE(_p.cust_name,'');
           NEW.cohead_billtoaddress1=COALESCE(_p.addr_line1,'');
@@ -361,7 +366,10 @@ BEGIN
           _shiptoId := NEW.cohead_shipto_id;
         END IF;
 
-        SELECT cntct.*, shipto_name,
+        SELECT cntct.*, 
+               getcontactphone(cntct_id, 'Office') AS contact_phone, 
+               getcontactphone(cntct_id, 'Fax') AS contact_fax,
+               shipto_name,
                addr.addr_line1, addr.addr_line2, addr.addr_line3, addr.addr_city,
                addr.addr_state, addr.addr_postalcode, addr.addr_country
         INTO _a
@@ -376,9 +384,9 @@ BEGIN
         NEW.cohead_shipto_cntct_middle := COALESCE(_a.cntct_middle,'');
         NEW.cohead_shipto_cntct_last_name := COALESCE(_a.cntct_last_name,'');
 	NEW.cohead_shipto_cntct_suffix := COALESCE(_a.cntct_suffix,'');
-	NEW.cohead_shipto_cntct_phone := COALESCE(_a.cntct_phone,'');
+	NEW.cohead_shipto_cntct_phone := COALESCE(_a.contact_phone,'');
 	NEW.cohead_shipto_cntct_title := COALESCE(_a.cntct_title,'');
-	NEW.cohead_shipto_cntct_fax := COALESCE(_a.cntct_fax,'');
+	NEW.cohead_shipto_cntct_fax := COALESCE(_a.contact_fax,'');
 	NEW.cohead_shipto_cntct_email := COALESCE(_a.cntct_email,'');
         NEW.cohead_shiptoname := COALESCE(_p.shipto_name,'');
         NEW.cohead_shiptoaddress1 := COALESCE(_a.addr_line1,'');
@@ -437,12 +445,12 @@ BEGIN
               NEW.cohead_shipto_cntct_first_name=COALESCE(_a.cntct_first_name,'');
               NEW.cohead_shipto_cntct_middle=COALESCE(_a.cntct_middle,'');
               NEW.cohead_shipto_cntct_last_name=COALESCE(_a.cntct_last_name,'');
-              NEW.cohead_shipto_cntct_phone=COALESCE(_a.cntct_phone,'');
+              NEW.cohead_shipto_cntct_phone=COALESCE(_a.contact_phone,'');
               NEW.cohead_shipto_cntct_title=COALESCE(_a.cntct_title,'');
-              NEW.cohead_shipto_cntct_fax=COALESCE(_a.cntct_fax,'');
+              NEW.cohead_shipto_cntct_fax=COALESCE(_a.contact_fax,'');
               NEW.cohead_shipto_cntct_email=COALESCE(_a.cntct_email,'');
               NEW.cohead_shiptoname := COALESCE(_a.shipto_name,'');
-              NEW.cohead_shiptophone := COALESCE(_a.cntct_phone,'');
+              NEW.cohead_shiptophone := COALESCE(_a.contact_phone,'');
               NEW.cohead_shiptoaddress1 := COALESCE(_a.addr_line1,'');
               NEW.cohead_shiptoaddress2 := COALESCE(_a.addr_line2,'');
               NEW.cohead_shiptoaddress3 := COALESCE(_a.addr_line3,'');
@@ -621,7 +629,7 @@ CREATE TRIGGER soheadTriggerAfter
   EXECUTE PROCEDURE _soheadTriggerAfter();
 
 CREATE OR REPLACE FUNCTION _coheadBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -651,7 +659,7 @@ CREATE TRIGGER coheadBeforeDeleteTrigger
   EXECUTE PROCEDURE _coheadBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _coheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

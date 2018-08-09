@@ -15,7 +15,7 @@ BEGIN
     JOIN pg_namespace ON child.relnamespace=pg_namespace.oid
     JOIN pg_class parent ON confrelid=parent.oid
    WHERE parent.relname='cntct'
-     AND child.relname NOT IN ('cntctaddr', 'cntctdata', 'cntcteml',
+     AND child.relname NOT IN ('cntcteml',
                                'cohead',    'pohead',    'quhead',   'tohead',
                                'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist')
   LOOP

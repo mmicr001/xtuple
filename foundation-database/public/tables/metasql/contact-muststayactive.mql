@@ -3,14 +3,17 @@
 -- Notes: This query determines whether a given contact should be kept
 --        active because other active records depend on it.
 --        Todo - should this be moved to the cntctAfterTrigger?
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT EXISTS(
  SELECT 1
    FROM crmacct
+   JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id)
+   JOIN crmrole ON (crmrole_id=crmacctcntctass_crmrole_id)
   WHERE(crmacct_active
-    AND (<? value("id") ?> IN (crmacct_cntct_id_1, crmacct_cntct_id_2)))
+    AND (<? value("id") ?> = crmacctcntctass_cntct_id)
+    AND (crmrole_name IN ('Primary', 'Secondary')))
  UNION SELECT 3
    FROM custinfo
   WHERE (cust_active
@@ -19,9 +22,6 @@ SELECT EXISTS(
    FROM vendinfo
   WHERE (vend_active
     AND (<? value("id") ?> IN (vend_cntct1_id, vend_cntct2_id)))
- UNION SELECT 7
-   FROM prospect
-  WHERE (prospect_active AND (prospect_cntct_id=<? value("id") ?>))
  UNION SELECT 8
    FROM shiptoinfo
   WHERE (shipto_active AND (shipto_cntct_id=<? value("id") ?>))

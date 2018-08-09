@@ -4,6 +4,7 @@ ALTER TABLE public.custinfo DISABLE TRIGGER ALL;
 
 SELECT
   xt.add_column('custinfo', 'cust_id',               'SERIAL',        'NOT NULL',        'public'),
+  xt.add_column('custinfo', 'cust_crmacct_id',       'INTEGER',       NULL,              'public'),
   xt.add_column('custinfo', 'cust_active',           'BOOLEAN',       'NOT NULL',        'public'),
   xt.add_column('custinfo', 'cust_custtype_id',      'INTEGER',       NULL,              'public'),
   xt.add_column('custinfo', 'cust_salesrep_id',      'INTEGER',       NULL,              'public'),
@@ -21,7 +22,7 @@ SELECT
   xt.add_column('custinfo', 'cust_shipform_id',      'INTEGER',       NULL,              'public'),
   xt.add_column('custinfo', 'cust_shipvia',          'TEXT',          NULL,              'public'),
   xt.add_column('custinfo', 'cust_blanketpos',       'BOOLEAN',       'NOT NULL',        'public'),
-  xt.add_column('custinfo', 'cust_shipchrg_id',      'INTEGER',       'NOT NULL',        'public'),
+  xt.add_column('custinfo', 'cust_shipchrg_id',      'INTEGER',       'NOT NULL',       'public'),
   xt.add_column('custinfo', 'cust_creditstatus',     'CHARACTER(1)',  'NOT NULL',        'public'),
   xt.add_column('custinfo', 'cust_comments',         'TEXT',          NULL,              'public'),
   xt.add_column('custinfo', 'cust_ffbillto',         'BOOLEAN',      'NOT NULL',         'public'),
@@ -67,6 +68,10 @@ SELECT
   xt.add_constraint('custinfo', 'custinfo_cust_number_check',
                     $$CHECK (cust_number <> ''::text)$$, 'public'),
   xt.add_constraint('custinfo', 'custinfo_cust_number_key', 'UNIQUE (cust_number)', 'public'),
+  xt.add_constraint('custinfo', 'custinfo_crmacct_id_fkey',
+                    'FOREIGN KEY (cust_crmacct_id) REFERENCES crmacct(crmacct_id)
+                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('custinfo', 'cust_crmacct_id_key', 'UNIQUE (cust_crmacct_id)', 'public'),
   xt.add_constraint('custinfo', 'custinfo_cust_terms_fkey',
                     'FOREIGN KEY (cust_terms_id) REFERENCES terms(terms_id)
                      ON UPDATE RESTRICT ON DELETE RESTRICT', 'public'),
@@ -89,6 +94,37 @@ SELECT
   xt.add_constraint('custinfo', 'custinfo_cust_salesrep_fkey',
                     'FOREIGN KEY (cust_salesrep_id) REFERENCES salesrep(salesrep_id)
                      ON UPDATE RESTRICT ON DELETE RESTRICT', 'public');
+
+-- Version 5.0 data migration
+DO $$
+BEGIN
+  IF EXISTS(SELECT 1 FROM information_schema.columns
+             WHERE table_name = 'crmacct' and column_name = 'crmacct_cust_id') THEN
+    INSERT INTO crmacct (crmacct_number, crmacct_name, crmacct_active, crmacct_type, crmacct_cust_id)
+                  SELECT cust_number, cust_name, cust_active, 'O', cust_id
+                    FROM custinfo
+                   WHERE cust_crmacct_id IS NULL
+                     AND cust_number NOT IN (SELECT crmacct_number FROM crmacct);
+  END IF;
+
+  UPDATE custinfo SET cust_crmacct_id = crmacct_id
+    FROM crmacct
+   WHERE cust_number = crmacct_number
+     AND cust_crmacct_id IS NULL;
+
+  INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id,
+                               crmacctcntctass_crmrole_id)
+    SELECT cust_crmacct_id, cust_cntct_id, getcrmroleid('Billing')
+      FROM custinfo
+     WHERE cust_cntct_id IS NOT NULL
+    UNION
+    SELECT cust_crmacct_id, cust_corrcntct_id, getcrmroleid('Correspondence')
+      FROM custinfo
+     WHERE cust_corrcntct_id IS NOT NULL
+    ON CONFLICT DO NOTHING;
+END$$;
+
+ALTER TABLE custinfo ALTER COLUMN cust_crmacct_id SET NOT NULL;
 
 ALTER TABLE public.custinfo ENABLE TRIGGER ALL;
 

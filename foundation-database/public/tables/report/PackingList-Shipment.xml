@@ -3,7 +3,7 @@
  <title>Packing List (Shipment)</title>
  <name>PackingList-Shipment</name>
  <description>Non-Hybrid version - driven only by shiphead_id parameter - Packing List showing the contents of a particular shipment - Shows RA# if SO is a replacement order for and RA</description>
- <parameter default="324" active="true" listtype="static" type="string" name="shiphead_id">
+ <parameter type="string" active="true" name="shiphead_id" listtype="static" default="324">
   <description></description>
  </parameter>
  <grid>
@@ -41,7 +41,7 @@
 
        cust_number,
        trim(cntct_first_name || ' ' || cntct_last_name) AS cust_contact,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        terms_descrip
   FROM shiphead
   JOIN cohead ON (cohead_id=shiphead_order_id)

@@ -1,0 +1,43 @@
+-- Group: addressMerge
+-- Name: search
+-- Notes: Search for addresses
+--        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+
+SELECT addr_id,
+  CASE
+    WHEN (addrsel_addr_id IS NOT NULL AND addrsel_target) THEN
+      1 -- Selected as target contact
+    WHEN (addrsel_addr_id IS NOT NULL AND NOT addrsel_target) THEN
+      2 -- Selected as contact to merge
+    ELSE
+      0 -- No status
+  END AS status,
+  addr.*,
+  addrusecount(addr_id), 
+  CASE
+    WHEN (addrsel_addr_id IS NOT NULL AND addrsel_target) THEN
+      'altemphasis' -- Selected as target contact
+    WHEN (addrsel_addr_id IS NOT NULL AND NOT addrsel_target) THEN
+      'emphasis' -- Selected as contact to merge
+  END AS qtforegroundrole
+FROM addr
+LEFT OUTER JOIN addrsel ON (addr_id=addrsel_addr_id)
+WHERE 
+   concat( addr_number <? if exists('searchStreet' ?>,addr_line1, addr_line2, addr_line3 <? endif ?>
+           <? if exists('searchCity' ?>,addr_city <? endif ?>
+            <? if exists('searchPostal' ?>,addr_postalcode <? endif ?>) ~* <? value('searchText') ?>
+<? if exists("countries") ?>
+  AND addr_country  = (SELECT country_name FROM country WHERE country_id = <? value("countries") ?>)
+<? endif ?>
+<? if exists("states") ?>
+  AND addr_state ~ <? value("states") ?>
+<? endif ?>
+<? if exists("cities") ?>
+  AND addr_city ~* <? value("cities") ?>
+<? endif ?>
+<? if exists("postalcodes") ?>
+  AND addr_postalcode ~ <? value("postalcodes") ?>
+<? endif ?>
+;

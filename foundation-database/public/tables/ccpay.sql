@@ -34,6 +34,8 @@ SELECT
 
 SELECT
   xt.add_constraint('ccpay', 'ccpay_pkey', 'PRIMARY KEY (ccpay_id)', 'public'),
+  xt.add_constraint('ccpay', 'ccpay_cust_id_fk', 
+                    'FOREIGN KEY (ccpay_cust_id) REFERENCES custinfo(cust_id)', 'public'),
   xt.add_constraint('ccpay', 'ccpay_ccpay_ccard_id_fkey',
                     'FOREIGN KEY (ccpay_ccard_id) REFERENCES ccard(ccard_id)', 'public');
 

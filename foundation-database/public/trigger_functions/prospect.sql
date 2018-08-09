@@ -1,6 +1,9 @@
 CREATE OR REPLACE FUNCTION _prospectTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
+DECLARE
+  _custid       INTEGER;
+  _prospectid   INTEGER;
 BEGIN
   IF (NOT checkPrivilege('MaintainProspectMasters')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Prospects.';
@@ -19,27 +22,12 @@ BEGIN
     NEW.prospect_lastupdated := now();
   END IF;
 
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT dropIfExists('trigger', 'prospectTrigger');
-CREATE TRIGGER prospectTrigger BEFORE INSERT OR UPDATE ON prospect
-       FOR EACH ROW EXECUTE PROCEDURE _prospectTrigger();
-
-CREATE OR REPLACE FUNCTION _prospectAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  _custid       INTEGER;
-  _prospectid   INTEGER;
-
-BEGIN
-
   IF (TG_OP = 'INSERT') THEN
-    SELECT crmacct_cust_id, crmacct_prospect_id INTO _custid, _prospectid
+    SELECT cust_id, prospect_id INTO _custid, _prospectid
       FROM crmacct
-     WHERE crmacct_number=NEW.prospect_number;
+      LEFT OUTER JOIN custinfo ON (cust_crmacct_id=crmacct_id)
+      LEFT OUTER JOIN prospect ON (prospect_crmacct_id=crmacct_id)
+    WHERE crmacct_number=NEW.prospect_number;
 
     IF (_custid > 0 AND _custid != _prospectid) THEN
       RAISE EXCEPTION '[xtuple: createProspect, -2]';
@@ -49,37 +37,50 @@ BEGIN
       RAISE EXCEPTION '[xtuple: createProspect, -3]';
     END IF;
 
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
     LOOP
-      UPDATE crmacct SET crmacct_prospect_id=NEW.prospect_id,
-                         crmacct_cust_id=NULL,
-                         crmacct_name=NEW.prospect_name
-       WHERE crmacct_number=NEW.prospect_number;
+      UPDATE crmacct SET crmacct_name=NEW.prospect_name
+       WHERE crmacct_number=NEW.prospect_number
+       RETURNING crmacct_id INTO NEW.prospect_crmacct_id;
       IF (FOUND) THEN
         EXIT;
       END IF;
       BEGIN
         INSERT INTO crmacct(crmacct_number,      crmacct_name,
-                            crmacct_active,      crmacct_type,
-                            crmacct_prospect_id, crmacct_cntct_id_1
-                  ) VALUES (NEW.prospect_number, NEW.prospect_name,
-                            NEW.prospect_active, 'O',
-                            NEW.prospect_id,     NEW.prospect_cntct_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
+                            crmacct_active,      crmacct_type ) 
+                    VALUES (NEW.prospect_number, NEW.prospect_name,
+                            NEW.prospect_active, 'O')
+        RETURNING crmacct_id INTO NEW.prospect_crmacct_id;    
+      EXIT;
+        EXCEPTION WHEN unique_violation THEN
             -- do nothing, and loop to try the UPDATE again
       END;
     END LOOP;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT dropIfExists('trigger', 'prospectTrigger');
+CREATE TRIGGER prospectTrigger BEFORE INSERT OR UPDATE ON prospect
+       FOR EACH ROW EXECUTE PROCEDURE _prospectTrigger();
+
+CREATE OR REPLACE FUNCTION _prospectAfterTrigger () RETURNS TRIGGER AS $$
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+BEGIN
+
+  IF (TG_OP = 'INSERT') THEN
 
     /* TODO: default characteristic assignments based on what? */
 
-  ELSIF (TG_OP = 'UPDATE') THEN
+  ELSIF (TG_OP = 'UPDATE' AND OLD.prospect_crmacct_id=NEW.prospect_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.prospect_number
-    WHERE ((crmacct_prospect_id=NEW.prospect_id)
+    WHERE ((crmacct_id=NEW.prospect_crmacct_id)
       AND  (crmacct_number!=NEW.prospect_number));
 
     UPDATE crmacct SET crmacct_name = NEW.prospect_name
-    WHERE ((crmacct_prospect_id=NEW.prospect_id)
+    WHERE ((crmacct_id=NEW.prospect_crmacct_id)
       AND  (crmacct_name!=NEW.prospect_name));
 
   END IF;
@@ -100,20 +101,35 @@ BEGIN
                             OLD.prospect_number, NEW.prospect_number);
       END IF;
 
+      IF (OLD.prospect_owner_username <> NEW.prospect_owner_username) THEN
+        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Owner',
+                            OLD.prospect_owner_username, NEW.prospect_owner_username);
+      END IF;
+
+      IF (OLD.prospect_assigned_username <> NEW.prospect_assigned_username) THEN
+        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Assigned To',
+                            OLD.prospect_assigned_username, NEW.prospect_assigned_username);
+      END IF;
+
+      IF (OLD.prospect_assigned <> NEW.prospect_assigned) THEN
+        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Assigned',
+                            formatDate(OLD.prospect_assigned), formatDate(NEW.prospect_assigned));
+      END IF;
+
+      IF (OLD.prospect_lasttouch <> NEW.prospect_lasttouch) THEN
+        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Last Touched',
+                            formatDate(OLD.prospect_lasttouch), formatDate(NEW.prospect_lasttouch));
+      END IF;
+
       IF (OLD.prospect_name <> NEW.prospect_name) THEN
         PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Name',
                             OLD.prospect_name, NEW.prospect_name);
       END IF;
 
-      IF (OLD.prospect_cntct_id <> NEW.prospect_cntct_id) THEN
-        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Contact',
-                            formatCntctName(OLD.prospect_cntct_id), formatCntctName(NEW.prospect_cntct_id));
-      END IF;
-
-      IF (OLD.prospect_taxauth_id <> NEW.prospect_taxauth_id) THEN
-        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Tax Authority',
-                            (SELECT taxauth_code FROM taxauth WHERE taxauth_id=OLD.prospect_taxauth_id),
-                            (SELECT taxauth_code FROM taxauth WHERE taxauth_id=NEW.prospect_taxauth_id));
+      IF (OLD.prospect_source_id <> NEW.prospect_source_id) THEN
+        PERFORM postComment('ChangeLog', 'PSPCT', NEW.prospect_id, 'Source',
+                            (SELECT opsource_name FROM opsource WHERE opsource_id=OLD.prospect_source_id),
+                            (SELECT opsource_name FROM opsource WHERE opsource_id=NEW.prospect_source_id));
       END IF;
 
       IF (OLD.prospect_salesrep_id <> NEW.prospect_salesrep_id) THEN
@@ -145,15 +161,12 @@ CREATE TRIGGER prospectAfterTrigger AFTER INSERT OR UPDATE ON prospect
        FOR EACH ROW EXECUTE PROCEDURE _prospectAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _prospectBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainProspectMasters')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Prospects.';
   END IF;
-
-  UPDATE crmacct SET crmacct_prospect_id = NULL
-   WHERE crmacct_prospect_id = OLD.prospect_id;
 
   RETURN OLD;
 END;
@@ -164,7 +177,7 @@ CREATE TRIGGER prospectBeforeDeleteTrigger BEFORE DELETE ON prospect
        FOR EACH ROW EXECUTE PROCEDURE _prospectBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _prospectAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF EXISTS(SELECT 1 FROM quhead WHERE quhead_cust_id = OLD.prospect_id) AND

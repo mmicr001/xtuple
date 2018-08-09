@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _empBeforeTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -35,9 +35,35 @@ BEGIN
       LOWER(NEW.emp_username) != LOWER(NEW.emp_code) AND
       EXISTS(SELECT 1
                FROM crmacct
-              WHERE crmacct_emp_id = NEW.emp_id
+              WHERE crmacct_id = NEW.emp_crmacct_id
                 AND crmacct_usr_username IS NOT NULL)) THEN
     NEW.emp_username = LOWER(NEW.emp_code);
+  END IF;
+
+  IF (TG_OP = 'INSERT') THEN
+    LOOP
+      UPDATE crmacct SET crmacct_name=NEW.emp_name
+       WHERE crmacct_number=NEW.emp_code
+       RETURNING crmacct_id INTO NEW.emp_crmacct_id;
+      IF (FOUND) THEN
+        EXIT;
+      END IF;
+      BEGIN
+        INSERT INTO crmacct(crmacct_number,  crmacct_name, crmacct_active, crmacct_type)
+                    VALUES (NEW.emp_code,    NEW.emp_name, NEW.emp_active, 'I')
+        RETURNING crmacct_id INTO NEW.emp_crmacct_id;
+
+        INSERT INTO crmacctcntctass (crmacctcntctass_crmacct_id, crmacctcntctass_cntct_id, 
+                                     crmacctcntctass_crmrole_id)
+        SELECT NEW.emp_crmacct_id, NEW.emp_cntct_id, getcrmroleid()
+          WHERE NEW.emp_cntct_id IS NOT NULL;
+        EXIT;
+      EXCEPTION WHEN unique_violation THEN
+            -- do nothing, and loop to try the UPDATE again
+      END;
+    END LOOP;
+
+    /* TODO: default characteristic assignments based on empgrp? */
   END IF;
 
   -- Timestamps
@@ -59,45 +85,20 @@ CREATE TRIGGER empBeforeTrigger
   EXECUTE PROCEDURE _empBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _empAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _newcrmacctname TEXT;
-
+  _crmacctid  INTEGER;
 BEGIN
 
-  IF (TG_OP = 'INSERT') THEN
-    -- http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
-    LOOP
-      UPDATE crmacct SET crmacct_emp_id=NEW.emp_id,
-                         crmacct_name=NEW.emp_name
-       WHERE crmacct_number=NEW.emp_code;
-      IF (FOUND) THEN
-        EXIT;
-      END IF;
-      BEGIN
-        INSERT INTO crmacct(crmacct_number,  crmacct_name,    crmacct_active,
-                            crmacct_type,    crmacct_emp_id,  crmacct_cntct_id_1
-                  ) VALUES (NEW.emp_code,    NEW.emp_name,    NEW.emp_active,
-                            'I',             NEW.emp_id,      NEW.emp_cntct_id);
-        EXIT;
-      EXCEPTION WHEN unique_violation THEN
-            -- do nothing, and loop to try the UPDATE again
-      END;
-    END LOOP;
-
-    UPDATE salesrep SET salesrep_emp_id = NEW.emp_id
-    WHERE salesrep_number = NEW.emp_code;
-
-    /* TODO: default characteristic assignments based on empgrp? */
-
-  ELSIF (TG_OP = 'UPDATE') THEN
+  IF (TG_OP = 'UPDATE' AND OLD.emp_crmacct_id=NEW.emp_crmacct_id) THEN
     UPDATE crmacct SET crmacct_number = NEW.emp_code
-    WHERE ((crmacct_emp_id=NEW.emp_id)
+    WHERE ((crmacct_id=NEW.emp_crmacct_id)
       AND  (crmacct_number!=NEW.emp_code));
 
     UPDATE crmacct SET crmacct_name = NEW.emp_name
-    WHERE ((crmacct_emp_id=NEW.emp_id)
+    WHERE ((crmacct_id=NEW.emp_crmacct_id)
       AND  (crmacct_name!=NEW.emp_name));
 
   END IF;
@@ -155,18 +156,12 @@ CREATE TRIGGER empAfterTrigger
   EXECUTE PROCEDURE _empAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _empBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainEmployees')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Employees.';
   END IF;
-
-  UPDATE crmacct SET crmacct_emp_id = NULL
-   WHERE crmacct_emp_id = OLD.emp_id;
-
-  UPDATE salesrep SET salesrep_emp_id = NULL
-   WHERE salesrep_emp_id = OLD.emp_id;
 
   DELETE FROM docass WHERE docass_source_id = OLD.emp_id AND docass_source_type = 'EMP';
   DELETE FROM docass WHERE docass_target_id = OLD.emp_id AND docass_target_type = 'EMP';
@@ -183,7 +178,7 @@ CREATE TRIGGER empBeforeDeleteTrigger
   EXECUTE PROCEDURE _empBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _empAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (fetchMetricBool('EmployeeChangeLog')) THEN

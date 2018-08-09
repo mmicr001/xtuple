@@ -58,16 +58,7 @@ Here's how you can use CRUD to create a model to use for your own tests:
   exports.quoteData = {
     recordType: "XM.Quote",
     autoTestAttributes: true,
-    createHash: quote,
-    /**
-      An extra bit of work we have to do after the createHash fields are set:
-      create a valid line item.
-     */
-    beforeSaveActions: [{it: 'sets up a valid line item',
-      action: require("../specs/sales_order").getBeforeSaveAction("XM.QuoteLine")}],
-    updateHash: {
-      calculateFreight: false
-    }
+    createHash: quote
   };
 
 }());

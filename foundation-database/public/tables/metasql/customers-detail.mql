@@ -1,13 +1,18 @@
 -- Group: customers
 -- Name:  detail
 -- Notes: 
---        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT DISTINCT ON ( cust_number ) 
   cust_id, cust_custtype_id, 
   cust_active, cust_number, cust_name,
   custtype_code,
+  formatBoolYN(cust_active) as f_active,
+  formatAddr(bill_addr.addr_id) AS f_bill_addr,
+  formatAddr(corr_addr.addr_id) AS f_corr_addr,
+  bill_cntct.cntct_name AS bill_cntct_name,
+  corr_cntct.cntct_name AS corr_cntct_name,
   CASE cust_creditstatus WHEN 'W' THEN <? value('creditwarn')?>
 			WHEN 'H' THEN <? value('credithold')?>
 			WHEN 'G' THEN ''  -- Good Status
@@ -16,8 +21,8 @@ SELECT DISTINCT ON ( cust_number )
   bill_cntct.cntct_first_name AS bill_first_name,
   bill_cntct.cntct_last_name AS bill_last_name,
   bill_cntct.cntct_title AS bill_title,
-  bill_cntct.cntct_phone AS bill_phone,
-  bill_cntct.cntct_fax AS bill_fax,
+  getcontactphone(bill_cntct.cntct_id, 'Office') AS bill_phone,
+  getcontactphone(bill_cntct.cntct_id, 'Fax') AS bill_fax,
   bill_cntct.cntct_email AS bill_email,
   bill_addr.addr_line1 AS bill_line1,
   bill_addr.addr_line2 AS bill_line2,
@@ -28,8 +33,8 @@ SELECT DISTINCT ON ( cust_number )
   bill_addr.addr_country AS bill_country,
   corr_cntct.cntct_first_name AS corr_first_name,
   corr_cntct.cntct_last_name AS corr_last_name,
-  corr_cntct.cntct_phone AS corr_phone,
-  corr_cntct.cntct_fax AS corr_fax,
+  getcontactphone(corr_cntct.cntct_id, 'Office') AS corr_phone,
+  getcontactphone(corr_cntct.cntct_id, 'Fax') AS corr_fax,
   corr_cntct.cntct_email AS corr_email,
   corr_addr.addr_line1 AS corr_line1,
   corr_addr.addr_line2 AS corr_line2,
@@ -80,7 +85,7 @@ WHERE true
        OR (cust_name ~* <? value("search_pattern") ?>)
        OR (custtype_code ~* <? value("search_pattern") ?>)
        OR (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_cntct.cntct_phone,'') || ' ' || COALESCE(bill_cntct.cntct_phone2,'') || ' ' || COALESCE(bill_cntct.cntct_fax, '') ~* <? value("search_pattern") ?>)
+       OR (phonejson(bill_cntct.cntct_id)::TEXT ~* <? value("search_pattern") ?>)
        OR (COALESCE(bill_cntct.cntct_email, '') ~* <? value("search_pattern") ?>)
        OR (COALESCE(bill_addr.addr_line1,'') || ' ' || COALESCE(bill_addr.addr_line2,'') || ' ' || COALESCE(bill_addr.addr_line3,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(bill_addr.addr_city,'') ~* <? value("search_pattern") ?>)
@@ -88,7 +93,7 @@ WHERE true
        OR (COALESCE(bill_addr.addr_postalcode,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(bill_addr.addr_country,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(corr_cntct.cntct_first_name,'') || ' ' || COALESCE(corr_cntct.cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_cntct.cntct_phone,'') || ' ' || COALESCE(corr_cntct.cntct_phone2,'') || ' ' || COALESCE(corr_cntct.cntct_fax, '') ~* <? value("search_pattern") ?>)
+       OR (phonejson(corr_cntct.cntct_id)::TEXT ~* <? value("search_pattern") ?>)
        OR (COALESCE(corr_cntct.cntct_email, '') ~* <? value("search_pattern") ?>)
        OR (COALESCE(corr_addr.addr_line1,'') || ' ' || COALESCE(corr_addr.addr_line2,'') || ' ' || COALESCE(corr_addr.addr_line3,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(corr_addr.addr_city,'') ~* <? value("search_pattern") ?>)
@@ -108,13 +113,16 @@ WHERE true
 <? if exists("custtype_code_pattern") ?>
   AND (custtype_code ~* <? value("custtype_code_pattern") ?>)
 <? endif ?>
+<? if exists("custgrp") ?>
+  AND cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem WHERE groupsitem_groups_id = <? value("custgrp") ?>)
+<? endif ?>
 <? if exists("cntct_name_pattern") ?>
   AND (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?> 
    OR  COALESCE(corr_cntct.cntct_first_name,'') || ' ' || COALESCE(corr_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(bill_cntct.cntct_phone,'') || ' ' || COALESCE(bill_cntct.cntct_phone2,'') || ' ' || COALESCE(bill_cntct.cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>
-   OR  COALESCE(corr_cntct.cntct_phone,'') || ' ' || COALESCE(corr_cntct.cntct_phone2,'') || ' ' || COALESCE(corr_cntct.cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND (phonejson(bill_cntct.cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>
+   OR  phonejson(corr_cntct.cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(bill_cntct.cntct_email,'') ~* <? value("cntct_email_pattern") ?>

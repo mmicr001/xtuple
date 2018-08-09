@@ -1,23 +1,32 @@
 -- Group: contacts
 -- Name: detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number) 
+<? if exists("hasContext") ?>
+SELECT * FROM (
+<? endif ?>
+
+  SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0,
+                      cntct_last_name, cntct_first_name, cntct_number)
   cntct_id AS id
+<? if exists("hasContext") ?>
+, crmrole_sort, crmrole_name AS crmrole
+<? endif ?>
 <? if not exists("idOnly") ?> 
 , addr_id AS altId,
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
-  crmacct_id, crmacct_number, crmacct_name,
-  COALESCE(crmacct_cust_id,-1) > 0 AS cust_qtdisplayrole,
-  crmacct_cust_id AS cust,
-  COALESCE(crmacct_prospect_id,-1) > 0 AS prospect_qtdisplayrole,
-  crmacct_prospect_id AS prospect,
-  cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, cntct_phone,
-  cntct_phone2, cntct_fax, cntct_email, cntct_webaddr, cntct_created, cntct_lastupdated,
-  mrkd_id IS NOT NULL AS marked
+  regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
+  cntct_active,
+  cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
+  getContactPhone(cntct_id, 'Office') AS contact_phone,
+  getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
+  getContactPhone(cntct_id, 'Fax') AS contact_phone3,
+  cntct_email, cntct_webaddr,
+  min(cntct_created), max(cntct_lastupdated),
+  EXISTS(SELECT 1 FROM mrkd WHERE mrkd_target_type = 'T' and mrkd_target_id = cntct_id) AS marked
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
 <? endforeach ?>
@@ -29,14 +38,17 @@ SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0, cntct
 <? endforeach ?>
 <? endif ?>
 <? if exists("hasContext") ?>
-FROM cntct
+  FROM cntct
+  LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+  LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
+  LEFT OUTER JOIN crmrole ON (crmrole_id=crmacctcntctass_crmrole_id)
 <? else ?>
 FROM cntct()
+  LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+  LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
 <? endif ?>
-  LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id) 
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
   LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
-  LEFT OUTER JOIN mrkd ON (mrkd_target_type='T' AND mrkd_target_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='CNTCT') 
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cntct_id)
@@ -69,7 +81,7 @@ WHERE true
  (crmacct_number ~* <? value("search_pattern") ?>)
   OR (crmacct_name ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+  OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntcteml_email,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
@@ -84,11 +96,14 @@ WHERE true
 <? if exists("crmacct_id") ?>
   AND ( (crmacct_id=<? value("crmacct_id")?>) OR (crmacct_parent_id=<? value("crmacct_id")?>) )
 <? endif ?>
+<? if exists("cntctgrp") ?>
+  AND cntct_id IN (SELECT groupsitem_reference_id FROM cntctgrpitem WHERE groupsitem_groups_id=<? value("cntctgrp") ?>)
+<? endif ?>
 <? if exists("cntct_name_pattern") ?>
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(cntcteml_email,'') ~* <? value("cntct_email_pattern") ?>)
@@ -130,4 +145,32 @@ WHERE true
   AND cntct_lastupdated::DATE <= <? value("updateEndDate") ?>
 <? endif ?>
 <? literal("charClause") ?>
-ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc;
+
+GROUP BY cntct_id, cntct_number, cntcteml_primary
+<? if exists("hasContext") ?>
+    , crmrole_sort, crmrole_name
+<? endif ?>
+<? if not exists("idOnly") ?> 
+  ,addr_id,addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
+  addr_country, addr_notes, addr_number,
+  cntct_active, cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
+  contact_phone,contact_phone2,contact_phone3,
+  cntct_email, cntct_webaddr
+<? foreach("char_id_text_list") ?>
+  , charass_alias<? literal("char_id_text_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+  , charass_alias<? literal("char_id_list_list") ?>.charass_value
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+  , charass_alias<? literal("char_id_date_list") ?>.charass_value::date
+<? endforeach ?>
+<? endif ?>
+ ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0,
+         cntct_last_name, cntct_first_name, cntct_number,
+         cntcteml_primary desc
+<? if exists("hasContext") ?>
+) foo
+ORDER BY crmrole_sort
+<? endif ?>
+;

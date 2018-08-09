@@ -61,19 +61,19 @@ formatExtPrice(round((noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturn
                                WHERE (custtype_code ~ &lt;? value("custtype_pattern") ?>)))
   &lt;? endif ?>
   &lt;? if exists("custgrp") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem))
   &lt;? endif ?>
   &lt;? if exists("custgrp_id") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrpitem
-                     WHERE (custgrpitem_custgrp_id=&lt;? value("custgrp_id") ?>)))
+                     WHERE (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)))
   &lt;? endif ?>
   &lt;? if exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT custgrpitem_cust_id
+    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
                      FROM custgrp, custgrpitem
-                     WHERE ( (custgrpitem_custgrp_id=custgrp_id)
-                       AND   (custgrp_name ~ &lt;? value("custgrp_pattern") ?>) )) )
+                     WHERE ( (groupsitem_groups_id=custgrp_id)
+                       AND   (groups_name ~ &lt;? value("custgrp_pattern") ?>) )) )
   &lt;? endif ?>
 
   &lt;? if exists("item_id") ?>

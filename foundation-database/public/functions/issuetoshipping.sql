@@ -87,9 +87,12 @@ BEGIN
     IF ( SELECT COALESCE(itemsite_autoreg, FALSE)
          FROM coitem JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
          WHERE (coitem_id=pitemid) ) THEN
-      SELECT COALESCE(crmacct_cntct_id_1, -1) INTO _cntctid
+      SELECT COALESCE(crmacctcntctass_cntct_id, -1) INTO _cntctid
       FROM coitem JOIN cohead ON (cohead_id=coitem_cohead_id)
-                  JOIN crmacct ON (crmacct_cust_id=cohead_cust_id)
+                  JOIN custinfo ON (cohead_cust_id=cust_id)
+                  JOIN crmacct ON (crmacct_id=cust_crmacct_id)
+                  LEFT OUTER JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id
+                                                 AND crmacctcntctass_crmrole_id=getcrmroleid('Primary'))
       WHERE (coitem_id=pitemid);
       IF (_cntctid = -1) THEN
         RETURN -15;

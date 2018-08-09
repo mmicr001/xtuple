@@ -1,7 +1,7 @@
 -- Group: contact
 -- Name:  uses
 -- Notes: Find and report uses of the contact
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if not exists('core') ?>
@@ -12,19 +12,14 @@ FROM (
 <? endif ?>
   SELECT crmacct_id AS type_id, 1 AS type_code, <? value("crmacct") ?> AS type,
          crmacct_number AS number,
-         crmacct_name AS name, <? value("primary") ?> AS role,
+         crmacct_name AS name, crmrole_name AS role,
          (crmacct_active) AS active,
          crmacct_owner_username AS owner
-    FROM crmacct WHERE (crmacct_cntct_id_1=<? value("id") ?>)
-  
-  UNION ALL
-  SELECT crmacct_id AS type_id, 2 AS type_code, <? value("crmacct") ?> AS type,
-         crmacct_number AS number,
-         crmacct_name AS name, <? value("secondary") ?> AS role,
-         (crmacct_active) AS active,
-         crmacct_owner_username AS owner
-    FROM crmacct WHERE (crmacct_cntct_id_2=<? value("id") ?>)
-  
+    FROM crmacct 
+    JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id)
+    JOIN crmrole ON (crmacctcntctass_crmrole_id=crmrole_id)
+    WHERE (crmacctcntctass_cntct_id=<? value("id") ?>)
+
   UNION ALL
   SELECT cust_id AS type_id, 3 AS type_code, <? value("cust") ?> AS type,
          cust_number AS number,
@@ -56,15 +51,7 @@ FROM (
          (vend_active) AS active,
          '' AS owner
     FROM vendinfo WHERE (vend_cntct2_id=<? value("id") ?>)
-  
-  UNION ALL
-  SELECT prospect_id AS type_id, 7 AS type_code, <? value("prospect") ?> AS type,
-         prospect_number AS number,
-         prospect_name AS name, '' AS role,
-         (prospect_active) AS active,
-         '' AS owner
-    FROM prospect WHERE (prospect_cntct_id=<? value("id") ?>)
-  
+   
   UNION ALL
   SELECT shipto_id AS type_id, 8 AS type_code, <? value("shipto") ?> AS type,
          shipto_num AS number,
@@ -189,13 +176,14 @@ FROM (
 <? endif ?>
 
   UNION ALL
-  SELECT todoitem_id, 21 AS altId, <? value("todo") ?> AS type,
-         todoitem_seq::TEXT AS number,
-         todoitem_name AS name, '' AS role,
-         (todoitem_completed_date IS NULL) AS active,
-         todoitem_owner_username AS owner
-    FROM todoitem
-   WHERE todoitem_cntct_id=<? value("id") ?>
+  SELECT task_id, 21 AS altId, <? value("todo") ?> AS type,
+         task_number AS number,
+         task_name AS name, '' AS role,
+         (task_completed_date IS NULL) AS active,
+         task_owner_username AS owner
+    FROM task
+   WHERE task_parent_id=<? value("id") ?>
+     AND task_parent_type = 'T'
 
 <? if exists("showOrders") ?>
   <? if exists("tohead") ?>

@@ -127,7 +127,7 @@ var _       = require('underscore'),
 
     it("should verify the account and customer changed", function (done) {
       var sql = "select crmacct_name, cust_name"                            +
-                "  from crmacct join custinfo on crmacct_cust_id = cust_id" +
+                "  from crmacct join custinfo on cust_crmacct_id = crmacct_id" +
                 " where crmacct_id = $1;",
           options = _.extend({}, adminCred, { parameters: [ crmacctid ]});
       datasource.query(sql, options, function (err, res) {
@@ -187,8 +187,8 @@ var _       = require('underscore'),
     it("should verify the account, cust, vend all changed", function (done) {
       var sql = "select crmacct_name, cust_name, vend_name"     +
                 "  from crmacct"                                +
-                "  join custinfo on crmacct_cust_id = cust_id"  +
-                "  join vendinfo on crmacct_vend_id = vend_id"  +
+                "  join custinfo on cust_crmacct_id = crmacct_id"  +
+                "  join vendinfo on vend_crmacct_id = crmacct_id"  +
                 " where crmacct_id = $1;",
           options = _.extend({}, adminCred, { parameters: [ crmacctid ]});
       datasource.query(sql, options, function (err, res) {

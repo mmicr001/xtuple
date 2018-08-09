@@ -8,16 +8,16 @@
     e.emp_number::varchar 	AS number, 
     e.emp_active 		AS active, 
     e.emp_startdate 		AS start_date, 
-    cntct.cntct_number 	AS contact_number, 
+    cntct.cntct_number    	AS contact_number, 
     cntct.cntct_honorific 	AS honorific, 
     cntct.cntct_first_name 	AS first, 
-    cntct.cntct_middle 	AS middle, 
+    cntct.cntct_middle 	        AS middle, 
     cntct.cntct_last_name 	AS last, 
-    cntct.cntct_suffix 	AS suffix, 
-    cntct.cntct_title 		AS job_title, 
-    cntct.cntct_phone 		AS voice, 
-    cntct.cntct_phone2 	AS alternate, 
-    cntct.cntct_fax 		AS fax, 
+    cntct.cntct_suffix   	AS suffix, 
+    cntct.cntct_title 		AS job_title,
+    getContactPhone(cntct.cntct_id, 'Office') AS voice,
+    getContactPhone(cntct.cntct_id, 'Mobile') AS alternate,
+    getContactPhone(cntct.cntct_id, 'Fax') AS fax,
     cntct.cntct_email 		AS email, 
     cntct.cntct_webaddr 	AS web, 
     (''::TEXT) 			AS contact_change, 
@@ -68,15 +68,15 @@
          ELSE 'Error'
    	END AS billing_period
   FROM emp e
-         JOIN crmacct           ON (e.emp_id = crmacct_emp_id)
+         JOIN crmacct           ON (e.emp_crmacct_id = crmacct_id)
    	 LEFT JOIN cntct 	ON (e.emp_cntct_id = cntct.cntct_id)
    	 LEFT JOIN addr 	ON (cntct.cntct_addr_id = addr.addr_id)
    	 LEFT JOIN whsinfo 	ON (e.emp_warehous_id = whsinfo.warehous_id)
    	 LEFT JOIN emp m 	ON (e.emp_mgr_emp_id = m.emp_id)
    	 LEFT JOIN dept 	ON (e.emp_dept_id = dept.dept_id)
    	 LEFT JOIN shift 	ON (e.emp_shift_id = shift.shift_id)
-   	 LEFT JOIN salesrep     ON (crmacct_salesrep_id = salesrep_id)
-   	 LEFT JOIN vendinfo     ON (crmacct_vend_id = vend_id)
+   	 LEFT JOIN salesrep     ON (crmacct_id = salesrep_crmacct_id)
+   	 LEFT JOIN vendinfo     ON (crmacct_id = vend_crmacct_id)
    	 LEFT JOIN image 	ON (e.emp_image_id = image.image_id)
    	 LEFT JOIN curr_symbol 	ON (e.emp_wage_curr_id = curr_symbol.curr_id);
 
@@ -127,9 +127,7 @@ CREATE OR REPLACE RULE "_INSERT" AS ON INSERT TO api.employee DO INSTEAD
       			new.middle,
       			new.last,
       			new.suffix,
-      			new.voice,
-      			new.alternate,
-      			new.fax,
+                        buildSimplePhoneJson(NEW.voice, NEW.alternate, NEW.fax),
       			new.email,
       			new.web,
       			new.job_title,
@@ -193,9 +191,7 @@ CREATE OR REPLACE RULE "_UPDATE" AS ON UPDATE TO api.employee DO INSTEAD
 							 	new.middle, 
 							 	new.last, 
 							 	new.suffix, 
-							 	new.voice,
-							 	new.alternate,
-							 	new.fax,
+							 	buildSimplePhoneJson(NEW.voice, NEW.alternate, NEW.fax),
 							 	new.email,
 							 	new.web,
 							 	new.job_title,

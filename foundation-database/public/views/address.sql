@@ -7,27 +7,30 @@ SELECT addr.*,
   LEFT OUTER JOIN (
     SELECT cntct_addr_id AS join_id, crmacct_id, crmacct_number, crmacct_name
     FROM cntct
-    JOIN crmacct ON (cntct_crmacct_id=crmacct_id)
+    JOIN crmacctcntctass ON (cntct_id=crmacctcntctass_cntct_id)
+    JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id)
     UNION
     -- Vendor
     SELECT vend_addr_id, crmacct_id, crmacct_number, crmacct_name
     FROM vendinfo
-    JOIN crmacct ON (vend_id=crmacct_vend_id)
+    JOIN crmacct ON (vend_crmacct_id=crmacct_id)
     UNION
     -- Vendor Addresses
     SELECT vendaddr_addr_id, crmacct_id, crmacct_number, crmacct_name
     FROM vendaddrinfo
-    JOIN crmacct ON (vendaddr_vend_id=crmacct_vend_id)
+    JOIN vendinfo ON (vendaddr_vend_id=vend_id)
+    JOIN crmacct ON (vend_crmacct_id=crmacct_id)
     UNION
     -- Tax Authority
     SELECT taxauth_addr_id, crmacct_id, crmacct_number, crmacct_name
     FROM taxauth
-    JOIN crmacct ON (taxauth_id=crmacct_taxauth_id)
+    JOIN crmacct ON (taxauth_crmacct_id=crmacct_id)
     UNION
     -- Customer Ship-to
     SELECT shipto_addr_id, crmacct_id, crmacct_number, crmacct_name
     FROM shiptoinfo
-    JOIN crmacct ON (shipto_cust_id=crmacct_cust_id)
+    JOIN custinfo ON (shipto_cust_id=cust_id)
+    JOIN crmacct ON (cust_crmacct_id=crmacct_id)
   ) AS addresses ON addr_id = join_id
 ;
 

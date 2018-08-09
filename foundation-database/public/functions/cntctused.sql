@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION cntctused(integer) RETURNS boolean AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCntctId ALIAS FOR $1;
@@ -19,9 +19,10 @@ BEGIN
     AND conrelid=con.oid
     AND f.relname = 'cntct'
     AND con.relnamespace=pg_namespace.oid
-    AND con.relname NOT IN ('cntctaddr', 'cntctdata', 'cntcteml',
+    AND con.relname NOT IN ('cntcteml', 'cntctphone',
                             'cohead',    'pohead',    'quhead',   'tohead',
-                            'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist')
+                            'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist',
+                            'crmacctcntctass')
   LOOP
     -- Validate
     IF (ARRAY_UPPER(_fk.seq,1) > 1) THEN

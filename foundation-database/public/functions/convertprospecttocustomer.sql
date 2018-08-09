@@ -55,7 +55,7 @@ BEGIN
     _p.prospect_active,
     _p.prospect_number,
     _p.prospect_name,
-    _p.prospect_cntct_id,
+    getcrmaccountcontact(_p.prospect_crmacct_id),
     _p.prospect_taxzone_id,
     _p.prospect_comments,
     'G',
@@ -81,6 +81,11 @@ BEGIN
     false
     FROM salesrep
    WHERE salesrep_id = COALESCE(_p.prospect_salesrep_id, FetchMetricValue('DefaultSalesRep'));
+
+  UPDATE charass SET charass_target_type = 'C'
+  WHERE charass_target_type = 'PSPCT'
+    AND charass_target_id = pProspectId
+    AND charass_char_id IN (SELECT charuse_char_id FROM charuse WHERE charuse_target_type = 'C');
 
   DELETE FROM prospect WHERE prospect_id = pProspectId;
 

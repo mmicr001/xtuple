@@ -24,7 +24,7 @@
        formatDate(orderdate) AS f_orderdate,
        custponumber AS f_ponumber,
        cust_name AS f_custname,
-       cntct_phone AS f_custphone
+       getcontactphone(cntct_id, 'Office') AS f_custphone
   FROM custinfo JOIN cntct ON (cust_cntct_id=cntct_id), (SELECT shiphead_number,
                      shiphead_tracknum,
                      shiphead_freight,

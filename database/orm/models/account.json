@@ -3,7 +3,7 @@
     "context":"xtuple",
     "nameSpace":"XM",
     "type":"Account",
-    "table":"crmacct",
+    "table":"xt.crmacctinfo",
     "isRest":true,
     "lockable":true,
     "idSequenceName": "crmacct_crmacct_id_seq",
@@ -96,7 +96,7 @@
         "toOne":{
           "isNested":true,
           "type":"ContactRelation",
-          "column":"crmacct_cntct_id_1",
+          "column":"primary_contact",
           "inverse":"id"
         }
       },
@@ -105,7 +105,7 @@
         "toOne":{
           "isNested":true,
           "type":"ContactRelation",
-          "column":"crmacct_cntct_id_2",
+          "column":"secondary_contact",
           "inverse":"id"
         }
       },
@@ -133,43 +133,6 @@
           "type":"UserAccountRelation",
           "column":"crmacct_usr_username",
           "inverse":"username"
-        }
-      },
-      {
-        "name":"employee",
-        "toOne":{
-          "isNested": true,
-          "type":"EmployeeRelation",
-          "column":"crmacct_emp_id"
-        }
-      },
-      {
-        "name":"salesRep",
-        "toOne":{
-          "type":"SalesRep",
-          "column":"crmacct_salesrep_id"
-        }
-      },
-      {
-        "name":"taxAuthority",
-        "toOne":{
-          "isNested":true,
-          "type":"TaxAuthorityRelation",
-          "column":"crmacct_taxauth_id"
-        }
-      },
-      {
-        "name":"partner",
-        "attr":{
-          "type":"Number",
-          "column":"crmacct_partner_id"
-        }
-      },
-      {
-        "name":"competitor",
-        "attr":{
-          "type":"Number",
-          "column":"crmacct_competitor_id"
         }
       },
       {
@@ -600,7 +563,7 @@
     "context":"xtuple",
     "nameSpace":"XM",
     "type":"AccountListItem",
-    "table":"crmacct",
+    "table":"xt.crmacctinfo",
     "isRest":true,
     "comment":"Account List Item Map",
     "privileges":{
@@ -657,7 +620,7 @@
         "toOne":{
           "isNested":true,
           "type":"ContactRelation",
-          "column":"crmacct_cntct_id_1",
+          "column":"primary_contact",
           "inverse":"id"
         }
       },

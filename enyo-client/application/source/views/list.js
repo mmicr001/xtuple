@@ -820,38 +820,6 @@ trailing:true, white:true, strict: false*/
   XV.registerModelList("XM.CustomerGroupRelation", "XV.CustomerGroupList");
 
   // ..........................................................
-  // CUSTOMER PROSPECT
-  //
-
-  enyo.kind({
-    name: "XV.CustomerProspectList",
-    kind: "XV.CustomerList",
-    label: "_customerProspect".loc(),
-    collection: "XM.CustomerProspectListItemCollection",
-    components: [
-      {kind: "XV.ListItem", components: [
-        {kind: "FittableColumns", components: [
-          {kind: "XV.ListColumn", classes: "name-column", components: [
-            {kind: "XV.ListAttr", attr: "number", isKey: true},
-            {kind: "XV.ListAttr", attr: "name"}
-          ]},
-          {kind: "XV.ListColumn", classes: "right-column", components: [
-            {kind: "XV.ListAttr", attr: "contact.phone", },
-            {kind: "XV.ListAttr", attr: "contact.primaryEmail"}
-          ]},
-          {kind: "XV.ListColumn", fit: true, components: [
-            {kind: "XV.ListAttr", attr: "contact.name",
-              placeholder: "_noContact".loc()},
-            {kind: "XV.ListAttr", attr: "contact.address.formatShort"}
-          ]}
-        ]}
-      ]}
-    ],
-  });
-
-  XV.registerModelList("XM.CustomerProspectRelation", "XV.CustomerProspectList");
-
-  // ..........................................................
   // CUSTOMER SHIPTO
   //
   enyo.kind({
@@ -1804,79 +1772,6 @@ trailing:true, white:true, strict: false*/
 
   XV.registerModelList("XM.ProjectListItem", "XV.ProjectList");
   XV.registerModelList("XM.ProjectRelation", "XV.ProjectList");
-
-  // ..........................................................
-  // PROSPECT
-  //
-
-  enyo.kind({
-    name: "XV.ProspectList",
-    kind: "XV.List",
-    label: "_prospects".loc(),
-    collection: "XM.ProspectRelationCollection",
-    events: {
-      onWorkspace: ""
-    },
-    actions: [{
-      name: "convert",
-      method: "convertProspect",
-      privilege: "MaintainCustomerMasters",
-      isViewMethod: true
-    }],
-    query: {orderBy: [
-      {attribute: 'number'}
-    ]},
-    parameterWidget: "XV.ProspectListParameters",
-    components: [
-      {kind: "XV.ListItem", components: [
-        {kind: "FittableColumns", components: [
-          {kind: "XV.ListColumn", classes: "first", components: [
-            {kind: "FittableColumns", components: [
-              {kind: "XV.ListAttr", attr: "number", isKey: true},
-              {kind: "XV.ListAttr", attr: "contact.phone", fit: true,
-                classes: "right"}
-            ]},
-            {kind: "FittableColumns", components: [
-              {kind: "XV.ListAttr", attr: "name"},
-              {kind: "XV.ListAttr", attr: "contact.primaryEmail", classes: "right"}
-            ]}
-          ]},
-          {kind: "XV.ListColumn", classes: "last", fit: true, components: [
-            {kind: "XV.ListAttr", attr: "contact.name",
-              placeholder: "_noContact".loc()},
-            {kind: "XV.ListAttr", attr: "contact.address"}
-          ]}
-        ]}
-      ]}
-    ],
-    /**
-      Convert the prospect from the list into a customer model. The way we
-      do this is to open a customer workspace and then call the model method
-      convertFromProspect AFTER the workspace is initialized. That way
-      the view and the model get bound together correctly. The user will have
-      to fill out some customer-specific fields, and when they save a new
-      customer will be created.
-     */
-    convertProspect: function (inEvent) {
-      var model = inEvent.model,
-        modelId = model.id,
-        success = function () {
-          this.getValue().convertFromProspect(modelId);
-        };
-
-      this.doWorkspace({
-        workspace: "XV.CustomerWorkspace",
-        attributes: {
-          name: model.get("name"),
-          number: model.get("number")
-        },
-        success: success,
-        allowNew: false
-      });
-    }
-  });
-
-  XV.registerModelList("XM.ProspectRelation", "XV.ProspectList");
 
   // ..........................................................
   // SALES EMAIL PROFILE

@@ -1,0 +1,21 @@
+-- Group: addressMerge
+-- Name: populate
+-- Notes: Queries selected address info
+--        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT DISTINCT ON (addr_id) addr_id, 
+  addr_line1, addr_line2, addr_line3, addr_city, addr_state,
+  addr_postalcode, addr_country, addr_active, addr_notes, addr_number,
+  CASE WHEN addrsel_mrg_addr_line1 THEN 'emphasis' END AS addr_line1_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_line2 THEN 'emphasis' END AS addr_line2_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_line3 THEN 'emphasis' END AS addr_line3_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_city THEN 'emphasis' END AS addr_city_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_state THEN 'emphasis' END AS addr_state_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_postalcode THEN 'emphasis' END AS addr_postalcode_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_country THEN 'emphasis' END AS addr_country_qtforegroundrole,
+  CASE WHEN addrsel_mrg_addr_notes THEN 'emphasis' END AS addr_notes_qtforegroundrole
+
+FROM addrsel
+  JOIN addr ON (addrsel_addr_id=addr_id)
+WHERE (addrsel_target=<? value("target") ?>);

@@ -3,6 +3,12 @@
  <title>Inventory Availability by Sales Order</title>
  <name>InventoryAvailabilityBySalesOrder</name>
  <description></description>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
  <size>Letter</size>
  <portrait/>
  <topmargin>50</topmargin>
@@ -15,7 +21,7 @@
        formatDate(cohead_orderdate) AS orderdate,
        cohead_custponumber,
        cust_name,
-       cntct_phone AS cust_phone,
+       getcontactphone(cntct_id, 'Office') AS cust_phone,
        &lt;? if exists("onlyShowShortages") ?>
          text('Only Showing Shortages')
        &lt;? else ?>

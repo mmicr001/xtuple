@@ -1,0 +1,209 @@
+-- Group: orderActivityByProject
+-- Name:  tasks
+-- Notes: Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT *,
+  formatDate(due) AS f_due,
+  formatDate(assigned) AS f_assigned,
+  formatDate(started) AS f_start,
+  formatDate(completed) AS f_completed,
+  'curr' AS qty_xtnumericrole,
+  'curr' AS value_xtnumericrole,
+  CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'error' END AS hrs_balance_qtforegroundrole,
+  CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'error' END AS exp_balance_qtforegroundrole
+FROM (
+
+----- TASKS -----
+SELECT -1 AS id, 
+       3 AS type,
+       '0' AS subtype,
+       1 AS section,
+       <? value('tasks') ?> AS section_qtdisplayrole,
+       <? value('tasks') ?> AS number,
+       NULL::text AS status,
+       NULL::text AS name,
+       NULL::text AS descrip,
+       NULL::date AS due,
+       NULL::date AS assigned,
+       NULL::date AS started,
+       NULL::date AS completed,
+       NULL::numeric AS hrs_budget,
+       NULL::numeric AS hrs_actual,
+       NULL::numeric AS hrs_balance,
+       NULL::numeric AS exp_budget,
+       NULL::numeric AS exp_actual,
+       NULL::numeric AS exp_balance,
+        
+       NULL::text AS due_qtforegroundrole,
+       0 AS xtindentrole,
+       ARRAY[1] AS path_info
+UNION ALL
+
+SELECT * FROM (
+  WITH RECURSIVE task_hier AS (
+     SELECT task_id, task_parent_task_id, 1 AS level, ARRAY[task_id] AS path_info
+     FROM task 
+     WHERE task_parent_task_id IS NULL
+       AND task_prj_id=<? value("prj_id") ?>
+     UNION ALL
+     SELECT c.task_id, c.task_parent_task_id, p.level + 1, p.path_info||c.task_id
+     FROM task c
+      JOIN task_hier p ON c.task_parent_task_id = p.task_id
+     WHERE task_prj_id=<? value("prj_id") ?>
+  )
+  SELECT t.task_id, 5 AS "type", '0'::TEXT AS subtype, 1 AS section, 
+       <? value('tasks') ?>::TEXT AS section_qtdisplayrole,
+       t.task_number, 
+       CASE                       
+           WHEN task_status = 'C' THEN <? value('complete') ?>
+           WHEN task_status = 'O' THEN <? value('inprocess') ?>
+           WHEN task_status = 'P' THEN <? value('planning') ?>
+           WHEN task_status = 'N' THEN <? value('new') ?>
+           WHEN task_status = 'D' THEN <? value('deferred') ?>
+       END AS status,
+       task_name AS name,
+       task_descrip AS descrip,
+       task_due_date AS due,
+       (SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id=t.task_id) AS assigned,
+       task_start_date AS started,
+       task_completed_date AS completed,
+       task_hours_budget AS hrs_budget,
+       task_hours_actual AS hrs_actual,
+       (task_hours_budget-task_hours_actual) AS hrs_balance,
+       task_exp_budget AS exp_budget,
+       task_exp_actual AS exp_actual,
+       (task_exp_budget-task_exp_actual) AS exp_balance,
+       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'error' 
+         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning' 
+         END AS due_qtforegroundrole,
+       level AS xtindentrole,
+       path_info
+  FROM task_hier h
+  JOIN task t ON t.task_id=h.task_id
+  WHERE (task_parent_id = <? value("prj_id") ?> AND task_parent_type='J')
+  <? if not exists("showCompleted") ?>
+    AND task_status <> 'C'
+  <? endif ?>
+  ORDER BY path_info
+) tasksub
+
+<? if exists("showIn") ?>
+UNION ALL
+----- INCIDENTS -----
+
+SELECT -1 AS id, 
+       100 AS type,
+       '0' AS subtype,
+       2 AS section,
+       <? value('incidents') ?> AS section_qtdisplayrole,
+       <? value('incidents') ?> AS number,
+       NULL::text AS status,
+       NULL::text AS name,
+       NULL::text AS descrip,
+       NULL::date AS due,
+       NULL::date AS assigned,
+       NULL::date AS started,
+       NULL::date AS completed,
+       NULL::numeric AS hrs_budget,
+       NULL::numeric AS hrs_actual,
+       NULL::numeric AS hrs_balance,
+       NULL::numeric AS exp_budget,
+       NULL::numeric AS exp_actual,
+       NULL::numeric AS exp_balance,
+        
+       NULL::text AS due_qtforegroundrole,
+       0 AS xtindentrole,
+       ARRAY[1] AS path_info
+UNION ALL
+
+SELECT incdt_id AS id,
+       105 AS type,
+       '0' AS subtype,
+       2 AS section,
+       NULL AS section_qtdisplayrole,
+       incdt_number::text AS number,
+       CASE                         
+           WHEN incdt_status = 'L' THEN <? value('closed') ?>
+           WHEN incdt_status = 'N' THEN <? value('new') ?>
+           WHEN incdt_status = 'F' THEN <? value('feedback') ?>
+           WHEN incdt_status = 'A' THEN <? value('assigned') ?>	
+           WHEN incdt_status = 'R' THEN <? value('resolved') ?>
+           WHEN incdt_status = 'C' THEN <? value('confirmed') ?>
+       END AS status,
+       incdt_number::text AS name,
+       incdt_summary AS descrip,
+       NULL::date AS due,
+       NULL::date AS assigned,
+       NULL::date AS started,
+       NULL::date AS completed,
+       NULL::numeric AS hrs_budget,
+       NULL::numeric AS hrs_actual,
+       NULL::numeric AS hrs_balance,
+       NULL::numeric AS exp_budget,
+       NULL::numeric AS exp_actual,
+       NULL::numeric AS exp_balance,
+       NULL::text AS due_qtforegroundrole,
+       2 AS xtindentrole,
+       ARRAY[1] AS path_info
+  FROM incdt
+ WHERE (incdt_prj_id = <? value("prj_id") ?> )
+<? endif ?>
+
+<? if exists("showOpp") ?>
+UNION ALL
+----- OPPORTUNITIES -----
+
+SELECT -1 AS id, 
+       110 AS type,
+       '0' AS subtype,
+       3 AS section,
+       <? value('opportunities') ?> AS section_qtdisplayrole,
+       <? value('opportunities') ?> AS number,
+       NULL::text AS status,
+       NULL::text AS name,
+       NULL::text AS descrip,
+       NULL::date AS due,
+       NULL::date AS assigned,
+       NULL::date AS started,
+       NULL::date AS completed,
+       NULL::numeric AS hrs_budget,
+       NULL::numeric AS hrs_actual,
+       NULL::numeric AS hrs_balance,
+       NULL::numeric AS exp_budget,
+       NULL::numeric AS exp_actual,
+       NULL::numeric AS exp_balance,
+        
+       NULL::text AS due_qtforegroundrole,
+       0 AS xtindentrole,
+       ARRAY[1] AS path_info
+UNION ALL
+SELECT ophead_id AS id,
+       110 AS type,
+       '0' AS subtype,
+       3 AS section,
+       NULL AS section_qtdisplayrole,
+       ophead_number::text AS number,
+       opstage_name AS status,
+       ophead_name::text AS name,
+       ophead_notes AS descrip,
+       ophead_target_date::date AS due,
+       ophead_assigned_date::date AS assigned,
+       ophead_start_date::date AS started,
+       NULL::date AS completed,
+       NULL::numeric AS hrs_budget,
+       NULL::numeric AS hrs_actual,
+       NULL::numeric AS hrs_balance,
+       NULL::numeric AS exp_budget,
+       NULL::numeric AS exp_actual,
+       NULL::numeric AS exp_balance,
+       NULL::text AS due_qtforegroundrole,
+       2 AS xtindentrole,
+       ARRAY[1] AS path_info
+  FROM ophead
+  JOIN opstage ON opstage_id=ophead_opstage_id
+ WHERE (ophead_prj_id = <? value("prj_id") ?> )
+<? endif ?>   
+
+) data
+ORDER BY section, subtype, type, path_info;

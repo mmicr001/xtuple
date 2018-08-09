@@ -922,42 +922,6 @@ trailing:true, white:true, strict:false*/
   });
 
   // ..........................................................
-  // PROSPECT
-  //
-
-  enyo.kind({
-    name: "XV.ProspectListParameters",
-    kind: "XV.ParameterWidget",
-    components: [
-      {kind: "onyx.GroupboxHeader", content: "_contact".loc()},
-      {name: "isActive", attr: "isActive", label: "_showInactive".loc(), defaultKind: "XV.CheckboxWidget",
-        getParameter: function () {
-          var param;
-          if (!this.getValue()) {
-            param = {
-              attribute: this.getAttr(),
-              operator: "=",
-              value: true
-            };
-          }
-          return param;
-        }
-      },
-      {name: "number", label: "_number".loc(), attr: "number"},
-      {name: "name", label: "_name".loc(), attr: "name"},
-      {kind: "onyx.GroupboxHeader", content: "_contact".loc()},
-      {name: "primaryEmail", label: "_primaryEmail".loc(), attr: "contact.primaryEmail"},
-      {name: "phone", label: "_phone".loc(), attr: ["contact.phone", "contact.alternate", "contact.fax"]},
-      {kind: "onyx.GroupboxHeader", content: "_address".loc()},
-      {name: "street", label: "_street".loc(), attr: ["contact.address.line1", "contact.address.line2", "contact.address.line3"]},
-      {name: "city", label: "_city".loc(), attr: "contact.address.city"},
-      {name: "state", label: "_state".loc(), attr: "contact.address.state"},
-      {name: "postalCode", label: "_postalCode".loc(), attr: "contact.address.postalCode"},
-      {name: "country", label: "_country".loc(), attr: "contact.address.country"}
-    ]
-  });
-
-  // ..........................................................
   // PURCHASE ORDER LIST
   //
 

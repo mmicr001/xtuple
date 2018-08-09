@@ -135,11 +135,6 @@ white:true*/
   XT.cacheCollection("XM.shifts", "XM.ShiftCollection", "number");
   XT.cacheCollection("XM.sources", "XM.SourceCollection");
   XT.cacheCollection("XM.states", "XM.StateCollection", "abbreviation");
-  XT.cacheCollection("XM.taxAuthorities", "XM.TaxAuthorityCollection");
-  XT.cacheCollection("XM.taxClasses", "XM.TaxClassCollection");
-  XT.cacheCollection("XM.taxTypes", "XM.TaxTypeCollection", "name");
-  XT.cacheCollection("XM.taxZones", "XM.TaxZoneCollection");
-  XT.cacheCollection("XM.taxCodes", "XM.TaxCodeCollection");
   XT.cacheCollection("XM.units", "XM.UnitCollection");
   XT.cacheCollection("XM.users", "XM.UserAccountRelationCollection", "username");
   XT.cacheCollection("XM.filters", "XM.FilterCollection");

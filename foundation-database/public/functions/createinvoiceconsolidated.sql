@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION createInvoiceConsolidated(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCustid ALIAS FOR $1;
@@ -23,7 +23,7 @@ BEGIN
                    cohead_billtoname, cohead_billtoaddress1,
                    cohead_billtoaddress2, cohead_billtoaddress3,
                    cohead_billtocity, cohead_billtostate,
-                   cohead_billtozipcode, cntct_phone AS cust_phone,
+                   cohead_billtozipcode, getcontactphone(cntct_id, 'Office') AS cust_phone,
                    cohead_billtocountry,
                    cohead_salesrep_id, cohead_commission,
                    cohead_terms_id,
@@ -136,7 +136,7 @@ BEGIN
                  AND (COALESCE(cohead_billtocity,'')         = COALESCE(_c.cohead_billtocity,''))
                  AND (COALESCE(cohead_billtostate,'')        = COALESCE(_c.cohead_billtostate,''))
                  AND (COALESCE(cohead_billtozipcode,'')      = COALESCE(_c.cohead_billtozipcode,''))
-                 AND (COALESCE(cntct_phone,'')               = COALESCE(_c.cust_phone,''))
+                 AND (COALESCE(getcontactphone(cntct_id, 'Office'),'') = COALESCE(_c.cust_phone,''))
                  AND (COALESCE(cohead_billtocountry,'')      = COALESCE(_c.cohead_billtocountry,''))
                  AND (COALESCE(cohead_salesrep_id, 0)        = COALESCE(_c.cohead_salesrep_id, 0))
                  AND (COALESCE(cohead_commission, 0)         = COALESCE(_c.cohead_commission, 0))

@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION public.formatachchecks(pbankaccntid INTEGER, -- all u
                                                   penckey TEXT)
   RETURNS SETOF achline AS
 $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _bank            RECORD;
@@ -114,7 +114,7 @@ BEGIN
                               AND checkhead_recip_id=vend_id
                               AND vend_ach_enabled)
                 JOIN curr_symbol ON (checkhead_curr_id=curr_id)
-                LEFT OUTER JOIN crmacct ON (crmacct_vend_id=vend_id)
+                LEFT OUTER JOIN crmacct ON (crmacct_id=vend_crmacct_id)
                 WHERE ((checkhead_bankaccnt_id=pbankaccntid)
                    AND (checkhead_amount > 0)
                    AND (checkhead_id=pcheckheadid OR pcheckheadid IS NULL)

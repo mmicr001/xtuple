@@ -34,6 +34,7 @@ BEGIN
     EXECUTE format('SELECT COUNT(*) + %L AS count FROM %I.%I WHERE %I = %L;',
                    _count, _fk.schemaname, _fk.tablename, _col, pAddrId)
        INTO _count;
+
   END LOOP;
 
   RETURN _count;

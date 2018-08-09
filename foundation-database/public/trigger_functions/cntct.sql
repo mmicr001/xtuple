@@ -1,11 +1,24 @@
 -- Before trigger
 CREATE OR REPLACE FUNCTION _cntctTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
   NEW.cntct_name := formatCntctName(NULL, NEW.cntct_first_name, NEW.cntct_middle, NEW.cntct_last_name, NEW.cntct_suffix);
+  IF (TG_OP = 'UPDATE' AND NEW.cntct_email = '') THEN
+    -- Delete the Contact email address
+    DELETE FROM cntcteml WHERE cntcteml_cntct_id=NEW.cntct_id
+                         AND   cntcteml_email=OLD.cntct_email;
+  END IF;
   NEW.cntct_email := lower(NEW.cntct_email);
+
+  -- Unique Email check
+  IF (fetchmetricbool('EnforceUniqueContactEmails') AND
+      EXISTS(SELECT 1 FROM cntcteml WHERE cntcteml_email = NEW.cntct_email
+                                      AND  cntcteml_cntct_id <> NEW.cntct_id)
+     ) THEN
+    RAISE EXCEPTION 'Emails are required to be unique.  You cannot use this email more than once. [xtuple: cntctEmailUnique, -1]';
+  END IF;
 
   IF (TG_OP = 'INSERT') THEN
     --- clear the number from the issue cache
@@ -32,12 +45,10 @@ CREATE TRIGGER cntcttrigger
 
 -- Before Delete trigger
 CREATE OR REPLACE FUNCTION _cntctTriggerBeforeDelete() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM cntctaddr WHERE cntctaddr_cntct_id=OLD.cntct_id;
-    DELETE FROM cntctdata WHERE cntctdata_cntct_id=OLD.cntct_id;
     DELETE FROM cntcteml  WHERE cntcteml_cntct_id=OLD.cntct_id;
     DELETE FROM docass WHERE docass_source_id = OLD.cntct_id AND docass_source_type = 'T';
     DELETE FROM docass WHERE docass_target_id = OLD.cntct_id AND docass_target_type = 'T';
@@ -79,7 +90,7 @@ CREATE TRIGGER cntcttriggerbeforedelete
 
 -- After Delete trigger
 CREATE OR REPLACE FUNCTION _cntctAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -107,7 +118,7 @@ CREATE TRIGGER cntctAfterDeleteTrigger
 
 -- After trigger
 CREATE OR REPLACE FUNCTION _cntctTriggerAfter() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntctemlid INTEGER;
@@ -120,7 +131,9 @@ BEGIN
       VALUES (
         NEW.cntct_id, true, NEW.cntct_email );
     END IF;
-    PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Created');
+    IF (fetchMetricBool('ContactChangeLog')) THEN
+      PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Created');
+    END IF;
   ELSIF (TG_OP = 'UPDATE') THEN
     IF (OLD.cntct_email != NEW.cntct_email AND length(coalesce(NEW.cntct_email,'')) > 0) THEN
       SELECT cntcteml_id INTO _cntctemlid
@@ -148,6 +161,27 @@ BEGIN
         UPDATE cntcteml SET
           cntcteml_primary=true
         WHERE (cntcteml_id=_cntctemlid);
+      END IF;
+      IF (fetchMetricBool('ContactChangeLog')) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Primary Email', OLD.cntct_email, NEW.cntct_email);
+      END IF;
+    END IF;
+
+    IF (TG_OP = 'UPDATE' AND fetchMetricBool('ContactChangeLog')) THEN
+      IF (OLD.cntct_title != NEW.cntct_title) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Job Title', OLD.cntct_title, NEW.cntct_title);
+      END IF;
+      IF (OLD.cntct_owner_username != '' AND OLD.cntct_owner_username != NEW.cntct_owner_username) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Owner', OLD.cntct_owner_username, NEW.cntct_owner_username);
+      END IF;
+      IF (OLD.cntct_name != NEW.cntct_name) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Name', OLD.cntct_name, NEW.cntct_name);
+      END IF;
+      IF (OLD.cntct_webaddr != NEW.cntct_webaddr) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Name', OLD.cntct_webaddr, NEW.cntct_webaddr);
+      END IF;
+      IF (OLD.cntct_addr_id != NEW.cntct_addr_id) THEN
+        PERFORM postComment('ChangeLog', 'T', NEW.cntct_id, 'Name', formataddr(OLD.cntct_addr_id), formataddr(NEW.cntct_addr_id));
       END IF;
     END IF;
   END IF;

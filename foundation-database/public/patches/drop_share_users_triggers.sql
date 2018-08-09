@@ -35,3 +35,24 @@ BEGIN
   END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Also drop the trigger_functions
+-- Remoived as part of xTuple 5.0 as they were interfering with the schema changes
+DO $$
+DECLARE
+  _rec  RECORD;
+BEGIN
+
+ FOR _rec IN
+   SELECT  nspname AS schemaname, p.proname
+   FROM    pg_catalog.pg_namespace n
+   JOIN    pg_catalog.pg_proc p
+   ON      p.pronamespace = n.oid
+   WHERE   p.proname ~* 'share_users_cache'
+ LOOP
+
+   EXECUTE format('SELECT dropifexists(''FUNCTION'', ''%I()'', ''%I'',true)',
+                    _rec.proname, _rec.schemaname);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;

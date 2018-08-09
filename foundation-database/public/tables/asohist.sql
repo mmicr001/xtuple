@@ -56,6 +56,10 @@ SELECT
                     'FOREIGN KEY (asohist_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('asohist', 'asohist_asohist_taxzone_id_fkey',
                     'FOREIGN KEY (asohist_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
+  xt.add_constraint('asohist', 'asohist_cust_id_fk', 
+                    'FOREIGN KEY (asohist_cust_id) REFERENCES custinfo(cust_id)', 'public'),
+  xt.add_constraint('asohist', 'asohist_salesrep_id_fk', 
+                    'FOREIGN KEY (asohist_salesrep_id) REFERENCES salesrep(salesrep_id)', 'public'),
   xt.add_constraint('asohist', 'asohist_to_curr_symbol',
                     'FOREIGN KEY (asohist_curr_id) REFERENCES curr_symbol(curr_id)', 'public');
 

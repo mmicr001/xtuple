@@ -1,15 +1,51 @@
 -- Group: prospects
 -- Name:  detail
 -- Notes: 
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT 
-  prospect.*,
-  cntct.*, addr.*
+SELECT prospect_id, prospect_crmacct_id,
+  prospect.*, prospect_created::DATE AS created,
+  opsource_name AS prospect_source,
+  cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone,
+  addr.*
+<? foreach("char_id_text_list") ?>
+       ,charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+       ,charass_alias<? literal("char_id_list_list") ?>.charass_value AS char<? literal("char_id_list_list") ?>
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+       ,charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>
+<? endforeach ?>
 FROM prospect 
-  LEFT OUTER JOIN cntct ON (prospect_cntct_id=cntct_id) 
-  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
+  LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id)) 
+  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
+  LEFT OUTER JOIN opsource ON (prospect_source_id=opsource_id)
+<? foreach("char_id_text_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> 
+          ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='PSPCT') 
+         AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=prospect_id)
+         AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> 
+          ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> 
+          ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='PSPCT') 
+         AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=prospect_id)
+         AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> 
+          ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> 
+          ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='PSPCT') 
+         AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=prospect_id)
+         AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> 
+          ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
+<? endforeach ?>
 WHERE true
 <? if not exists("showInactive") ?> 
   AND prospect_active 
@@ -23,13 +59,16 @@ WHERE true
   AND ((prospect_number ~* <? value("search_pattern") ?>)
        OR (prospect_name ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+       OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
        OR (COALESCE(addr_country,'') ~* <? value("search_pattern") ?>))
+<? endif ?>
+<? if exists("pspctgrp") ?>
+  AND prospect_id IN (SELECT groupsitem_reference_id FROM pspctgrpitem WHERE groupsitem_groups_id=<? value("pspctgrp") ?>)
 <? endif ?>
 <? if exists("prospect_number_pattern") ?>
   AND (prospect_number ~* <? value("prospect_number_pattern") ?>)
@@ -41,7 +80,7 @@ WHERE true
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
-  AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
+  AND (phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
   AND (COALESCE(cntct_email,'') ~* <? value("cntct_email_pattern") ?>)
@@ -61,7 +100,17 @@ WHERE true
 <? if exists("addr_country_pattern") ?>
   AND (COALESCE(addr_country,'') ~* <? value("addr_country_pattern") ?>)
 <? endif ?>
+<? if exists("owner") ?>
+  AND prospect_owner_username=<? value("owner") ?>
+<? endif ?>
+<? if exists("assigned") ?>
+  AND prospect_assigned_username=<? value("assigned") ?>
+<? endif ?>
+<? if exists("source") ?>
+  AND prospect_source_id=<? value("source") ?>
+<? endif ?>
 <? if exists("id") ?>
   AND (prospect_id=<? value("id") ?>
 <? endif ?>
+<? literal("charClause") ?>
 ORDER BY prospect_number; 

@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION reverseCashReceipt(INTEGER, INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCashrcptid ALIAS FOR $1;
@@ -58,7 +58,7 @@ BEGIN
           CASE WHEN (COALESCE(cashrcpt_cust_id,0) > 0) THEN
             ('Reverse Cash Receipt posting for ' || cust_number||'-'||cust_name)
           ELSE
-            'Reverse Cash Receipt posting for ' || (SELECT custgrp_name||'-'||custgrp_descrip FROM custgrp WHERE custgrp_id = cashrcpt_custgrp_id)
+            'Reverse Cash Receipt posting for ' || (SELECT groups_name||'-'||groups_descrip FROM custgrp WHERE groups_id = cashrcpt_custgrp_id)
           END AS custnote,
          cashrcpt_fundstype, cashrcpt_number, cashrcpt_docnumber,
          cashrcpt_distdate, cashrcpt_amount, cashrcpt_discount,

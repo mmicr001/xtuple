@@ -20,28 +20,33 @@
   <sql>SELECT * 
 FROM (
 SELECT 'Contact' AS type, cntct_first_name AS first,
-       cntct_last_name AS last, crmacct_number, cntct_phone AS phone,
-       cntct_email AS email, cntct_fax AS fax, addr.*
-FROM addr, cntct LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id)
+       cntct_last_name AS last, crmacct_number, getcontactphone(cntct_id, 'Office') AS phone,
+       cntct_email AS email, getcontactphone(cntct_id, 'Fax') AS fax, addr.*
+FROM addr, cntct 
+LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
+LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id)
 WHERE (cntct_addr_id=addr_id)
 UNION
 SELECT 'Ship-To' AS type, shipto_num AS first,
        shipto_name AS last, crmacct_number, '' AS phone,
        '' AS email, '' AS fax, addr.*
-FROM addr, shiptoinfo LEFT OUTER JOIN crmacct ON (shipto_cust_id=crmacct_cust_id
-)
+FROM addr, shiptoinfo 
+JOIN custinfo ON (shipto_cust_id=cust_id)
+LEFT OUTER JOIN crmacct ON (cust_crmacct_id=crmacct_id)
 WHERE (shipto_addr_id=addr_id)
 UNION
 SELECT 'Vendor' AS type, vend_number AS first,
        vend_name AS last, crmacct_number, '' AS phone,
        '' AS email, '' AS fax, addr.*
-FROM addr, vendinfo LEFT OUTER JOIN crmacct ON (vend_id=crmacct_vend_id)
+FROM addr, vendinfo LEFT OUTER JOIN crmacct ON (vend_crmacct_id=crmacct_id)
 WHERE (vend_addr_id=addr_id)
 UNION
 SELECT 'Vendor Address' AS type, vendaddr_code AS first,
        vendaddr_name AS last, crmacct_number, '' AS phone,
        '' AS email, '' AS fax, addr.*
-FROM addr, vendaddrinfo LEFT OUTER JOIN crmacct ON (vendaddr_vend_id=crmacct_vend_id)
+FROM addr, vendaddrinfo 
+JOIN vendinfo ON (vendaddr_vend_id=vend_id)
+LEFT OUTER JOIN crmacct ON (vend_crmacct_id=crmacct_id)
 WHERE (vendaddr_addr_id=addr_id)
 UNION
 SELECT 'Site' AS type, warehous_code AS first,

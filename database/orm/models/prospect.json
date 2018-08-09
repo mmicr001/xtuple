@@ -51,12 +51,10 @@
         }
       },
       {
-        "name": "contact",
-        "toOne": {
-          "isNested": true,
-          "type": "ContactRelation",
-          "column": "prospect_cntct_id",
-          "inverse": "id"
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "prospect_crmacct_id"
         }
       },
       {
@@ -87,8 +85,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_prospect_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "crmacct"
           }
         ],
         "properties": [
@@ -145,11 +143,10 @@
         }
       },
       {
-        "name": "contact",
-        "toOne": {
-          "isNested": true,
-          "type": "ContactRelation",
-          "column": "prospect_cntct_id"
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "prospect_crmacct_id"
         }
       },
       {
@@ -173,8 +170,8 @@
         "isChild": true,
         "relations": [
           {
-            "column": "crmacct_prospect_id",
-            "inverse": "id"
+            "column": "crmacct_id",
+            "inverse": "crmacct"
           }
         ],
         "properties": [

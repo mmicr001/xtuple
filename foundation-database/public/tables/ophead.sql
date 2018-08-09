@@ -22,6 +22,7 @@ SELECT
   xt.add_column('ophead', 'ophead_start_date',           'DATE', NULL, 'public'),
   xt.add_column('ophead', 'ophead_assigned_date',        'DATE', NULL, 'public'),
   xt.add_column('ophead', 'ophead_priority_id',       'INTEGER', NULL, 'public'),
+  xt.add_column('ophead', 'ophead_prj_id',             'INTEGER', NULL, 'public'),
   xt.add_column('ophead', 'ophead_number',               'TEXT', 'NOT NULL', 'public'),
   xt.add_column('ophead', 'ophead_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('ophead', 'ophead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
@@ -43,7 +44,10 @@ SELECT
   xt.add_constraint('ophead', 'ophead_ophead_optype_id_fkey',
                     'FOREIGN KEY (ophead_optype_id) REFERENCES optype(optype_id)', 'public'),
   xt.add_constraint('ophead', 'ophead_ophead_priority_id_fkey',
-                    'FOREIGN KEY (ophead_priority_id) REFERENCES incdtpriority(incdtpriority_id)', 'public');
+                    'FOREIGN KEY (ophead_priority_id) REFERENCES incdtpriority(incdtpriority_id)', 'public'),
+  xt.add_constraint('ophead', 'ophead_ophead_prj_id_fkey',
+                    'FOREIGN KEY (ophead_prj_id) REFERENCES prj(prj_id)', 'public');
+
 
 ALTER TABLE public.ophead ENABLE TRIGGER ALL;
 

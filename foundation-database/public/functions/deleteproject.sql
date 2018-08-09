@@ -1,11 +1,14 @@
+DROP FUNCTION IF EXISTS deleteProject(INTEGER) CASCADE;
 
-CREATE OR REPLACE FUNCTION deleteProject(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+CREATE OR REPLACE FUNCTION deleteProject(pPrjid INTEGER) RETURNS INTEGER AS $$
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  pPrjid ALIAS FOR $1;
   _result INTEGER;
 BEGIN
+
+  UPDATE ophead SET ophead_prj_id=NULL 
+  WHERE  ophead_prj_id=pPrjid;
 
   SELECT quhead_id INTO _result
     FROM quhead
@@ -54,20 +57,6 @@ BEGIN
   IF (FOUND) THEN
     RETURN -6;
   END IF;
-
-  DELETE FROM comment
-  WHERE ((comment_source='J')
-  AND (comment_source_id=pPrjid));
-
-  DELETE FROM comment
-  WHERE ((comment_source='TA')
-  AND (comment_source_id IN (
-    SELECT prjtask_id
-    FROM prjtask
-    WHERE (prjtask_prj_id=pPrjId))));
-
-  DELETE FROM prjtask
-   WHERE (prjtask_prj_id=pPrjid);
 
   UPDATE prj
      SET prj_recurring_prj_id=null

@@ -6,35 +6,47 @@ DECLARE
   _newparentid INTEGER;
 BEGIN
 
-  IF (TG_OP = 'DELETE') THEN
-    DELETE FROM docass WHERE docass_source_id = OLD.prj_id AND docass_source_type = 'J';
-    DELETE FROM docass WHERE docass_target_id = OLD.prj_id AND docass_target_type = 'J';
+  DELETE FROM docass WHERE docass_source_id = OLD.prj_id AND docass_source_type = 'J';
+  DELETE FROM docass WHERE docass_target_id = OLD.prj_id AND docass_target_type = 'J';
 
-    SELECT recur_id INTO _recurid
-      FROM recur
-     WHERE ((recur_parent_id=OLD.prj_id)
-        AND (recur_parent_type='J'));
+  DELETE FROM comment
+  WHERE ((comment_source='J')
+  AND (comment_source_id=OLD.prj_id));
 
-    IF (_recurid IS NOT NULL) THEN
-      SELECT MIN(prj_id) INTO _newparentid
-        FROM prj
-       WHERE ((prj_recurring_prj_id=OLD.prj_id)
-          AND (prj_id!=OLD.prj_id));
+  DELETE FROM comment
+  WHERE comment_source='TA'
+  AND comment_source_id IN (
+    SELECT task_id
+    FROM task
+    WHERE task_parent_type='J' 
+      AND task_parent_id=OLD.prj_id);
 
-      -- client is responsible for warning about deleting a recurring prj
-      IF (_newparentid IS NULL) THEN
-        DELETE FROM recur WHERE recur_id=_recurid;
-      ELSE
-        UPDATE recur SET recur_parent_id=_newparentid
-         WHERE recur_id=_recurid;
-      END IF;
+  DELETE FROM task   WHERE task_parent_id = OLD.prj_id AND task_parent_type = 'J';
+  UPDATE task SET task_prj_id = NULL WHERE task_prj_id = OLD.prj_id;
 
+  SELECT recur_id INTO _recurid
+    FROM recur
+   WHERE ((recur_parent_id=OLD.prj_id)
+      AND (recur_parent_type='J'));
+
+  IF (_recurid IS NOT NULL) THEN
+    SELECT MIN(prj_id) INTO _newparentid
+      FROM prj
+     WHERE ((prj_recurring_prj_id=OLD.prj_id)
+        AND (prj_id!=OLD.prj_id));
+
+    -- client is responsible for warning about deleting a recurring prj
+    IF (_newparentid IS NULL) THEN
+      DELETE FROM recur WHERE recur_id=_recurid;
+    ELSE
+      UPDATE recur SET recur_parent_id=_newparentid
+       WHERE recur_id=_recurid;
     END IF;
 
-    RETURN OLD;
   END IF;
 
-  RETURN NEW;
+  RETURN OLD;
+
 END;
 $$ LANGUAGE plpgsql;
 

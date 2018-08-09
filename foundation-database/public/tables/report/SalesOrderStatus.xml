@@ -3,6 +3,12 @@
  <title>Sales Order Status</title>
  <name>SalesOrderStatus</name>
  <description></description>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
  <size>Letter</size>
  <portrait/>
  <topmargin>50</topmargin>
@@ -57,10 +63,9 @@ ORDER BY coitem_linenumber;</sql>
   <sql>SELECT cohead_number,
        formatDate(cohead_orderdate) AS orderdate,
        cohead_custponumber,
-       cust_name, cntct_phone AS cust_phone
-  FROM cohead, custinfo, cntct
+       cust_name, getcontactphone(cust_cntct_id, 'Office') AS cust_phone
+  FROM cohead, custinfo
  WHERE ((cohead_cust_id=cust_id)
-   AND (cust_cntct_id=cntct_id)
    AND (cohead_id=&lt;? value("sohead_id") ?>)
 );</sql>
  </querysource>

@@ -46,7 +46,7 @@ SELECT
   xt.add_constraint('cashrcpt','cashrcpt_cust_id_check',
                     'CHECK((cashrcpt_custgrp_id IS NULL AND cashrcpt_cust_id IS NOT NULL) OR (cashrcpt_custgrp_id IS NOT NULL AND cashrcpt_cust_id IS NULL))', 'public'),
   xt.add_constraint('cashrcpt', 'fk_cashrcpt_custgrp_id',
-                    'FOREIGN KEY (cashrcpt_custgrp_id) REFERENCES custgrp(custgrp_id)', 'public'),
+                    'FOREIGN KEY (cashrcpt_custgrp_id) REFERENCES custgrp(groups_id)', 'public'),
   xt.add_constraint('cashrcpt', 'cashrcpt_cashrcpt_ccpay_id_fkey',
                     'FOREIGN KEY (cashrcpt_ccpay_id) REFERENCES ccpay(ccpay_id)', 'public');
 

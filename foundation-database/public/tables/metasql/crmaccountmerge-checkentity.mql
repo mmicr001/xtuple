@@ -1,0 +1,20 @@
+-- Group: crmaccountmerge
+-- Name:  checkentity
+-- Notes: Check the CRM entities associated with the merge crm accounts.
+--        Used by merge2crmaccts() function
+--        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT t1.<? literal('colname') ?>_id AS src, t2.<? literal('colname') ?>_id AS tgt
+  <? if exists('custpspct') ?>
+  , c1.cust_id AS src_cust, c2.cust_id AS tgt_cust
+  <? endif ?>
+from crmacctsel
+LEFT JOIN <? literal('tblname')?> t1 ON crmacctsel_src_crmacct_id=t1.<? literal('colname') ?>_crmacct_id
+LEFT JOIN <? literal('tblname')?> t2 ON crmacctsel_dest_crmacct_id=t2.<? literal('colname') ?>_crmacct_id
+<? if exists('custpspct') ?>
+  LEFT JOIN custinfo c1 ON crmacctsel_src_crmacct_id=c1.cust_crmacct_id
+  LEFT JOIN custinfo c2 ON crmacctsel_dest_crmacct_id=c2.cust_crmacct_id
+<? endif ?>
+WHERE crmacctsel_src_crmacct_id = <? value('srcid') ?>
+                      AND crmacctsel_dest_crmacct_id = <? value('destid') ?>

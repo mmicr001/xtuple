@@ -144,11 +144,12 @@ WHERE ( (addr_id = warehous_addr_id)
  </querysource>
  <querysource>
   <name>contact_fax_phone</name>
-  <sql>SELECT cntct_fax, cntct_phone
+  <sql>SELECT getcontactphone(cntct_id, 'Fax') AS contact_fax,
+              getcontactphone(cntct_id, 'Office') AS contact_phone
          FROM quhead
          LEFT OUTER JOIN custinfo ON quhead_cust_id = cust_id
          LEFT OUTER JOIN prospect ON quhead_cust_id = prospect_id
-         JOIN cntct ON COALESCE(cust_cntct_id, prospect_cntct_id) = cntct_id
+         JOIN cntct ON COALESCE(cust_cntct_id, getcrmaccountcontact(prospect_crmacct_id)) = cntct_id
         WHERE quhead_id = &lt;? value("quhead_id") ?>;
 </sql>
  </querysource>
@@ -249,7 +250,7 @@ WHERE ( (addr_id = warehous_addr_id)
     <height>20</height>
    </rect>
    <font>
-    <face>Arial</face>
+    <face>Open Sans,Helvetica,Verdana,sans-serif</face>
     <size>10</size>
     <weight>bold</weight>
    </font>
@@ -257,7 +258,7 @@ WHERE ( (addr_id = warehous_addr_id)
    <vcenter/>
    <data>
     <query>contact_fax_phone</query>
-    <column>cntct_phone</column>
+    <column>contact_phone</column>
    </data>
   </field>
   <label>
@@ -319,7 +320,7 @@ WHERE ( (addr_id = warehous_addr_id)
     <height>20</height>
    </rect>
    <font>
-    <face>Arial</face>
+    <face>Open Sans,Helvetica,Verdana,sans-serif</face>
     <size>10</size>
     <weight>bold</weight>
    </font>
@@ -327,7 +328,7 @@ WHERE ( (addr_id = warehous_addr_id)
    <vcenter/>
    <data>
     <query>contact_fax_phone</query>
-    <column>cntct_fax</column>
+    <column>contact_fax</column>
    </data>
   </field>
   <field>

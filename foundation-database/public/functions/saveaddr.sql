@@ -1,9 +1,24 @@
-CREATE OR REPLACE FUNCTION saveAddr(pAddrId int4, pNumber text,
-                                    pAddr1 text, pAddr2 text, pAddr3 text,
-                                    pCity text, pState text, pPostalCode text,
-                                    pCountry text, pActive boolean, pNotes text, pFlag text)
+DROP FUNCTION IF EXISTS public.saveaddr(integer, text, text, text, text, text, text, text, text, boolean, text, text) CASCADE;
+
+CREATE OR REPLACE FUNCTION public.saveaddr(
+    paddrid integer,
+    pnumber text,
+    paddr1 text,
+    paddr2 text,
+    paddr3 text,
+    pcity text,
+    pstate text,
+    ppostalcode text,
+    pcountry text,
+    pactive boolean,
+    pnotes text,
+    pflag text,
+    pLongitude NUMERIC DEFAULT NULL,
+    pLatitude NUMERIC DEFAULT NULL,
+    pAccuracy NUMERIC DEFAULT NULL,
+    pMktg BOOLEAN DEFAULT FALSE)
   RETURNS integer AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _addr   addr%ROWTYPE;
@@ -35,6 +50,10 @@ BEGIN
   _addr.addr_country    := COALESCE(pCountry,    '');
   _addr.addr_active     := COALESCE(pActive,     true);
   _addr.addr_notes      := COALESCE(pNotes,      '');
+  _addr.addr_lon        := pLongitude;
+  _addr.addr_lat        := pLatitude;
+  _addr.addr_accuracy   := pAccuracy;
+  _addr.addr_allowmktg  := pMktg;
 
   --If there is nothing here, get out
   IF (_addr.addr_number = ''
@@ -61,7 +80,11 @@ BEGIN
                     AND _addr.addr_postalcode = addr_postalcode
                     AND _addr.addr_country    = addr_country
                     AND _addr.addr_active     = addr_active
-                    AND _addr.addr_notes      = COALESCE(addr_notes, '')) THEN
+                    AND _addr.addr_notes      = COALESCE(addr_notes, '')
+                    AND _addr.addr_lon        = addr_lon
+                    AND _addr.addr_lat        = addr_lat
+                    AND _addr.addr_accuracy   = addr_accuracy
+                    AND _addr.addr_allowmktg  = addr_allowmktg) THEN
     RETURN _addr.addr_id;
   END IF;
 
@@ -116,7 +139,9 @@ BEGIN
       addr_line1 = _addr.addr_line1, addr_line2 = _addr.addr_line2, addr_line3 = _addr.addr_line3,
       addr_city = _addr.addr_city, addr_state = _addr.addr_state,
       addr_postalcode = _addr.addr_postalcode, addr_country = _addr.addr_country,
-      addr_active = _addr.addr_active, addr_notes = _addr.addr_notes
+      addr_active = _addr.addr_active, addr_notes = _addr.addr_notes,
+      addr_lon = _addr.addr_lon, addr_lat = _addr.addr_lat,
+      addr_accuracy = _addr.addr_accuracy, addr_allowmktg = _addr.addr_allowmktg
     WHERE addr_id = _addr.addr_id;
 
   ELSE
@@ -127,12 +152,16 @@ BEGIN
     INSERT INTO addr (addr_number,
                       addr_line1, addr_line2, addr_line3,
                       addr_city, addr_state, addr_postalcode, addr_country,
-                      addr_active, addr_notes
+                      addr_active, addr_notes,
+                      addr_lon, addr_lat, addr_accuracy,
+                      addr_allowmktg
       ) VALUES (_addr.addr_number,
                 _addr.addr_line1, _addr.addr_line2, _addr.addr_line3,
                 _addr.addr_city, _addr.addr_state,
                 _addr.addr_postalcode, _addr.addr_country,
-                _addr.addr_active, _addr.addr_notes
+                _addr.addr_active, _addr.addr_notes,
+                _addr.addr_lon, _addr.addr_lat, _addr.addr_accuracy,
+                _addr.addr_allowmktg
       ) RETURNING addr_id INTO _addr.addr_id;
   END IF;
 

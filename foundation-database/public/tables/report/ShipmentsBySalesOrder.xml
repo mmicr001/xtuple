@@ -3,6 +3,12 @@
  <title>Shipments By Sales Order</title>
  <name>ShipmentsBySalesOrder</name>
  <description></description>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
  <size>Letter</size>
  <portrait/>
  <topmargin>50</topmargin>
@@ -15,10 +21,9 @@
        formatDate(cohead_orderdate) AS f_orderdate,
        cohead_custponumber AS f_ponumber,
        cust_name AS f_custname,
-       cntct_phone AS f_custphone
-FROM cohead, custinfo, cntct
+       getcontactphone(cust_cntct_id, 'Office') AS f_custphone
+FROM cohead, custinfo, 
 WHERE ((cohead_cust_id=cust_id)
- AND (cust_cntct_id=cntct_id)
  AND (cohead_id=&lt;? value("sohead_id") ?>));</sql>
  </querysource>
  <querysource>

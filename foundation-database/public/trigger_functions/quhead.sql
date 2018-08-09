@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _quheadtrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _oldHoldType TEXT;
@@ -94,7 +94,7 @@ BEGIN
              null,
              null
       FROM prospect
-        LEFT OUTER JOIN cntct ON (prospect_cntct_id=cntct_id)
+        LEFT OUTER JOIN cntct ON (cntct_id=getcrmaccountcontact(prospect_crmacct_id))
         LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
       WHERE (prospect_id=NEW.quhead_cust_id)) AS data;
     ELSE
@@ -193,8 +193,10 @@ BEGIN
                  NULL, crmacct_id,
                  NEW.quhead_billto_cntct_id, NULL
           FROM crmacct
-          WHERE (crmacct_cust_id=NEW.quhead_cust_id)
-             OR (crmacct_prospect_id=NEW.quhead_cust_id)
+          LEFT OUTER JOIN custinfo ON (crmacct_id=cust_crmacct_id)
+          LEFT OUTER JOIN prospect ON (crmacct_id=prospect_crmacct_id)
+          WHERE (cust_id=NEW.quhead_cust_id)
+             OR (prospect_id=NEW.quhead_cust_id)
           LIMIT 1;
         END IF;
       END IF;
@@ -288,7 +290,8 @@ BEGIN
           SELECT quhead_shipto_id INTO _shiptoid FROM quhead WHERE (quhead_id=NEW.quhead_id);
           -- Get the shipto address
             IF (COALESCE(NEW.quhead_shipto_id,-1) <> COALESCE(_shiptoid,-1)) THEN
-            SELECT addr.*, shipto_name, cntct_phone INTO _a
+            SELECT addr.*, shipto_name, 
+                   getcontactphone(cntct_id, 'Office') AS contact_phone INTO _a
             FROM shiptoinfo
             LEFT OUTER JOIN cntct ON (shipto_cntct_id=cntct_id)
             LEFT OUTER JOIN addr ON (shipto_addr_id=addr_id)
@@ -296,7 +299,7 @@ BEGIN
             IF (FOUND) THEN
               -- Free form not allowed so we're going to make sure address matches Shipto data
               NEW.quhead_shiptoname := COALESCE(_a.shipto_name,'');
-              NEW.quhead_shiptophone := COALESCE(_a.cntct_phone,'');
+              NEW.quhead_shiptophone := COALESCE(_a.contact_phone,'');
               NEW.quhead_shiptoaddress1 := COALESCE(_a.addr_line1,'');
               NEW.quhead_shiptoaddress2 := COALESCE(_a.addr_line2,'');
               NEW.quhead_shiptoaddress3 := COALESCE(_a.addr_line3,'');
@@ -363,7 +366,7 @@ CREATE TRIGGER quheadtrigger
   EXECUTE PROCEDURE _quheadtrigger();
 
 CREATE OR REPLACE FUNCTION _quheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

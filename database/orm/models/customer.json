@@ -66,6 +66,13 @@
         }
       },
       {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "cust_crmacct_id"
+        }
+      },
+      {
         "name": "customerType",
         "toOne": {
           "type": "CustomerType",
@@ -711,15 +718,6 @@
           "type": "CustomerType",
           "column": "cust_custtype_id",
           "required": true
-        }
-      },
-      {
-        "name": "customerGroups",
-        "toMany": {
-          "isNested": true,
-          "type": "CustomerCustomerGroup",
-          "column": "cust_id",
-          "inverse": "customer"
         }
       },
       {
@@ -1769,6 +1767,14 @@
         }
       },
       {
+        "name": "crmacct",
+        "attr": {
+          "type": "Number",
+          "column": "cust_crmacct_id",
+          "required": true
+        }
+      },
+      {
         "name": "uuid",
         "attr": {
           "type": "String",
@@ -2194,145 +2200,6 @@
         }
       }
     ],
-    "isSystem": true
-  },
-  {
-    "context": "xtuple",
-    "nameSpace": "XM",
-    "type": "CustomerGroup",
-    "table": "custgrp",
-    "isRest": true,
-    "idSequenceName": "custgrp_custgrp_id_seq",
-    "lockable": true,
-    "comment": "Customer Group Map",
-    "privileges": {
-      "all": {
-        "create": "MaintainCustomerGroups",
-        "read": "ViewCustomerGroups",
-        "update": "MaintainCustomerGroups",
-        "delete": "MaintainCustomerGroups"
-      }
-    },
-    "properties": [
-      {
-        "name": "id",
-        "attr": {
-          "type": "Number",
-          "column": "custgrp_id",
-          "isPrimaryKey": true
-        }
-      },
-      {
-        "name": "name",
-        "attr": {
-          "type": "String",
-          "column": "custgrp_name",
-          "isNaturalKey": true
-        }
-      },
-      {
-        "name": "description",
-        "attr": {
-          "type": "String",
-          "column": "custgrp_descrip"
-        }
-      },
-      {
-        "name": "customers",
-        "toMany": {
-          "isNested": true,
-          "type": "CustomerGroupCustomer",
-          "column": "custgrp_id",
-          "inverse": "customerGroup"
-        }
-      }
-    ],
-    "isSystem": true
-  },
-  {
-    "context": "xtuple",
-    "nameSpace": "XM",
-    "type": "CustomerGroupCustomer",
-    "table": "custgrpitem",
-    "idSequenceName": "custgrpitem_custgrpitem_id_seq",
-    "comment": "Customer Group Customer Map",
-    "properties": [
-      {
-        "name": "id",
-        "attr": {
-          "type": "Number",
-          "column": "custgrpitem_id",
-          "isPrimaryKey": true
-        }
-      },
-      {
-        "name": "uuid",
-        "attr": {
-          "type": "String",
-          "column": "obj_uuid",
-          "isNaturalKey": true
-        }
-      },
-      {
-        "name": "customerGroup",
-        "attr": {
-          "type": "Number",
-          "column": "custgrpitem_custgrp_id"
-        }
-      },
-      {
-        "name": "customer",
-        "toOne":  {
-          "isNested": true,
-          "type": "CustomerRelation",
-          "column": "custgrpitem_cust_id"
-        }
-      }
-    ],
-    "isNestedOnly": true,
-    "isSystem": true
-  },
-  {
-    "context": "xtuple",
-    "nameSpace": "XM",
-    "type": "CustomerCustomerGroup",
-    "table": "custgrpitem",
-    "idSequenceName": "custgrpitem_custgrpitem_id_seq",
-    "comment": "Customer Group Customer Map",
-    "properties": [
-      {
-        "name": "id",
-        "attr": {
-          "type": "Number",
-          "column": "custgrpitem_id",
-          "isPrimaryKey": true
-        }
-      },
-      {
-        "name": "uuid",
-        "attr": {
-          "type": "String",
-          "column": "obj_uuid",
-          "isNaturalKey": true
-        }
-      },
-      {
-        "name": "customerGroup",
-        "toOne": {
-          "type": "CustomerGroup",
-          "isNested": true,
-          "column": "custgrpitem_custgrp_id"
-        }
-      },
-      {
-        "name": "customer",
-        "attr": {
-          "type": "Number",
-          "column": "custgrpitem_cust_id"
-        }
-      }
-    ],
-    "isNestedOnly": true,
     "isSystem": true
   },
   {
