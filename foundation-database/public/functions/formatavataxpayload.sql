@@ -49,6 +49,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType       TEXT,
                                                pLineState       TEXT[],
                                                pLineZip         TEXT[],
                                                pLineCountry     TEXT[],
+                                               pTaxPaid         NUMERIC,
                                                pRecord          BOOLEAN) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -306,6 +307,16 @@ BEGIN
                 "reason": "Refund for %s"
                 }',
                 pOrigDate, pOrigOrder);
+  END IF;
+
+  IF pTaxPaid IS NOT NULL THEN
+    _payload := _payload ||
+                format(', "taxOverride": {
+                "type": "taxAmount",
+                "taxAmount": "%s",
+                "reason": "Tax paid to vendor"
+                }',
+                pTaxPaid);
   END IF;
 
   _payload = _payload || '}}';

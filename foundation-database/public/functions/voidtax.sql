@@ -6,6 +6,14 @@ DECLARE
 
 BEGIN
 
+  IF pOrderType = 'VCH' THEN
+    IF (SELECT getOrderTax('VCH', vohead_id) - vohead_tax_charged <= 0.0
+          FROM vohead
+         WHERE vohead_id = pOrderId) THEN
+      RETURN NULL;
+    END IF;
+  END IF;
+
   _service := fetchMetricText('TaxService');
 
   IF _service = 'A' THEN
