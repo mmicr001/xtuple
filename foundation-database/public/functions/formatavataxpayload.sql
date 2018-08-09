@@ -111,7 +111,7 @@ BEGIN
     pordernumber,
     fetchmetrictext('AvalaraCompany'),
     pdocdate,
-    COALESCE(pCust, fetchMetricText('AvalaraCompany')),
+    pCust,
     pUsage,
     pTaxReg,
     pfromline1,

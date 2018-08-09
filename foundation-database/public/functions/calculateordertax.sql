@@ -60,30 +60,26 @@ BEGIN
  
   SELECT dochead_number, dochead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
          addr_state, addr_postalcode, addr_country, dochead_toaddr1, dochead_toaddr2,
-         dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip,
-         dochead_tocountry,
-         CASE WHEN dochead_cust_id IS NOT NULL
-              THEN COALESCE(cust_number, prospect_number)
-              ELSE NULL
-          END,
-         cust_tax_exemption, COALESCE(taxreg_number, ' '),
-         dochead_curr_id, dochead_date, dochead_origdate, dochead_origorder,
-         dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc, dochead_misc_descrip,
-         dochead_freight_taxtype_id, dochead_misc_taxtype_id, dochead_misc_discount
+         dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip, dochead_tocountry,
+         COALESCE(cust_number, prospect_number, vend_number), cust_tax_exemption,
+         COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
+         dochead_origorder, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
+         dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
+         dochead_misc_discount
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
          _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
-         _toline3, _tocity, _tostate, _tozip,
-         _tocountry,
-         _cust,
-         _usage, _taxreg,
-         _currid, _docdate, _origdate, _origorder,
-         _freight, _misc, _miscdescrip,
-         _freighttaxtype, _misctaxtype, _miscdiscount
+         _toline3, _tocity, _tostate, _tozip, _tocountry,
+         _cust, _usage,
+         _taxreg, _currid, _docdate, _origdate,
+         _origorder, _freight, _misc,
+         _miscdescrip, _freighttaxtype, _misctaxtype,
+         _miscdiscount
     FROM dochead
     JOIN whsinfo ON dochead_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
     LEFT OUTER JOIN custinfo ON dochead_cust_id = cust_id
     LEFT OUTER JOIN prospect ON dochead_cust_id = prospect_id
+    LEFT OUTER JOIN vendinfo ON dochead_vend_id = vend_id
     LEFT OUTER JOIN taxreg ON ((taxreg_rel_type = 'C' AND dochead_cust_id = taxreg_rel_id)
                                OR (taxreg_rel_type = 'V' AND dochead_vend_id = taxreg_rel_id))
                           AND CURRENT_DATE BETWEEN taxreg_effective AND taxreg_expires
@@ -98,7 +94,7 @@ BEGIN
             dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
             addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
-            taxreg_number;
+            vend_number, taxreg_number;
 
   SELECT COALESCE(array_agg(addr_line1), ARRAY[_toline1]),
          COALESCE(array_agg(addr_line2), ARRAY[_toline2]),
