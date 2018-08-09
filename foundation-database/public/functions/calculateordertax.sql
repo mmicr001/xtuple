@@ -61,7 +61,11 @@ BEGIN
   SELECT dochead_number, dochead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
          addr_state, addr_postalcode, addr_country, dochead_toaddr1, dochead_toaddr2,
          dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip, dochead_tocountry,
-         COALESCE(cust_number, prospect_number, vend_number), cust_tax_exemption,
+         COALESCE(cust_number, prospect_number, vend_number),
+         CASE WHEN dochead_cust_id IS NOT NULL
+              THEN cust_tax_exemption
+              ELSE COALESCE(vend_tax_exemption, fetchMetricText('AvalaraUserExemptionCode'))
+          END,
          COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
          dochead_origorder, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
          dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
@@ -69,7 +73,8 @@ BEGIN
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
          _fromstate, _fromzip, _fromcountry, _toline1, _toline2,
          _toline3, _tocity, _tostate, _tozip, _tocountry,
-         _cust, _usage,
+         _cust,
+         _usage,
          _taxreg, _currid, _docdate, _origdate,
          _origorder, _freight, _misc,
          _miscdescrip, _freighttaxtype, _misctaxtype,
@@ -94,7 +99,7 @@ BEGIN
             dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
             addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
-            vend_number, taxreg_number;
+            vend_number, vend_tax_exemption, taxreg_number;
 
   SELECT COALESCE(array_agg(addr_line1), ARRAY[_toline1]),
          COALESCE(array_agg(addr_line2), ARRAY[_toline2]),
