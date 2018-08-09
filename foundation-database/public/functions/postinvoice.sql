@@ -216,7 +216,8 @@ BEGIN
       cohist_shiptoaddress2, cohist_shiptoaddress3,
       cohist_shiptocity, cohist_shiptostate, cohist_shiptozip,
       cohist_curr_id, cohist_sequence, cohist_taxtype_id, cohist_taxzone_id,
-      cohist_shipzone_id, cohist_saletype_id, cohist_promisedate )
+      cohist_shipzone_id, cohist_saletype_id, cohist_promisedate,
+      cohist_invchead_id, cohist_invcitem_id, cohist_coitem_id )
     VALUES
     ( _cohistid, _p.invchead_cust_id, _r.itemsite_id, _p.invchead_shipto_id,
       _p.invchead_shipdate, _p.invchead_shipvia,
@@ -233,7 +234,8 @@ BEGIN
       _p.invchead_shipto_city, _p.invchead_shipto_state,
       _p.invchead_shipto_zipcode, _p.invchead_curr_id,
       _p.sequence, _r.invcitem_taxtype_id, _p.invchead_taxzone_id,
-      _p.invchead_shipzone_id, _p.invchead_saletype_id, _r.coitem_promdate );
+      _p.invchead_shipzone_id, _p.invchead_saletype_id, _r.coitem_promdate,
+      pInvcheadid, _r.invcitem_id, _r.invcitem_coitem_id );
 
     INSERT INTO cohisttax
     ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
@@ -301,7 +303,8 @@ BEGIN
       cohist_shiptoaddress2, cohist_shiptoaddress3,
       cohist_shiptocity, cohist_shiptostate, cohist_shiptozip,
       cohist_curr_id, cohist_sequence, cohist_taxtype_id, cohist_taxzone_id,
-      cohist_shipzone_id, cohist_saletype_id )
+      cohist_shipzone_id, cohist_saletype_id,
+      cohist_invchead_id, cohist_invcitem_id )
     VALUES
     ( _cohistid, _p.invchead_cust_id, -1, _p.invchead_shipto_id,
       'M', (_r.invcitem_number || '-' || _r.invcitem_descrip),
@@ -319,7 +322,8 @@ BEGIN
       _p.invchead_shipto_city, _p.invchead_shipto_state,
       _p.invchead_shipto_zipcode, _p.invchead_curr_id,
       _p.sequence, _r.invcitem_taxtype_id, _p.invchead_taxzone_id,
-      _p.invchead_shipzone_id, _p.invchead_saletype_id );
+      _p.invchead_shipzone_id, _p.invchead_saletype_id,
+      pInvcheadid, _r.invcitem_id );
     INSERT INTO cohisttax
     ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
       taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
@@ -380,7 +384,8 @@ BEGIN
       cohist_shiptoaddress2, cohist_shiptoaddress3,
       cohist_shiptocity, cohist_shiptostate, cohist_shiptozip,
       cohist_curr_id, cohist_sequence, cohist_taxtype_id, cohist_taxzone_id,
-      cohist_shipzone_id, cohist_saletype_id )
+      cohist_shipzone_id, cohist_saletype_id,
+      cohist_invchead_id )
     VALUES
     ( _cohistid, _p.invchead_cust_id, -1, _p.invchead_shipto_id,
       'F', 'Freight',
@@ -398,7 +403,8 @@ BEGIN
       _p.invchead_shipto_city, _p.invchead_shipto_state,
       _p.invchead_shipto_zipcode, _p.invchead_curr_id,
       _p.sequence, getFreightTaxtypeId(), _p.invchead_taxzone_id,
-      _p.invchead_shipzone_id, _p.invchead_saletype_id );
+      _p.invchead_shipzone_id, _p.invchead_saletype_id,
+      pInvcheadid );
     INSERT INTO cohisttax
     ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
       taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
@@ -455,7 +461,8 @@ BEGIN
       cohist_shiptoaddress2, cohist_shiptoaddress3,
       cohist_shiptocity, cohist_shiptostate, cohist_shiptozip,
       cohist_curr_id, cohist_sequence,
-      cohist_shipzone_id, cohist_saletype_id )
+      cohist_shipzone_id, cohist_saletype_id,
+      cohist_invchead_id )
     VALUES
     ( _p.invchead_cust_id, -1, _p.invchead_shipto_id,
       'M', _p.invchead_misc_descrip, _p.invchead_misc_accnt_id,
@@ -473,7 +480,8 @@ BEGIN
       _p.invchead_shipto_city, _p.invchead_shipto_state,
       _p.invchead_shipto_zipcode, _p.invchead_curr_id,
       _p.sequence,
-      _p.invchead_shipzone_id, _p.invchead_saletype_id );
+      _p.invchead_shipzone_id, _p.invchead_saletype_id,
+      pInvcheadid );
 
   END IF;
 
@@ -496,7 +504,8 @@ BEGIN
       cohist_shiptoaddress2, cohist_shiptoaddress3,
       cohist_shiptocity, cohist_shiptostate, cohist_shiptozip,
       cohist_curr_id, cohist_sequence, cohist_taxtype_id, cohist_taxzone_id,
-      cohist_shipzone_id, cohist_saletype_id )
+      cohist_shipzone_id, cohist_saletype_id,
+      cohist_invchead_id )
     VALUES
     ( _cohistid, _p.invchead_cust_id, -1, _p.invchead_shipto_id,
       'T', 'Misc Tax Adjustment',
@@ -514,7 +523,8 @@ BEGIN
       _p.invchead_shipto_city, _p.invchead_shipto_state,
       _p.invchead_shipto_zipcode, _p.invchead_curr_id,
       _p.sequence, getAdjustmentTaxtypeId(), _p.invchead_taxzone_id,
-      _p.invchead_shipzone_id, _p.invchead_saletype_id );
+      _p.invchead_shipzone_id, _p.invchead_saletype_id,
+      pInvcheadid );
     INSERT INTO cohisttax
     ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
       taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
