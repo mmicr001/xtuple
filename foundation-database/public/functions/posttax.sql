@@ -20,7 +20,7 @@ BEGIN
     RETURN '{"commit": true}'::JSONB;
   END IF;
 
-  RETURN ''::JSONB;
+  RETURN '{}'::JSONB;
 
 END
 $$ language plpgsql;

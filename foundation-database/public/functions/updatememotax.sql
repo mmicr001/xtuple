@@ -69,23 +69,25 @@ BEGIN
       AND  (taxass_taxzone_id = ptaxzone))
    LOOP  
 
-     -- Determine pre-tax subtotal
-     _subtotal := (SELECT calculatepretaxtotal(ptaxzone, _taxt.taxass_taxtype_id, pdate, pcurr, pamount));
-
      -- Determine the Tax details for the Voucher Tax Zone
      <<taxdetail>>
      FOR _taxd IN
-	SELECT taxdetail_tax_code, taxdetail_tax_id,taxdetail_taxrate_percent,COALESCE(taxdetail_taxrate_amount,0.00) as taxdetail_taxrate_amount,
-	       taxdetail_taxclass_sequence as seq
-	FROM calculatetaxdetail(ptaxzone, _taxt.taxass_taxtype_id, pdate, pcurr, pamount)
-	ORDER BY taxdetail_taxclass_sequence DESC
+        SELECT tax_id, (value->>'tax')::NUMERIC AS tax,
+               (value->>'sequence')::INTEGER AS sequence
+          FROM jsonb_array_elements(calculateTaxIncluded(ptaxzone, pcurr, pdate,
+                                                        0.0, 0.0, -1, -1, FALSE,
+                                                        ARRAY[''],
+                                                        ARRAY[_taxt.taxass_taxtype_id],
+                                                        ARRAY[pamount])->'lines'->0->'tax')
+          JOIN tax ON (value->>'taxid')::INTEGER = tax_id
+	ORDER BY sequence DESC
 
      LOOP
      -- Calculate Tax Amount
-       _taxamount = ((_subtotal * _taxd.taxdetail_taxrate_percent) + _taxd.taxdetail_taxrate_amount) * _sense;
+       _taxamount = _taxd.tax;
 
        -- Insert Tax Line
-       EXECUTE format(_sql, _table, pDate, _taxd.taxdetail_tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid, pCurr,
+       EXECUTE format(_sql, _table, pDate, _taxd.tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid, pCurr,
                       COALESCE(pCurrRate, currrate(pCurr,pDate)), pDate);
 
        -- Check for and post reverse VAT charges
@@ -93,11 +95,10 @@ BEGIN
                   WHERE ((taxass_reverse_tax)
                   AND (COALESCE(taxass_taxzone_id, -1) = ptaxzone)
                   AND (COALESCE(taxass_taxtype_id, -1) IN (getAdjustmentTaxTypeId(), -1))))) THEN
-          EXECUTE format(_revsql, _table, pDate, _taxd.taxdetail_tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid);
+          EXECUTE format(_revsql, _table, pDate, _taxd.tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid);
        END IF;
 
        _total = _total + _taxamount;
-       -- _subtotal = _subtotal - _taxamount;
 
      END LOOP taxdetail;
    END LOOP taxtypes;

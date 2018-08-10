@@ -20,7 +20,7 @@ BEGIN
     RETURN '{"code": "DocVoided"}'::JSONB;
   END IF;
 
-  RETURN ''::JSONB;
+  RETURN '{}'::JSONB;
 
 END
 $$ language plpgsql;
