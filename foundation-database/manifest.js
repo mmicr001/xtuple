@@ -169,7 +169,7 @@
     "public/functions/calculatesubtax.sql",
     "public/functions/calculateinversetax.sql",
     "public/functions/calculatetax.sql",
-    "public/functions/calculatepretaxtotal.sql",
+    "public/functions/calculatetaxincluded.sql",
     "public/functions/calculatetaxdetail.sql",
     "public/functions/calculatetaxdetailline.sql",
     "public/functions/calculatetaxdetailsummary.sql",
