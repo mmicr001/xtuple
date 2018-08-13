@@ -137,11 +137,13 @@ BEGIN
       -- Now apply Expense Category taxation (if applicable)
       INSERT INTO checkheadtax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax, 
                                 taxhist_taxtype_id, taxhist_parent_id, taxhist_journalnumber ) 
-          SELECT 0, 0, 0, _p.checkhead_checkdate, taxdetail_tax_id, (taxdetail_tax * -1), _p.checkhead_taxtype_id,
-              pCheckid, _journalNumber
-          FROM calculatetaxdetail(_p.checkhead_taxzone_id,
-                            _p.checkhead_taxtype_id,_p.checkhead_checkdate,
-                            _p.checkhead_curr_id,(_p.checkhead_amount-_p.total_tax));
+          SELECT 0, 0, 0, _p.checkhead_checkdate, ((value->>'tax')::NUMERIC * -1),
+                 _p.checkhead_taxtype_id, pCheckid, _journalNumber
+          FROM jsonb_array_elements(calculatetax(_p.checkhead_taxzone_id,_p.checkhead_curr_id,
+                                    _p.checkhead_checkdate, 0.0, 0.0, getFreightTaxtypeId(),
+                                    getMiscTaxtypeId(), FALSE, ARRAY[''],
+                                    ARRAY[_p.checkhead_taxtype_id],
+                                    ARRAY[_p.checkhead_amount-_p.total_tax])->'lines'->0->'tax');
               
       PERFORM addTaxToGLSeries(_sequence,
 		       _t.checkrecip_gltrans_source, 'CK', CAST(_p.checkhead_number AS TEXT),

@@ -168,4 +168,38 @@ SELECT 'CM',
                                         WHERE items.cmitem_cmhead_id = cmhead_id
                                           AND (items.cmitem_itemsite_id = cmitem.cmitem_itemsite_id
                                                OR items.cmitem_number = cmitem.cmitem_number)) items
-                                WHERE items.cmitem_id = cmitem.cmitem_id);
+                                WHERE items.cmitem_id = cmitem.cmitem_id)
+UNION ALL
+SELECT 'AR' AS docitem_type,
+       aropen_id AS docitem_id,
+       NULL AS docitem_dochead_id,
+       1 AS docitem_linenumber,
+       0 AS docitem_subnumber,
+       '' docitem_number,
+       NULL AS docitem_item_id,
+       NULL AS docitem_warehous_id,
+       '' AS docitem_item_number,
+       '' AS docitem_item_descrip,
+       1 AS docitem_qty,
+       aropen_amount AS docitem_unitprice,
+       aropen_amount AS docitem_price,
+       NULL AS docitem_taxtype_id,
+       0.0 AS docitem_freight
+  FROM aropen
+UNION ALL
+SELECT 'AP' AS docitem_type,
+       apopen_id AS docitem_id,
+       NULL AS docitem_dochead_id,
+       1 AS docitem_linenumber,
+       0 AS docitem_subnumber,
+       '' docitem_number,
+       NULL AS docitem_item_id,
+       NULL AS docitem_warehous_id,
+       '' AS docitem_item_number,
+       '' AS docitem_item_descrip,
+       1 AS docitem_qty,
+       apopen_amount AS docitem_unitprice,
+       apopen_amount AS docitem_price,
+       NULL AS docitem_taxtype_id,
+       0.0 AS docitem_freight
+  FROM apopen;

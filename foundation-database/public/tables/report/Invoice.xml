@@ -111,12 +111,7 @@ WHERE (invcitem_invchead_id=&lt;? value("invchead_id") ?>);</sql>
        formatMoney(total_allocated) AS f_allocated
  FROM (SELECT invchead_misc_amount, invchead_freight,
               invchead_payment, invchead_notes, invchead_misc_descrip,
-              (SELECT COALESCE(SUM(tax),0) 
-                FROM (
-                SELECT ROUND(SUM(taxdetail_tax),2) AS tax 
-                FROM tax 
-                 JOIN calculateTaxDetailSummary('I', &lt;? value("invchead_id") ?>, 'T') ON (taxdetail_tax_id=tax_id)
-	   GROUP BY tax_id) AS data) AS tax,
+              getOrderTax('INV', &lt;? value("invchead_id") ?>) AS tax,
               SUM(COALESCE(ROUND(invcitem_billed *
                                  invcitem_qty_invuomratio *
                                  invcitem_price /

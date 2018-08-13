@@ -15,11 +15,7 @@
     pohead_fob AS fob,
     pohead_shipvia AS ship_via,
     curr_abbr AS currency,
-    (SELECT COALESCE(SUM(tax), 0.00) AS tax
-     FROM (SELECT ROUND(SUM(taxdetail_tax),2) AS tax
-           FROM tax
-            JOIN calculateTaxDetailSummary('PO', pohead_id, 'T') ON (taxdetail_tax_id=tax_id)
-           GROUP BY tax_id) AS data) AS tax,
+    getOrderTax('PO', pohead_id) AS tax,
     pohead_freight AS freight,
     pohead_comments AS notes,
     pohead_dropship AS dropship,

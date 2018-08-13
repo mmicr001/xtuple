@@ -41,9 +41,13 @@ BEGIN
      -- Determine the Tax details for the Voucher Tax Zone/Types returned
      <<taxdetail>>
      FOR _taxd IN
-	SELECT taxdetail_tax_id, taxdetail_tax_code, taxdetail_tax
-	FROM calculatetaxdetail(ptaxzone, _taxt.vodist_taxtype_id, pdate, pcurr, _taxt.vodist_amount)
-	ORDER BY taxdetail_taxclass_sequence DESC
+	SELECT (value->>'taxid')::INTEGER, tax_code, (value->>'tax')::NUMERIC
+        FROM jsonb_array_elements(calculatetax(ptaxzone, pcurr, pdate, 0.0, 0.0,
+                                               getFreightTaxtypeId(), getMiscTaxtypeId(), FALSE,
+                                               ARRAY[''], ARRAY[_taxt.vodist_taxtype_id],
+                                  ARRAY[_taxt.vodist_amount])->'lines'->0->'tax')
+        JOIN tax ON (value->>'taxid')::INTEGER = tax_id
+	ORDER BY (value->>'sequence')::INTEGER DESC
      LOOP
        INSERT INTO _vodisttax (vodisttax_vohead_id, vodisttax_taxtype_id, vodisttax_tax_id, vodisttax_tax_code, vodisttax_amount)
          VALUES (pVoHeadid, _taxt.vodist_taxtype_id, _taxd.taxdetail_tax_id, _taxd.taxdetail_tax_code, _taxd.taxdetail_tax);

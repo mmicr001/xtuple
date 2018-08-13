@@ -9,12 +9,10 @@ DECLARE
   _cohead		cohead%ROWTYPE;
   _miscApplied          NUMERIC := 0.0;
   _freight		NUMERIC;
-  _freighttypeid        INTEGER;
   _invcDate		DATE;
   _schedDate		DATE;
   _shipDate		DATE;
   _shipVia		TEXT;
-  _tax			NUMERIC;
 
 BEGIN
 
@@ -119,13 +117,6 @@ BEGIN
   IF (NOT FOUND) THEN
     _shipVia := _cohead.cohead_shipvia;
   END IF;
-
-  --Determine any tax
-
-  SELECT 
-  getFreightTaxTypeId() INTO _freighttypeid;
-  SELECT SUM(COALESCE(taxdetail_tax, 0.00)) INTO _tax
-  FROM calculatetaxdetail(_cohead.cohead_taxzone_id, _freighttypeid, _cohead.cohead_orderdate,_cohead.cohead_curr_id, _freight);
 
   --  Determine if we are using the _shipDate or _schedDate or current_date for the _invcDate
   IF( fetchMetricText('InvoiceDateSource')='scheddate') THEN
