@@ -68,10 +68,14 @@ BEGIN
 
 --  Start by handling taxes
   FOR _r IN SELECT tax_sales_accnt_id, 
-              round(sum(taxdetail_tax),2) AS tax,
-              currToBase(_p.cmhead_curr_id, round(sum(taxdetail_tax),2), _p.cmhead_docdate) AS taxbasevalue
-            FROM tax 
-             JOIN calculateTaxDetailSummary('CM', pCmheadid, 'T') ON (taxdetail_tax_id=tax_id)
+              round(sum(taxhist_tax),2) AS tax,
+              currToBase(_p.cmhead_curr_id, round(sum(taxhist_tax),2), _p.cmhead_docdate) AS taxbasevalue
+            FROM taxhist
+            JOIN tax ON taxhist_tax_id = tax_id
+            WHERE (taxhist_doctype = 'CM' AND taxhist_parent_id = pCmheadid)
+               OR (tachist_doctype = 'CMI' AND taxhist_parent_id IN (SELECT cmitem_id
+                                                                       FROM cmitem
+                                                                      WHERE cmitem_cmhead_id = pCmheadid)) 
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _sequence, 'A/R', 'CM', _p.cmhead_number,

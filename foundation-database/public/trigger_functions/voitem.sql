@@ -41,35 +41,6 @@ BEGIN
     RAISE EXCEPTION 'Voucher head not found';
   END IF;
 
--- Calculate Tax
-  PERFORM calculateTaxHist( 'voitemtax',
-                            NEW.voitem_id,
-                            COALESCE(_r.vohead_taxzone_id, -1),
-                            NEW.voitem_taxtype_id,
-                            COALESCE(_r.vohead_docdate, CURRENT_DATE),
-                            COALESCE(_r.vohead_curr_id, -1),
-                            COALESCE(SUM(vodist_amount * -1), 0) )
-  FROM vodist
-  WHERE ( (vodist_vohead_id=_r.vohead_id)
-    AND   (vodist_poitem_id=NEW.voitem_poitem_id) );
-
-  -- Calculate Freight Tax
-  IF (NEW.voitem_freight <> 0) THEN
-    PERFORM calculateTaxHist( 'voitemtax',
-                              NEW.voitem_id,
-                              COALESCE(vohead_taxzone_id, -1),
-                              getFreightTaxtypeId(),
-                              COALESCE(vohead_docdate, CURRENT_DATE),
-                              COALESCE(vohead_curr_id, -1),
-                              COALESCE(NEW.voitem_freight * -1, 0))
-    FROM vohead
-    WHERE (vohead_id=NEW.voitem_vohead_id);
-  ELSIF (NEW.voitem_freight = 0) THEN
-    DELETE FROM voitemtax
-    WHERE ((taxhist_parent_id=NEW.voitem_id)
-      AND  (taxhist_taxtype_id = getFreightTaxtypeId()));
-  END IF;     
-
   RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';

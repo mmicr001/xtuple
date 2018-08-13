@@ -61,12 +61,16 @@ BEGIN
           WHERE aropen_id = _r.aropen_id;
 
           FOR _v IN SELECT tax_sales_accnt_id,
-                           tax_id, 
-                           round(sum(taxdetail_tax), 2) AS tax,
-                           currToBase(_t.invchead_curr_id, round(sum(taxdetail_tax), 2), _t.invchead_invcdate) AS taxbasevalue
-          FROM tax 
-            JOIN calculateTaxDetailSummary('I', _t.invcheadid, 'T') ON (taxdetail_tax_id=tax_id)
-            GROUP BY tax_id, tax_sales_accnt_id 
+                           tax_id,
+                           round(sum(taxhist_tax), 2) AS tax,
+                           currToBase(_t.invchead_curr_id, round(sum(taxhist_tax), 2), _t.invchead_invcdate) AS taxbasevalue
+          FROM taxhist
+          JOIN tax ON taxhist_tax_id = tax_id
+          WHERE (taxhist_doctype = 'INV' AND taxhist_parent_id = _t.invcheadid)
+             OR (taxhist_doctype = 'INVI' AND taxhist_parent_id IN (SELECT invcitem_id
+                                                                      FROM invcitem
+                                                                     WHERE invcitem_invchead_id = _t.invcheadid))
+            GROUP BY tax_id, tax_sales_accnt_id
           LOOP
             INSERT INTO aropentax(
               taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,

@@ -83,11 +83,7 @@ ORDER BY poitem_linenumber;</sql>
 FROM
 ( SELECT COALESCE(SUM(poitem_qty_ordered * poitem_unitprice), 0) AS subtotal,
          COALESCE(SUM(poitem_freight)+pohead_freight,0) AS totalfreight,
-         (SELECT COALESCE(SUM(tax), 0.0)
-          FROM (SELECT ROUND(SUM(taxdetail_tax),2) AS tax
-                FROM tax
-                     JOIN calculateTaxDetailSummary('PO', &lt;? value("pohead_id") ?>, 'T') ON (taxdetail_tax_id=tax_id)
-                GROUP BY tax_id) AS taxdata) AS tax
+         getOrderTax('PO', &lt;? value("pohead_id") ?>) AS tax
   FROM pohead JOIN poitem ON (poitem_pohead_id=pohead_id)
   WHERE (pohead_id=&lt;? value("pohead_id") ?>)
   GROUP BY pohead_freight ) AS data;

@@ -107,12 +107,15 @@ BEGIN
 
 -- Taxes
     FOR _tax IN
-      SELECT taxdetail_tax_id, sum(taxdetail_tax) AS taxdetail_tax,
-        currToBase(_p.pohead_curr_id, round(sum(taxdetail_tax),2), current_date) AS taxbasevalue
-      FROM calculateTaxDetail(_p.pohead_taxzone_id, _p.poitem_taxtype_id,
-	  		       current_date, _p.pohead_curr_id, 
-			       _itemAmount) 
-      GROUP BY taxdetail_tax_id
+      SELECT (value->>'taxid')::INTEGER AS taxdetail_tax_id, sum((value->>'tax')::NUMERIC) AS taxdetail_tax,
+        currToBase(_p.pohead_curr_id, round(sum((value->>'tax')::NUMERIC),2), current_date) AS taxbasevalue
+      FROM jsonb_array_elements(calculatetax(_p.pohead_taxzone_id,_p.pohead_curr_id,
+                                current_date, 0.0, 0.0, getFreightTaxtypeId(),
+                                getMiscTaxtypeId(), FALSE, ARRAY[''],
+                                ARRAY[_p.poitem_taxtype_id],
+                                ARRAY[_itemAmount])->'lines'->0->'tax')
+      GROUP BY (value->>'taxid')::INTEGER
+
     LOOP
       INSERT INTO apopentax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax, 
                              taxhist_taxtype_id, taxhist_parent_id, taxhist_journalnumber ) 

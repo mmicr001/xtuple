@@ -99,12 +99,7 @@ ORDER BY quitem_linenumber;</sql>
        (SELECT SUM(ROUND((quitem_qtyord * quitem_qty_invuomratio) * (quitem_price / quitem_price_invuomratio),2)) AS subtotal
           FROM quitem
          WHERE (quitem_quhead_id=&lt;? value("quhead_id") ?>) ) AS subtot,
-       (SELECT COALESCE(SUM(tax),0.0) AS tax 
-        FROM (
-          SELECT ROUND(SUM(taxdetail_tax),2) AS tax 
-          FROM tax 
-          JOIN calculateTaxDetailSummary('Q', &lt;? value("quhead_id") ?>, 'T') ON (taxdetail_tax_id=tax_id)
-	GROUP BY tax_id) AS data) AS taxtot
+         getOrderTax('Q', &lt;? value("quhead_id") ?>) AS taxtot
        
 
 
