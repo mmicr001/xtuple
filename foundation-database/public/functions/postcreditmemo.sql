@@ -73,7 +73,7 @@ BEGIN
             FROM taxhist
             JOIN tax ON taxhist_tax_id = tax_id
             WHERE (taxhist_doctype = 'CM' AND taxhist_parent_id = pCmheadid)
-               OR (tachist_doctype = 'CMI' AND taxhist_parent_id IN (SELECT cmitem_id
+               OR (taxhist_doctype = 'CMI' AND taxhist_parent_id IN (SELECT cmitem_id
                                                                        FROM cmitem
                                                                       WHERE cmitem_cmhead_id = pCmheadid)) 
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
