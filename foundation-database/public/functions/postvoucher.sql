@@ -22,6 +22,11 @@ DECLARE
   _itemAmount NUMERIC;
   _totalDiscountableAmount NUMERIC;
   _test INTEGER;
+  _taxTotal NUMERIC;
+  _freightTax NUMERIC;
+  _freightTotal NUMERIC;
+  _freightheadtax NUMERIC;
+  _accnt INTEGER;
   _a RECORD;
   _d RECORD;
   _g RECORD;
@@ -136,28 +141,84 @@ BEGIN
   END IF;
 
 --  Start by handling taxes
-  FOR _r IN SELECT tax_sales_accnt_id, 
-              round(sum(taxhist_tax),2) AS tax,
-              currToBase(_p.vohead_curr_id, round(sum(taxhist_tax),2), _p.vohead_docdate) AS taxbasevalue
-            FROM taxhist
-            JOIN tax ON taxhist_tax_id
-            WHERE (taxhist_doctype = 'VCH' AND taxhist_parent_id = _p.vohead_id)
-               OR (taxhist_doctype = 'VCHI' AND taxhist_parent_id IN (SELECT voitem_id
-                                                                        FROM voitem
-                                                                       WHERE voitem_vohead_id = _p.vohead_id))
-	    GROUP BY tax_id, tax_sales_accnt_id LOOP
+  _taxTotal := getOrderTax('VCH', pVoheadid);
 
-    PERFORM insertIntoGLSeries( _sequence, 'A/P', 'VO', _p.vohead_number,
-                                _r.tax_sales_accnt_id, 
-                                _r.taxbasevalue,
-                                _glDate, _p.glnotes );
+  SELECT COALESCE(SUM(taxhist_tax), 0.0) INTO _freightTax
+    FROM taxhist
+   WHERE taxhist_doctype = 'VCH'
+     AND taxhist_parent_id = pVoheadid
+     AND taxhist_line_type = 'F';
 
-    RAISE DEBUG 'postVoucher: _r.tax=%', _r.tax;
+  SELECT vohead_freight + COALESCE(SUM(voitem_freight), 0.0) INTO _freightTotal
+    FROM vohead
+    JOIN voitem ON vohead_id = voitem_vohead_id
+   WHERE vohead_id = pVoheadid
+   GROUP BY vohead_freight;
 
-    _totalAmount_base := (_totalAmount_base - _r.taxbasevalue);
-    _totalAmount := (_totalAmount - _r.tax);
-     
-  END LOOP;
+  IF (_taxTotal != 0.0) THEN
+    FOR _r IN SELECT COALESCE(costcat_purchprice_accnt_id, expcat_exp_accnt_id) AS accnt,
+                     COALESCE(SUM(taxhist_tax), 0.0) *
+                     GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS tax,
+                     voitem_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
+                     GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS freighttax,
+                     COALESCE(costcat_freight_accnt_id, expcat_freight_accnt_id) AS freightaccnt
+                FROM voitem
+                JOIN poitem ON voitem_poitem_id = poitem_id
+                LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
+                LEFT OUTER JOIN costcat ON itemsite_costcat_id = costcat_id
+                LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
+                LEFT OUTER JOIN taxhist ON taxhist_doctype = 'VCHI'
+                                       AND voitem_id = taxhist_parent_id
+               WHERE voitem_vohead_id = pVoheadid
+               GROUP BY voitem_id, costcat_purchprice_accnt_id, expcat_exp_accnt_id,
+                        costcat_freight_accnt_id, expcat_freight_accnt_id
+    LOOP
+      PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
+                                 _r.accnt,
+                                 currToBase(_p.vohead_curr_id, _r.tax * -1, _p.vohead_docdate),
+                                 _glDate, _p.glnotes);
+
+      PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
+                                 _r.freightaccnt,
+                                 currToBase(_p.vohead_curr_id, _r.freighttax * -1, _p.vohead_docdate),
+                                 _glDate, _p.glnotes);
+    END LOOP;
+
+    SELECT vohead_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
+           GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal,
+           expcat_exp_accnt_id
+      INTO _freightheadtax, _accnt
+      FROM vohead
+      JOIN expcat ON vohead_freight_expcat_id = expcat_id
+     WHERE vohead_id = pVoheadid;
+
+    PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
+                               _accnt,
+                               currToBase(_p.vohead_curr_id, _freightheadtax * -1, _p.vohead_docdate),
+                               _glDate, _p.glnotes);
+
+    FOR _r IN SELECT tax_use_accnt_id,
+                     currToBase(_p.vohead_curr_id, SUM(taxhist_tax_owed), _p.vohead_docdate) AS tax
+                FROM taxhist
+                JOIN tax ON taxhist_tax_id = tax_id
+               WHERE (taxhist_doctype = 'VCH' AND taxhist_parent_id = pVoheadid)
+                  OR (taxhist_doctype = 'VCHI' AND taxhist_parent_id IN (SELECT voitem_id
+                                                                           FROM voitem
+                                                                          WHERE voitem_vohead_id = pVoheadid))
+               GROUP BY tax_id, tax_use_accnt_id
+    LOOP
+      PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
+                                 CASE WHEN fetchMetricText('TaxService') = 'A'
+                                      THEN fetchMetricValue('AvalaraUseAccountId')::INTEGER
+                                      ELSE _r.tax_use_accnt_id
+                                  END,
+                                 _r.tax,
+                                 _glDate, _p.glnotes);
+    END LOOP;
+  END IF;
+
+  _totalAmount_base := _totalAmount_base + currToBase(_p.vohead_curr_id, _p.vohead_tax_charged, _p.vohead_docdate);
+  _totalAmount := _totalAmount + _p.vohead_tax_charged;
 
 -- Update item tax records with posting data
     UPDATE voitemtax SET 

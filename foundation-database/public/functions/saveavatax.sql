@@ -79,16 +79,19 @@ BEGIN
                     taxhist_basis_tax_id,
                     taxhist_sequence,
                     taxhist_percent, taxhist_amount, 
-                    taxhist_tax, taxhist_docdate, taxhist_curr_id,
+                    taxhist_tax, taxhist_tax_owed,
+                    taxhist_docdate, taxhist_curr_id,
                     taxhist_curr_rate, taxhist_doctype, taxhist_line_type, taxhist_freightgroup)
                    SELECT %%L, %%L, (value->>'taxName'), (value->>'taxableAmount')::NUMERIC * %L,
                           NULL,
                           0,
                           (value->>'rate')::NUMERIC, 0,
-                          (value->>'tax')::NUMERIC * %L, %L, %L,
+                          (value->>'taxCalculated')::NUMERIC * %L, (value->>'tax')::NUMERIC * %L,
+                          %L, %L,
                           %L, %%L, %%L, %%L
                      FROM jsonb_array_elements(%%L)
                     WHERE (value->>'tax')::NUMERIC != 0.0$_$,
+                  CASE WHEN _return THEN -1 ELSE 1 END,
                   CASE WHEN _return THEN -1 ELSE 1 END,
                   CASE WHEN _return THEN -1 ELSE 1 END,
                   (pResult->>'date')::DATE, _currid,

@@ -110,7 +110,7 @@ BEGIN
 
     PERFORM insertIntoGLSeries( _p.sequence, 'A/R', 'IN', _p.invchead_invcnumber,
                                 CASE WHEN fetchMetricText('TaxService') = 'A'
-                                     THEN fetchMetricValue('AvalaraGLAccountId')::INTEGER
+                                     THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
                                      ELSE _r.tax_sales_accnt_id
                                  END,
                                 _r.taxbasevalue,
