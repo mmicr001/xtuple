@@ -22,7 +22,8 @@ SELECT
   xt.add_column('taxhist', 'taxhist_doctype',           'TEXT', NULL,       'public'),
   xt.add_column('taxhist', 'taxhist_reverse_charge', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public'),
   xt.add_column('taxhist', 'taxhist_line_type',         'TEXT', 'NOT NULL DEFAULT ''L''', 'public'),
-  xt.add_column('taxhist', 'taxhist_freightgroup',   'INTEGER', 'NULL', 'public');
+  xt.add_column('taxhist', 'taxhist_freightgroup',   'INTEGER', 'NULL', 'public'),
+  xt.add_column('taxhist', 'taxhist_tax_owed',       'NUMERIC', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('taxhist', 'taxhist_pkey', 'PRIMARY KEY (taxhist_id)', 'public'),

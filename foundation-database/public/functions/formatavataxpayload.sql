@@ -50,6 +50,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType       TEXT,
                                                pLineZip         TEXT[],
                                                pLineCountry     TEXT[],
                                                pTaxPaid         NUMERIC,
+                                               pTaxOwed         NUMERIC,
                                                pRecord          BOOLEAN) RETURNS JSONB AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -314,8 +315,9 @@ BEGIN
                 format(', "taxOverride": {
                 "type": "taxAmount",
                 "taxAmount": "%s",
-                "reason": "Tax paid to vendor"
+                "reason": "%s Tax paid to vendor"
                 }',
+                pTaxOwed,
                 pTaxPaid);
   END IF;
 

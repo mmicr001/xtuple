@@ -79,11 +79,14 @@ BEGIN
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _sequence, 'A/R', 'CM', _p.cmhead_number,
-                                _r.tax_sales_accnt_id, 
-                                _r.taxbasevalue,
+                                CASE WHEN fetchMetricText('TaxService') = 'A'
+                                     THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
+                                     ELSE _r.tax_sales_accnt_id
+                                 END,
+                                _r.taxbasevalue * -1,
                                 _glDate, _p.cmhead_billtoname );
 
-    _totalAmount := _totalAmount + _r.tax * -1;
+    _totalAmount := _totalAmount + _r.tax;
   END LOOP;
 
 -- Update item tax records with posting data

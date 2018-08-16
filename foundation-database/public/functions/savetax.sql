@@ -9,6 +9,8 @@ DECLARE
   _r RECORD;
   _lineid INTEGER;
   _adjustment NUMERIC;
+  _taxcharged NUMERIC;
+  _taxtotal NUMERIC;
 
 BEGIN
 
@@ -108,6 +110,21 @@ BEGIN
     EXECUTE format(_qry, _subtablename, _lineid, (_r.value->>'taxtypeid')::INTEGER,
                    (_r.value->>'taxable')::NUMERIC, _subtype, 'L', _r.value->'tax');
   END LOOP;
+
+  IF pOrderType = 'VCH' THEN
+    SELECT vohead_tax_charged INTO _taxcharged
+      FROM vohead
+     WHERE vohead_id = pOrderId;
+
+    _taxtotal := getOrderTax('VCH', pOrderId);
+
+    UPDATE taxhist
+       SET taxhist_tax_owed = taxhist_tax * GREATEST(_taxtotal - _taxcharged, 0.0) / _taxtotal
+     WHERE (taxhist_doctype = 'VCH' AND taxhist_parent_id = pOrderId)
+        OR (taxhist_doctype = 'VCHI' AND taxhist_parent_id IN (SELECT voitem_id
+                                                                 FROM voitem
+                                                                WHERE voitem_vohead_id = pOrderId));
+  END IF;
 
   SELECT COALESCE(SUM(taxhist_tax), 0.0)
     INTO _adjustment
