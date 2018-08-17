@@ -160,7 +160,7 @@ BEGIN
     FOR _r IN SELECT tax_use_accnt_id,
                      currToBase(_p.vohead_curr_id, SUM(taxhist_tax_owed), _p.vohead_docdate) AS tax
                 FROM taxhist
-                JOIN tax ON taxhist_tax_id = tax_id
+                LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
                WHERE (taxhist_doctype = 'VCH' AND taxhist_parent_id = _p.vohead_id)
                   OR (taxhist_doctype = 'VCHI' AND taxhist_parent_id IN (SELECT voitem_id
                                                                            FROM voitem
