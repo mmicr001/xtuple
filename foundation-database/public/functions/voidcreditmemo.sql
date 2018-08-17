@@ -77,7 +77,7 @@ BEGIN
               round(sum(taxhist_tax),2) AS tax,
               currToBase(_p.cmhead_curr_id, round(sum(taxhist_tax),2), _p.cmhead_docdate) AS taxbasevalue
             FROM taxhist
-            JOIN tax ON taxhist_tax_id = tax_id
+            LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
             WHERE (taxhist_doctype = 'CM' AND taxhist_parent_id = _p.cmhead_id)
                OR (taxhist_doctype = 'CMI' AND taxhist_parent_id IN (SELECT cmitem_id
                                                                        FROM cmitem
