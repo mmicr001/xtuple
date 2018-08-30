@@ -8,7 +8,7 @@ BEGIN
 
   RETURN QUERY
     WITH augmented AS (
-      SELECT row(crmacct.*)::crmacct, crmaccttypes_b(crmacct_id) AS types FROM crmacct
+      SELECT row(crmacct.*)::crmacct, crmaccttypes(crmacct_id) AS types FROM crmacct
     )
     SELECT (row).* FROM augmented
      WHERE _all
