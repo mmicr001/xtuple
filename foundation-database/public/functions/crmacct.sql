@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION crmacct_new() RETURNS SETOF crmacct AS $$
+CREATE OR REPLACE FUNCTION crmacct() RETURNS SETOF crmacct AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE

@@ -294,7 +294,7 @@
     "public/functions/creditlimitcheck.sql",
     "public/functions/creditmemototal.sql",
     "public/functions/crmacct.sql",
-    "public/functions/crmacctTypes.sql",
+    "public/functions/crmaccttypes.sql",
     "public/functions/currconcat.sql",
     "public/functions/currentapmemonumber.sql",
     "public/functions/currentarmemonumber.sql",
