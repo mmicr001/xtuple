@@ -42,7 +42,7 @@ cdir() {
   log "Changing directory to $1"
 }
 
-PG_VERSION=9.4
+PG_VERSION=9.6
 DATABASE=dev
 RUNALL=true
 XT_VERSION=
