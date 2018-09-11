@@ -88,6 +88,9 @@ WHERE((true)
 <? if exists("prj_id") ?>
    AND (ophead_prj_id=<? value("prj_id") ?>)
 <? endif ?>
+<? if exists("name_pattern") ?>
+   AND (ophead_name ~* <? value("name_pattern") ?>)
+<? endif ?>
 <? if exists("opsource_id") ?>
    AND (ophead_opsource_id=<? value("opsource_id") ?>)
 <? endif ?>

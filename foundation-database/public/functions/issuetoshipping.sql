@@ -119,20 +119,18 @@ BEGIN
     WHERE ( (coitem_id=pitemid)
       AND   (shiphead_number=getOpenShipment(pordertype, coitem_cohead_id, itemsite_warehous_id)) );
     IF ((NOT FOUND) OR (pDropship)) THEN
-      SELECT NEXTVAL('shiphead_shiphead_id_seq') INTO _shipheadid;
-
       _shipnumber := fetchShipmentNumber();
       IF (_shipnumber < 0) THEN
 	RETURN -10;
       END IF;
 
       INSERT INTO shiphead
-      ( shiphead_id, shiphead_number, shiphead_order_id, shiphead_order_type,
+      ( shiphead_number, shiphead_order_id, shiphead_order_type,
 	shiphead_shipped,
 	shiphead_sfstatus, shiphead_shipvia, shiphead_shipchrg_id,
 	shiphead_freight, shiphead_freight_curr_id,
 	shiphead_shipdate, shiphead_notes, shiphead_shipform_id, shiphead_dropship )
-      SELECT _shipheadid, _shipnumber, coitem_cohead_id, pordertype,
+      SELECT _shipnumber, coitem_cohead_id, pordertype,
 	     FALSE,
 	     'N', cohead_shipvia,
 	     CASE WHEN (cohead_shipchrg_id <= 0) THEN NULL
@@ -145,8 +143,9 @@ BEGIN
 	     END,
 	     pDropship
       FROM cohead, coitem
-      WHERE ((coitem_cohead_id=cohead_id)
-         AND (coitem_id=pitemid) );
+      WHERE coitem_cohead_id=cohead_id
+        AND coitem_id=pitemid
+      RETURNING shiphead_id INTO _shipheadid;
 
       UPDATE pack
       SET pack_shiphead_id = _shipheadid,
@@ -167,20 +166,16 @@ BEGIN
 	AND  (coitem_id=pitemid));
     END IF;
 
-    _shipitemid := nextval('shipitem_shipitem_id_seq');
     INSERT INTO shipitem
-    ( shipitem_id, shipitem_shiphead_id, shipitem_orderitem_id, shipitem_qty,
+    ( shipitem_shiphead_id, shipitem_orderitem_id, shipitem_qty,
       shipitem_transdate, shipitem_trans_username, shipitem_invoiced,
-      shipitem_value, shipitem_invhist_id )
+      shipitem_invhist_id )
     VALUES
-    ( _shipitemid, _shipheadid, pitemid, pQty,
+    ( _shipheadid, pitemid, pQty,
       _timestamp, getEffectiveXtUser(), FALSE,
-      _value,
-      CASE WHEN _invhistid = -1 THEN
-        NULL
-      ELSE
-        _invhistid
-      END );
+      CASE WHEN _invhistid = -1 THEN NULL
+      ELSE _invhistid END )
+    RETURNING shipitem_id INTO _shipitemid;
 
     -- Handle reservations
     IF (fetchmetricbool('EnableSOReservations')) THEN
@@ -220,6 +215,11 @@ BEGIN
     SELECT (invhist_unitcost * invhist_invqty) INTO _value
     FROM invhist
     WHERE (invhist_id=_invhistid);
+
+    -- Due to Reservation interdependencies we have to create the shipitem, post inventory,
+    -- then update the shipitem with the invhist value
+    UPDATE shipitem SET shipitem_value = _value
+    WHERE shipitem_id = _shipitemid;
 
     -- Calculate shipment freight
     SELECT calcShipFreight(_shipheadid) INTO _freight;
@@ -271,20 +271,18 @@ BEGIN
       AND   (shiphead_number=getOpenShipment(pordertype, tohead_id, tohead_src_warehous_id)) );
 
     IF (NOT FOUND) THEN
-      _shipheadid := NEXTVAL('shiphead_shiphead_id_seq');
-
       _shipnumber := fetchShipmentNumber();
       IF (_shipnumber < 0) THEN
 	RETURN -10;
       END IF;
 
       INSERT INTO shiphead
-      ( shiphead_id, shiphead_number, shiphead_order_id, shiphead_order_type,
+      ( shiphead_number, shiphead_order_id, shiphead_order_type,
 	shiphead_shipped,
 	shiphead_sfstatus, shiphead_shipvia, shiphead_shipchrg_id,
 	shiphead_freight, shiphead_freight_curr_id,
 	shiphead_shipdate, shiphead_notes, shiphead_shipform_id )
-      SELECT _shipheadid, _shipnumber, tohead_id, pordertype,
+      SELECT _shipnumber, tohead_id, pordertype,
 	     FALSE,
 	     'N', tohead_shipvia, tohead_shipchrg_id,
 	     tohead_freight + SUM(toitem_freight), tohead_freight_curr_id,
@@ -295,7 +293,8 @@ BEGIN
 			    FROM toitem
 			    WHERE (toitem_id=pitemid))) )
       GROUP BY tohead_id, tohead_shipvia, tohead_shipchrg_id, tohead_freight,
-	       tohead_freight_curr_id, tohead_shipcomments, tohead_shipform_id;
+	       tohead_freight_curr_id, tohead_shipcomments, tohead_shipform_id
+      RETURNING shiphead_id INTO _shipheadid;
     END IF;
 
     INSERT INTO shipitem
@@ -310,6 +309,15 @@ BEGIN
            ELSE _invhistid
       END
     );
+
+    UPDATE pack
+    SET pack_shiphead_id = _shipheadid,
+        pack_printed = FALSE
+    FROM toitem
+    WHERE ((pack_head_id=toitem_tohead_id)
+      AND  (pack_shiphead_id IS NULL)
+      AND  (pack_head_type='TO')
+      AND  (toitem_id=pitemid));
 
   ELSE
     RETURN -11;

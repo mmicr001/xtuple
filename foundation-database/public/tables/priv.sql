@@ -33,7 +33,8 @@ declare
       ['CRM', 'ViewProspectGroups', 'Allows Viewing of Prospect Groups'],
       ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
       ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
-      ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups']
+      ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups'],
+      ['Sales', 'MaintainCustomerNumbers', 'Can edit or update Customer or Prospect numbers']
     ];
   _p TEXT[];
 begin
