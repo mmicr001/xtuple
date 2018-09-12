@@ -78,17 +78,7 @@ BEGIN
          _i.invchead_saletype_id, _i.invchead_shipzone_id, _i.invchead_warehous_id,
          _i.invchead_freight_taxtype_id, _i.invchead_misc_taxtype_id, _i.invchead_misc_discount);
 
-    INSERT INTO invcheadtax
-    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
-     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
-    SELECT _invcheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INV',
-           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
-      FROM invcheadtax
-     WHERE taxhist_parent_id = pInvcheadid;
+    PERFORM copyTax('INV', pInvcheadid, 'INV', _invcheadid);
 
   FOR _l IN SELECT *
             FROM invcitem
@@ -120,17 +110,7 @@ BEGIN
          _l.invcitem_price_uom_id, _l.invcitem_price_invuomratio,
          _l.invcitem_coitem_id);
 
-    INSERT INTO invcitemtax
-    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
-     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
-    SELECT _invcitemid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'INVI',
-           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
-      FROM invcitemtax
-     WHERE taxhist_parent_id = _l.invcitem_id;
+    PERFORM copyTax('INV', _l.invcitem_id, 'INV', _invcitemid, _invcheadid);
   END LOOP;
 
   RETURN _invcheadid;

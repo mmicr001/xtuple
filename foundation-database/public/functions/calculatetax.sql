@@ -229,10 +229,12 @@ BEGIN
        SELECT ROUND(taxrate_percent * (_prevlinetotal + _amounts[_line]) +
                     currToCurr(taxrate_curr_id, pCurrId, taxrate_amount, pDocDate), _precision)
               AS tax, tax_id, COALESCE(tax_basis_tax_id, -1) AS tax_basis_tax_id,
+              COALESCE(taxclass_id, -1) AS taxclass_id,
               COALESCE(taxrate_percent, 0.0) AS taxrate_percent,
               COALESCE(currToCurr(taxrate_curr_id, pCurrId, taxrate_amount, pDocDate), 0.0)
               AS taxrate_amount
          FROM tax
+         LEFT OUTER JOIN taxclass ON tax_taxclass_id = taxclass_id
          LEFT OUTER JOIN taxrate ON tax_id = taxrate_tax_id
                                 AND pDocDate BETWEEN COALESCE(taxrate_effective, startOfTime())
                                                  AND COALESCE(taxrate_expires, endOfTime())
@@ -242,10 +244,12 @@ BEGIN
                     currToCurr(subtaxrate.taxrate_curr_id, pCurrId, subtaxrate.taxrate_amount,
                                pDocDate), _precision) AS tax, subtax.tax_id AS tax_id,
               COALESCE(subtax.tax_basis_tax_id, -1) AS tax_basis_tax_id,
+              COALESCE(subtaxclass.taxclass_id, -1) AS taxclass_id,
               COALESCE(subtaxrate.taxrate_percent, 0.0) AS taxrate_percent,
               COALESCE(subtaxrate.taxrate_amount, 0.0) AS taxrate_amount
          FROM _taxamount
          JOIN tax subtax ON _taxamount.tax_id = subtax.tax_basis_tax_id
+         LEFT OUTER JOIN taxclass subtaxclass ON subtax.tax_taxclass_id = subtaxclass.taxclass_id
          LEFT OUTER JOIN taxrate subtaxrate ON subtax.tax_id = subtaxrate.taxrate_tax_id
                                            AND pDocDate BETWEEN
                                                         COALESCE(subtaxrate.taxrate_effective,
@@ -255,9 +259,10 @@ BEGIN
                                                                  endOfTime())
       )
       SELECT COALESCE(string_agg('{"taxid": ' || tax_id || ', "basistaxid": ' || tax_basis_tax_id ||
-                                 ', "sequence": ' || _tax.taxclass_sequence || ', "percent": ' ||
-                                 taxrate_percent || ', "amount": ' || taxrate_amount ||
-                                 ', "tax": ' || tax || '}', ','), ''), SUM(tax)
+                                 ', "taxclassid": ' || taxclass_id || ', "sequence": ' ||
+                                 _tax.taxclass_sequence || ', "percent": ' || taxrate_percent ||
+                                 ', "amount": ' || taxrate_amount || ', "tax": ' || tax || '}',
+                                 ','), ''), SUM(tax)
         INTO _taxdetail, _amount
         FROM _taxamount;
 
@@ -287,7 +292,9 @@ BEGIN
   END LOOP;
 
   _result := '{"currid": ' || pCurrId || ', "currrate": ' || currRate(pCurrId, pDocDate) ||
-             ', "date": "' || pDocDate || '", "total": ' || _total || ', "lines": [' || _lines ||
+             ', "date": "' || pDocDate || '", "total": ' || _total || ', "discount": ' ||
+             CASE WHEN pMiscDiscount AND pMisc < 0 THEN pMisc * -1 ELSE 0.0 END ||
+             ', "lines": [' || _lines ||
              '], "freight": ' || _freight;
 
   IF _includemisc THEN

@@ -41,9 +41,6 @@ BEGIN
   END IF;
 
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM invcheadtax
-    WHERE (taxhist_parent_id=OLD.invchead_id);
-
     SELECT recur_id INTO _recurid
       FROM recur
      WHERE ((recur_parent_id=OLD.invchead_id)

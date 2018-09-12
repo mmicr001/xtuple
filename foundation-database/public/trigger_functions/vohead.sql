@@ -29,7 +29,6 @@ BEGIN
      WHERE poreject_vohead_id = OLD.vohead_id;
 
     DELETE FROM vodist    WHERE vodist_vohead_id  = OLD.vohead_id;
-    DELETE FROM voheadtax WHERE taxhist_parent_id = OLD.vohead_id;
     DELETE FROM voitem    WHERE voitem_vohead_id  = OLD.vohead_id;
 
     SELECT recur_id INTO _recurid

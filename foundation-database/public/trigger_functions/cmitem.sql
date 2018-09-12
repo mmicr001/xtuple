@@ -6,9 +6,6 @@ BEGIN
     RAISE EXCEPTION 'You do not have privileges to maintain Credit Memos.';
   END IF;
 
-  DELETE FROM cmitemtax
-   WHERE (taxhist_parent_id=OLD.cmitem_id);
-
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -71,14 +68,6 @@ BEGIN
       WHERE (raitem_id=OLD.cmitem_raitem_id);
     END IF;
     RETURN OLD;
-  END IF;
-
--- Cache Credit Memo Head
-  SELECT * INTO _r
-  FROM cmhead
-  WHERE (cmhead_id=NEW.cmitem_cmhead_id);
-  IF (NOT FOUND) THEN
-    RAISE EXCEPTION 'Credit Memo head not found';
   END IF;
 
   RETURN NEW;

@@ -6,6 +6,11 @@ DECLARE
 
 BEGIN
 
+  UPDATE taxhead
+     SET taxhead_status = 'P'
+   WHERE taxhead_doc_type = pOrderType
+     AND taxhead_doc_id = pOrderId;
+
   IF pOrderType = 'VCH' THEN
     IF (SELECT getOrderTax('VCH', vohead_id) - vohead_tax_charged <= 0.0
           FROM vohead

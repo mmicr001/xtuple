@@ -39,14 +39,20 @@ BEGIN
          findFreightAccount(invchead_cust_id) AS freightaccntid,
          findARAccount(invchead_cust_id) AS araccntid,
          aropen_id, cohist_unitcost,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM invcheadtax
-           WHERE ( (taxhist_parent_id = invchead_id)
-             AND   (taxhist_taxtype_id = getFreightTaxtypeId()) ) ) AS freighttax,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM invcheadtax
-           WHERE ( (taxhist_parent_id = invchead_id)
-             AND   (taxhist_taxtype_id = getAdjustmentTaxtypeId()) ) ) AS adjtax
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'INV'
+             AND taxhead_doc_id = invchead_id
+             AND taxline_line_type = 'F' ) AS freighttax,
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'INV'
+             AND taxhead_doc_id = invchead_id
+             AND taxline_line_type = 'A' ) AS adjtax
        INTO _p 
   FROM invchead JOIN aropen ON (aropen_doctype='I' AND aropen_docnumber=invchead_invcnumber)
                 JOIN cohist ON (cohist_doctype='I' AND cohist_invcnumber=invchead_invcnumber)
@@ -97,14 +103,14 @@ BEGIN
 
 --  Start by handling taxes (reverse sense)
   FOR _r IN SELECT tax_sales_accnt_id, 
-              round(sum(taxhist_tax),2) AS tax,
-              currToBase(_p.invchead_curr_id, round(sum(taxhist_tax),2), _firstExchDate) AS taxbasevalue
-            FROM taxhist
-            LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
-            WHERE (taxhist_doctype = 'INV' AND taxhist_parent_id = pInvcheadid)
-            OR (taxhist_doctype = 'INVI' AND taxhist_parent_id IN (SELECT invcitem_id
-                                                                     FROM invcitem
-                                                                    WHERE invcitem_invchead_id = pInvcheadid))
+              round(sum(taxdetail_tax),2) AS tax,
+              currToBase(_p.invchead_curr_id, round(sum(taxdetail_tax),2), _firstExchDate) AS taxbasevalue
+            FROM taxhead
+            JOIN taxline ON taxline_taxhead_id = taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+            WHERE taxhead_doc_type = 'INV'
+              AND taxhead_doc_id = pInvcheadid
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _glSequence, 'A/R', 'IN', _p.invchead_invcnumber,
@@ -284,11 +290,6 @@ BEGIN
   END IF;
 
 --  Delete sales history
-  DELETE FROM cohisttax
-  WHERE (taxhist_parent_id IN (SELECT cohist_id
-                               FROM cohist
-                               WHERE (cohist_doctype='I' AND cohist_invcnumber=_p.invchead_invcnumber)));
-
   DELETE FROM cohist
   WHERE (cohist_doctype='I' AND cohist_invcnumber=_p.invchead_invcnumber);
 

@@ -149,14 +149,7 @@ BEGIN
                  AND (COALESCE(cohead_shipzone_id, 0)        = COALESCE(_c.cohead_shipzone_id, 0))
                 ) LOOP
 
-    --  Create the Invoice Head tax
-        INSERT INTO invcheadtax(taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-                                taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate)
-        SELECT _invcheadid,taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-               taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate
-        FROM cobmisctax 
-        WHERE taxhist_parent_id = _i.cobmisc_id
-          AND taxhist_taxtype_id = getadjustmenttaxtypeid();
+        PERFORM copyTax('COB', _i.cobmisc_id, 'INV', _invcheadid);
 
     --  Give this selection a number if it has not been assigned one
         UPDATE cobmisc
@@ -171,7 +164,7 @@ BEGIN
                          coitem_price_uom_id, coitem_price_invuomratio,
                          coitem_memo,
                          itemsite_item_id, itemsite_warehous_id,
-                         cobill_taxtype_id
+                         cobill_taxtype_id, cobill_id
                     FROM cohead, coitem, cobill, itemsite
                    WHERE((cobill_coitem_id=coitem_id)
                      AND (cohead_id=coitem_cohead_id)
@@ -203,6 +196,8 @@ BEGIN
             _r.coitem_memo,
             _r.cobill_taxtype_id,
             _r.coitem_id );
+
+          PERFORM copyTax('COB', _r.cobill_id, 'INV', _invcitemid, _invcheadid);
           
       --  Find and mark any Lot/Serial invdetail records associated with this bill
           UPDATE invdetail SET invdetail_invcitem_id = _invcitemid

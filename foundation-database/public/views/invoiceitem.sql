@@ -10,9 +10,13 @@ SELECT invcitem.*, itemsite_id, cohead_number, coitem_promdate,
                   COALESCE(round((invcitem_billed * invcitem_qty_invuomratio) *
                                  (invcitem_price / invcitem_price_invuomratio), 2), 0),
                   invchead_invcdate) AS baseextprice,
-       ( SELECT COALESCE(SUM(taxhist_tax), 0)
-         FROM invcitemtax
-         WHERE (taxhist_parent_id = invcitem_id) ) AS tax,
+       ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+         FROM taxhead
+         JOIN taxline ON taxhead_id = taxline_taxhead_id
+         JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+         WHERE taxhead_doc_type = 'INV'
+           AND taxhead_doc_id = invchead_id
+           AND taxline_line_id = invcitem_id ) AS tax,
        ( SELECT COALESCE(SUM(shipitem_value),
                          (itemCost(itemsite_id) * invcitem_billed * invcitem_qty_invuomratio),
                          0.0)

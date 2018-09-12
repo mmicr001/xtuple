@@ -1,17 +1,17 @@
 -- add tax information to a GL Series
 -- return the base currency value of the GL Series records inserted
 --	  NULL if there has been an error
-
-CREATE OR REPLACE FUNCTION addTaxToGLSeries(pSequence  INTEGER,
-                                            pSource    TEXT,
-                                            pDocType   TEXT,
-                                            pDocNumber TEXT,
-                                            pCurrId    INTEGER,
-                                            pExchDate  DATE,
-                                            pDistDate  DATE,
-                                            pTableName TEXT,
-                                            pParentId  INTEGER,
-                                            pNotes     TEXT) RETURNS NUMERIC AS $$
+DROP FUNCTION IF EXISTS addTaxToGLSeries(INTEGER, TEXT, TEXT, TEXT, INTEGER, DATE, DATE, TEXT, INTEGER, TEXT);
+CREATE OR REPLACE FUNCTION addTaxToGLSeries(pSequence   INTEGER,
+                                            pSource     TEXT,
+                                            pDocType    TEXT,
+                                            pDocNumber  TEXT,
+                                            pCurrId     INTEGER,
+                                            pExchDate   DATE,
+                                            pDistDate   DATE,
+                                            pParentType TEXT,
+                                            pParentId   INTEGER,
+                                            pNotes      TEXT) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -21,32 +21,28 @@ DECLARE
 
 BEGIN
 
--- This is just a fancy select statement on taxhist.
--- Because all tax records tables inherit from taxhist,
--- we can use the same select statement for all.
--- https://www.postgresql.org/docs/8.1/static/ddl-inherit.html
--- pTableName in the where clause narrows down the selection
--- to the correct sub table.
+  FOR _t IN SELECT taxhead_id, taxdetail_tax, tax_sales_accnt_id
+            FROM taxhead
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            JOIN tax ON taxdetail_tax_id = tax_id
+            WHERE taxhead_doc_type = pParentType
+              AND taxhead_doc_id = pParentId
+            LOOP
 
-  FOR _t IN SELECT taxhist_id, taxhist_tax, tax_sales_accnt_id
-            FROM taxhist JOIN tax ON (tax_id = taxhist_tax_id)
-                         JOIN pg_class ON (pg_class.oid = taxhist.tableoid)
-            WHERE ( (taxhist_parent_id = pParentId)
-              AND   (relname = pTableName) ) LOOP
-
-    _baseTax := currToBase(pCurrId, _t.taxhist_tax, pExchDate);
+    _baseTax := currToBase(pCurrId, _t.taxdetail_tax, pExchDate);
     _returnVal := _returnVal + _baseTax;
     PERFORM insertIntoGLSeries( pSequence, pSource, pDocType, pDocNumber,
                                 _t.tax_sales_accnt_id, _baseTax,
                                 pDistDate, pNotes );
 
-    UPDATE taxhist SET
-      taxhist_docdate=pExchDate,
-      taxhist_distdate=pDistDate,
-      taxhist_curr_id=pCurrId,
-      taxhist_curr_rate=curr_rate
+    UPDATE taxhead SET
+      taxhead_date=pExchDate,
+      taxhead_distdate=pDistDate,
+      taxhead_curr_id=pCurrId,
+      taxhead_curr_rate=curr_rate
     FROM curr_rate
-    WHERE ((taxhist_id=_t.taxhist_id)
+    WHERE ((taxhead_id=_t.taxhead_id)
       AND  (pCurrId=curr_id)
       AND  (pExchDate BETWEEN curr_effective AND curr_expires));
 

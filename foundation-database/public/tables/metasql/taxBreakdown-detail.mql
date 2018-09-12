@@ -5,46 +5,51 @@
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if exists("dochead_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
+SELECT NULL::INTEGER AS taxdetail_id, 0 AS linetype,
        docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
        docitem_number AS line, docitem_item_number AS item_number,
        docitem_qty AS qty,
        docitem_unitprice AS amount,
        docitem_price AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_amount), 0.0) AS taxhist_amount,
-       COALESCE(SUM(taxhist_percent), 0.0) * 100 AS taxhist_percent,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
+       COALESCE(MAX(taxdetail_taxable), 0.0) AS taxdetail_taxable,
+       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxdetail_sequence,
+       COALESCE(SUM(taxdetail_amount), 0.0) AS taxdetail_amount,
+       COALESCE(SUM(taxdetail_percent), 0.0) * 100 AS taxdetail_percent,
+       COALESCE(SUM(taxdetail_tax), 0.0) AS taxdetail_tax,
+       docitem_price + COALESCE(SUM(taxdetail_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
-                         AND docitem_id = taxhist_parent_id
+  LEFT OUTER JOIN taxhead ON docitem_type = taxhead_doc_type
+                         AND docitem_dochead_id = taxhead_doc_id
+  LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                         AND docitem_id = taxline_line_id
+  LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_dochead_id = <? value("dochead_id") ?>
  GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
           docitem_unitprice, docitem_price, docitem_item_number
 UNION
 SELECT NULL, 1,
-       taxhist_freightgroup, 0,
+       taxline_freightgroup::INTEGER, 0,
        <? value("freight") ?> ||
-       COALESCE(' ' || <? value("group") ?> || ' ' || taxhist_freightgroup, ''), NULL,
+       COALESCE(' ' || <? value("group") ?> || ' ' || taxline_freightgroup, ''), NULL,
        1.0,
        dochead_freight,
        dochead_freight,
-       COALESCE(MAX(taxhist_basis), 0.0),
+       COALESCE(MAX(taxdetail_taxable), 0.0),
        NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_amount), 0.0),
-       COALESCE(SUM(taxhist_percent), 0.0) * 100,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       dochead_freight + COALESCE(SUM(taxhist_tax), 0.0), 0
+       COALESCE(SUM(taxdetail_amount), 0.0),
+       COALESCE(SUM(taxdetail_percent), 0.0) * 100,
+       COALESCE(SUM(taxdetail_tax), 0.0),
+       dochead_freight + COALESCE(SUM(taxdetail_tax), 0.0), 0
   FROM dochead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-                         AND dochead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'F'
+  LEFT OUTER JOIN taxhead ON dochead_type = taxhead_doc_type
+                         AND dochead_id = taxhead_doc_id
+  LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                         AND taxline_line_type = 'F'
+  LEFT OUTER JOIN taxdetail ON taxdetail_taxline_id = taxline_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
- GROUP BY dochead_freight, taxhist_freightgroup
+ GROUP BY dochead_freight, taxline_freightgroup
 UNION
 SELECT NULL, 2,
        1, 0,
@@ -52,16 +57,18 @@ SELECT NULL, 2,
        1.0,
        dochead_misc,
        dochead_misc,
-       COALESCE(MAX(taxhist_basis), 0.0),
+       COALESCE(MAX(taxdetail_taxable), 0.0),
        NULL, NULL, NULL,
-       COALESCE(SUM(taxhist_amount), 0.0),
-       COALESCE(SUM(taxhist_percent), 0.0) * 100,
-       COALESCE(SUM(taxhist_tax), 0.0),
-       dochead_misc + COALESCE(SUM(taxhist_tax), 0.0), 0
+       COALESCE(SUM(taxdetail_amount), 0.0),
+       COALESCE(SUM(taxdetail_percent), 0.0) * 100,
+       COALESCE(SUM(taxdetail_tax), 0.0),
+       dochead_misc + COALESCE(SUM(taxdetail_tax), 0.0), 0
   FROM dochead
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-                         AND dochead_id = taxhist_parent_id
-                         AND taxhist_line_type = 'M'
+  LEFT OUTER JOIN taxhead ON dochead_type = taxhead_doc_type
+                         AND dochead_id = taxhead_doc_id
+  LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                         AND taxline_line_type = 'M'
+  LEFT OUTER JOIN taxdetail ON taxdetail_taxline_id = taxline_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
    AND dochead_type NOT IN ('P', 'VCH')
@@ -77,93 +84,104 @@ SELECT NULL, 3,
        NULL, NULL, NULL,
        NULL,
        NULL,
-       SUM(taxhist_tax),
-       SUM(taxhist_tax), 0
+       SUM(taxdetail_tax),
+       SUM(taxdetail_tax), 0
   FROM dochead
-  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-              AND dochead_id = taxhist_parent_id
-              AND taxhist_line_type = 'A'
+  LEFT OUTER JOIN taxhead ON dochead_type = taxhead_doc_type
+                         AND dochead_id = taxhead_doc_id
+  LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                         AND taxline_line_type = 'A'
+  LEFT OUTER JOIN taxdetail ON taxdetail_taxline_id = taxline_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
  GROUP BY dochead_id
 UNION
-SELECT taxhist_id, 0,
+SELECT taxdetail_id, 0,
        docitem_linenumber, docitem_subnumber,
        NULL, NULL,
        NULL,
        NULL,
        NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_amount,
-       taxhist_percent * 100,
-       taxhist_tax,
+       taxdetail_taxable,
+       COALESCE(taxdetail_tax_code, tax_code), tax_descrip, taxdetail_sequence,
+       taxdetail_amount,
+       taxdetail_percent * 100,
+       taxdetail_tax,
        NULL, 1
   FROM docitem
-  JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
-              AND docitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+  JOIN taxhead ON docitem_type = taxhead_doc_type
+              AND docitem_dochead_id = taxhead_doc_id
+  JOIN taxline ON taxhead_id = taxline_taxhead_id
+              AND docitem_id = taxline_line_id
+  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_dochead_id = <? value("dochead_id") ?>
 UNION
-SELECT taxhist_id, 1,
-       taxhist_freightgroup, 0,
+SELECT taxdetail_id, 1,
+       taxline_freightgroup::INTEGER, 0,
        NULL, NULL,
        NULL,
        NULL,
        NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_amount,
-       taxhist_percent * 100,
-       taxhist_tax,
+       taxdetail_taxable,
+       COALESCE(taxdetail_tax_code, tax_code), tax_descrip, taxdetail_sequence,
+       taxdetail_amount,
+       taxdetail_percent * 100,
+       taxdetail_tax,
        NULL, 1
   FROM dochead
-  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-              AND dochead_id = taxhist_parent_id
-              AND taxhist_line_type = 'F'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+  JOIN taxhead ON dochead_type = taxhead_doc_type
+              AND dochead_id = taxhead_doc_id
+  JOIN taxline ON taxhead_id = taxline_taxhead_id
+              AND taxline_line_type = 'F'
+  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
 UNION
-SELECT taxhist_id, 2,
+SELECT taxdetail_id, 2,
        1, 0,
        NULL, NULL,
        NULL,
        NULL,
        NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_amount,
-       taxhist_percent * 100,
-       taxhist_tax,
+       taxdetail_taxable,
+       COALESCE(taxdetail_tax_code, tax_code), tax_descrip, taxdetail_sequence,
+       taxdetail_amount,
+       taxdetail_percent * 100,
+       taxdetail_tax,
        NULL, 1
   FROM dochead
-  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-              AND dochead_id = taxhist_parent_id
-              AND taxhist_line_type = 'M'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+  JOIN taxhead ON dochead_type = taxhead_doc_type
+              AND dochead_id = taxhead_doc_id
+  JOIN taxline ON taxhead_id = taxline_taxhead_id
+              AND taxline_line_type = 'M'
+  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
    AND dochead_type NOT IN ('P', 'VCH')
 UNION
-SELECT taxhist_id, 3,
+SELECT taxdetail_id, 3,
        1, 0,
        NULL, NULL,
        NULL,
        NULL,
        NULL,
        0.0,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, 0,
+       COALESCE(taxdetail_tax_code, tax_code), tax_descrip, 0,
        NULL,
        NULL,
-       taxhist_tax,
+       taxdetail_tax,
        NULL, 1
   FROM dochead
-  JOIN taxhist ON taxhist_doctype = <? value("headtype") ?>
-              AND dochead_id = taxhist_parent_id
-              AND taxhist_line_type = 'A'
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+  JOIN taxhead ON dochead_type = taxhead_doc_type
+              AND dochead_id = taxhead_doc_id
+  JOIN taxline ON taxhead_id = taxline_taxhead_id
+              AND taxline_line_type = 'A'
+  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
  WHERE dochead_type = <? value("headtype") ?>
    AND dochead_id = <? value("dochead_id") ?>
 UNION
@@ -173,114 +191,88 @@ SELECT NULL, 4,
        NULL,
        NULL,
        SUM(docitem_price),
-       SUM(taxhist_basis),
+       SUM(taxdetail_taxable),
        NULL, NULL, NULL,
-       SUM(taxhist_amount),
-       CASE WHEN MIN(taxhist_percent) = MAX(taxhist_percent)
-            THEN MAX(taxhist_percent)
-            ELSE (SUM(taxhist_tax) - SUM(taxhist_amount)) /
-                 COALESCE(NULLIF(SUM(taxhist_basis), 0.0), 1.0)
+       SUM(taxdetail_amount),
+       CASE WHEN MIN(taxdetail_percent) = MAX(taxdetail_percent)
+            THEN MAX(taxdetail_percent)
+            ELSE (SUM(taxdetail_tax) - SUM(taxdetail_amount)) /
+                 COALESCE(NULLIF(SUM(taxdetail_taxable), 0.0), 1.0)
         END * 100,
-       SUM(taxhist_tax),
-       SUM(docitem_price) + SUM(taxhist_tax), 0
+       SUM(taxdetail_tax),
+       SUM(docitem_price) + SUM(taxdetail_tax), 0
   FROM
   (
    SELECT dochead_freight + dochead_misc AS docitem_price,
-          COALESCE(SUM(freightbasis), 0.0) +
-          COALESCE(MAX(miscbasis), 0.0) AS taxhist_basis,
-          COALESCE(SUM(freighttax), 0.0) +
-          COALESCE(SUM(misctax), 0.0) +
-          COALESCE(SUM(adjtax), 0.0) AS taxhist_tax,
-          COALESCE(SUM(freightamount), 0.0) +
-          COALESCE(SUM(miscamount), 0.0) AS taxhist_amount,
-          CASE WHEN COALESCE(SUM(freightbasis), 0.0) = 0.0
-                AND COALESCE(MAX(miscbasis), 0.0) = 0.0
-               THEN NULL
-               WHEN COALESCE(SUM(freightbasis), 0.0) = 0.0
-               THEN COALESCE(SUM(miscpercent), 0.0)
-               WHEN COALESCE(MAX(miscbasis), 0.0) = 0.0
-               THEN COALESCE(SUM(freightpercent), 0.0)
-               WHEN COALESCE(SUM(freightpercent), 0.0) =
-                    COALESCE(SUM(miscpercent), 0.0)
-               THEN COALESCE(SUM(freightpercent), 0.0)
-               ELSE -1
-           END AS taxhist_percent
-     FROM
-     (
-      SELECT dochead_id, dochead_freight, dochead_misc,
-             MAX(freight.taxhist_basis) AS freightbasis, misc.taxhist_basis AS miscbasis,
-             SUM(freight.taxhist_tax) AS freighttax, misc.taxhist_tax AS misctax,
-             adj.taxhist_tax AS adjtax,
-             SUM(freight.taxhist_amount) AS freightamount, misc.taxhist_amount AS miscamount,
-             SUM(freight.taxhist_percent) AS freightpercent, misc.taxhist_percent AS miscpercent
-        FROM dochead
-        LEFT OUTER JOIN taxhist freight ON freight.taxhist_doctype = <? value("headtype") ?>
-                                       AND dochead_id = freight.taxhist_parent_id
-                                       AND freight.taxhist_line_type = 'F'
-        LEFT OUTER JOIN taxhist misc ON misc.taxhist_doctype = <? value("headtype") ?>
-                                    AND dochead_id = misc.taxhist_parent_id
-                                    AND misc.taxhist_line_type = 'M'
-        LEFT OUTER JOIN taxhist adj ON adj.taxhist_doctype = <? value("headtype") ?>
-                                   AND dochead_id = adj.taxhist_parent_id
-                                   AND adj.taxhist_line_type = 'A'
-       WHERE dochead_type = <? value("headtype") ?>
-         AND dochead_id = <? value("dochead_id") ?>
-       GROUP BY dochead_id, dochead_freight, dochead_misc,
-                misc.taxhist_basis, misc.taxhist_tax, misc.taxhist_amount, misc.taxhist_percent,
-                adj.taxhist_tax, freight.taxhist_freightgroup
-     ) freightgroup
-    GROUP BY dochead_id, dochead_freight, dochead_misc
-   UNION ALL
-   SELECT docitem_price, COALESCE(MAX(taxhist_basis), 0.0), COALESCE(SUM(taxhist_tax), 0.0),
-          COALESCE(SUM(taxhist_amount), 0.0), CASE WHEN COALESCE(MAX(taxhist_basis), 0.0) = 0.0
-                                                   THEN NULL
-                                                   ELSE COALESCE(SUM(taxhist_percent), 0.0)
-                                               END
+          MAX(taxdetail_taxable) AS taxdetail_taxable, SUM(taxdetail_amount) AS taxdetail_amount,
+          SUM(taxdetail_percent) AS taxdetail_percent, SUM(taxdetail_tax) AS taxdetail_tax
+     FROM dochead
+     LEFT OUTER JOIN taxhead ON dochead_type = taxhead_doc_type
+                            AND dochead_id = taxhead_doc_id
+     LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                            AND taxline_line_type != 'L'
+     LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+    WHERE dochead_type = <? value("headtype") ?>
+      AND dochead_id = <? value("dochead_id") ?>
+    GROUP BY taxline_id, dochead_freight, dochead_misc
+   UNION
+   SELECT docitem_price,
+          MAX(taxdetail_taxable) AS taxdetail_taxable, SUM(taxdetail_amount) AS taxdetail_amount,
+          SUM(taxdetail_percent) AS taxdetail_percent, SUM(taxdetail_tax) AS taxdetail_tax
      FROM docitem
-     LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
-                            AND docitem_id = taxhist_parent_id
+     LEFT OUTER JOIN taxhead ON docitem_type = taxhead_doc_type
+                            AND docitem_dochead_id = taxhead_doc_id
+     LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                            AND docitem_id = taxline_line_id
+     LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
     WHERE docitem_type = <? value("headtype") ?>
       AND docitem_dochead_id = <? value("dochead_id") ?>
-    GROUP BY docitem_id, docitem_price
+    GROUP BY taxline_id, docitem_price
   ) sub
 <? elseif exists("docitem_id") ?>
-SELECT NULL::INTEGER AS taxhist_id, 0 AS linetype,
+SELECT NULL::INTEGER AS taxdetail_id, 0 AS linetype,
        docitem_linenumber AS linenumber, docitem_subnumber AS subnumber,
        docitem_number AS line, docitem_item_number AS item_number,
        docitem_qty AS qty,
        docitem_unitprice AS amount,
        docitem_price AS extended,
-       COALESCE(MAX(taxhist_basis), 0.0) AS taxhist_basis,
-       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxhist_sequence,
-       COALESCE(SUM(taxhist_amount), 0.0) AS taxhist_amount,
-       COALESCE(SUM(taxhist_percent), 0.0) * 100 AS taxhist_percent,
-       COALESCE(SUM(taxhist_tax), 0.0) AS taxhist_tax,
-       docitem_price + COALESCE(SUM(taxhist_tax), 0.0) AS total, 0 AS xtindentrole
+       COALESCE(MAX(taxdetail_taxable), 0.0) AS taxdetail_taxable,
+       NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxdetail_sequence,
+       COALESCE(SUM(taxdetail_taxable), 0.0) AS taxdetail_amount,
+       COALESCE(SUM(taxdetail_percent), 0.0) * 100 AS taxdetail_percent,
+       COALESCE(SUM(taxdetail_tax), 0.0) AS taxdetail_tax,
+       docitem_price + COALESCE(SUM(taxdetail_tax), 0.0) AS total, 0 AS xtindentrole
   FROM docitem
-  LEFT OUTER JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
-                         AND docitem_id = taxhist_parent_id
+  LEFT OUTER JOIN taxhead ON docitem_type = taxhead_doc_type
+                         AND docitem_dochead_id = taxhead_doc_id
+  LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                         AND docitem_id = taxline_line_id
+  LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_id = <? value("docitem_id") ?>
  GROUP BY docitem_id, docitem_linenumber, docitem_subnumber, docitem_number, docitem_qty,
           docitem_unitprice, docitem_price, docitem_item_number
 UNION
-SELECT taxhist_id, 0,
+SELECT taxdetail_id, 0,
        docitem_linenumber, docitem_subnumber,
        NULL, NULL,
        NULL,
        NULL,
        NULL,
-       taxhist_basis,
-       COALESCE(taxhist_tax_code, tax_code), tax_descrip, taxhist_sequence,
-       taxhist_amount,
-       taxhist_percent * 100,
-       taxhist_tax,
+       taxdetail_taxable,
+       COALESCE(taxdetail_tax_code, tax_code), tax_descrip, taxdetail_sequence,
+       taxdetail_amount,
+       taxdetail_percent * 100,
+       taxdetail_tax,
        NULL, 1
   FROM docitem
-  JOIN taxhist ON taxhist_doctype = <? value("itemtype") ?>
-              AND docitem_id = taxhist_parent_id
-  LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
+  JOIN taxhead ON docitem_type = taxhead_doc_type
+              AND docitem_dochead_id = taxhead_doc_id
+  JOIN taxline ON taxhead_id = taxline_taxhead_id
+              AND docitem_id = taxline_line_id
+  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
  WHERE docitem_type = <? value("headtype") ?>
    AND docitem_id = <? value("docitem_id") ?>
 <? endif ?>
-ORDER BY linetype, linenumber, subnumber, xtindentrole, taxhist_sequence;
+ORDER BY linetype, linenumber, subnumber, xtindentrole, taxdetail_sequence;
