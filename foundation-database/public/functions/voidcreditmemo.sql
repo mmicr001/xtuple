@@ -34,10 +34,13 @@ BEGIN
 --  Cache C/M information
   SELECT cmhead.*,
          findARAccount(cmhead_cust_id) AS ar_accnt_id,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM cmheadtax
-           WHERE ( (taxhist_parent_id = cmhead_id)
-             AND   (taxhist_taxtype_id = getAdjustmentTaxtypeId()) ) ) AS adjtax
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'CM'
+             AND taxhead_doc_id = cmhead_id
+             AND taxline_line_type = 'A' ) AS adjtax
          INTO _p
   FROM cmhead
   WHERE (cmhead_id=pCmheadid);
@@ -74,14 +77,14 @@ BEGIN
 
 --  Start by handling taxes (reverse sense)
   FOR _r IN SELECT tax_sales_accnt_id,
-              round(sum(taxhist_tax),2) AS tax,
-              currToBase(_p.cmhead_curr_id, round(sum(taxhist_tax),2), _p.cmhead_docdate) AS taxbasevalue
-            FROM taxhist
-            LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
-            WHERE (taxhist_doctype = 'CM' AND taxhist_parent_id = _p.cmhead_id)
-               OR (taxhist_doctype = 'CMI' AND taxhist_parent_id IN (SELECT cmitem_id
-                                                                       FROM cmitem
-                                                                      WHERE cmitem_cmhead_id = _p.cmhead_id))
+              round(sum(taxdetail_tax),2) AS tax,
+              currToBase(_p.cmhead_curr_id, round(sum(taxdetail_tax),2), _p.cmhead_docdate) AS taxbasevalue
+            FROM taxhead
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+            WHERE taxhead_doc_type = 'CM'
+              AND taxhead_doc_id = _p.cmhead_id
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _glSequence, 'A/R', 'CM', _p.cmhead_number,
@@ -237,11 +240,6 @@ BEGIN
   END IF;
 
 --  Delete sales history
-  DELETE FROM cohisttax
-  WHERE (taxhist_parent_id IN (SELECT cohist_id
-                               FROM cohist
-                               WHERE (cohist_doctype='C' AND cohist_ordernumber=_p.cmhead_number)));
-
   DELETE FROM cohist
   WHERE (cohist_doctype='C' AND cohist_ordernumber=_p.cmhead_number);
 

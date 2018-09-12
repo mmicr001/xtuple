@@ -125,11 +125,12 @@ BEGIN
   _taxBaseValue := addTaxToGLSeries(_glSequence,
 				      'A/R', 'DM', pDocNumber,
 				      pCurrId, pDocDate, pDocDate,
-                                      'aropentax', _aropenid,
+                                      'AR', _aropenid,
                                       (_custName || ' ' || pNotes));
 
-  UPDATE aropentax SET taxhist_journalnumber = _journalNumber
-  WHERE taxhist_parent_id=_aropenid;
+  UPDATE taxhead SET taxhead_journalnumber = _journalNumber
+  WHERE taxhead_doc_type = 'AR'
+    AND taxhead_doc_id = _aropenid;
 
   -- Credit the Prepaid account for the basis amount
   SELECT insertIntoGLSeries ( _glSequence, 'A/R', 'DM',
@@ -165,19 +166,6 @@ BEGIN
     1, (pAmount - _taxBaseValue), 0,
     pSalesrepid, pCommissiondue, FALSE,
     pCurrId, _glSequence );
-  INSERT INTO cohisttax
-  ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-    taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-    taxhist_percent, taxhist_amount, taxhist_tax,
-    taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-    taxhist_journalnumber )
-  SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-         taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-         taxhist_percent, taxhist_amount, taxhist_tax,
-         taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-         taxhist_journalnumber
-  FROM aropentax
-  WHERE (taxhist_parent_id=_aropenid);
 
   RETURN _aropenid;
 

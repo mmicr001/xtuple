@@ -5,14 +5,7 @@ DECLARE
   _itemfractional BOOLEAN;
 
 BEGIN
-  IF (TG_OP = 'DELETE') THEN
-    DELETE FROM invcitemtax
-    WHERE (taxhist_parent_id=OLD.invcitem_id);
-
-    RETURN OLD;
-  END IF;
-
-  IF (TG_OP IN ('UPDATE','DELETE')) THEN
+  IF (TG_OP = 'UPDATE') THEN
     IF (SELECT COUNT(invchead_id) > 0
         FROM invchead
         WHERE ((invchead_id=OLD.invcitem_invchead_id)
@@ -40,7 +33,7 @@ $$ LANGUAGE 'plpgsql';
 
 SELECT dropIfExists('TRIGGER', 'invcitemBeforeTrigger');
 CREATE TRIGGER invcitemBeforeTrigger
-  BEFORE INSERT OR UPDATE OR DELETE
+  BEFORE INSERT OR UPDATE
   ON invcitem
   FOR EACH ROW
   EXECUTE PROCEDURE _invcitemBeforeTrigger();
@@ -48,22 +41,7 @@ CREATE TRIGGER invcitemBeforeTrigger
 CREATE OR REPLACE FUNCTION _invcitemTrigger() RETURNS trigger AS $$
 -- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  _r RECORD;
-
 BEGIN
-  IF (TG_OP = 'DELETE') THEN
-    RETURN OLD;
-  END IF;
-
--- Cache Invoice Head
-  SELECT * INTO _r
-  FROM invchead
-  WHERE (invchead_id=NEW.invcitem_invchead_id);
-  IF (NOT FOUND) THEN
-    RAISE EXCEPTION 'Invoice head not found';
-  END IF;
-
 -- Insert new row
   IF (TG_OP = 'INSERT') THEN
       PERFORM postComment('ChangeLog', 'INVI', NEW.invcitem_id, 'Created');
@@ -113,7 +91,7 @@ $$ LANGUAGE 'plpgsql';
 
 SELECT dropIfExists('TRIGGER', 'invcitemtrigger');
 CREATE TRIGGER invcitemtrigger
-  AFTER INSERT OR UPDATE OR DELETE
+  AFTER INSERT OR UPDATE
   ON invcitem
   FOR EACH ROW
   EXECUTE PROCEDURE _invcitemTrigger();

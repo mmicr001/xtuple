@@ -134,9 +134,9 @@ SELECT 'CM',
        COALESCE(NULLIF(itemsite_warehous_id, -1), invchead_warehous_id, cmhead_warehous_id),
        COALESCE(item_number, cmitem_number),
        COALESCE(item_descrip1, cmitem_descrip),
-       cmitem_qtycredit,
-       cmitem_unitprice,
-       cmitem_qtycredit * cmitem_unitprice,
+       cmitem_qtycredit * cmitem_qty_invuomratio,
+       cmitem_unitprice / cmitem_price_invuomratio,
+       cmitem_qtycredit * cmitem_qty_invuomratio * cmitem_unitprice / cmitem_price_invuomratio,
        COALESCE(invcitem_taxtype_id, cmitem_taxtype_id),
        0.0
   FROM cmitem

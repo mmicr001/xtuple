@@ -34,6 +34,8 @@ DECLARE
   _taxAmount NUMERIC := 0;
   _taxAmount_base NUMERIC;
   _apaccntid INTEGER;
+  _taxheadid INTEGER;
+  _taxlineid INTEGER;
 
 BEGIN
 --Set things up
@@ -106,8 +108,29 @@ BEGIN
       CASE WHEN (round(_itemAmount, 2) = 0) THEN _p.poreject_date END );
 
 -- Taxes
+    INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
+                         taxhead_date,
+                         taxhead_curr_id, taxhead_curr_rate,
+                         taxhead_taxzone_id, taxhead_journalnumber)
+    SELECT 'P', 'AP', _apopenid, _p.pohead_vend_id,
+           CURRENT_DATE, _p.pohead_curr_id, currRate(_p.pohead_curr_id, CURRENT_DATE),
+           _p.pohead_taxzone_id, _journalNumber
+    RETURNING taxhead_id INTO _taxheadid;
+
+    INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                         taxline_taxtype_id, taxline_qty, taxline_amount, taxline_extended)
+    SELECT _taxheadid, 'L', _apopenid,
+           _p.poitem_taxtype_id, 1.0, _itemAmount, _itemAmount
+    RETURNING taxline_id INTO _taxlineid;
+
     FOR _tax IN
-      SELECT (value->>'taxid')::INTEGER AS taxdetail_tax_id, sum((value->>'tax')::NUMERIC) AS taxdetail_tax,
+      SELECT (value->>'taxid')::INTEGER AS taxdetail_tax_id,
+             (value->>'taxclassid')::INTEGER AS taxclassid,
+             (value->>'sequence')::INTEGER AS sequence,
+             (value->>'basistaxid')::INTEGER AS basistaxid,
+             (value->>'amount')::NUMERIC AS amount,
+             (value->>'percent')::NUMERIC AS percent,
+             sum((value->>'tax')::NUMERIC) AS taxdetail_tax,
         currToBase(_p.pohead_curr_id, round(sum((value->>'tax')::NUMERIC),2), current_date) AS taxbasevalue
       FROM jsonb_array_elements(calculatetax(_p.pohead_taxzone_id,_p.pohead_curr_id,
                                 current_date, 0.0, 0.0, getFreightTaxtypeId(),
@@ -117,10 +140,12 @@ BEGIN
       GROUP BY (value->>'taxid')::INTEGER
 
     LOOP
-      INSERT INTO apopentax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax, 
-                             taxhist_taxtype_id, taxhist_parent_id, taxhist_journalnumber ) 
-      VALUES (0, 0, 0, current_date, _tax.taxdetail_tax_id, _tax.taxdetail_tax, getadjustmenttaxtypeid(), 
-              _apopenid, _journalNumber);
+      INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+                             taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id,
+                             taxdetail_amount, taxdetail_percent, taxdetail_tax)
+      SELECT _taxlineid, _itemAmount, _tax.taxdetail_tax_id,
+             _tax.taxclassid, _tax.sequence, _tax.basistaxid,
+             _tax.amount, _tax.percent, _tax.taxdetail_tax;
 
       _taxAmount := _taxAmount + _tax.taxdetail_tax;
  
@@ -129,7 +154,7 @@ BEGIN
     _taxAmount_base := addTaxToGLSeries(_sequence,
 		       'A/P', 'CM', _docNumber,
 		       _p.pohead_curr_id, current_date, current_date,
-                      'apopentax', _apopenid,
+                      'AP', _apopenid,
                       _p.notes);
 
     UPDATE apopen SET apopen_amount = round(_itemAmount + _taxAmount,2)

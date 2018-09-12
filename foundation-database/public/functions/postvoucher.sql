@@ -143,11 +143,13 @@ BEGIN
 --  Start by handling taxes
   _taxTotal := getOrderTax('VCH', pVoheadid);
 
-  SELECT COALESCE(SUM(taxhist_tax), 0.0) INTO _freightTax
-    FROM taxhist
-   WHERE taxhist_doctype = 'VCH'
-     AND taxhist_parent_id = pVoheadid
-     AND taxhist_line_type = 'F';
+  SELECT COALESCE(SUM(taxdetail_tax), 0.0) INTO _freightTax
+    FROM taxhead
+    JOIN taxline ON taxhead_id = taxline_taxhead_id
+    JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+   WHERE taxhead_doc_type = 'VCH'
+     AND taxhead_doc_id = pVoheadid
+     AND taxline_line_type = 'F';
 
   SELECT vohead_freight + COALESCE(SUM(voitem_freight), 0.0) INTO _freightTotal
     FROM vohead
@@ -157,7 +159,7 @@ BEGIN
 
   IF (_taxTotal != 0.0) THEN
     FOR _r IN SELECT COALESCE(costcat_purchprice_accnt_id, expcat_exp_accnt_id) AS accnt,
-                     COALESCE(SUM(taxhist_tax), 0.0) *
+                     COALESCE(SUM(taxdetail_tax), 0.0) *
                      GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS tax,
                      voitem_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
                      GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS freighttax,
@@ -167,8 +169,11 @@ BEGIN
                 LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
                 LEFT OUTER JOIN costcat ON itemsite_costcat_id = costcat_id
                 LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
-                LEFT OUTER JOIN taxhist ON taxhist_doctype = 'VCHI'
-                                       AND voitem_id = taxhist_parent_id
+                LEFT OUTER JOIN taxhead ON taxhead_doc_type = 'VCH'
+                                       AND taxhead_doc_id = pVoheadid
+                LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       AND voitem_id = taxline_line_id
+                LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                WHERE voitem_vohead_id = pVoheadid
                GROUP BY voitem_id, costcat_purchprice_accnt_id, expcat_exp_accnt_id,
                         costcat_freight_accnt_id, expcat_freight_accnt_id
@@ -198,13 +203,13 @@ BEGIN
                                _glDate, _p.glnotes);
 
     FOR _r IN SELECT tax_use_accnt_id,
-                     currToBase(_p.vohead_curr_id, SUM(taxhist_tax_owed), _p.vohead_docdate) AS tax
-                FROM taxhist
-                LEFT OUTER JOIN tax ON taxhist_tax_id = tax_id
-               WHERE (taxhist_doctype = 'VCH' AND taxhist_parent_id = pVoheadid)
-                  OR (taxhist_doctype = 'VCHI' AND taxhist_parent_id IN (SELECT voitem_id
-                                                                           FROM voitem
-                                                                          WHERE voitem_vohead_id = pVoheadid))
+                     currToBase(_p.vohead_curr_id, SUM(taxdetail_tax_owed), _p.vohead_docdate) AS tax
+                FROM taxhead
+                JOIN taxline ON taxhead_id = taxline_taxhead_id
+                JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+               WHERE taxhead_doc_type = 'VCH'
+                 AND taxhead_doc_id = pVoheadid
                GROUP BY tax_id, tax_use_accnt_id
     LOOP
       PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
@@ -220,34 +225,19 @@ BEGIN
   _totalAmount_base := _totalAmount_base + currToBase(_p.vohead_curr_id, _p.vohead_tax_charged, _p.vohead_docdate);
   _totalAmount := _totalAmount + _p.vohead_tax_charged;
 
--- Update item tax records with posting data
-    UPDATE voitemtax SET 
-      taxhist_docdate=_p.vohead_docdate,
-      taxhist_distdate=_glDate,
-      taxhist_curr_id=_p.vohead_curr_id,
-      taxhist_curr_rate=curr_rate,
-      taxhist_journalnumber=pJournalNumber
-    FROM vohead
-     JOIN voitem ON (vohead_id=voitem_vohead_id), 
-     curr_rate
-    WHERE ((vohead_id=pVoheadId)
-      AND (taxhist_parent_id=voitem_id)
-      AND (_p.vohead_curr_id=curr_id)
-      AND (_p.vohead_docdate BETWEEN curr_effective 
-                           AND curr_expires) );
-
--- Update Misc distributions with posting data
-    UPDATE voheadtax SET 
-      taxhist_docdate=_p.vohead_docdate,
-      taxhist_distdate=_glDate,
-      taxhist_curr_id=_p.vohead_curr_id,
-      taxhist_curr_rate=curr_rate,
-      taxhist_journalnumber=pJournalNumber
+-- Update tax records with posting data
+    UPDATE taxhead SET 
+      taxhead_date=_p.vohead_docdate,
+      taxhead_distdate=_glDate,
+      taxhead_curr_id=_p.vohead_curr_id,
+      taxhead_curr_rate=curr_rate,
+      taxhead_journalnumber=pJournalNumber
     FROM curr_rate
-    WHERE ((taxhist_parent_id=pVoheadid)
+    WHERE taxhead_doc_type = 'VCH'
+      AND taxhead_doc_id = pVoheadId
       AND (_p.vohead_curr_id=curr_id)
       AND (_p.vohead_docdate BETWEEN curr_effective 
-                           AND curr_expires) );
+                           AND curr_expires);
 
 --  Loop through the vodist records for the passed vohead that
 --  are posted against a P/O Item

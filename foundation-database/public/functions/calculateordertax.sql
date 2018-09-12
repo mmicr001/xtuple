@@ -68,7 +68,7 @@ BEGIN
               ELSE COALESCE(vend_tax_exemption, fetchMetricText('AvalaraUserExemptionCode'))
           END,
          COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
-         dochead_origorder, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
+         dochead_orignumber, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
          dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
          dochead_misc_discount
     INTO _number, _taxzoneid, _fromline1, _fromline2, _fromline3, _fromcity,
@@ -96,7 +96,7 @@ BEGIN
    GROUP BY dochead_id, dochead_number, dochead_taxzone_id, dochead_warehous_id, dochead_toaddr1,
             dochead_toaddr2, dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip,
             dochead_tocountry, dochead_cust_id, dochead_vend_id, dochead_curr_id, dochead_date,
-            dochead_origdate, dochead_origorder, dochead_freight, dochead_misc,
+            dochead_origdate, dochead_orignumber, dochead_freight, dochead_misc,
             dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
             addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,

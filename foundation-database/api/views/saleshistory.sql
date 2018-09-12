@@ -71,9 +71,19 @@
     END AS document_type,
     curr_abbr AS currency,
     cohist_sequence AS gl_sequence,
-    (SELECT SUM(taxhist_tax)
-     FROM cohisttax
-     WHERE (taxhist_parent_id=cohist_id)) AS tax
+    CASE WHEN cohist_doctype = 'C' AND cohist_misc_descrip !~ 'A/R Misc'
+         THEN (SELECT getOrderTax('CM', cmhead_id)
+                 FROM cmhead
+                WHERE cmhead_number = cohist_ordernumber)
+         WHEN cohist_doctype = 'I'
+         THEN getOrderTax('INV', cohist_invchead_id)
+         WHEN cohist_doctype IN ('C', 'D')
+         THEN (SELECT getOrderTax('AR', aropen_id)
+                 FROM aropen
+                WHERE aropen_doctype = cohist_doctype
+                  AND aropen_docnumber = cohist_invcnumber)
+         ELSE 0.0
+     END AS tax
   FROM cohist
     LEFT OUTER JOIN custinfo ON (cohist_cust_id=cust_id)
     LEFT OUTER JOIN shiptoinfo ON (cohist_shipto_id=shipto_id)

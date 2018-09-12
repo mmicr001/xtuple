@@ -13,7 +13,7 @@ SELECT cmhead_id AS orderid, -2 AS itemid,
              formatMoney( calcCmheadAmt(cmhead_id) +
                           cmhead_freight +
                           cmhead_misc +
-                          calcCmheadTax(cmhead_id) ) AS extprice,
+                          getOrderTax('CM', cmhead_id) ) AS extprice,
              'Credit' AS sence,
              COALESCE( ( SELECT formatGLAccountLong(accnt_id)
                          FROM accnt
@@ -62,7 +62,7 @@ WHERE ( (NOT cmhead_posted)
  AND (NOT cmhead_hold)
  AND (cmhead_misc <> 0) )
 
--- Freight Tax and Tax Adjustments
+-- Tax
 UNION SELECT cmhead_id AS orderid, -1 AS itemid,
              '' AS documentnumber,
              '' AS cust_number,
@@ -71,36 +71,16 @@ UNION SELECT cmhead_id AS orderid, -1 AS itemid,
              -1 AS linenumber,
              'Sales Tax' AS item, tax_descrip AS itemdescrip, '' AS iteminvuom,
              '' AS qtytobill,
-             formatMoney(taxhist_tax * -1.0) AS price,
-             formatMoney(taxhist_tax * -1.0) AS extprice,
+             formatMoney(taxdetail_tax) AS price,
+             formatMoney(taxdetail_tax) AS extprice,
              'Debit' AS sence,
              CASE WHEN (accnt_id IS NULL) THEN 'Not Assigned'
                   ELSE (formatGLAccountLong(accnt_id) || ' - ' || accnt_descrip)
              END AS account
-FROM cmhead JOIN cmheadtax ON (taxhist_parent_id=cmhead_id)
-            JOIN tax ON (tax_id=taxhist_tax_id)
-            LEFT OUTER JOIN accnt ON (accnt_id=tax_sales_accnt_id)
-WHERE ( (NOT cmhead_posted)
- AND (NOT cmhead_hold) )
-
--- Cmitem tax
-UNION SELECT cmhead_id AS orderid, -1 AS itemid,
-             '' AS documentnumber,
-             '' AS cust_number,
-             '' AS billtoname,
-             cmhead_number::TEXT AS ordernumber,
-             -1 AS linenumber,
-             'Sales Tax' AS item, tax_descrip AS itemdescrip, '' AS iteminvuom,
-             '' AS qtytobill,
-             formatMoney(taxhist_tax * -1.0) AS price,
-             formatMoney(taxhist_tax * -1.0) AS extprice,
-             'Debit' AS sence,
-             CASE WHEN (accnt_id IS NULL) THEN 'Not Assigned'
-                  ELSE (formatGLAccountLong(accnt_id) || ' - ' || accnt_descrip)
-             END AS account
-FROM cmhead JOIN cmitem ON (cmitem_cmhead_id=cmhead_id)
-            JOIN cmitemtax ON (taxhist_parent_id=cmitem_id)
-            JOIN tax ON (tax_id=taxhist_tax_id)
+FROM cmhead JOIN taxhead ON taxhead_doc_type = 'CM' AND taxhead_doc_id = cmhead_id
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
             LEFT OUTER JOIN accnt ON (accnt_id=tax_sales_accnt_id)
 WHERE ( (NOT cmhead_posted)
  AND (NOT cmhead_hold) )

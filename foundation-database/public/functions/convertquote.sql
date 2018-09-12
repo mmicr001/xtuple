@@ -159,17 +159,7 @@ BEGIN
   FROM quhead JOIN custinfo ON (cust_id=quhead_cust_id)
   WHERE (quhead_id=pQuheadid);
 
-  INSERT INTO coheadtax
-  (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-   taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-   taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
-   taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
-  SELECT _soheadid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-         taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-         taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'S',
-         taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
-    FROM quheadtax
-   WHERE taxhist_parent_id = pQuheadid;
+  PERFORM copyTax('Q', pQuheadid, 'S', _soheadid);
 
   -- Move Documents
   UPDATE url SET url_source_id = _soheadid,
@@ -242,17 +232,7 @@ BEGIN
       _r.quitem_unitcost, _r.quitem_prcost,
       _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, -1, _r.quitem_dropship );
 
-    INSERT INTO coitemtax
-    (taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-     taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-     taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, taxhist_doctype,
-     taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type)
-    SELECT _soitemid, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, taxhist_basis_tax_id,
-           taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate,
-           taxhist_distdate, taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber, 'SI',
-           taxhist_reverse_charge, taxhist_tax_code, taxhist_line_type
-      FROM quitemtax
-     WHERE taxhist_parent_id = _r.quitem_id;
+    PERFORM copyTax('Q', _r.quitem_id, 'S', _soitemid, _soheadid);
 
     IF (fetchMetricBool('enablextcommissionission')) THEN
       PERFORM xtcommission.getSalesReps(quhead_cust_id, quhead_shipto_id,
