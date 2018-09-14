@@ -1,30 +1,29 @@
 CREATE OR REPLACE FUNCTION crmacct() RETURNS SETOF crmacct AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  _priv TEXT;
-  _grant BOOLEAN;
-
+  _all  BOOLEAN := checkPrivilege('MaintainAllCRMAccounts ViewAllCRMAccounts');
+  _mine BOOLEAN := checkPrivilege('MaintainPersonalCRMAccounts ViewPersonalCRMAccounts');
 BEGIN
-  -- This query will give us the most permissive privilege the user has been granted
-  SELECT privilege, granted INTO _priv, _grant
-  FROM privgranted 
-  WHERE privilege IN ('MaintainAllCRMAccounts','ViewAllCRMAccounts','MaintainPersonalCRMAccounts','ViewPersonalCRMAccounts')
-  ORDER BY granted DESC, sequence
-  LIMIT 1;
 
-  -- If have an 'All' privilege return all results
-  IF (_priv ~ 'All' AND _grant) THEN
-    RETURN QUERY SELECT * FROM crmacct;
-  -- Otherwise if have any other grant, must be personal privilege.
-  ELSIF (_grant) THEN
-    RETURN QUERY SELECT * FROM crmacct 
-                  WHERE crmacct_owner_username = getEffectiveXtUser();
-  END IF;
-
-  RETURN;
+  RETURN QUERY
+    WITH augmented AS (
+      SELECT row(crmacct.*)::crmacct, crmaccttypes(crmacct_id) AS types FROM crmacct
+    )
+    SELECT (row).* FROM augmented
+     WHERE _all
+        OR (_mine AND (row).crmacct_owner_username = getEffectiveXtUser()
+            AND  CASE WHEN types ? 'vendor' THEN checkprivilege('MaintainVendorAccounts ViewVendorAccounts')
+                      WHEN types ? 'customer' THEN checkprivilege('MaintainCustomerMasters ViewCustomerMasters')
+                      WHEN types ? 'salesrep' THEN checkprivilege('MaintainSalesReps ViewSalesReps')
+                      WHEN types ? 'taxauth' THEN checkprivilege('MaintainTaxAuthorities ViewTaxAuthorities')
+                      WHEN types ? 'prospect' THEN checkprivilege('MaintainProspectMasters ViewProspectMasters')
+                      WHEN types ? 'employee' THEN checkprivilege('MaintainEmployees ViewEmployees')
+                      WHEN types ? 'user' THEN checkprivilege('MaintainUsers')
+                      ELSE true
+                 END);
 
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION crmacct() IS 'A table function that returns CRM Account results according to privilege settings.';
