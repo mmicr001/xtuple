@@ -20,6 +20,10 @@ BEGIN
   END IF;
 
   IF (TG_OP = 'DELETE') THEN
+    DELETE FROM taxhead
+     WHERE taxhead_doc_type = 'CM'
+       AND taxhead_doc_id = OLD.cmhead_id;
+
     RETURN OLD;
   END IF;
 
@@ -72,6 +76,32 @@ BEGIN
     NEW.cmhead_shipto_country   := COALESCE(NEW.cmhead_shipto_country, '');
     NEW.cmhead_shipto_state     := COALESCE(NEW.cmhead_shipto_state, '');
     NEW.cmhead_shipto_zipcode   := COALESCE(NEW.cmhead_shipto_zipcode, '');
+  END IF;
+
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.cmhead_docdate != OLD.cmhead_docdate OR
+       NEW.cmhead_curr_id != OLD.cmhead_curr_id OR
+       NEW.cmhead_freight != OLD.cmhead_freight OR
+       NEW.cmhead_freight_taxtype_id != OLD.cmhead_freight_taxtype_id OR
+       NEW.cmhead_misc != OLD.cmhead_misc OR
+       NEW.cmhead_misc_taxtype_id != OLD.cmhead_misc_taxtype_id OR
+       NEW.cmhead_misc_discount != OLD.cmhead_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.cmhead_taxzone_id != OLD.cmhead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.cmhead_cust_id != OLD.cmhead_cust_id OR
+         NEW.cmhead_warehous_id != OLD.cmhead_warehous_id OR
+         NEW.cmhead_shipto_address1 != OLD.cmhead_shipto_address1 OR
+         NEW.cmhead_shipto_address2 != OLD.cmhead_shipto_address2 OR
+         NEW.cmhead_shipto_address3 != OLD.cmhead_shipto_address3 OR
+         NEW.cmhead_shipto_city != OLD.cmhead_shipto_city OR
+         NEW.cmhead_shipto_state != OLD.cmhead_shipto_state OR
+         NEW.cmhead_shipto_zipcode != OLD.cmhead_shipto_zipcode OR
+         NEW.cmhead_shipto_country != OLD.cmhead_shipto_country)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'CM'
+       AND taxhead_doc_id = NEW.cmhead_id;
   END IF;
 
   RETURN NEW;

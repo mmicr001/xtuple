@@ -59,6 +59,28 @@ BEGIN
     END IF;
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.pohead_orderdate != OLD.pohead_orderdate OR
+       NEW.pohead_curr_id != OLD.pohead_curr_id OR
+       NEW.pohead_freight != OLD.pohead_freight OR
+       NEW.pohead_freight_taxtype_id != OLD.pohead_freight_taxtype_id OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.pohead_taxzone_id != OLD.pohead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.pohead_warehous_id != OLD.pohead_warehous_id OR
+         NEW.pohead_shiptoaddress1 != OLD.pohead_shiptoaddress1 OR
+         NEW.pohead_shiptoaddress2 != OLD.pohead_shiptoaddress2 OR
+         NEW.pohead_shiptoaddress3 != OLD.pohead_shiptoaddress3 OR
+         NEW.pohead_shiptocity != OLD.pohead_shiptocity OR
+         NEW.pohead_shiptostate != OLD.pohead_shiptostate OR
+         NEW.pohead_shiptozipcode != OLD.pohead_shiptozipcode OR
+         NEW.pohead_shiptocountry != OLD.pohead_shiptocountry)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'P'
+       AND taxhead_doc_id = NEW.pohead_id;
+  END IF;
+
   IF (fetchMetricBool('POChangeLog')) THEN
     IF (TG_OP = 'INSERT') THEN
       PERFORM postComment('ChangeLog', 'P', NEW.pohead_id, 'Created');
@@ -140,6 +162,10 @@ BEGIN
   DELETE FROM comment
   WHERE ( (comment_source='P')
    AND (comment_source_id=OLD.pohead_id) );
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'P'
+     AND taxhead_doc_id = OLD.pohead_id;
 
   RETURN OLD;
 END;

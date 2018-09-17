@@ -40,6 +40,32 @@ BEGIN
     NEW.invchead_shipto_country  := COALESCE(NEW.invchead_shipto_country, '');
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.invchead_invcdate != OLD.invchead_invcdate OR
+       NEW.invchead_curr_id != OLD.invchead_curr_id OR
+       NEW.invchead_freight != OLD.invchead_freight OR
+       NEW.invchead_freight_taxtype_id != OLD.invchead_freight_taxtype_id OR
+       NEW.invchead_misc_amount != OLD.invchead_misc_amount OR
+       NEW.invchead_misc_taxtype_id != OLD.invchead_misc_taxtype_id OR
+       NEW.invchead_misc_discount != OLD.invchead_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.invchead_taxzone_id != OLD.invchead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.invchead_cust_id != OLD.invchead_cust_id OR
+         NEW.invchead_warehous_id != OLD.invchead_warehous_id OR
+         NEW.invchead_shipto_address1 != OLD.invchead_shipto_address1 OR
+         NEW.invchead_shipto_address2 != OLD.invchead_shipto_address2 OR
+         NEW.invchead_shipto_address3 != OLD.invchead_shipto_address3 OR
+         NEW.invchead_shipto_city != OLD.invchead_shipto_city OR
+         NEW.invchead_shipto_state != OLD.invchead_shipto_state OR
+         NEW.invchead_shipto_zipcode != OLD.invchead_shipto_zipcode OR
+         NEW.invchead_shipto_country != OLD.invchead_shipto_country)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'INV'
+       AND taxhead_doc_id = NEW.invchead_id;
+  END IF;
+
   IF (TG_OP = 'DELETE') THEN
     SELECT recur_id INTO _recurid
       FROM recur
@@ -197,6 +223,10 @@ BEGIN
   FROM charass
   WHERE charass_target_type = 'INV'
     AND charass_target_id = OLD.invchead_id;
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'INV'
+     AND taxhead_doc_id = OLD.invchead_id;
 
   RETURN OLD;
 END;
