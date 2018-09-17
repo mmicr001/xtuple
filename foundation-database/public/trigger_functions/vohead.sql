@@ -76,6 +76,19 @@ BEGIN
     RETURN OLD;
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.vohead_docdate != OLD.vohead_docdate OR
+       NEW.vohead_curr_id != OLD.vohead_curr_id OR
+       NEW.vohead_freight != OLD.vohead_freight OR
+       NEW.vohead_freight_taxtype_id != OLD.vohead_freight_taxtype_id OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.vohead_taxzone_id != OLD.vohead_taxzone_id))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = NEW.vohead_id;
+  END IF;
+
   IF (TG_OP = 'INSERT') THEN
     PERFORM clearNumberIssue('VcNumber', NEW.vohead_number);
     PERFORM postComment('ChangeLog', 'VCH', NEW.vohead_id, 'Created');
@@ -112,6 +125,10 @@ BEGIN
   FROM charass
   WHERE charass_target_type = 'VCH'
     AND charass_target_id = OLD.vohead_id;
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'VCH'
+     AND taxhead_doc_id = OLD.vohead_id;
 
   RETURN OLD;
 END;

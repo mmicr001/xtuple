@@ -27,6 +27,21 @@ BEGIN
     END IF;
   END IF;
 
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.invcitem_billed != OLD.invcitem_billed OR
+       NEW.invcitem_qty_invuomratio != OLD.invcitem_qty_invuomratio OR
+       NEW.invcitem_price != OLD.invcitem_price OR
+       NEW.invcitem_price_invuomratio != OLD.invcitem_price_invuomratio OR
+       NEW.invcitem_taxtype_id != OLD.invcitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.invcitem_warehous_id != OLD.invcitem_warehous_id))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'INV'
+       AND taxhead_doc_id = NEW.invcitem_invchead_id;
+  END IF;
+
   RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -95,3 +110,24 @@ CREATE TRIGGER invcitemtrigger
   ON invcitem
   FOR EACH ROW
   EXECUTE PROCEDURE _invcitemTrigger();
+
+CREATE OR REPLACE FUNCTION _invcitemDeleteTrigger() RETURNS TRIGGER AS $$
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+BEGIN
+
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'INV'
+     AND taxhead_doc_id = OLD.invcitem_invchead_id;
+
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT dropIfExists('TRIGGER', 'invcitemDeleteTrigger');
+CREATE TRIGGER invcitemDeleteTrigger
+  AFTER DELETE
+  ON invcitem
+  FOR EACH ROW
+  EXECUTE PROCEDURE _invcitemDeleteTrigger();

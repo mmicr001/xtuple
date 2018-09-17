@@ -486,6 +486,32 @@ BEGIN
 
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.cohead_orderdate != OLD.cohead_orderdate OR
+       NEW.cohead_curr_id != OLD.cohead_curr_id OR
+       NEW.cohead_freight != OLD.cohead_freight OR
+       NEW.cohead_freight_taxtype_id != OLD.cohead_freight_taxtype_id OR
+       NEW.cohead_misc != OLD.cohead_misc OR
+       NEW.cohead_misc_taxtype_id != OLD.cohead_misc_taxtype_id OR
+       NEW.cohead_misc_discount != OLD.cohead_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.cohead_taxzone_id != OLD.cohead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.cohead_cust_id != OLD.cohead_cust_id OR
+         NEW.cohead_warehous_id != OLD.cohead_warehous_id OR
+         NEW.cohead_shiptoaddress1 != OLD.cohead_shiptoaddress1 OR
+         NEW.cohead_shiptoaddress2 != OLD.cohead_shiptoaddress2 OR
+         NEW.cohead_shiptoaddress3 != OLD.cohead_shiptoaddress3 OR
+         NEW.cohead_shiptocity != OLD.cohead_shiptocity OR
+         NEW.cohead_shiptostate != OLD.cohead_shiptostate OR
+         NEW.cohead_shiptozipcode != OLD.cohead_shiptozipcode OR
+         NEW.cohead_shiptocountry != OLD.cohead_shiptocountry)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'S'
+       AND taxhead_doc_id = NEW.cohead_id;
+  END IF;
+
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
 
     IF (TG_OP = 'INSERT') THEN
@@ -668,6 +694,10 @@ BEGIN
   DELETE FROM charass
   WHERE charass_target_type = 'SO'
     AND charass_target_id = OLD.cohead_id;
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'S'
+     AND taxhead_doc_id = OLD.cohead_id;
 
   RETURN OLD;
 END;

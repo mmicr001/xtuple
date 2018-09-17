@@ -6,6 +6,11 @@ BEGIN
     RAISE EXCEPTION 'You do not have privileges to maintain Credit Memos.';
   END IF;
 
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'CM'
+     AND taxhead_doc_id = OLD.cmitem_cmhead_id;
+
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -68,6 +73,21 @@ BEGIN
       WHERE (raitem_id=OLD.cmitem_raitem_id);
     END IF;
     RETURN OLD;
+  END IF;
+
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.cmitem_qtycredit != OLD.cmitem_qtycredit OR
+       NEW.cmitem_qty_invuomratio != OLD.cmitem_qty_invuomratio OR
+       NEW.cmitem_unitprice != OLD.cmitem_unitprice OR
+       NEW.cmitem_price_invuomratio != OLD.cmitem_price_invuomratio OR
+       NEW.cmitem_taxtype_id != OLD.cmitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.cmitem_itemsite_id != OLD.cmitem_itemsite_id))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'CM'
+       AND taxhead_doc_id = NEW.cmitem_cmhead_id;
   END IF;
 
   RETURN NEW;

@@ -1,3 +1,28 @@
+CREATE OR REPLACE FUNCTION _cobmiscBeforeTrigger() RETURNS "trigger" AS $$
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- See www.xtuple.com/CPAL for the full text of the software license.
+DECLARE
+
+BEGIN
+  IF (TG_OP = 'DELETE') THEN
+    DELETE FROM taxhead
+     WHERE taxhead_doc_type = 'COB'
+       AND taxhead_doc_id = OLD.cobmisc_id;
+
+    RETURN OLD;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+SELECT dropIfExists('TRIGGER', 'cobmiscBeforeTrigger');
+CREATE TRIGGER cobmiscBeforeTrigger
+  BEFORE INSERT OR UPDATE OR DELETE
+  ON cobmisc
+  FOR EACH ROW
+  EXECUTE PROCEDURE _cobmiscBeforeTrigger();
+
 CREATE OR REPLACE FUNCTION _cobmiscTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -18,6 +43,20 @@ BEGIN
       WHERE ((coitem_id=cobill_coitem_id)
        AND (cobill_cobmisc_id=NEW.cobmisc_id));
     END IF;
+  END IF;
+
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.cobmisc_freight != OLD.cobmisc_freight OR
+       NEW.cobmisc_freight_taxtype_id != OLD.cobmisc_freight_taxtype_id OR
+       NEW.cobmisc_misc != OLD.cobmisc_misc OR
+       NEW.cobmisc_misc_taxtype_id != OLD.cobmisc_misc_taxtype_id OR
+       NEW.cobmisc_misc_discount != OLD.cobmisc_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.cobmisc_taxzone_id != OLD.cobmisc_taxzone_id))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'COB'
+       AND taxhead_doc_id = NEW.cobmisc_id;
   END IF;
 
   RETURN NEW;
