@@ -158,7 +158,7 @@ BEGIN
    GROUP BY vohead_freight;
 
   IF (_taxTotal != 0.0) THEN
-    FOR _r IN SELECT COALESCE(costcat_purchprice_accnt_id, expcat_exp_accnt_id) AS accnt,
+    FOR _r IN SELECT COALESCE(costcat_purchprice_accnt_id, expcat_tax_accnt_id) AS accnt,
                      COALESCE(SUM(taxdetail_tax), 0.0) *
                      GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS tax,
                      voitem_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
@@ -175,7 +175,7 @@ BEGIN
                                        AND voitem_id = taxline_line_id
                 LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                WHERE voitem_vohead_id = pVoheadid
-               GROUP BY voitem_id, costcat_purchprice_accnt_id, expcat_exp_accnt_id,
+               GROUP BY voitem_id, costcat_purchprice_accnt_id, expcat_tax_accnt_id,
                         costcat_freight_accnt_id, expcat_freight_accnt_id
     LOOP
       PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
@@ -191,7 +191,7 @@ BEGIN
 
     SELECT vohead_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
            GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal,
-           expcat_exp_accnt_id
+           expcat_tax_accnt_id
       INTO _freightheadtax, _accnt
       FROM vohead
       JOIN expcat ON vohead_freight_expcat_id = expcat_id
