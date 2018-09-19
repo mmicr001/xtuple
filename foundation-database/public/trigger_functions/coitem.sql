@@ -28,7 +28,7 @@ BEGIN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'S'
-       AND taxhead_doc_id = NEW.coitem_quhead_id;
+       AND taxhead_doc_id = NEW.coitem_cohead_id;
   END IF;
 
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN

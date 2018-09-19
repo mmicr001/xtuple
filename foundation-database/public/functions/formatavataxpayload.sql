@@ -77,89 +77,89 @@ BEGIN
   _numfreight := COALESCE(array_length(pFreightSplit, 1), 0);
 
   _payload = format('{ "createTransactionModel": {
-    "type": "%s",
-    "code": "%s",
-    "companyCode": "%s",
-    "date": "%s",
-    "customerCode": "%s",
-    "customerUsageType": "%s",
-    "businessIdentificationNo": "%s",
+    "type": %s,
+    "code": %s,
+    "companyCode": %s,
+    "date": %s,
+    "customerCode": %s,
+    "customerUsageType": %s,
+    "businessIdentificationNo": %s,
     "addresses": {
         "shipFrom": {
-            "line1": "%s",
-            "line2": "%s",
-            "line3": "%s",
-            "city": "%s",
-            "region": "%s",
-            "country": "%s",
-            "postalCode": "%s"
+            "line1": %s,
+            "line2": %s,
+            "line3": %s,
+            "city": %s,
+            "region": %s,
+            "country": %s,
+            "postalCode": %s
         },
         "shipTo": {
-            "line1": "%s",
-            "line2": "%s",
-            "line3": "%s",
-            "city": "%s",
-            "region": "%s",
-            "country": "%s",
-            "postalCode": "%s"
+            "line1": %s,
+            "line2": %s,
+            "line3": %s,
+            "city": %s,
+            "region": %s,
+            "country": %s,
+            "postalCode": %s
         }
     },
     "commit": false,
-    "currencyCode": "%s",
-    "description": "%s",
+    "currencyCode": %s,
+    "description": %s,
     "discount": %s,
     "lines": [',
-    _transactionType,
-    pordernumber,
-    fetchmetrictext('AvalaraCompany'),
-    pdocdate,
-    pCust,
-    pUsage,
-    pTaxReg,
-    pfromline1,
-    pfromline2,
-    pfromline3,
-    pfromcity,
-    pfromstate,
-    pfromcountry,
-    pfromzip,
-    ptoline1,
-    ptoline2,
-    ptoline3,
-    ptocity,
-    ptostate,
-    ptocountry,
-    ptozip,
-    (SELECT curr_abbr FROM curr_symbol WHERE curr_id=pcurrid),
-    'xTuple-' || _transactionType,
-    CASE WHEN pMiscDiscount AND pMisc < 0
-         THEN pMisc * CASE WHEN _return
-                           THEN 1
-                           ELSE -1
-                       END
-         ELSE 0
-     END);
+    to_jsonb(_transactionType),
+    to_jsonb(pordernumber),
+    to_jsonb(fetchmetrictext('AvalaraCompany')),
+    to_jsonb(pdocdate),
+    to_jsonb(pCust),
+    to_jsonb(COALESCE(pUsage, '')),
+    to_jsonb(COALESCE(pTaxReg, '')),
+    to_jsonb(COALESCE(pfromline1, '')),
+    to_jsonb(COALESCE(pfromline2, '')),
+    to_jsonb(COALESCE(pfromline3, '')),
+    to_jsonb(COALESCE(pfromcity, '')),
+    to_jsonb(COALESCE(pfromstate, '')),
+    to_jsonb(COALESCE(pfromcountry, '')),
+    to_jsonb(COALESCE(pfromzip, '')),
+    to_jsonb(COALESCE(ptoline1, '')),
+    to_jsonb(COALESCE(ptoline2, '')),
+    to_jsonb(COALESCE(ptoline3, '')),
+    to_jsonb(COALESCE(ptocity, '')),
+    to_jsonb(COALESCE(ptostate, '')),
+    to_jsonb(COALESCE(ptocountry, '')),
+    to_jsonb(COALESCE(ptozip, '')),
+    to_jsonb((SELECT curr_abbr FROM curr_symbol WHERE curr_id=pcurrid)),
+    to_jsonb('xTuple-' || _transactionType),
+    to_jsonb(CASE WHEN pMiscDiscount AND pMisc < 0
+                  THEN pMisc * CASE WHEN _return
+                                    THEN 1
+                                    ELSE -1
+                                END
+                  ELSE 0
+              END));
 
   FOR _line IN 1.._numlines
   LOOP
    _payload = _payload ||
             format('{
-            "number": "%s",
-            "itemCode": "%s",
-            "description": "%s",
+            "number": %s,
+            "itemCode": %s,
+            "description": %s,
             "quantity": %s,
             "amount": %s,
-            "taxCode": "%s",
+            "taxCode": %s,
             "discounted": "true"',
-            plines[_line],
-            CASE WHEN fetchMetricBool('AvalaraUPC')
-                 THEN COALESCE(plineupc[_line], plinecodes[_line])
-                 ELSE plinecodes[_line]
-             END,
-            plinedescrips[_line],
-            pqtys[_line],
-            pamounts[_line] * CASE WHEN _return THEN -1 ELSE 1 END,
-            ptaxtypes[_line]);
+            to_jsonb(plines[_line]),
+            to_jsonb(CASE WHEN fetchMetricBool('AvalaraUPC')
+                          THEN COALESCE(plineupc[_line], plinecodes[_line])
+                          ELSE plinecodes[_line]
+                      END),
+            to_jsonb(COALESCE(plinedescrips[_line], '')),
+            to_jsonb(pqtys[_line]),
+            to_jsonb(pamounts[_line] * CASE WHEN _return THEN -1 ELSE 1 END),
+            to_jsonb(COALESCE(ptaxtypes[_line], '')));
 
     IF pLineLine1[_line] != pFromLine1 OR pLineLine2[_line] != pFromLine2 OR
        pLineLine3[_line] != pFromLine3 OR pLineCity[_line] != pFromCity OR
@@ -168,37 +168,37 @@ BEGIN
       _payload := _payload ||
                 format(',"addresses": {
                 "shipFrom": {
-                "line1": "%s",
-                "line2": "%s",
-                "line3": "%s",
-                "city": "%s",
-                "region": "%s",
-                "country": "%s",
-                "postalCode": "%s"
+                "line1": %s,
+                "line2": %s,
+                "line3": %s,
+                "city": %s,
+                "region": %s,
+                "country": %s,
+                "postalCode": %s
                 },
                 "shipTo": {
-                "line1": "%s",
-                "line2": "%s",
-                "line3": "%s",
-                "city": "%s",
-                "region": "%s",
-                "country": "%s",
-                "postalCode": "%s"
+                "line1": %s,
+                "line2": %s,
+                "line3": %s,
+                "city": %s,
+                "region": %s,
+                "country": %s,
+                "postalCode": %s
                 }}',
-                pLineLine1[_line],
-                pLineLine2[_line],
-                pLineLine3[_line],
-                pLineCity[_line],
-                pLineState[_line],
-                pLineCountry[_line],
-                pLineZip[_line],
-                pToLine1,
-                pToLine2,
-                pToLine3,
-                pToCity,
-                pToState,
-                pToCountry,
-                pToZip);
+                to_jsonb(COALESCE(pLineLine1[_line], '')),
+                to_jsonb(COALESCE(pLineLine2[_line], '')),
+                to_jsonb(COALESCE(pLineLine3[_line], '')),
+                to_jsonb(COALESCE(pLineCity[_line], '')),
+                to_jsonb(COALESCE(pLineState[_line], '')),
+                to_jsonb(COALESCE(pLineCountry[_line], '')),
+                to_jsonb(COALESCE(pLineZip[_line], '')),
+                to_jsonb(COALESCE(pToLine1, '')),
+                to_jsonb(COALESCE(pToLine2, '')),
+                to_jsonb(COALESCE(pToLine3, '')),
+                to_jsonb(COALESCE(pToCity, '')),
+                to_jsonb(COALESCE(pToState, '')),
+                to_jsonb(COALESCE(pToCountry, '')),
+                to_jsonb(COALESCE(pToZip, '')));
     END IF;
 
     _payload := _payload || '}';
@@ -224,15 +224,15 @@ BEGIN
 
       _payload = _payload ||
                 format('{
-                "number": "%s",
-                "descrip": "%s",
+                "number": %s,
+                "descrip": %s,
                 "amount": %s,
-                "taxCode": "%s",
+                "taxCode": %s,
                 "discounted": "true"',
-                _freightname,
-                _freightname,
-                _freight * CASE WHEN _return THEN -1 ELSE 1 END,
-                pfreighttaxtype);
+                to_jsonb(_freightname),
+                to_jsonb(_freightname),
+                to_jsonb(_freight * CASE WHEN _return THEN -1 ELSE 1 END),
+                to_jsonb(COALESCE(pfreighttaxtype, '')));
 
       IF pFreightLine1[_freightsplit] != pFromLine1 OR pFreightLine2[_freightsplit] != pFromLine2 OR
          pFreightLine3[_freightsplit] != pFromLine3 OR pFreightCity[_freightsplit] != pFromCity OR
@@ -241,37 +241,37 @@ BEGIN
         _payload := _payload ||
                   format(',"addresses": {
                   "shipFrom": {
-                  "line1": "%s",
-                  "line2": "%s",
-                  "line3": "%s",
-                  "city": "%s",
-                  "region": "%s",
-                  "country": "%s",
-                  "postalCode": "%s"
+                  "line1": %s,
+                  "line2": %s,
+                  "line3": %s,
+                  "city": %s,
+                  "region": %s,
+                  "country": %s,
+                  "postalCode": %s
                   },
                   "shipTo": {
-                  "line1": "%s",
-                  "line2": "%s",
-                  "line3": "%s",
-                  "city": "%s",
-                  "region": "%s",
-                  "country": "%s",
-                  "postalCode": "%s"
+                  "line1": %s,
+                  "line2": %s,
+                  "line3": %s,
+                  "city": %s,
+                  "region": %s,
+                  "country": %s,
+                  "postalCode": %s
                   }}',
-                  pFreightLine1[_freightsplit],
-                  pFreightLine2[_freightsplit],
-                  pFreightLine3[_freightsplit],
-                  pFreightCity[_freightsplit],
-                  pFreightState[_freightsplit],
-                  pFreightCountry[_freightsplit],
-                  pFreightZip[_freightsplit],
-                  pToLine1,
-                  pToLine2,
-                  pToLine3,
-                  pToCity,
-                  pToState,
-                  pToCountry,
-                  pToZip);
+                  to_jsonb(COALESCE(pFreightLine1[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightLine2[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightLine3[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightCity[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightState[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightCountry[_freightsplit], '')),
+                  to_jsonb(COALESCE(pFreightZip[_freightsplit], '')),
+                  to_jsonb(COALESCE(pToLine1, '')),
+                  to_jsonb(COALESCE(pToLine2, '')),
+                  to_jsonb(COALESCE(pToLine3, '')),
+                  to_jsonb(COALESCE(pToCity, '')),
+                  to_jsonb(COALESCE(pToState, '')),
+                  to_jsonb(COALESCE(pToCountry, '')),
+                  to_jsonb(COALESCE(pToZip), ''));
       END IF;
 
       _payload := _payload || '}';
@@ -289,13 +289,13 @@ BEGIN
     _payload = _payload ||
               format('{
               "number": "Misc",
-              "descrip": "%s",
+              "descrip": %s,
               "amount": %s,
-              "taxCode": "%s"
+              "taxCode": %s
               }',
-              pmiscdescrip,
-              pmisc * CASE WHEN _return THEN -1 ELSE 1 END,
-              pmisctaxtype);
+              to_jsonb(COALESCE(pmiscdescrip, '')),
+              to_jsonb(pmisc * CASE WHEN _return THEN -1 ELSE 1 END),
+              to_jsonb(COALESCE(pmisctaxtype, '')));
   END IF;
 
   _payload := _payload || ']';
@@ -304,21 +304,21 @@ BEGIN
     _payload := _payload ||
                 format(', "taxOverride": {
                 "type": "taxDate",
-                "taxDate": "%s",
-                "reason": "Refund for %s"
+                "taxDate": %s,
+                "reason": %s
                 }',
-                pOrigDate, pOrigOrder);
+                to_jsonb(pOrigDate), to_jsonb('Refund for ' || pOrigOrder));
   END IF;
 
   IF pTaxPaid IS NOT NULL THEN
     _payload := _payload ||
                 format(', "taxOverride": {
                 "type": "taxAmount",
-                "taxAmount": "%s",
-                "reason": "%s Tax paid to vendor"
+                "taxAmount": %s,
+                "reason": %s
                 }',
-                pTaxOwed,
-                pTaxPaid);
+                to_jsonb(pTaxOwed),
+                to_jsonb(pTaxPaid || 'Tax paid to vendor'));
   END IF;
 
   _payload = _payload || '}}';

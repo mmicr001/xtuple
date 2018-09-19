@@ -36,7 +36,7 @@ BEGIN
   IF (TG_OP = 'UPDATE') THEN
 
   -- Calculate Tax
-    IF (COALESCE(NEW.cobmisc_taxzone_id,-1) <> COALESCE(OLD.cobmisc_taxzone_id,-1)) THEN
+    IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.cobmisc_taxzone_id,-1) <> COALESCE(OLD.cobmisc_taxzone_id,-1)) THEN
       UPDATE cobill SET cobill_taxtype_id=getItemTaxType(itemsite_item_id,NEW.cobmisc_taxzone_id)
       FROM coitem
         JOIN itemsite ON (coitem_itemsite_id=itemsite_id)
