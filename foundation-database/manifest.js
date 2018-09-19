@@ -1112,6 +1112,7 @@
     "public/tables/file.sql",
     "public/tables/empgrp.sql",
     "public/tables/empgrpitem.sql",
+    "public/tables/expcat.sql",
     "public/tables/filter.sql",
     "public/tables/fundstype.sql",
     "public/tables/grp.sql",
