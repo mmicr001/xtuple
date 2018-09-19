@@ -134,7 +134,7 @@ BEGIN
          (NEW.invchead_invcdate <> OLD.invchead_invcdate) OR
          (NEW.invchead_curr_id <> OLD.invchead_curr_id) ) THEN
   -- Calculate invcitem Tax
-      IF (COALESCE(NEW.invchead_taxzone_id,-1) <> COALESCE(OLD.invchead_taxzone_id,-1)) THEN
+      IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.invchead_taxzone_id,-1) <> COALESCE(OLD.invchead_taxzone_id,-1)) THEN
 
         UPDATE invcitem SET invcitem_taxtype_id=getItemTaxType(invcitem_item_id,NEW.invchead_taxzone_id)
         WHERE (invcitem_invchead_id=NEW.invchead_id);

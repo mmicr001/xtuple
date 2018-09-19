@@ -117,7 +117,7 @@ CREATE OR REPLACE FUNCTION _poheadTriggerAfter() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
-  IF (COALESCE(NEW.pohead_taxzone_id,-1) <> COALESCE(OLD.pohead_taxzone_id,-1)) THEN
+  IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.pohead_taxzone_id,-1) <> COALESCE(OLD.pohead_taxzone_id,-1)) THEN
     UPDATE poitem SET poitem_taxtype_id=getItemTaxType(itemsite_item_id,NEW.pohead_taxzone_id)
     FROM itemsite
     WHERE ((itemsite_id=poitem_itemsite_id)

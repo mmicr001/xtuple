@@ -19,6 +19,11 @@ BEGIN
     RETURN saveAvaTax(pOrderType, pOrderId, pResult);
   END IF;
 
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = pOrderType
+     AND taxhead_doc_id = pOrderId
+     AND taxhead_service = 'A';
+
   SELECT taxhead_id
     INTO _taxheadid
     FROM taxhead

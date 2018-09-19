@@ -8,6 +8,13 @@ BEGIN
      RAISE EXCEPTION ''You do not have privileges to maintain Items.'';
    END IF;
 
+  IF (NEW.itemtax_default) THEN
+    UPDATE itemtax
+       SET itemtax_default = FALSE
+     WHERE itemtax_item_id = NEW.itemtax_item_id
+       AND itemtax_id != NEW.itemtax_id;
+  END IF;
+
   RETURN NEW;
 END;
 ' LANGUAGE 'plpgsql';

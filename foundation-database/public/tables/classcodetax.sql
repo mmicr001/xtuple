@@ -4,6 +4,7 @@ select xt.add_column('classcodetax','classcodetax_id', 'serial', 'primary key', 
 select xt.add_column('classcodetax','classcodetax_classcode_id', 'integer', 'NOT NULL', 'public') ;
 select xt.add_column('classcodetax','classcodetax_taxtype_id', 'integer', 'NOT NULL', 'public');
 select xt.add_column('classcodetax','classcodetax_taxzone_id', 'integer', null, 'public');
+select xt.add_column('classcodetax','classcodetax_default', 'boolean', 'NOT NULL DEFAULT FALSE', 'public');
 
 
 ALTER TABLE public.classcodetax DROP CONSTRAINT IF EXISTS classcodetax_classcodetax_classcode_id_fkey;
