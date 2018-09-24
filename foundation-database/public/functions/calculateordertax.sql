@@ -203,7 +203,8 @@ BEGIN
          _linezip,
          _linecountry
     FROM docitem
-    JOIN dochead ON docitem_dochead_id = dochead_id
+    JOIN dochead ON docitem_type = dochead_type
+                AND docitem_dochead_id = dochead_id
     JOIN whsinfo ON docitem_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
     LEFT OUTER JOIN item ON docitem_item_id = item_id
