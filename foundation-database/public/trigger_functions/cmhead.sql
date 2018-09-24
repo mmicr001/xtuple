@@ -97,7 +97,8 @@ BEGIN
          NEW.cmhead_shipto_city != OLD.cmhead_shipto_city OR
          NEW.cmhead_shipto_state != OLD.cmhead_shipto_state OR
          NEW.cmhead_shipto_zipcode != OLD.cmhead_shipto_zipcode OR
-         NEW.cmhead_shipto_country != OLD.cmhead_shipto_country)))) THEN
+         NEW.cmhead_shipto_country != OLD.cmhead_shipto_country OR
+         NEW.cmhead_tax_exemption != OLD.cmhead_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'CM'

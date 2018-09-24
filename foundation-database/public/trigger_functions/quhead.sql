@@ -352,7 +352,8 @@ BEGIN
          NEW.quhead_shiptocity != OLD.quhead_shiptocity OR
          NEW.quhead_shiptostate != OLD.quhead_shiptostate OR
          NEW.quhead_shiptozipcode != OLD.quhead_shiptozipcode OR
-         NEW.quhead_shiptocountry != OLD.quhead_shiptocountry)))) THEN
+         NEW.quhead_shiptocountry != OLD.quhead_shiptocountry OR
+         NEW.quhead_tax_exemption != OLD.quhead_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'Q'

@@ -21,6 +21,7 @@ SELECT xt.add_column('cobmisc', 'cobmisc_taxzone_id', 'INTEGER', 'NULL', 'public
 SELECT xt.add_column('cobmisc', 'cobmisc_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public');
 SELECT xt.add_column('cobmisc', 'cobmisc_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public');
 SELECT xt.add_column('cobmisc', 'cobmisc_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+SELECT xt.add_column('cobmisc', 'cobmisc_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT xt.add_constraint('cobmisc', 'cobmisc_cobmisc_invchead_id_fkey', 'FOREIGN KEY (cobmisc_invchead_id) REFERENCES invchead(invchead_id)', 'public');
 SELECT xt.add_constraint('cobmisc', 'cobmisc_cobmisc_taxzone_id_fkey', 'FOREIGN KEY (cobmisc_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public');
@@ -30,4 +31,4 @@ SELECT xt.add_constraint('cobmisc', 'cobmisc_cobmisc_misc_taxtype_id_fkey', 'FOR
 
 ALTER TABLE cobmisc DROP COLUMN IF EXISTS cobmisc_taxtype_id;
 
-COMMENT ON TABLE taxtype IS 'General information about Billing Selections';
+COMMENT ON TABLE cobmisc IS 'General information about Billing Selections';

@@ -95,7 +95,8 @@ BEGIN
     cohead_shipzone_id,
     cohead_freight_taxtype_id,
     cohead_misc_taxtype_id,
-    cohead_misc_discount)
+    cohead_misc_discount,
+    cohead_tax_exemption)
   SELECT
     fetchSoNumber(),
     cohead_cust_id,
@@ -175,7 +176,8 @@ BEGIN
     cohead_shipzone_id,
     cohead_freight_taxtype_id,
     cohead_misc_taxtype_id,
-    cohead_misc_discount
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -280,7 +282,8 @@ BEGIN
     cohead_shipzone_id,
     cohead_freight_taxtype_id,
     cohead_misc_taxtype_id,
-    cohead_misc_discount )
+    cohead_misc_discount,
+    cohead_tax_exemption )
    SELECT
     fetchSoNumber(),
     pCustomer,
@@ -358,7 +361,8 @@ BEGIN
     cohead_shipzone_id,
     cohead_freight_taxtype_id,
     cohead_misc_taxtype_id,
-    cohead_misc_discount
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -421,7 +425,8 @@ BEGIN
       coitem_subnumber,
       coitem_firm,
       coitem_taxtype_id, 
-      coitem_dropship )
+      coitem_dropship,
+      coitem_tax_exemption )
     VALUES (
       _soheadid,
       _soitem.coitem_linenumber,
@@ -459,7 +464,8 @@ BEGIN
       _soitem.coitem_subnumber,
       _soitem.coitem_firm,
       _soitem.coitem_taxtype_id,
-      _soitem.coitem_dropship )
+      _soitem.coitem_dropship,
+      _soitem.coitem_tax_exemption )
     RETURNING coitem_id INTO _soitemid;
 
   PERFORM copyTax('S', _soitem.coitem_id, 'S', _soitemid);

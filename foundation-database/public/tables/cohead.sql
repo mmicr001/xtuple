@@ -82,7 +82,8 @@ SELECT
   xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
   xt.add_column('cohead', 'cohead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
-  xt.add_column('cohead', 'cohead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+  xt.add_column('cohead', 'cohead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public'),
+  xt.add_column('cohead', 'cohead_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('cohead', 'cohead_pkey',  'PRIMARY KEY (cohead_id)', 'public'),

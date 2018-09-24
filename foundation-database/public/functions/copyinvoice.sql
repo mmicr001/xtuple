@@ -49,7 +49,8 @@ BEGIN
          invchead_taxzone_id,
          invchead_recurring_invchead_id,
          invchead_saletype_id, invchead_shipzone_id, invchead_warehous_id,
-         invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount)
+         invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
+         invchead_tax_exemption)
   VALUES(_invcheadid,
          _i.invchead_cust_id, _i.invchead_shipto_id,
          _i.invchead_ordernumber, _i.invchead_orderdate,
@@ -76,7 +77,8 @@ BEGIN
          _i.invchead_taxzone_id,
          _i.invchead_recurring_invchead_id,
          _i.invchead_saletype_id, _i.invchead_shipzone_id, _i.invchead_warehous_id,
-         _i.invchead_freight_taxtype_id, _i.invchead_misc_taxtype_id, _i.invchead_misc_discount);
+         _i.invchead_freight_taxtype_id, _i.invchead_misc_taxtype_id, _i.invchead_misc_discount,
+         _i.invchead_tax_exemption);
 
     PERFORM copyTax('INV', pInvcheadid, 'INV', _invcheadid);
 
@@ -96,7 +98,7 @@ BEGIN
          invcitem_taxtype_id,
          invcitem_qty_uom_id, invcitem_qty_invuomratio,
          invcitem_price_uom_id, invcitem_price_invuomratio,
-         invcitem_coitem_id)
+         invcitem_coitem_id, invcitem_tax_exemption)
     VALUES
         (_invcitemid, _invcheadid,
          _l.invcitem_linenumber, _l.invcitem_item_id,
@@ -108,7 +110,7 @@ BEGIN
          _l.invcitem_taxtype_id,
          _l.invcitem_qty_uom_id, _l.invcitem_qty_invuomratio,
          _l.invcitem_price_uom_id, _l.invcitem_price_invuomratio,
-         _l.invcitem_coitem_id);
+         _l.invcitem_coitem_id, _l.invcitem_tax_exemption);
 
     PERFORM copyTax('INV', _l.invcitem_id, 'INV', _invcitemid, _invcheadid);
   END LOOP;

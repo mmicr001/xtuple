@@ -74,7 +74,8 @@ BEGIN
          NEW.pohead_shiptocity != OLD.pohead_shiptocity OR
          NEW.pohead_shiptostate != OLD.pohead_shiptostate OR
          NEW.pohead_shiptozipcode != OLD.pohead_shiptozipcode OR
-         NEW.pohead_shiptocountry != OLD.pohead_shiptocountry)))) THEN
+         NEW.pohead_shiptocountry != OLD.pohead_shiptocountry OR
+         NEW.pohead_tax_exemption != OLD.pohead_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'P'

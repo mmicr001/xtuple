@@ -83,7 +83,8 @@ BEGIN
        NEW.cmitem_price_invuomratio != OLD.cmitem_price_invuomratio OR
        NEW.cmitem_taxtype_id != OLD.cmitem_taxtype_id OR
        (fetchMetricText('TaxService') != 'N' AND
-        NEW.cmitem_itemsite_id != OLD.cmitem_itemsite_id))) THEN
+        (NEW.cmitem_itemsite_id != OLD.cmitem_itemsite_id OR
+         NEW.cmitem_tax_exemption != OLD.cmitem_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'CM'

@@ -32,6 +32,29 @@ $BODY$ LANGUAGE 'plpgsql' VOLATILE;
 CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer)
   RETURNS integer AS
 $BODY$
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+DECLARE
+  pSoitemid     ALIAS FOR $1;
+  pQty  ALIAS FOR $2;
+  pClose        ALIAS FOR $3;
+  pTaxtypeid    ALIAS FOR $4;
+  _taxexemption    TEXT := NULL;
+
+BEGIN
+  SELECT coitem_tax_exemption
+  INTO _taxexemption
+  FROM coitem
+  WHERE (coitem_id = pSoitemid)
+  LIMIT 1;
+
+   RETURN selectforbilling(pSoitemid, pQty, pClose, pTaxtypeid, _taxexemption);
+END;
+$BODY$ LANGUAGE 'plpgsql' VOLATILE;
+
+CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text)
+  RETURNS integer AS
+$BODY$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -39,6 +62,7 @@ DECLARE
   pQty		ALIAS FOR $2;
   pClose	ALIAS FOR $3;
   ptaxtypeid	ALIAS FOR $4;
+  ptaxexemption ALIAS FOR $5;
   _cobillid INTEGER;
   _r RECORD;
 
@@ -85,7 +109,8 @@ BEGIN
         cobill_select_username = getEffectiveXtUser(),
         cobill_qty = pQty,
         cobill_toclose = pClose,
-	cobill_taxtype_id = ptaxtypeid
+	cobill_taxtype_id = ptaxtypeid,
+        cobill_tax_exemption = ptaxexemption
     WHERE (cobill_id=_cobillid);
 
   ELSE
@@ -94,12 +119,12 @@ BEGIN
     (cobill_id, cobill_coitem_id, cobill_cobmisc_id,
      cobill_selectdate, cobill_select_username,
      cobill_qty, cobill_toclose,
-     cobill_taxtype_id)
+     cobill_taxtype_id, cobill_tax_exemption)
     VALUES
     (_cobillid, _r.coitem_id, _r.cobmisc_id,
       CURRENT_DATE, getEffectiveXtUser(),
       pQty, pClose,
-      ptaxtypeid);
+      ptaxtypeid, ptaxexemption);
 
     PERFORM copyTax('S', _r.coitem_id, 'COB', _cobillid, _r.cobmisc_id);
   END IF;

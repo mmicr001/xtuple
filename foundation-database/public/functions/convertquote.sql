@@ -127,7 +127,7 @@ BEGIN
     cohead_billto_cntct_suffix, cohead_billto_cntct_phone, cohead_billto_cntct_title, 
     cohead_billto_cntct_fax, cohead_billto_cntct_email, cohead_ophead_id,
     cohead_calcfreight, cohead_saletype_id, cohead_shipzone_id, cohead_freight_taxtype_id,
-    cohead_misc_taxtype_id, cohead_misc_discount )
+    cohead_misc_taxtype_id, cohead_misc_discount, cohead_tax_exemption )
   SELECT _soheadid, _soNum, quhead_cust_id,
          CURRENT_DATE, quhead_packdate,
          quhead_custponumber, quhead_warehous_id,
@@ -155,7 +155,7 @@ BEGIN
 	 quhead_billto_cntct_last_name, quhead_billto_cntct_suffix, quhead_billto_cntct_phone,
 	 quhead_billto_cntct_title, quhead_billto_cntct_fax, quhead_billto_cntct_email, quhead_ophead_id,
          quhead_calcfreight, quhead_saletype_id, quhead_shipzone_id, quhead_freight_taxtype_id,
-         quhead_misc_taxtype_id, quhead_misc_discount
+         quhead_misc_taxtype_id, quhead_misc_discount, quhead_tax_exemption
   FROM quhead JOIN custinfo ON (cust_id=quhead_cust_id)
   WHERE (quhead_id=pQuheadid);
 
@@ -221,7 +221,8 @@ BEGIN
       coitem_qty_uom_id, coitem_qty_invuomratio,
       coitem_price_uom_id, coitem_price_invuomratio,
       coitem_unitcost, coitem_prcost,
-      coitem_custpn, coitem_memo, coitem_taxtype_id, coitem_order_id, coitem_dropship )
+      coitem_custpn, coitem_memo, coitem_taxtype_id, coitem_order_id, coitem_dropship,
+      coitem_tax_exemption )
     VALUES
     ( _soitemid, _soheadid, _r.quitem_linenumber, _r.quitem_subnumber, _r.quitem_itemsite_id,
       'O', _r.quitem_scheddate, _r.quitem_promdate,
@@ -230,7 +231,8 @@ BEGIN
       _r.quitem_qty_uom_id, _r.quitem_qty_invuomratio,
       _r.quitem_price_uom_id, _r.quitem_price_invuomratio,
       _r.quitem_unitcost, _r.quitem_prcost,
-      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, -1, _r.quitem_dropship );
+      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, -1, _r.quitem_dropship,
+      _r.quitem_tax_exemption );
 
     PERFORM copyTax('Q', _r.quitem_id, 'S', _soitemid, _soheadid);
 

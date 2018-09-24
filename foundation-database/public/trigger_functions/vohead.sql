@@ -82,7 +82,9 @@ BEGIN
        NEW.vohead_freight != OLD.vohead_freight OR
        NEW.vohead_freight_taxtype_id != OLD.vohead_freight_taxtype_id OR
        (fetchMetricText('TaxService') = 'N' AND
-        NEW.vohead_taxzone_id != OLD.vohead_taxzone_id))) THEN
+        NEW.vohead_taxzone_id != OLD.vohead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.vohead_tax_exemption != OLD.vohead_tax_exemption))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'VCH'

@@ -24,7 +24,8 @@ BEGIN
        NEW.coitem_price_invuomratio != OLD.coitem_price_invuomratio OR
        NEW.coitem_taxtype_id != OLD.coitem_taxtype_id OR
        (fetchMetricText('TaxService') != 'N' AND
-        NEW.coitem_itemsite_id != OLD.coitem_itemsite_id))) THEN
+        (NEW.coitem_itemsite_id != OLD.coitem_itemsite_id OR
+         NEW.coitem_tax_exemption != OLD.coitem_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'S'

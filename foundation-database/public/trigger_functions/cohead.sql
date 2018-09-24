@@ -505,7 +505,8 @@ BEGIN
          NEW.cohead_shiptocity != OLD.cohead_shiptocity OR
          NEW.cohead_shiptostate != OLD.cohead_shiptostate OR
          NEW.cohead_shiptozipcode != OLD.cohead_shiptozipcode OR
-         NEW.cohead_shiptocountry != OLD.cohead_shiptocountry)))) THEN
+         NEW.cohead_shiptocountry != OLD.cohead_shiptocountry OR
+         NEW.cohead_tax_exemption != OLD.cohead_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'S'

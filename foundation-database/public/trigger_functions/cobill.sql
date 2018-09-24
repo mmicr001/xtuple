@@ -32,7 +32,9 @@ BEGIN
   IF (TG_OP = 'INSERT' OR
       TG_OP = 'UPDATE' AND
       (NEW.cobill_qty != OLD.cobill_qty OR
-       NEW.cobill_taxtype_id != OLD.cobill_taxtype_id)) THEN
+       NEW.cobill_taxtype_id != OLD.cobill_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.cobill_tax_exemption != OLD.cobill_tax_exemption))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'COB'

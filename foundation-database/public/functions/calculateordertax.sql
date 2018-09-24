@@ -47,6 +47,7 @@ DECLARE
   _qtys NUMERIC[];
   _taxtypeids INTEGER[];
   _amounts NUMERIC[];
+  _usages TEXT[];
   _lineline1 TEXT[];
   _lineline2 TEXT[];
   _lineline3 TEXT[];
@@ -64,8 +65,9 @@ BEGIN
          dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip, dochead_tocountry,
          COALESCE(cust_number, prospect_number, vend_number),
          CASE WHEN dochead_cust_id IS NOT NULL
-              THEN cust_tax_exemption
-              ELSE COALESCE(vend_tax_exemption, fetchMetricText('AvalaraUserExemptionCode'))
+              THEN COALESCE(dochead_tax_exemption, cust_tax_exemption)
+              ELSE COALESCE(dochead_tax_exemption, vend_tax_exemption,
+                            fetchMetricText('AvalaraUserExemptionCode'))
           END,
          COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
          dochead_orignumber, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
@@ -95,9 +97,9 @@ BEGIN
      AND dochead_id = pOrderId
    GROUP BY dochead_id, dochead_number, dochead_taxzone_id, dochead_warehous_id, dochead_toaddr1,
             dochead_toaddr2, dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip,
-            dochead_tocountry, dochead_cust_id, dochead_vend_id, dochead_curr_id, dochead_date,
-            dochead_origdate, dochead_orignumber, dochead_freight, dochead_misc,
-            dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
+            dochead_tocountry, dochead_cust_id, dochead_vend_id, dochead_tax_exemption,
+            dochead_curr_id, dochead_date, dochead_origdate, dochead_orignumber, dochead_freight,
+            dochead_misc, dochead_misc_descrip, dochead_freight_taxtype_id, dochead_misc_taxtype_id,
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
             addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
             vend_number, vend_tax_exemption, taxreg_number;
@@ -171,6 +173,13 @@ BEGIN
          COALESCE(array_agg(ROUND(docitem_qty, 6)), ARRAY[]::NUMERIC[]),
          COALESCE(array_agg(docitem_taxtype_id), ARRAY[]::INTEGER[]),
          COALESCE(array_agg(ROUND(docitem_price, _precision)), ARRAY[]::NUMERIC[]),
+         COALESCE(array_agg(CASE WHEN dochead_cust_id IS NOT NULL
+                                 THEN COALESCE(docitem_tax_exemption, dochead_tax_exemption,
+                                               cust_tax_exemption)
+                                 ELSE COALESCE(docitem_tax_exemption, dochead_tax_exemption,
+                                               vend_tax_exemption,
+                                               fetchMetricText('AvalaraUserExemptionCode'))
+                             END), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_line1), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_line2), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_line3), ARRAY[]::TEXT[]),
@@ -185,6 +194,7 @@ BEGIN
          _qtys,
          _taxtypeids,
          _amounts,
+         _usages,
          _lineline1,
          _lineline2,
          _lineline3,
@@ -193,9 +203,12 @@ BEGIN
          _linezip,
          _linecountry
     FROM docitem
+    JOIN dochead ON docitem_dochead_id = dochead_id
     JOIN whsinfo ON docitem_warehous_id = warehous_id
     LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
     LEFT OUTER JOIN item ON docitem_item_id = item_id
+    LEFT OUTER JOIN custinfo ON dochead_cust_id = cust_id
+    LEFT OUTER JOIN vendinfo ON dochead_vend_id = vend_id
    WHERE docitem_type = pOrderType
      AND docitem_dochead_id = pOrderId;
 
@@ -220,7 +233,7 @@ BEGIN
                       _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1, _freightline2,
                       _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
                       _freightsplit, _linenums, _linecodes, _lineupc, _linedescrips, _qtys,
-                      _taxtypeids, _amounts, _lineline1, _lineline2, _lineline3, _linecity,
+                      _taxtypeids, _amounts, _usages, _lineline1, _lineline2, _lineline3, _linecity,
                       _linestate, _linezip, _linecountry, _taxpaid, _taxowed, pRecord);
 
 END

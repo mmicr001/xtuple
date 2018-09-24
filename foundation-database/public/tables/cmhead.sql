@@ -50,6 +50,7 @@ SELECT xt.add_column('cmhead', 'cmhead_warehous_id', 'INTEGER', 'NULL', 'public'
 SELECT xt.add_column('cmhead', 'cmhead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public');
 SELECT xt.add_column('cmhead', 'cmhead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public');
 SELECT xt.add_column('cmhead', 'cmhead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+SELECT xt.add_column('cmhead', 'cmhead_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT xt.add_constraint('cmhead', 'cmhead_cmhead_cust_id_fkey', 'FOREIGN KEY (cmhead_cust_id) REFERENCES custinfo(cust_id)', 'public');
 SELECT xt.add_constraint('cmhead', 'cmhead_cmhead_prj_id_fkey', 'FOREIGN KEY (cmhead_prj_id) REFERENCES prj(prj_id)', 'public');

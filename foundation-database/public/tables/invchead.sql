@@ -62,7 +62,8 @@ SELECT
   xt.add_column('invchead', 'invchead_warehous_id', 'INTEGER', 'NULL', 'public'),
   xt.add_column('invchead', 'invchead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
   xt.add_column('invchead', 'invchead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
-  xt.add_column('invchead', 'invchead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+  xt.add_column('invchead', 'invchead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public'),
+  xt.add_column('invchead', 'invchead_tax_exemption', 'TEXT', 'NULL', 'public');
 
 -- Found some placeholder invoice customer numbers (unposted).  Clean up first then remove NULL constraint.
 DELETE FROM invchead WHERE invchead_cust_id = -1;
