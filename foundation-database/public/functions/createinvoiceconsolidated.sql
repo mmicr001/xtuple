@@ -33,6 +33,10 @@ BEGIN
                    cohead_shipchrg_id,
                    cohead_saletype_id,
                    cohead_shipzone_id,
+                   cohead_freight_taxtype_id,
+                   cohead_misc_taxtype_id,
+                   cohead_misc_discount,
+                   cohead_tax_exemption,
                    
 		-- the following are consolidated values to use in creating the header
                    MIN(cohead_number) AS cohead_number,
@@ -62,7 +66,11 @@ BEGIN
                    cobmisc_taxzone_id,
                    cohead_shipchrg_id,
                    cohead_saletype_id,
-                   cohead_shipzone_id
+                   cohead_shipzone_id,
+                   cohead_freight_taxtype_id,
+                   cohead_misc_taxtype_id,
+                   cohead_misc_discount,
+                   cohead_tax_exemption
 		LOOP
 
     IF(_c.cnt = 1) THEN
@@ -96,7 +104,9 @@ BEGIN
         invchead_notes, invchead_prj_id, invchead_curr_id,
         invchead_taxzone_id,
         invchead_shipchrg_id,
-        invchead_saletype_id, invchead_shipzone_id )
+        invchead_saletype_id, invchead_shipzone_id,
+        invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
+        invchead_tax_exemption )
       VALUES(_invcheadid,
              pCustid, -1,
              NULL, _c.cohead_orderdate,
@@ -118,7 +128,9 @@ BEGIN
              'Multiple Sales Order # Invoice', _c.cohead_prj_id, _c.cobmisc_curr_id,
              _c.cobmisc_taxzone_id,
              _c.cohead_shipchrg_id,
-             _c.cohead_saletype_id, _c.cohead_shipzone_id
+             _c.cohead_saletype_id, _c.cohead_shipzone_id,
+             _c.cohead_freight_taxtype_id, _c.cohead_misc_taxtype_id, _c.cohead_misc_discount,
+             _c.cohead_tax_exemption
              );
  
     _lastlinenumber := 1;
@@ -164,7 +176,7 @@ BEGIN
                          coitem_price_uom_id, coitem_price_invuomratio,
                          coitem_memo,
                          itemsite_item_id, itemsite_warehous_id,
-                         cobill_taxtype_id, cobill_id
+                         cobill_taxtype_id, cobill_tax_exemption, cobill_id
                     FROM cohead, coitem, cobill, itemsite
                    WHERE((cobill_coitem_id=coitem_id)
                      AND (cohead_id=coitem_cohead_id)
@@ -182,7 +194,7 @@ BEGIN
             invcitem_custprice, invcitem_price, invcitem_listprice,
             invcitem_price_uom_id, invcitem_price_invuomratio,
             invcitem_notes,
-            invcitem_taxtype_id,
+            invcitem_taxtype_id, invcitem_tax_exemption,
             invcitem_coitem_id )
           VALUES
           ( _invcitemid, _invcheadid,
@@ -194,7 +206,7 @@ BEGIN
             _r.coitem_custprice, _r.coitem_price, _r.coitem_listprice,
             _r.coitem_price_uom_id, _r.coitem_price_invuomratio,
             _r.coitem_memo,
-            _r.cobill_taxtype_id,
+            _r.cobill_taxtype_id, _r.cobill_tax_exemption,
             _r.coitem_id );
 
           PERFORM copyTax('COB', _r.cobill_id, 'INV', _invcitemid, _invcheadid);

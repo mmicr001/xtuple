@@ -73,7 +73,8 @@ SELECT
   xt.add_column('quhead', 'quhead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('quhead', 'quhead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
   xt.add_column('quhead', 'quhead_misc_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getMiscTaxtypeId()', 'public'),
-  xt.add_column('quhead', 'quhead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
+  xt.add_column('quhead', 'quhead_misc_discount', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public'),
+  xt.add_column('quhead', 'quhead_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('quhead', 'quhead_pkey', 'PRIMARY KEY (quhead_id)', 'public'),

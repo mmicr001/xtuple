@@ -59,7 +59,8 @@ BEGIN
          NEW.invchead_shipto_city != OLD.invchead_shipto_city OR
          NEW.invchead_shipto_state != OLD.invchead_shipto_state OR
          NEW.invchead_shipto_zipcode != OLD.invchead_shipto_zipcode OR
-         NEW.invchead_shipto_country != OLD.invchead_shipto_country)))) THEN
+         NEW.invchead_shipto_country != OLD.invchead_shipto_country OR
+         NEW.invchead_tax_exemption != OLD.invchead_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'INV'

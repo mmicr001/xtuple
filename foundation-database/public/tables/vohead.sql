@@ -26,7 +26,8 @@ SELECT
   xt.add_column('vohead','vohead_freight_expcat_id',    'INTEGER', NULL, 'public'),
   xt.add_column('vohead','vohead_freight_distributed',  'NUMERIC', NULL, 'public'),
   xt.add_column('vohead', 'vohead_tax_charged',        'NUMERIC', 'NOT NULL DEFAULT 0.0', 'public'),
-  xt.add_column('vohead', 'vohead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public');
+  xt.add_column('vohead', 'vohead_freight_taxtype_id', 'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
+  xt.add_column('vohead', 'vohead_tax_exemption',         'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('vohead', 'vohead_pkey', 'PRIMARY KEY (vohead_id)', 'public'),

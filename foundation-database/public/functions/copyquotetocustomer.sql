@@ -53,7 +53,7 @@ BEGIN
     quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
     quhead_ordercomments,  quhead_shipcomments,
     quhead_imported,  quhead_curr_id,  quhead_taxzone_id,  quhead_freight_taxtype_id,
-    quhead_misc_taxtype_id,  quhead_misc_discount,  quhead_ophead_id,  quhead_status,
+    quhead_misc_taxtype_id,  quhead_misc_discount, quhead_tax_exemption, quhead_ophead_id,  quhead_status,
     quhead_shipto_cntct_id,  quhead_billto_cntct_id,  quhead_billto_cntct_honorific,
     quhead_billto_cntct_first_name,  quhead_billto_cntct_middle,  quhead_billto_cntct_last_name,  quhead_billto_cntct_suffix,
     quhead_billto_cntct_phone,  quhead_billto_cntct_title,  quhead_billto_cntct_fax,  quhead_billto_cntct_email )
@@ -68,7 +68,7 @@ BEGIN
          quhead_misc_accnt_id,  quhead_misc_descrip,  quhead_misc,  quhead_freight,  quhead_commission,
          quhead_ordercomments,  quhead_shipcomments,
          FALSE,  quhead_curr_id,  quhead_taxzone_id,  quhead_freight_taxtype_id,
-         quhead_misc_taxtype_id,  quhead_misc_discount  quhead_ophead_id,  'O',
+         quhead_misc_taxtype_id,  quhead_misc_discount, quhead_tax_exemption,  quhead_ophead_id,  'O',
          
  	 NULL, -- quhead_shipto_cntct_id,
 	
@@ -95,7 +95,7 @@ BEGIN
     quitem_qty_invuomratio,  quitem_price_invuomratio,
     quitem_memo,  quitem_custpn,  quitem_imported,  quitem_taxtype_id,
     quitem_createorder,  quitem_order_warehous_id,  quitem_item_id,  quitem_prcost,
-    quitem_dropship,  quitem_itemsrc_id,  quitem_pricemode )
+    quitem_dropship,  quitem_itemsrc_id,  quitem_pricemode, quitem_tax_exemption )
   SELECT _quheadid,  quitem_linenumber,  quitem_itemsite_id,
          COALESCE(pSchedDate,  quitem_scheddate),
          quitem_promdate,
@@ -106,7 +106,7 @@ BEGIN
          quitem_qty_invuomratio,  quitem_price_invuomratio,
          quitem_memo,  quitem_custpn,  FALSE,  quitem_taxtype_id,
          quitem_createorder,  quitem_order_warehous_id,  quitem_item_id,  quitem_prcost,
-         quitem_dropship,  quitem_itemsrc_id,  quitem_pricemode
+         quitem_dropship,  quitem_itemsrc_id,  quitem_pricemode, quitem_tax_exemption
   FROM quitem,  itemsite
   WHERE ( (quitem_itemsite_id=itemsite_id)
    AND (quitem_quhead_id=pQuheadid));

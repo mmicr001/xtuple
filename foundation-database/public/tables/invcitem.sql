@@ -26,7 +26,8 @@ SELECT
   xt.add_column('invcitem', 'invcitem_updateinv',       'BOOLEAN', 'DEFAULT false', 'public'),
   xt.add_column('invcitem', 'invcitem_rev_accnt_id',    'INTEGER', NULL,            'public'),
   xt.add_column('invcitem', 'invcitem_listprice', 'NUMERIC(16,4)', NULL,            'public'),
-  xt.add_column('invcitem', 'invcitem_subnumber', 'INTEGER', 'NOT NULL DEFAULT 0', 'public');
+  xt.add_column('invcitem', 'invcitem_subnumber', 'INTEGER', 'NOT NULL DEFAULT 0', 'public'),
+  xt.add_column('invcitem', 'invcitem_tax_exemption', 'TEXT', 'NULL', 'public');
 
 ALTER TABLE invcitem DROP CONSTRAINT IF EXISTS invcitem_invchead_id_linenumber_unique;
 

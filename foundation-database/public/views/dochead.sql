@@ -27,7 +27,8 @@ SELECT 'Q' AS dochead_type,
        quhead_misc_descrip AS dochead_misc_descrip,
        quhead_freight_taxtype_id AS dochead_freight_taxtype_id,
        quhead_misc_taxtype_id AS dochead_misc_taxtype_id,
-       quhead_misc_discount AS dochead_misc_discount
+       quhead_misc_discount AS dochead_misc_discount,
+       quhead_tax_exemption AS dochead_tax_exemption
   FROM quhead
 UNION ALL
 SELECT 'S',
@@ -57,7 +58,8 @@ SELECT 'S',
        cohead_misc_descrip,
        cohead_freight_taxtype_id,
        cohead_misc_taxtype_id,
-       cohead_misc_discount
+       cohead_misc_discount,
+       cohead_tax_exemption
   FROM cohead
 UNION ALL
 SELECT 'COB',
@@ -87,7 +89,8 @@ SELECT 'COB',
        cobmisc_misc_descrip,
        cobmisc_freight_taxtype_id,
        cobmisc_misc_taxtype_id,
-       cobmisc_misc_discount
+       cobmisc_misc_discount,
+       cobmisc_tax_exemption
   FROM cobmisc
   JOIN cohead ON cobmisc_cohead_id = cohead_id
 UNION ALL
@@ -118,7 +121,8 @@ SELECT 'INV',
        invchead_misc_descrip,
        invchead_freight_taxtype_id,
        invchead_misc_taxtype_id,
-       invchead_misc_discount
+       invchead_misc_discount,
+       invchead_tax_exemption
   FROM invchead
 UNION ALL
 SELECT 'P',
@@ -148,7 +152,8 @@ SELECT 'P',
        NULL,
        pohead_freight_taxtype_id,
        NULL,
-       FALSE
+       FALSE,
+       pohead_tax_exemption
   FROM pohead
 UNION ALL
 SELECT 'VCH',
@@ -178,7 +183,8 @@ SELECT 'VCH',
        NULL,
        vohead_freight_taxtype_id,
        NULL,
-       FALSE
+       FALSE,
+       vohead_tax_exemption
   FROM vohead
   JOIN pohead ON vohead_pohead_id = pohead_id
 UNION ALL
@@ -209,6 +215,7 @@ SELECT 'CM',
        cmhead_misc_descrip,
        COALESCE(invchead_freight_taxtype_id, cmhead_freight_taxtype_id),
        COALESCE(invchead_misc_taxtype_id, cmhead_misc_taxtype_id),
-       cmhead_misc_discount
+       cmhead_misc_discount,
+       cmhead_tax_exemption
   FROM cmhead
   LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber;

@@ -24,7 +24,8 @@ BEGIN
   FOR _r IN SELECT cohead_id, coitem_id, SUM(shipitem_qty) AS qty,
                    coitem_price, coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id,
                    ( ((coitem_qtyord - coitem_qtyshipped + coitem_qtyreturned) <= 0)
-                    OR (NOT cust_partialship) ) AS toclose, coitem_taxtype_id, true AS additive
+                    OR (NOT cust_partialship) ) AS toclose, coitem_taxtype_id, coitem_tax_exemption,
+                   true AS additive
             FROM shiphead, shipitem, coitem, cohead, custinfo, itemsite, item
             WHERE ( (shipitem_shiphead_id=shiphead_id)
              AND (shipitem_orderitem_id=coitem_id)
@@ -37,13 +38,14 @@ BEGIN
              AND (item_type != 'K')
              AND (cohead_id=_coheadid)
              AND (shiphead_id=pShipheadid) )
-            GROUP BY cohead_id, coitem_id, cust_partialship, coitem_taxtype_id,
+            GROUP BY cohead_id, coitem_id, cust_partialship, coitem_taxtype_id, coitem_tax_exemption,
                      coitem_qtyord, coitem_qtyshipped, coitem_qtyreturned,
                      coitem_price, invpricerat, coitem_qty_invuomratio, item_id
             UNION
             SELECT cohead_id, coitem_id, coitem_qtyord AS qty,
                    coitem_price, coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id,
-                   true AS toclose, coitem_taxtype_id, false AS additive
+                   true AS toclose, coitem_taxtype_id, coitem_tax_exemption,
+                   false AS additive
               FROM shiphead, cohead, custinfo, itemsite, item, coitem AS kit
              WHERE((shiphead_order_id=cohead_id)
                AND (coitem_cohead_id=cohead_id)
@@ -64,7 +66,7 @@ BEGIN
                         AND ((sub.coitem_qtyord - sub.coitem_qtyshipped + sub.coitem_qtyreturned) > 0)
                         LIMIT 1)
                ))
-             GROUP BY cohead_id, coitem_id, cust_partialship, coitem_taxtype_id,
+             GROUP BY cohead_id, coitem_id, cust_partialship, coitem_taxtype_id, coitem_tax_exemption,
                       coitem_qtyord, coitem_qtyshipped, coitem_qtyreturned,
                       coitem_price, invpricerat, coitem_qty_invuomratio, item_id, coitem_linenumber
   LOOP
@@ -85,7 +87,8 @@ BEGIN
              cobill_select_username = getEffectiveXtUser(),
              cobill_qty = CASE WHEN _r.additive THEN cobill_qty + _r.qty ELSE _r.qty END,
              cobill_toclose = _r.toclose,
-             cobill_taxtype_id = _r.coitem_taxtype_id
+             cobill_taxtype_id = _r.coitem_taxtype_id,
+             cobill_tax_exemption = _r.coitem_tax_exemption
       WHERE (cobill_id=_cobillid);
     ELSE
 --  Now insert the cobill line
@@ -93,12 +96,12 @@ BEGIN
       ( cobill_cobmisc_id, cobill_coitem_id,
         cobill_selectdate, cobill_select_username,
         cobill_qty, cobill_toclose,
-        cobill_taxtype_id )
+        cobill_taxtype_id, cobill_tax_exemption )
       VALUES
       ( _cobmiscid, _r.coitem_id,
         CURRENT_DATE, getEffectiveXtUser(),
         _r.qty, _r.toclose,
-         _r.coitem_taxtype_id )
+         _r.coitem_taxtype_id, _r.coitem_tax_exemption)
       RETURNING cobill_id INTO _cobillid;
 
       PERFORM copyTax('S', _r.coitem_id, 'COB', _cobillid, _cobmiscid);

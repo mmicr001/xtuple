@@ -35,7 +35,8 @@ BEGIN
        NEW.invcitem_price_invuomratio != OLD.invcitem_price_invuomratio OR
        NEW.invcitem_taxtype_id != OLD.invcitem_taxtype_id OR
        (fetchMetricText('TaxService') != 'N' AND
-        NEW.invcitem_warehous_id != OLD.invcitem_warehous_id))) THEN
+        (NEW.invcitem_warehous_id != OLD.invcitem_warehous_id OR
+         NEW.invcitem_tax_exemption != OLD.invcitem_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'INV'

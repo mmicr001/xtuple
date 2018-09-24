@@ -15,7 +15,8 @@ SELECT 'Q' AS docitem_type,
        quitem_qtyord * quitem_qty_invuomratio *
        quitem_price / quitem_price_invuomratio AS docitem_price,
        quitem_taxtype_id AS docitem_taxtype_id,
-       0.0 AS docitem_freight
+       0.0 AS docitem_freight,
+       quitem_tax_exemption AS docitem_tax_exemption
   FROM quitem
   JOIN itemsite ON quitem_itemsite_id = itemsite_id
   JOIN item ON itemsite_item_id = item_id
@@ -35,7 +36,8 @@ SELECT 'S',
        coitem_qtyord * coitem_qty_invuomratio *
        coitem_price / coitem_price_invuomratio,
        coitem_taxtype_id,
-       0.0
+       0.0,
+       coitem_tax_exemption
   FROM coitem
   JOIN itemsite ON coitem_itemsite_id = itemsite_id
   JOIN item ON itemsite_item_id = item_id
@@ -55,7 +57,8 @@ SELECT 'COB',
        cobill_qty * coitem_qty_invuomratio *
        coitem_price / coitem_price_invuomratio,
        cobill_taxtype_id,
-       0.0
+       0.0,
+       cobill_tax_exemption
   FROM cobill
   JOIN coitem ON cobill_coitem_id = coitem_id
   JOIN itemsite ON coitem_itemsite_id = itemsite_id
@@ -76,7 +79,8 @@ SELECT 'INV',
        invcitem_billed * invcitem_qty_invuomratio *
        invcitem_price / invcitem_price_invuomratio,
        invcitem_taxtype_id,
-       0.0
+       0.0,
+       invcitem_tax_exemption
   FROM invcitem
   JOIN invchead ON invcitem_invchead_id = invchead_id
   LEFT OUTER JOIN item ON invcitem_item_id = item_id
@@ -95,7 +99,8 @@ SELECT 'P',
        poitem_unitprice,
        poitem_qty_ordered * poitem_unitprice,
        poitem_taxtype_id,
-       poitem_freight
+       poitem_freight,
+       poitem_tax_exemption
   FROM poitem
   JOIN pohead ON poitem_pohead_id = pohead_id
   LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
@@ -116,7 +121,8 @@ SELECT 'VCH',
        poitem_unitprice,
        voitem_qty * poitem_unitprice,
        voitem_taxtype_id,
-       voitem_freight
+       voitem_freight,
+       voitem_tax_exemption
   FROM voitem
   JOIN poitem ON voitem_poitem_id = poitem_id
   JOIN pohead ON poitem_pohead_id = pohead_id
@@ -138,7 +144,8 @@ SELECT 'CM',
        cmitem_unitprice / cmitem_price_invuomratio,
        cmitem_qtycredit * cmitem_qty_invuomratio * cmitem_unitprice / cmitem_price_invuomratio,
        COALESCE(invcitem_taxtype_id, cmitem_taxtype_id),
-       0.0
+       0.0,
+       cmitem_tax_exemption
   FROM cmitem
   JOIN cmhead ON cmitem_cmhead_id = cmhead_id
   LEFT OUTER JOIN itemsite ON cmitem_itemsite_id = itemsite_id
@@ -184,7 +191,8 @@ SELECT 'AR' AS docitem_type,
        aropen_amount AS docitem_unitprice,
        aropen_amount AS docitem_price,
        NULL AS docitem_taxtype_id,
-       0.0 AS docitem_freight
+       0.0 AS docitem_freight,
+       NULL
   FROM aropen
 UNION ALL
 SELECT 'AP' AS docitem_type,
@@ -201,5 +209,6 @@ SELECT 'AP' AS docitem_type,
        apopen_amount AS docitem_unitprice,
        apopen_amount AS docitem_price,
        NULL AS docitem_taxtype_id,
-       0.0 AS docitem_freight
+       0.0 AS docitem_freight,
+       NULL
   FROM apopen;

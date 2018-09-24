@@ -52,7 +52,9 @@ BEGIN
        NEW.cobmisc_misc_taxtype_id != OLD.cobmisc_misc_taxtype_id OR
        NEW.cobmisc_misc_discount != OLD.cobmisc_misc_discount OR
        (fetchMetricText('TaxService') = 'N' AND
-        NEW.cobmisc_taxzone_id != OLD.cobmisc_taxzone_id))) THEN
+        NEW.cobmisc_taxzone_id != OLD.cobmisc_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.cobmisc_tax_exemption != OLD.cobmisc_tax_exemption))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'COB'

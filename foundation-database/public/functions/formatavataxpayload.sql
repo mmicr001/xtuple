@@ -42,6 +42,7 @@ CREATE OR REPLACE FUNCTION formatAvaTaxPayload(pOrderType       TEXT,
                                                pQtys            NUMERIC[],
                                                pTaxTypes        TEXT[],
                                                pAmounts         NUMERIC[],
+                                               pUsages          TEXT[],
                                                pLineLine1       TEXT[],
                                                pLineLine2       TEXT[],
                                                pLineLine3       TEXT[],
@@ -82,7 +83,7 @@ BEGIN
     "companyCode": %s,
     "date": %s,
     "customerCode": %s,
-    "customerUsageType": %s,
+    "entityUseCode": %s,
     "businessIdentificationNo": %s,
     "addresses": {
         "shipFrom": {
@@ -160,6 +161,12 @@ BEGIN
             to_jsonb(pqtys[_line]),
             to_jsonb(pamounts[_line] * CASE WHEN _return THEN -1 ELSE 1 END),
             to_jsonb(COALESCE(ptaxtypes[_line], '')));
+
+    IF pUsages[_line] IS DISTINCT FROM pUsage THEN
+      _payload := _payload ||
+                format(',"entityUseCode": %s',
+                to_jsonb(COALESCE(pUsage, '')));
+    END IF;
 
     IF pLineLine1[_line] != pFromLine1 OR pLineLine2[_line] != pFromLine2 OR
        pLineLine3[_line] != pFromLine3 OR pLineCity[_line] != pFromCity OR

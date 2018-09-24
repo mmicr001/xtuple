@@ -132,7 +132,7 @@ BEGIN
 	,cobmisc_notes,cobmisc_shipdate ,cobmisc_invcdate,cobmisc_posted ,cobmisc_misc_accnt_id 
 	,cobmisc_misc_descrip,cobmisc_closeorder,cobmisc_curr_id
 	,cobmisc_taxzone_id, cobmisc_freight_taxtype_id
-        ,cobmisc_misc_taxtype_id, cobmisc_misc_discount
+        ,cobmisc_misc_taxtype_id, cobmisc_misc_discount, cobmisc_tax_exemption
 	)
 	SELECT
 	_cobmiscid,_cohead.cohead_id,_shipVia,_freight,
@@ -141,7 +141,7 @@ BEGIN
         _cohead.cohead_ordercomments,_shipDate,_invcDate,FALSE,_cohead.cohead_misc_accnt_id,
         _cohead.cohead_misc_descrip,NOT(cust_backorder),_cohead.cohead_curr_id,
 	_cohead.cohead_taxzone_id, _cohead.cohead_freight_taxtype_id,
-        _cohead.cohead_misc_taxtype_id, _cohead.cohead_misc_discount
+        _cohead.cohead_misc_taxtype_id, _cohead.cohead_misc_discount, _cohead.cohead_tax_exemption
 	FROM custinfo
 	WHERE (cust_id=_cohead.cohead_cust_id);
 

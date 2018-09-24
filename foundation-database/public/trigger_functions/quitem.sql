@@ -19,7 +19,8 @@ BEGIN
        NEW.quitem_price_invuomratio != OLD.quitem_price_invuomratio OR
        NEW.quitem_taxtype_id != OLD.quitem_taxtype_id OR
        (fetchMetricText('TaxService') != 'N' AND
-        NEW.quitem_itemsite_id != OLD.quitem_itemsite_id))) THEN
+        (NEW.quitem_itemsite_id != OLD.quitem_itemsite_id OR
+         NEW.quitem_tax_exemption != OLD.quitem_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'Q'

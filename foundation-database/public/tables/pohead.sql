@@ -62,7 +62,8 @@ SELECT
   xt.add_column('pohead', 'pohead_potype_id',            'INTEGER', NULL, 'public'),
   xt.add_column('pohead', 'pohead_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('pohead', 'pohead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
-  xt.add_column('pohead', 'pohead_freight_taxtype_id',   'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public');
+  xt.add_column('pohead', 'pohead_freight_taxtype_id',   'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
+  xt.add_column('pohead', 'pohead_tax_exemption',           'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('pohead', 'pohead_pkey', 'PRIMARY KEY (pohead_id)', 'public'),

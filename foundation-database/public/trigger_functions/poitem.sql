@@ -166,7 +166,8 @@ BEGIN
        NEW.poitem_freight != OLD.poitem_freight OR
        NEW.poitem_taxtype_id != OLD.poitem_taxtype_id OR
        (fetchMetricText('TaxService') != 'N' AND
-        NEW.poitem_itemsite_id != OLD.poitem_itemsite_id))) THEN
+        (NEW.poitem_itemsite_id != OLD.poitem_itemsite_id OR
+         NEW.poitem_tax_exemption != OLD.poitem_tax_exemption)))) THEN
     UPDATE taxhead
        SET taxhead_valid = FALSE
      WHERE taxhead_doc_type = 'P'
