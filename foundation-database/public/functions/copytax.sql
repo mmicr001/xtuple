@@ -42,14 +42,16 @@ BEGIN
                  AND taxline_line_type != 'L'
     LOOP
       INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
-                           taxline_freightgroup, taxline_shipfromaddr_line1,
+                           taxline_linenumber, taxline_subnumber, taxline_number,
+                           taxline_item_number, taxline_shipfromaddr_line1,
                            taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
                            taxline_shipfromaddr_city, taxline_shipfromaddr_region,
                            taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,
                            taxline_taxtype_id, taxline_taxtype_external_code, taxline_qty,
                            taxline_amount, taxline_extended)
       SELECT taxhead_id, taxline_line_type, taxline_line_id,
-             taxline_freightgroup, taxline_shipfromaddr_line1,
+             taxline_linenumber, taxline_subnumber, taxline_number,
+             taxline_item_number, taxline_shipfromaddr_line1,
              taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
              taxline_shipfromaddr_city, taxline_shipfromaddr_region,
              taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,
@@ -84,14 +86,16 @@ BEGIN
                  AND taxline_line_id = pSourceId
     LOOP
       INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
-                           taxline_freightgroup, taxline_shipfromaddr_line1,
+                           taxline_linenumber, taxline_subnumber, taxline_number,
+                           taxline_item_number, taxline_shipfromaddr_line1,
                            taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
                            taxline_shipfromaddr_city, taxline_shipfromaddr_region,
                            taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,
                            taxline_taxtype_id, taxline_taxtype_external_code, taxline_qty,
                            taxline_amount, taxline_extended)
       SELECT taxhead_id, taxline_line_type, pTargetId,
-             taxline_freightgroup, taxline_shipfromaddr_line1,
+             taxline_linenumber, taxline_subnumber, taxline_number,
+             taxline_item_number, taxline_shipfromaddr_line1,
              taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
              taxline_shipfromaddr_city, taxline_shipfromaddr_region,
              taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,

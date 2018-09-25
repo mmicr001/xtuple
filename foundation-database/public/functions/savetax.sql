@@ -68,9 +68,13 @@ BEGIN
   SELECT value
     FROM jsonb_array_elements(pResult->'lines')
   LOOP
-    INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id, taxline_taxtype_id,
+    INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                         taxline_linenumber, taxline_subnumber, taxline_number, taxline_item_number,
+                         taxline_taxtype_id,
                          taxline_qty, taxline_amount, taxline_extended)
-    SELECT _taxheadid, 'L', docitem_id, NULLIF((_r.value->>'taxtypeid')::INTEGER, -1),
+    SELECT _taxheadid, 'L', docitem_id,
+           docitem_linenumber, docitem_subnumber, docitem_number, docitem_item_number,
+           NULLIF((_r.value->>'taxtypeid')::INTEGER, -1),
            docitem_qty, docitem_unitprice, docitem_price
       FROM docitem
      WHERE docitem_type = pOrderType

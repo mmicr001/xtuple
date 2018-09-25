@@ -6,7 +6,10 @@ SELECT xt.add_column('taxline', 'taxline_id', 'SERIAL', 'PRIMARY KEY', 'public')
 SELECT xt.add_column('taxline', 'taxline_taxhead_id', 'INTEGER', 'NOT NULL', 'public');
 SELECT xt.add_column('taxline', 'taxline_line_type', 'TEXT', 'NULL', 'public');
 SELECT xt.add_column('taxline', 'taxline_line_id', 'INTEGER', 'NULL', 'public');
-SELECT xt.add_column('taxline', 'taxline_freightgroup', 'TEXT', 'NULL', 'public');
+SELECT xt.add_column('taxline', 'taxline_linenumber', 'INTEGER', 'NOT NULL DEFAULT 1', 'public');
+SELECT xt.add_column('taxline', 'taxline_subnumber', 'INTEGER', 'NOT NULL DEFAULT 0', 'public');
+SELECT xt.add_column('taxline', 'taxline_number', 'TEXT', 'NULL', 'public');
+SELECT xt.add_column('taxline', 'taxline_item_number', 'TEXT', 'NOT NULL DEFAULT ''''', 'public');
 SELECT xt.add_column('taxline', 'taxline_shipfromaddr_line1', 'TEXT', 'NULL', 'public');
 SELECT xt.add_column('taxline', 'taxline_shipfromaddr_line2', 'TEXT', 'NULL', 'public');
 SELECT xt.add_column('taxline', 'taxline_shipfromaddr_line3', 'TEXT', 'NULL', 'public');
@@ -22,7 +25,7 @@ SELECT xt.add_column('taxline', 'taxline_extended', 'NUMERIC', 'NULL', 'public')
 
 SELECT xt.add_constraint('taxline', 'taxline_taxhead_id_fkey', 'FOREIGN KEY (taxline_taxhead_id) REFERENCES taxhead (taxhead_id) ON DELETE CASCADE', 'public');
 SELECT xt.add_constraint('taxline', 'taxline_taxtype_id_fkey', 'FOREIGN KEY (taxline_taxtype_id) REFERENCES taxtype (taxtype_id)', 'public');
-SELECT xt.add_constraint('taxline', 'taxline_taxline_line_key', 'UNIQUE (taxline_line_type, taxline_line_id, taxline_freightgroup)', 'public');
+SELECT xt.add_constraint('taxline', 'taxline_taxline_line_key', 'UNIQUE (taxline_taxhead_id, taxline_line_type, taxline_line_id, taxline_number)', 'public');
 SELECT xt.add_constraint('taxline', 'taxline_taxline_line_type_check', $$CHECK (taxline_line_type IN ('L', 'F', 'M', 'A'))$$, 'public');
 SELECT xt.add_constraint('taxline', 'taxline_taxline_line_id_check', $$CHECK ((taxline_line_type = 'L') = (taxline_line_id IS NOT NULL))$$, 'public');
 SELECT xt.add_constraint('taxline', 'taxline_taxline_qty_check', $$CHECK ((taxline_line_type = 'L') = (taxline_qty IS NOT NULL))$$, 'public');

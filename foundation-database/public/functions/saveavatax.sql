@@ -80,17 +80,21 @@ BEGIN
     END IF;
 
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
-                         taxline_freightgroup, taxline_shipfromaddr_line1,
-                         taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
-                         taxline_shipfromaddr_city, taxline_shipfromaddr_region,
-                         taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,
+                         taxline_linenumber, taxline_subnumber,
+                         taxline_number, taxline_item_number,
+                         taxline_shipfromaddr_line1, taxline_shipfromaddr_line2,
+                         taxline_shipfromaddr_line3, taxline_shipfromaddr_city,
+                         taxline_shipfromaddr_region, taxline_shipfromaddr_postalcode,
+                         taxline_shipfromaddr_country,
                          taxline_taxtype_id, taxline_taxtype_external_code, taxline_qty,
                          taxline_amount, taxline_extended)
     SELECT _taxheadid, _linetype, _lineid,
-           _freightgroup, addr_line1,
-           addr_line2, addr_line3,
-           addr_city, addr_state,
-           addr_postalcode, addr_country,
+           COALESCE(docitem_linenumber, 1), COALESCE(docitem_subnumber, 0),
+           COALESCE(docitem_number, _freightgroup), COALESCE(docitem_item_number, ''),
+           addr_line1, addr_line2,
+           addr_line3, addr_city,
+           addr_state, addr_postalcode,
+           addr_country,
            _taxtypeid, (_r.value->>'taxCode'), docitem_qty,
            docitem_unitprice, (_r.value->>'lineAmount')::NUMERIC
       FROM dochead
