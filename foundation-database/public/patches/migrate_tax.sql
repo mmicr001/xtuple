@@ -205,9 +205,11 @@ BEGIN
      WHERE invchead_posted;
 
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                         taxline_linenumber, taxline_subnumber, taxline_number, taxline_item_number,
                          taxline_taxtype_id, taxline_qty, taxline_amount, taxline_extended)
     SELECT DISTINCT ON (invchead_id, type, invcitem_id)
            taxhead_id, type, invcitem_id,
+           invcitem_linenumber, invcitem_subnumber, number, item_number,
            COALESCE(cohisttax.taxhist_taxtype_id,
                     invcheadtax.taxhist_taxtype_id, invcitemtax.taxhist_taxtype_id, taxtype_id),
            qty, amt,
@@ -220,6 +222,9 @@ BEGIN
                   AND invchead_id = taxhead_doc_id
       JOIN (
             SELECT invcitem_invchead_id AS headid, cohist_id, 'L' AS type, invcitem_id,
+                   invcitem_linenumber, invcitem_subnumber,
+                   formatInvcLineNumber(invcitem_id) AS number,
+                   COALESCE(item_number, invcitem_number) AS item_number,
                    COALESCE(cohist_taxtype_id, invcitem_taxtype_id) AS taxtype_id,
                    COALESCE(cohist_qtyshipped, invcitem_billed / invcitem_qty_invuomratio) AS qty,
                    COALESCE(cohist_unitprice, invcitem_price / invcitem_price_invuomratio) AS amt,
@@ -227,9 +232,13 @@ BEGIN
                          COALESCE(cohist_unitprice, invcitem_price / invcitem_price_invuomratio), 2)
                    AS ext
               FROM invcitem
+              LEFT OUTER JOIN item ON invcitem_item_id = item_id
               LEFT OUTER JOIN cohist ON invcitem_id = cohist_invcitem_id
             UNION
             SELECT invchead_id, cohist_id, 'F', NULL,
+                   1, 0,
+                   NULL,
+                   '',
                    getFreightTaxtypeId(),
                    NULL,
                    NULL,
@@ -241,6 +250,9 @@ BEGIN
              WHERE COALESCE(cohist_unitprice, invchead_freight) != 0.0
             UNION
             SELECT invchead_id, cohist_id, 'M', NULL,
+                   1, 0,
+                   NULL,
+                   '',
                    getMiscTaxtypeId(),
                    NULL,
                    NULL,
@@ -252,6 +264,9 @@ BEGIN
              WHERE COALESCE(cohist_unitprice, invchead_misc_amount) != 0.0
             UNION
             SELECT invchead_id, cohist_id, 'A', NULL,
+                   1, 0,
+                   NULL,
+                   '',
                    getAdjustmentTaxtypeId(),
                    NULL,
                    NULL,
@@ -401,9 +416,11 @@ BEGIN
      WHERE vohead_posted;
 
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                         taxline_linenumber, taxline_subnumber, taxline_number, taxline_item_number,
                          taxline_taxtype_id, taxline_qty, taxline_amount, taxline_extended)
     SELECT DISTINCT ON (vohead_id, type, voitem_id)
            taxhead_id, type, voitem_id,
+           poitem_linenumber, 0, number, item_number,
            COALESCE(voheadtax.taxhist_taxtype_id, voitemtax.taxhist_taxtype_id, voitem_taxtype_id),
            qty, amt,
            CASE WHEN type != 'A'
@@ -414,14 +431,23 @@ BEGIN
                   AND vohead_id = taxhead_doc_id
       JOIN (
             SELECT voitem_vohead_id AS headid, 'L' AS type, voitem_id,
+                   poitem_linenumber,
+                   formatPoLineNumber(poitem_id) AS number,
+                   COALESCE(item_number, expcat_code) AS item_number,
                    voitem_taxtype_id,
                    voitem_qty AS qty,
                    poitem_unitprice AS amt,
                    ROUND(voitem_qty * poitem_unitprice, 2) AS ext
               FROM voitem
               JOIN poitem ON voitem_poitem_id = poitem_id
+              LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
+              LEFT OUTER JOIN item ON itemsite_item_id = item_id
+              LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
             UNION
             SELECT vohead_id, 'F', NULL,
+                   1,
+                   NULL,
+                   '',
                    getFreightTaxtypeId(),
                    NULL,
                    NULL,
@@ -430,6 +456,9 @@ BEGIN
              WHERE vohead_freight != 0.0
             UNION
             SELECT vohead_id, 'A', NULL,
+                   1,
+                   NULL,
+                   '',
                    getAdjustmentTaxtypeId(),
                    NULL,
                    NULL,
@@ -540,9 +569,11 @@ BEGIN
      WHERE cmhead_posted;
 
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                         taxline_linenumber, taxline_subnumber, taxline_number, taxline_item_number,
                          taxline_taxtype_id, taxline_qty, taxline_amount, taxline_extended)
     SELECT DISTINCT ON (cmhead_id, type, cmitem_id)
            taxhead_id, type, cmitem_id,
+           cmitem_linenumber, 0, number, item_number,
            COALESCE(cohisttax.taxhist_taxtype_id,
                     cmheadtax.taxhist_taxtype_id, cmitemtax.taxhist_taxtype_id, taxtype_id),
            qty, amt,
@@ -555,6 +586,9 @@ BEGIN
                   AND cmhead_id = taxhead_doc_id
       JOIN (
             SELECT cmitem_cmhead_id AS headid, cohist_id, 'L' AS type, cmitem_id,
+                   cmitem_linenumber,
+                   cmitem_linenumber::TEXT AS number,
+                   COALESCE(item_number, cmitem_number) AS item_number,
                    COALESCE(cohist_taxtype_id, cmitem_taxtype_id) AS taxtype_id,
                    COALESCE(cohist_qtyshipped * -1,
                             cmitem_qtycredit * cmitem_qty_invuomratio) AS qty,
@@ -564,6 +598,8 @@ BEGIN
                          COALESCE(cohist_unitprice, cmitem_unitprice / cmitem_price_invuomratio), 2)
                    AS ext
               FROM cmitem
+              LEFT OUTER JOIN itemsite ON cmitem_itemsite_id = itemsite_id
+              LEFT OUTER JOIN item ON itemsite_item_id = item_id
               JOIN cmhead ON cmitem_cmhead_id = cmhead_id
               LEFT OUTER JOIN cohist ON cohist_doctype = 'C'
                                     AND cmhead_number = cohist_ordernumber
@@ -579,6 +615,9 @@ BEGIN
                                                     cmitem_number || '-' || cmitem_descrip))
             UNION
             SELECT cmhead_id, cohist_id, 'F', NULL,
+                   1,
+                   NULL,
+                   '',
                    getFreightTaxtypeId(),
                    NULL,
                    NULL,
@@ -590,6 +629,9 @@ BEGIN
              WHERE COALESCE(cohist_unitprice, cmhead_freight) != 0.0
             UNION
             SELECT cmhead_id, cohist_id, 'M', NULL,
+                   1,
+                   NULL,
+                   '',
                    getMiscTaxtypeId(),
                    NULL,
                    NULL,
@@ -602,6 +644,9 @@ BEGIN
              WHERE COALESCE(cohist_unitprice, cmhead_misc) != 0.0
             UNION
             SELECT cmhead_id, cohist_id, 'A', NULL,
+                   1,
+                   NULL,
+                   '',
                    getAdjustmentTaxtypeId(),
                    NULL,
                    NULL,
@@ -992,8 +1037,8 @@ BEGIN
     PERFORM archiveSalesHistory(asohist_id)
        FROM asohisttmp;
 
-    DROP TABLE taxpay CASCADE;
-    DROP TABLE taxhist CASCADE;
+--    DROP TABLE taxpay CASCADE;
+--    DROP TABLE taxhist CASCADE;
   END IF;
 
 END
