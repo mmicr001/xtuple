@@ -2015,6 +2015,7 @@
     "public/patches/fixacl.sql",
     "public/patches/fixapapply.sql",
     "public/patches/fixcheckitemcurrrate.sql",
+    "public/patches/fixcohist.sql",
     "public/patches/fixinvhist.sql",
     "public/patches/migrate_wo_source.sql",
     "public/patches/migrate_tax.sql",
