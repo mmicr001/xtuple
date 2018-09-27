@@ -1037,8 +1037,8 @@ BEGIN
     PERFORM archiveSalesHistory(asohist_id)
        FROM asohisttmp;
 
-    DROP TABLE taxpay CASCADE;
-    DROP TABLE taxhist CASCADE;
+--    DROP TABLE taxpay CASCADE;
+--    DROP TABLE taxhist CASCADE;
   END IF;
 
 END
