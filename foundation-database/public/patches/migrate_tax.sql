@@ -95,7 +95,7 @@ BEGIN
                      AND taxhist_taxtype_id = getAdjustmentTaxtypeId());
 
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_tax_id, taxdetail_tax)
-    SELECT taxline_id, taxhist_tax_id, taxhist_tax
+    SELECT taxline_id, taxhist_tax_id, taxhist_tax * -1
       FROM vohead
       JOIN voheadtax ON vohead_id = taxhist_parent_id
       JOIN taxhead ON taxhead_doc_type = 'VCH'
@@ -117,7 +117,7 @@ BEGIN
                      AND taxhist_taxtype_id = getAdjustmentTaxtypeId());
 
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_tax_id, taxdetail_tax)
-    SELECT taxline_id, taxhist_tax_id, taxhist_tax
+    SELECT taxline_id, taxhist_tax_id, taxhist_tax * -1
       FROM cmhead
       JOIN cmheadtax ON cmhead_id = taxhist_parent_id
       JOIN taxhead ON taxhead_doc_type = 'CM'
@@ -483,10 +483,10 @@ BEGIN
                            taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id, 
                            taxdetail_amount, taxdetail_percent, taxdetail_tax, taxdetail_paydate,
                            taxdetail_tax_paid)
-    SELECT taxline_id, taxhist_basis, tax_id,
+    SELECT taxline_id, taxhist_basis * -1, tax_id,
            tax_taxclass_id, taxhist_sequence, taxhist_basis_tax_id, 
-           taxhist_amount, taxhist_percent, taxhist_tax, taxpay_distdate,
-           taxpay_tax
+           taxhist_amount, taxhist_percent, taxhist_tax * -1, taxpay_distdate,
+           taxpay_tax * -1
       FROM vohead
       JOIN (
             SELECT voitem_vohead_id AS headid, taxline_id, taxhist_basis, tax_id, tax_taxclass_id,
@@ -680,10 +680,10 @@ BEGIN
                            taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id, 
                            taxdetail_amount, taxdetail_percent, taxdetail_tax, taxdetail_paydate,
                            taxdetail_tax_paid)
-    SELECT taxline_id, taxable, tax_id,
+    SELECT taxline_id, taxable * -1, tax_id,
            tax_taxclass_id, sequence, basis, 
-           amount, percent, tax, taxpay_distdate,
-           taxpay_tax
+           amount, percent, tax * -1, taxpay_distdate,
+           taxpay_tax * -1
       FROM cmhead
       JOIN (
             SELECT cmitem_cmhead_id AS headid, taxline_id,
@@ -846,14 +846,31 @@ BEGIN
                                         AND taxhist_percent = 0.0))
      WHERE aropen_posted;
 
-    INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+    INSERT INTO taxdetail (taxdetail_taxline_id,
+                           taxdetail_taxable,
+                           taxdetail_tax_id,
                            taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id, 
-                           taxdetail_amount, taxdetail_percent, taxdetail_tax, taxdetail_paydate,
+                           taxdetail_amount, taxdetail_percent,
+                           taxdetail_tax,
+                           taxdetail_paydate,
                            taxdetail_tax_paid)
-    SELECT taxline_id, taxhist_basis, tax_id,
+    SELECT taxline_id,
+           taxhist_basis * CASE WHEN aropen_doctype = 'C'
+                                THEN -1
+                                ELSE 1
+                            END,
+           tax_id,
            tax_taxclass_id, taxhist_sequence, taxhist_basis_tax_id, 
-           taxhist_amount, taxhist_percent, taxhist_tax, taxpay_distdate,
-           taxpay_tax
+           taxhist_amount, taxhist_percent,
+           taxhist_tax * CASE WHEN aropen_doctype = 'C'
+                              THEN -1
+                              ELSE 1
+                          END,
+           taxpay_distdate,
+           taxpay_tax * CASE WHEN aropen_doctype = 'C'
+                             THEN -1
+                             ELSE 1
+                         END
       FROM aropen
       JOIN (
             SELECT aropen_id AS headid, taxline_id, taxhist_basis, tax_id, tax_taxclass_id,
@@ -950,12 +967,24 @@ BEGIN
      WHERE apopen_posted
        AND apopen_doctype IN ('C', 'D');
 
-    INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+    INSERT INTO taxdetail (taxdetail_taxline_id,
+                           taxdetail_taxable,
+                           taxdetail_tax_id,
                            taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id, 
-                           taxdetail_amount, taxdetail_percent, taxdetail_tax)
-    SELECT taxline_id, taxhist_basis, tax_id,
+                           taxdetail_amount, taxdetail_percent,
+                           taxdetail_tax)
+    SELECT taxline_id,
+           taxhist_basis * CASE WHEN apopen_doctype = 'D'
+                                THEN -1
+                                ELSE 1
+                            END,
+           tax_id,
            tax_taxclass_id, taxhist_sequence, taxhist_basis_tax_id, 
-           taxhist_amount, taxhist_percent, taxhist_tax
+           taxhist_amount, taxhist_percent,
+           taxhist_tax * CASE WHEN apopen_doctype = 'D'
+                              THEN -1
+                              ELSE 1
+                          END
       FROM apopen
       JOIN (
             SELECT apopen_id AS headid, taxline_id, taxhist_basis, tax_id, tax_taxclass_id,
@@ -1023,8 +1052,8 @@ BEGIN
                            taxdetail_tax_paid)
     SELECT taxline_id, taxhist_basis, tax_id,
            tax_taxclass_id, taxhist_sequence, taxhist_basis_tax_id, 
-           taxhist_amount, taxhist_percent, taxhist_tax, taxpay_distdate,
-           taxpay_tax
+           taxhist_amount, taxhist_percent, taxhist_tax * -1, taxpay_distdate,
+           taxpay_tax * -1
       FROM checkhead
       JOIN taxhead ON taxhead_doc_type = 'CK'
                   AND checkhead_id = taxhead_doc_id
