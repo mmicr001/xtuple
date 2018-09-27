@@ -424,7 +424,7 @@ BEGIN
            COALESCE(voheadtax.taxhist_taxtype_id, voitemtax.taxhist_taxtype_id, voitem_taxtype_id),
            qty, amt,
            CASE WHEN type != 'A'
-                THEN COALESCE(voheadtax.taxhist_basis, voitemtax.taxhist_basis, ext)
+                THEN COALESCE(voheadtax.taxhist_basis* -1, voitemtax.taxhist_basis * -1, ext)
             END
       FROM vohead
       JOIN taxhead ON taxhead_doc_type = 'VCH'
@@ -578,8 +578,8 @@ BEGIN
                     cmheadtax.taxhist_taxtype_id, cmitemtax.taxhist_taxtype_id, taxtype_id),
            qty, amt,
            CASE WHEN type != 'A' 
-                THEN COALESCE(cohisttax.taxhist_basis,
-                              cmheadtax.taxhist_basis, cmitemtax.taxhist_basis, ext)
+                THEN COALESCE(cohisttax.taxhist_basis * -1,
+                              cmheadtax.taxhist_basis * -1, cmitemtax.taxhist_basis * -1, ext)
             END
       FROM cmhead
       JOIN taxhead ON taxhead_doc_type = 'CM'
@@ -808,7 +808,10 @@ BEGIN
            COALESCE(taxhist_taxtype_id, getAdjustmentTaxtypeId()),
            qty, amt,
            CASE WHEN type != 'A'
-                THEN COALESCE(taxhist_basis, ext)
+                THEN COALESCE(taxhist_basis * CASE WHEN aropen_doctype = 'C'
+                                                   THEN -1
+                                                   ELSE 1
+                                               END, ext)
             END
       FROM aropen
       JOIN taxhead ON taxhead_doc_type = 'AR'
@@ -936,7 +939,10 @@ BEGIN
            COALESCE(taxhist_taxtype_id, getAdjustmentTaxtypeId()),
            qty, amt,
            CASE WHEN type != 'A'
-                THEN COALESCE(taxhist_basis, ext)
+                THEN COALESCE(taxhist_basis * CASE WHEN apopen_doctype = 'D'
+                                                   THEN -1
+                                                   ELSE 1
+                                               END, ext)
             END
       FROM apopen
       JOIN taxhead ON taxhead_doc_type = 'AP'
@@ -1039,7 +1045,7 @@ BEGIN
            taxhead_id, 'L', checkhead_id,
            COALESCE(taxhist_taxtype_id, checkhead_taxtype_id),
            1.0, checkhead_amount,
-           COALESCE(taxhist_basis, checkhead_amount)
+           checkhead_amount
       FROM checkhead
       JOIN taxhead ON taxhead_doc_type = 'CK'
                   AND checkhead_id = taxhead_doc_id
@@ -1050,7 +1056,7 @@ BEGIN
                            taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id, 
                            taxdetail_amount, taxdetail_percent, taxdetail_tax, taxdetail_paydate,
                            taxdetail_tax_paid)
-    SELECT taxline_id, taxhist_basis, tax_id,
+    SELECT taxline_id, checkhead_amount, tax_id,
            tax_taxclass_id, taxhist_sequence, taxhist_basis_tax_id, 
            taxhist_amount, taxhist_percent, taxhist_tax * -1, taxpay_distdate,
            taxpay_tax * -1
