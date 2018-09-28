@@ -5,6 +5,7 @@ DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,T
 DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
 DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
 DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,JSON,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) CASCADE;
+DROP FUNCTION IF EXISTS saveCntct( INTEGER,TEXT,INTEGER,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL,JSON,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,BOOL) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.savecntct(
     pCntctid integer,
@@ -24,7 +25,8 @@ CREATE OR REPLACE FUNCTION public.savecntct(
     pTitle text,
     pFlag text,
     pOwnerUsername text DEFAULT NULL,
-    pEmailOptIn boolean DEFAULT fetchmetricbool('DefaultEmailOptIn'))
+    pEmailOptIn boolean DEFAULT fetchmetricbool('DefaultEmailOptIn'),
+    pCompany text DEFAULT NULL)
   RETURNS integer AS
 $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
@@ -109,13 +111,13 @@ BEGIN
   IF (_isNew) THEN
     INSERT INTO cntct (
       cntct_number,
-      cntct_addr_id,cntct_first_name,
-      cntct_last_name,cntct_honorific,cntct_initials,
+      cntct_addr_id,cntct_first_name, cntct_last_name,
+      cntct_companyname,cntct_honorific,cntct_initials,
       cntct_active,cntct_email,cntct_email_optin,cntct_webaddr,
       cntct_notes,cntct_title,cntct_middle,cntct_suffix, cntct_owner_username ) 
     VALUES (
       COALESCE(_cntctNumber,fetchNextNumber('ContactNumber')) ,pAddrId,
-      pFirstName,pLastName,pHonorific,
+      pFirstName,pLastName,pCompany,pHonorific,
       pInitials,COALESCE(pActive,true),
       pEmail,COALESCE(pEmailOptIn,fetchmetricbool('DefaultEmailOptIn'), FALSE),pWebAddr,pNotes,pTitle,pMiddleName,pSuffix,pOwnerUsername )
     RETURNING cntct_id INTO _cntctId;
@@ -134,6 +136,7 @@ BEGIN
       cntct_addr_id=COALESCE(pAddrId,cntct_addr_id),
       cntct_first_name=COALESCE(pFirstName,cntct_first_name),
       cntct_last_name=COALESCE(pLastName,cntct_last_name),
+      cntct_companyname=COALESCE(pCompany,cntct_companyname),
       cntct_honorific=COALESCE(pHonorific,cntct_honorific),
       cntct_initials=COALESCE(pInitials,cntct_initials),
       cntct_active=COALESCE(pActive,cntct_active),
