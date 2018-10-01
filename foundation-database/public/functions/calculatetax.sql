@@ -52,7 +52,6 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pLineZip          TEXT[],
                                         pLineCountry      TEXT[],
                                         pTaxPaid          NUMERIC,
-                                        pTaxOwed          NUMERIC,
                                         pRecord           BOOLEAN) RETURNS JSONB AS
 $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
@@ -97,7 +96,7 @@ BEGIN
                                pFreightState, pFreightZip, pFreightCountry, pFreightSplit, pLines,
                                pLineCodes, pLineUpc, pLineDescrips, pQtys, _taxtypes, pAmounts,
                                pUsages, pLineLine1, pLineLine2, pLineLine3, pLineCity, pLineState,
-                               pLineZip, pLineCountry, pTaxPaid, pTaxOwed, pRecord);
+                               pLineZip, pLineCountry, pTaxPaid, pRecord);
   ELSE
     RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,
                         pMiscTaxtypeId, pMiscDiscount, pLines, pTaxTypes, pAmounts);

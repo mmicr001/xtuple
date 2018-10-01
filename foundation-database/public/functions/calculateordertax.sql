@@ -56,7 +56,6 @@ DECLARE
   _linezip TEXT[];
   _linecountry TEXT[];
   _taxpaid NUMERIC;
-  _taxowed NUMERIC;
 
 BEGIN
  
@@ -220,9 +219,7 @@ BEGIN
   END IF;
 
   IF pOrderType = 'VCH' THEN
-    SELECT NULLIF(vohead_tax_charged, 0.0),
-           COALESCE(GREATEST(getOrderTax('VCH', vohead_id) - vohead_tax_charged, 0.0), 0.0)
-      INTO _taxpaid, _taxowed
+    SELECT NULLIF(vohead_tax_charged, 0.0) INTO _taxpaid
       FROM vohead
      WHERE vohead_id = pOrderId;
   END IF;
@@ -235,7 +232,7 @@ BEGIN
                       _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
                       _freightsplit, _linenums, _linecodes, _lineupc, _linedescrips, _qtys,
                       _taxtypeids, _amounts, _usages, _lineline1, _lineline2, _lineline3, _linecity,
-                      _linestate, _linezip, _linecountry, _taxpaid, _taxowed, pRecord);
+                      _linestate, _linezip, _linecountry, _taxpaid, pRecord);
 
 END
 $$ language plpgsql;
