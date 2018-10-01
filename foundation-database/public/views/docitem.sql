@@ -108,7 +108,7 @@ SELECT 'P',
   LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
 UNION ALL
 SELECT 'VCH',
-       voitem_id,
+       MIN(vodist_id),
        voitem_vohead_id,
        poitem_linenumber,
        0,
@@ -124,11 +124,61 @@ SELECT 'VCH',
        voitem_freight,
        voitem_tax_exemption
   FROM voitem
+  JOIN vodist ON voitem_vohead_id = vodist_vohead_id
+             AND voitem_poitem_id = vodist_poitem_id
   JOIN poitem ON voitem_poitem_id = poitem_id
   JOIN pohead ON poitem_pohead_id = pohead_id
   LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
   LEFT OUTER JOIN item ON itemsite_item_id = item_id
   LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
+ GROUP BY voitem_id, voitem_vohead_id, voitem_qty, voitem_taxtype_id, voitem_freight,
+          voitem_tax_exemption, poitem_id, poitem_linenumber, poitem_unitprice, pohead_warehous_id,
+          itemsite_warehous_id, item_id, item_number, item_descrip1, expcat_code, expcat_descrip
+UNION ALL
+SELECT 'VCH',
+       vodist_id,
+       vodist_vohead_id,
+       (SELECT COALESCE(MAX(poitem_linenumber), 0)
+          FROM vohead
+          JOIN pohead ON vohead_pohead_id = pohead_id
+          JOIN poitem ON pohead_id = poitem_pohead_id) +
+       (SELECT row
+          FROM (
+                SELECT vodist_id AS id, row_number() OVER (ORDER BY vodist_id) AS row
+                  FROM vodist
+                 WHERE vodist_vohead_id = vohead_id
+                   AND COALESCE(vodist_poitem_id, -1) = -1
+                   AND (COALESCE(vodist_accnt_id, -1) != -1 OR COALESCE(vodist_expcat_id, -1) != -1)
+               ) rows
+         WHERE id = vodist_id),
+       0,
+       'Misc Distrib. ' ||
+       (SELECT row
+          FROM (
+                SELECT vodist_id AS id, row_number() OVER (ORDER BY vodist_id) AS row
+                  FROM vodist
+                 WHERE vodist_vohead_id = vohead_id
+                   AND COALESCE(vodist_poitem_id, -1) = -1
+                   AND (COALESCE(vodist_accnt_id, -1) != -1 OR COALESCE(vodist_expcat_id, -1) != -1)
+               ) rows
+         WHERE id = vodist_id),
+       NULL,
+       COALESCE(vodist_warehous_id, pohead_warehous_id),
+       COALESCE(formatGLAccount(accnt_id), expcat_code),
+       COALESCE(accnt_descrip, expcat_descrip),
+       1,
+       vodist_amount,
+       vodist_amount,
+       vodist_taxtype_id,
+       0,
+       vodist_tax_exemption
+  FROM vodist
+  JOIN vohead ON vodist_vohead_id = vohead_id
+  LEFT OUTER JOIN pohead ON vohead_pohead_id = pohead_id
+  LEFT OUTER JOIN accnt ON vodist_accnt_id = accnt_id
+  LEFT OUTER JOIN expcat ON vodist_expcat_id = expcat_id
+ WHERE COALESCE(vodist_poitem_id, -1) = -1
+   AND (COALESCE(vodist_accnt_id, -1) != -1 OR COALESCE(vodist_expcat_id, -1) != -1)
 UNION ALL
 SELECT 'CM',
        cmitem_id,
