@@ -31,10 +31,10 @@ BEGIN
   ELSIF pType = 'createtransaction' THEN
     RETURN _base || 'transactions/createoradjust?$include=Details';
   ELSIF pType = 'committransaction' THEN
-    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' ||
+    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/transactions/' ||
            _number || '/commit';
   ELSIF pType = 'voidtransaction' THEN
-    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/' ||
+    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/transactions/' ||
            _number || '/void';
   ELSE
     RETURN _base || 'utilities/ping';

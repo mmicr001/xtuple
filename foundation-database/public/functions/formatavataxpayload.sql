@@ -154,7 +154,7 @@ BEGIN
             "discounted": "true"',
             to_jsonb(plines[_line]),
             to_jsonb(CASE WHEN fetchMetricBool('AvalaraUPC')
-                          THEN COALESCE(plineupc[_line], plinecodes[_line])
+                          THEN COALESCE('UPC:' || plineupc[_line], plinecodes[_line])
                           ELSE plinecodes[_line]
                       END),
             to_jsonb(COALESCE(plinedescrips[_line], '')),
