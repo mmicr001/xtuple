@@ -418,8 +418,8 @@ BEGIN
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
                          taxline_linenumber, taxline_subnumber, taxline_number, taxline_item_number,
                          taxline_taxtype_id, taxline_qty, taxline_amount, taxline_extended)
-    SELECT DISTINCT ON (vohead_id, type, voitem_id)
-           taxhead_id, type, voitem_id,
+    SELECT DISTINCT ON (vohead_id, type, vodist_id)
+           taxhead_id, type, vodist_id,
            poitem_linenumber, 0, number, item_number,
            COALESCE(voheadtax.taxhist_taxtype_id, voitemtax.taxhist_taxtype_id, voitem_taxtype_id),
            qty, amt,
@@ -431,6 +431,7 @@ BEGIN
                   AND vohead_id = taxhead_doc_id
       JOIN (
             SELECT voitem_vohead_id AS headid, 'L' AS type, voitem_id,
+                   MIN(vodist_id) AS vodist_id,
                    poitem_linenumber,
                    formatPoLineNumber(poitem_id) AS number,
                    COALESCE(item_number, expcat_code) AS item_number,
@@ -439,12 +440,17 @@ BEGIN
                    poitem_unitprice AS amt,
                    ROUND(voitem_qty * poitem_unitprice, 2) AS ext
               FROM voitem
+              JOIN vodist ON voitem_vohead_id = vodist_vohead_id
+                         AND voitem_poitem_id = vodist_poitem_id
               JOIN poitem ON voitem_poitem_id = poitem_id
               LEFT OUTER JOIN itemsite ON poitem_itemsite_id = itemsite_id
               LEFT OUTER JOIN item ON itemsite_item_id = item_id
               LEFT OUTER JOIN expcat ON poitem_expcat_id = expcat_id
+             GROUP BY voitem_id, voitem_vohead_id, voitem_taxtype_id, voitem_qty, poitem_id,
+                      poitem_linenumber, poitem_unitprice, item_number, expcat_code
             UNION
             SELECT vohead_id, 'F', NULL,
+                   NULL,
                    1,
                    NULL,
                    '',
@@ -456,6 +462,7 @@ BEGIN
              WHERE vohead_freight != 0.0
             UNION
             SELECT vohead_id, 'A', NULL,
+                   NULL,
                    1,
                    NULL,
                    '',
@@ -493,11 +500,13 @@ BEGIN
                    taxhist_sequence, taxhist_basis_tax_id, taxhist_amount, taxhist_percent,
                    taxhist_tax, taxpay_distdate, taxpay_tax
               FROM voitem
+              JOIN vodist ON voitem_vohead_id = vodist_vohead_id
+                         AND voitem_poitem_id = vodist_poitem_id
               JOIN vohead ON voitem_vohead_id = vohead_id
               JOIN taxhead ON taxhead_doc_type = 'VCH'
                           AND vohead_id = taxhead_doc_id
               JOIN taxline ON taxhead_id = taxline_taxhead_id
-                          AND voitem_id = taxline_line_id
+                          AND vodist_id = taxline_line_id
               JOIN voitemtax ON voitem_id = taxhist_parent_id
               LEFT OUTER JOIN taxpay ON taxhist_id = taxpay_taxhist_id
               JOIN tax ON taxhist_tax_id = tax_id

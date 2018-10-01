@@ -168,16 +168,16 @@ SELECT 'VCH',
        NULL,
        NULL,
        vohead_taxzone_id,
-       pohead_warehous_id,
+       COALESCE(pohead_warehous_id, warehous_id),
        pohead_shipvia,
        NULL,
-       pohead_shiptoaddress1,
-       pohead_shiptoaddress2,
-       pohead_shiptoaddress3,
-       pohead_shiptocity,
-       pohead_shiptostate,
-       pohead_shiptozipcode,
-       pohead_shiptocountry,
+       COALESCE(pohead_shiptoaddress1, addr_line1),
+       COALESCE(pohead_shiptoaddress2, addr_line2),
+       COALESCE(pohead_shiptoaddress3, addr_line3),
+       COALESCE(pohead_shiptocity, addr_city),
+       COALESCE(pohead_shiptostate, addr_state),
+       COALESCE(pohead_shiptozipcode, addr_postalcode),
+       COALESCE(pohead_shiptocountry, addr_country),
        vohead_freight,
        0.0,
        NULL,
@@ -186,7 +186,15 @@ SELECT 'VCH',
        FALSE,
        vohead_tax_exemption
   FROM vohead
-  JOIN pohead ON vohead_pohead_id = pohead_id
+  LEFT OUTER JOIN pohead ON vohead_pohead_id = pohead_id
+  LEFT OUTER JOIN whsinfo ON COALESCE(vohead_pohead_id, -1) = -1
+                         AND (SELECT vodist_warehous_id
+                                FROM vodist
+                               WHERE vodist_vohead_id = vohead_id
+                               ORDER BY vodist_id
+                               LIMIT 1) =
+                             warehous_id
+  LEFT OUTER JOIN addr ON warehous_addr_id = addr_id
 UNION ALL
 SELECT 'CM',
        cmhead_id,
