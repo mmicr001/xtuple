@@ -111,7 +111,7 @@ BEGIN
                            taxdetail_tax_owed)
     SELECT _taxlineid, (value->>'taxableAmount')::NUMERIC * _return, (value->>'taxName'),
            (value->>'rate')::NUMERIC, (value->>'taxCalculated')::NUMERIC * _return,
-           (value->>'tax')::NUMERIC * _return
+           ((value->>'taxCalculated')::NUMERIC - (value->>'tax')::NUMERIC) * _return
       FROM jsonb_array_elements(_r.value->'details');
   END LOOP;
 
