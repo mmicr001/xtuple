@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION calculateOrderTax(pOrderType TEXT, pOrderId INTEGER, 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _precision INTEGER := 2;
+  _tmp TEXT;
   _number TEXT;
   _taxzoneid INTEGER;
   _fromline1 TEXT;
@@ -19,6 +20,7 @@ DECLARE
   _tostate TEXT;
   _tozip TEXT;
   _tocountry TEXT;
+  _singlelocation BOOLEAN := FALSE;
   _cust TEXT;
   _usage TEXT;
   _taxreg TEXT;
@@ -102,6 +104,36 @@ BEGIN
             dochead_misc_discount, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
             addr_postalcode, addr_country, cust_number, cust_tax_exemption, prospect_number,
             vend_number, vend_tax_exemption, taxreg_number;
+
+  IF pOrderType IN ('P', 'VCH') THEN
+    _tmp := _fromline1;
+    _fromline1 := _toline1;
+    _toline1 := _tmp;
+    _tmp := _fromline2;
+    _fromline2 := _toline2;
+    _toline2 := _tmp;
+    _tmp := _fromline3;
+    _fromline3 := _toline3;
+    _toline3 := _tmp;
+    _tmp := _fromcity;
+    _fromcity := _tocity;
+    _tocity := _tmp;
+    _tmp := _fromstate;
+    _fromstate := _tostate;
+    _tostate := _tmp;
+    _tmp := _fromzip;
+    _fromzip := _tozip;
+    _tozip := _tmp;
+    _tmp := _fromcountry;
+    _fromcountry := _tocountry;
+    _tocountry := _tmp;
+  END IF;
+
+  IF pOrderType = 'VCH' AND (SELECT COALESCE(vohead_pohead_id, -1) = -1
+                               FROM vohead
+                              WHERE vohead_id = pOrderId) THEN
+    _singlelocation := TRUE;
+  END IF;
 
   SELECT COALESCE(array_agg(addr_line1), ARRAY[_toline1]),
          COALESCE(array_agg(addr_line2), ARRAY[_toline2]),
@@ -226,13 +258,13 @@ BEGIN
 
   RETURN calculateTax(pOrderType, _number, _taxzoneid, _fromline1, _fromline2, _fromline3,
                       _fromcity, _fromstate, _fromzip, _fromcountry, _toline1, _toline2, _toline3,
-                      _tocity, _tostate, _tozip, _tocountry, _cust, _usage, _taxreg, _currid,
-                      _docdate, _origdate, _origorder, _freight, _misc, _miscdescrip,
-                      _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1, _freightline2,
-                      _freightline3, _freightcity, _freightstate, _freightzip, _freightcountry,
-                      _freightsplit, _linenums, _linecodes, _lineupc, _linedescrips, _qtys,
-                      _taxtypeids, _amounts, _usages, _lineline1, _lineline2, _lineline3, _linecity,
-                      _linestate, _linezip, _linecountry, _taxpaid, pRecord);
+                      _tocity, _tostate, _tozip, _tocountry, _singlelocation, _cust, _usage,
+                      _taxreg, _currid, _docdate, _origdate, _origorder, _freight, _misc,
+                      _miscdescrip, _freighttaxtype, _misctaxtype, _miscdiscount, _freightline1,
+                      _freightline2, _freightline3, _freightcity, _freightstate, _freightzip,
+                      _freightcountry, _freightsplit, _linenums, _linecodes, _lineupc,
+                      _linedescrips, _qtys, _taxtypeids, _amounts, _usages, _lineline1, _lineline2,
+                      _lineline3, _linecity, _linestate, _linezip, _linecountry, _taxpaid, pRecord);
 
 END
 $$ language plpgsql;
