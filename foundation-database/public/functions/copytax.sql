@@ -122,6 +122,15 @@ BEGIN
          AND taxhead_doc_id = pTargetHeadId
          AND taxdetail_taxline_id = _r.taxline_id;
     END LOOP;
+
+    UPDATE taxhead
+       SET taxhead_valid = src.taxhead_valid
+      FROM taxline
+      JOIN taxhead src ON taxline_taxhead_id = src.taxhead_id
+     WHERE src.taxhead_doc_type = pSourceType
+       AND taxline_line_id = pSourceId
+       AND taxhead.taxhead_doc_type = pTargetType
+       AND taxhead.taxhead_doc_id = pTargetHeadId;
   END IF;
 
   RETURN TRUE;
