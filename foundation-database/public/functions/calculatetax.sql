@@ -15,6 +15,7 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pToState          TEXT,
                                         pToZip            TEXT,
                                         pToCountry        TEXT,
+                                        pSingleLocation   BOOLEAN,
                                         pCust             TEXT,
                                         pUsage            TEXT,
                                         pTaxReg           TEXT,
@@ -89,14 +90,14 @@ BEGIN
   IF _service = 'A' THEN
     RETURN formatAvaTaxPayload(pOrderType, pOrderNumber, pFromLine1, pFromLine2, pFromLine3,
                                pFromCity, pFromState, pFromZip, pFromCountry, pToLine1, pToLine2,
-                               pToLine3, pToCity, pToState, pToZip, pToCountry, pCust, pUsage,
-                               pTaxReg, pCurrId, pDocDate, pOrigDate, pOrigOrder, pFreight, pMisc,
-                               pMiscDescrip, _freighttaxtype, _misctaxtype, pMiscDiscount,
-                               pFreightLine1, pFreightLine2, pFreightLine3, pFreightCity,
-                               pFreightState, pFreightZip, pFreightCountry, pFreightSplit, pLines,
-                               pLineCodes, pLineUpc, pLineDescrips, pQtys, _taxtypes, pAmounts,
-                               pUsages, pLineLine1, pLineLine2, pLineLine3, pLineCity, pLineState,
-                               pLineZip, pLineCountry, pTaxPaid, pRecord);
+                               pToLine3, pToCity, pToState, pToZip, pToCountry, pSingleLocation,
+                               pCust, pUsage, pTaxReg, pCurrId, pDocDate, pOrigDate, pOrigOrder,
+                               pFreight, pMisc, pMiscDescrip, _freighttaxtype, _misctaxtype,
+                               pMiscDiscount, pFreightLine1, pFreightLine2, pFreightLine3,
+                               pFreightCity, pFreightState, pFreightZip, pFreightCountry,
+                               pFreightSplit, pLines, pLineCodes, pLineUpc, pLineDescrips, pQtys,
+                               _taxtypes, pAmounts, pUsages, pLineLine1, pLineLine2, pLineLine3,
+                               pLineCity, pLineState, pLineZip, pLineCountry, pTaxPaid, pRecord);
   ELSE
     RETURN calculateTax(pTaxZoneId, pCurrId, pDocDate, pFreight, pMisc, pFreightTaxtypeId,
                         pMiscTaxtypeId, pMiscDiscount, pLines, pTaxTypes, pAmounts);
