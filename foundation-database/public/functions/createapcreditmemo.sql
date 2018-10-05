@@ -257,7 +257,7 @@ BEGIN
 
   UPDATE taxhead SET taxhead_journalnumber = _journalNumber
   WHERE taxhead_doc_type = 'AP'
-    AND taxhead_doc_id = _appopenid;
+    AND taxhead_doc_id = _apopenid;
 
   -- Credit the Prepaid account for the basis amount
   SELECT insertIntoGLSeries ( _glSequence, 'A/P', 'CM',
