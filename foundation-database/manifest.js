@@ -1514,7 +1514,6 @@
     "public/tables/metasql/creditMemo-editlist.mql",
     "public/tables/metasql/creditMemoItems-list.mql",
     "public/tables/metasql/creditMemoCreditCards-detail.mql",
-    "public/tables/metasql/crm_strictcountrycheck.mql",
     "public/tables/metasql/crmaccountmerge-pickdatasources.mql",
     "public/tables/metasql/crmaccountmerge-checkentity.mql",
     "public/tables/metasql/crmaccountmerge-wip.mql",

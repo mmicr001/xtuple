@@ -58,7 +58,7 @@ WHERE true
  AND addr_state ~* <? value("state") ?>
 <? endif ?>
 <? if exists("country") ?>
- AND addr_country = (SELECT country_name FROM country WHERE country_id=<? value("country") ?>)
+ AND addr_country = (SELECT country_abbr FROM country WHERE country_id=<? value("country") ?>)
 <? endif ?>
 <? if exists("postalcode") ?>
  AND addr_postalcode ~* <? value("postalcode") ?>
@@ -85,7 +85,7 @@ WHERE true
  AND addr_state ~ <? value("state") ?>
 <? endif ?>
 <? if exists("country") ?>
- AND addr_country = (SELECT country_name FROM country WHERE country_id=<? value("country") ?>)
+ AND addr_country = (SELECT country_abbr FROM country WHERE country_id=<? value("country") ?>)
 <? endif ?>
 <? if exists("postalcode") ?>
  AND addr_postalcode ~ <? value("postalcode") ?>

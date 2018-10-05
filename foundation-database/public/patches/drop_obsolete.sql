@@ -28,3 +28,6 @@ DROP FUNCTION IF EXISTS calcVoucherFreight(INTEGER);
 DROP FUNCTION IF EXISTS calcVoucherTax(INTEGER);
 DROP FUNCTION IF EXISTS calcVoucherAmt(INTEGER);
 DROP FUNCTION IF EXISTS _vodistBeforeTrigger() CASCADE;
+
+DELETE FROM pkghead
+ WHERE pkghead_name = 'fixcountry';
