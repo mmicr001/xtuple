@@ -58,7 +58,7 @@ BEGIN
                         taxhead_date, taxhead_curr_id, taxhead_curr_rate, taxhead_taxzone_id,
                         taxhead_distdate)
    SELECT 'P', pDocSource, pMemoid, _custid,
-          pDate, pCurr, pCurrRate, pTaxZone,
+          pDate, pCurr, COALESCE(pCurrRate, currRate(pCurr, pDate)), NULLIF(pTaxZone, -1),
           pDate
    RETURNING taxhead_id INTO _taxheadid;
 
