@@ -689,7 +689,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>curr_abbr</column>
+     <column>curr</column>
     </data>
    </field>
    <field>
@@ -708,7 +708,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>f_taxlocal</column>
+     <column>f_salestaxlocal</column>
     </data>
    </field>
    <field>
@@ -746,7 +746,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>description</column>
+     <column>item_descrip</column>
     </data>
    </field>
    <field>
@@ -784,7 +784,7 @@
     <vcenter/>
     <data>
      <query>detail</query>
-     <column>f_taxbase</column>
+     <column>f_salestaxbase</column>
     </data>
    </field>
    <field>
@@ -925,7 +925,7 @@
    <vcenter/>
    <data>
     <query>detail</query>
-    <column>taxbase</column>
+    <column>salestaxbase</column>
    </data>
    <format builtin="true">money</format>
    <tracktotal/>

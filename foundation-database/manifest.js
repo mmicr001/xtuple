@@ -1669,6 +1669,7 @@
     "public/tables/metasql/taxAuthorities-detail.mql",
     "public/tables/metasql/taxBreakdown-detail.mql",
     "public/tables/metasql/taxHistory-detail.mql",
+    "public/tables/metasql/taxHistory-summary.mql",
     "public/tables/metasql/taxReturn-detail.mql",
     "public/tables/metasql/timePhasedAvailability-detail.mql",
     "public/tables/metasql/timePhasedBookings-detail.mql",
