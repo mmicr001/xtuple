@@ -1,0 +1,91 @@
+-- Group: taxHistory
+-- Name: summary
+-- Notes: 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT <? literal("groupBy") ?>,
+       <? literal("groupBy") ?> AS group,
+       description,
+       SUM(CASE WHEN sales THEN extended END) AS salesbase,
+       formatMoney(SUM(CASE WHEN sales THEN extended END)) AS f_salesbase,
+       SUM(CASE WHEN sales THEN taxbase END) AS salestaxbase,
+       formatMoney(SUM(CASE WHEN sales THEN taxbase END)) AS f_salestaxbase,
+       SUM(CASE WHEN purchase THEN extended END) AS purchasebase,
+       formatMoney(SUM(CASE WHEN purchase THEN extended END)) AS f_purchasebase,
+       SUM(CASE WHEN purchase THEN taxbase END) AS purchasetaxbase,
+       formatMoney(SUM(CASE WHEN purchase THEN taxbase END)) AS f_purchasetaxbase,
+       SUM(CASE WHEN sales THEN taxbase END) -
+       SUM(CASE WHEN purchase THEN taxbase END) AS nettaxbase,
+       formatMoney(SUM(CASE WHEN sales THEN taxbase END) - SUM(CASE WHEN purchase THEN taxbase END))
+       AS f_nettaxbase
+  FROM (
+        SELECT taxhead_doc_type IN ('INV', 'CM', 'AR', 'CR') AS sales,
+               taxhead_doc_type IN ('VCH', 'AP', 'CK') AS purchase,
+               <? literal("groupBy") ?>, <? literal("groupBy") ?>_descrip AS description,
+               taxline_extended / taxhead_curr_rate AS extended,
+               SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate) AS taxbase
+          FROM (
+                SELECT taxhead_doc_type, taxhead_status, taxhead_date, taxhead_distdate,
+                       taxhead_curr_rate, taxline_id, taxline_extended,
+                       taxdetail_paydate, taxdetail_tax_paid, taxdetail_tax,
+                       COALESCE(taxzone_code, <? value("none") ?>) AS taxzone, taxzone_descrip, 
+                       COALESCE(taxtype_name, <? value("none") ?>) AS taxtype, taxtype_descrip,
+                       COALESCE(taxdetail_tax_code, tax_code) AS tax, tax_descrip,
+                       COALESCE(taxclass_code,<? value("none") ?>) AS taxclass, taxclass_descrip,
+                       COALESCE(taxauth_code,<? value("none") ?>) AS taxauth,
+                       taxauth_name AS taxauth_descrip
+                  FROM taxhead
+                  JOIN taxline ON taxhead_id = taxline_taxhead_id
+                  JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                  LEFT OUTER JOIN taxzone ON taxhead_taxzone_id = taxzone_id
+                  JOIN taxtype ON taxline_taxtype_id = taxtype_id
+                  LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+                  LEFT OUTER JOIN taxclass ON taxdetail_taxclass_id = taxclass_id
+                  LEFT OUTER JOIN taxauth ON tax_taxauth_id = taxauth_id
+               ) details
+         WHERE taxhead_status = 'P'
+           AND taxhead_doc_type IN
+               (
+        <? if exists("showSales") ?>
+                'INV', 'CM', 'AR', 'CR'
+        <? endif ?>
+        <? if exists("showSales") ?>
+        <? if exists("showPurchases") ?>
+                ,
+        <? endif ?>
+        <? endif ?>
+        <? if exists("showPurchases") ?>
+                'VCH', 'AP', 'CK'
+        <? endif ?>
+               )
+        <? if exists("distDate") ?>
+           AND taxhead_distdate BETWEEN <? value("startDate") ?>
+                                    AND <? value("endDate") ?>
+        <? else ?>
+           AND taxhead_date BETWEEN <? value("startDate") ?>
+                                AND <? value("endDate") ?>
+        <? endif ?>
+        <? if exists("taxzone_id") ?>
+           AND taxhead_taxzone_id = <? value("taxzone_id") ?>
+        <? endif ?>
+        <? if exists("taxtype_id") ?>
+           AND taxline_taxtype_id = <? value("taxtype_id") ?>
+        <? endif ?>
+        <? if exists("tax_id") ?>
+           AND tax_id = <? value("tax_id") ?>
+        <? endif ?>
+        <? if exists("taxclass_id") ?>
+           AND taxclass_id = <? value("taxclass_id") ?>
+        <? endif ?>
+        <? if exists("taxauth_id") ?>
+           AND taxauth_id = <? value("taxauth_id") ?>
+        <? endif ?>
+        <? if exists("cashbasedtax") ?>
+           AND taxdetail_paydate IS NOT NULL
+        <? endif ?>
+         GROUP BY taxhead_doc_type, taxhead_curr_rate, taxline_id, taxline_extended,
+                  <? literal("groupBy") ?>, <? literal("groupBy") ?>_descrip
+        ) data
+ GROUP BY <? literal("groupBy") ?>, description
+ ORDER BY <? literal("groupBy") ?>;
