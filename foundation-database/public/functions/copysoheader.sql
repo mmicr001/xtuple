@@ -3,6 +3,11 @@ CREATE OR REPLACE FUNCTION copysoheader(psoheadid integer, pcustomer integer, ps
 $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
+
+--This procedure will ONLY copy the information in the cohead table.
+--It will NOT copy any associated order items. 
+--Sales Orders must have at least 1 associated item to be valid.
+--If you call this procedure, you must associate at least 1 item afterwards.
 DECLARE
   _soheadid INTEGER;
   _customer RECORD;
