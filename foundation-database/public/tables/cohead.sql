@@ -81,6 +81,7 @@ SELECT
   xt.add_column('cohead', 'cohead_status',          'CHARACTER(1)', $$DEFAULT 'O' NOT NULL$$, 'public'),
   xt.add_column('cohead', 'cohead_saletype_id',          'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public');
+  xt.add_column('cohead', 'cohead_recurring_cohead_id',  'INTEGER', NULL, 'public');
 
 SELECT
   xt.add_constraint('cohead', 'cohead_pkey',  'PRIMARY KEY (cohead_id)', 'public'),
@@ -149,3 +150,6 @@ COMMENT ON TABLE cohead IS 'Sales Order header information';
 
 COMMENT ON COLUMN cohead.cohead_saletype_id IS 'Associated sale type for sales order.';
 COMMENT ON COLUMN cohead.cohead_shipzone_id IS 'Associated shipping zone for sales order.';
+COMMENT ON COLUMN cohead.cohead_recurring_cohead_id IS 'The first cohead record in the series if '
+                  'this is a recurring order. If the cohead_recurring_cohead_id is the same '
+                  'as the cohead_id, this record is the first in the series.';
