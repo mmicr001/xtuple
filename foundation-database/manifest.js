@@ -1945,6 +1945,7 @@
     "public/patches/populate_taxauth.sql",
     "public/patches/populate_evnttype.sql",
     "public/patches/populate_mime_type.sql",
+    "public/patches/populate_recur.sql",
     "public/patches/rebuildinvbal.sql",
     "public/patches/remove_other_credit_card_fundstype.sql",
     "public/patches/migrateccpay.sql",
