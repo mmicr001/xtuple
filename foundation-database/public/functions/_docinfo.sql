@@ -97,9 +97,7 @@ BEGIN
                 WHERE NULLIF(value::TEXT, 'null') IS NOT NULL
       LOOP
         _s := '{'||_r.key||'}';
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
+        RETURN QUERY SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE);
       END LOOP;
     END IF;
 
@@ -113,9 +111,7 @@ BEGIN
     _id := (_crmacct#>>_s)::INTEGER;
    
     IF _id IS NOT NULL THEN
-      FOR _row IN SELECT * FROM _docinfo(_id, 'CRMA', TRUE) LOOP
-        RETURN NEXT _row;
-      END LOOP;
+      RETURN QUERY SELECT * FROM _docinfo(_id, 'CRMA', TRUE);
     END IF;
   END IF;
 
