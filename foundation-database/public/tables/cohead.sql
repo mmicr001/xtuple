@@ -80,7 +80,7 @@ SELECT
   xt.add_column('cohead', 'cohead_ophead_id',            'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_status',          'CHARACTER(1)', $$DEFAULT 'O' NOT NULL$$, 'public'),
   xt.add_column('cohead', 'cohead_saletype_id',          'INTEGER', NULL, 'public'),
-  xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public');
+  xt.add_column('cohead', 'cohead_shipzone_id',          'INTEGER', NULL, 'public'),
   xt.add_column('cohead', 'cohead_recurring_cohead_id',  'INTEGER', NULL, 'public');
 
 SELECT
