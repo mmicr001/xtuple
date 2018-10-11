@@ -95,7 +95,8 @@ BEGIN
     cohead_ophead_id,
     cohead_status,
     cohead_saletype_id,
-    cohead_shipzone_id )
+    cohead_shipzone_id,
+    cohead_recurring_cohead_id )
   SELECT
     fetchSoNumber(),
     cohead_cust_id,
@@ -173,7 +174,8 @@ BEGIN
     cohead_ophead_id,
     cohead_status,
     cohead_saletype_id,
-    cohead_shipzone_id
+    cohead_shipzone_id,
+    cohead_recurring_cohead_id
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -276,7 +278,8 @@ BEGIN
     cohead_ophead_id,
     cohead_status,
     cohead_saletype_id,
-    cohead_shipzone_id )
+    cohead_shipzone_id,
+    cohead_recurring_cohead_id )
    SELECT
     fetchSoNumber(),
     pCustomer,
@@ -352,7 +355,8 @@ BEGIN
     cohead_ophead_id,
     'O',
     cohead_saletype_id,
-    cohead_shipzone_id
+    cohead_shipzone_id,
+    cohead_recurring_cohead_id
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
