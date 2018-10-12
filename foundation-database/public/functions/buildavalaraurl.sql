@@ -18,7 +18,7 @@ BEGIN
 
   _base := _base || 'api/v2/';
 
-  SELECT dochead_number
+  SELECT pOrderType || '-' || dochead_number
     INTO _number
     FROM dochead
    WHERE dochead_type = pOrderType
@@ -36,6 +36,9 @@ BEGIN
   ELSIF pType = 'voidtransaction' THEN
     RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/transactions/' ||
            _number || '/void';
+  ELSIF pType = 'refundtransaction' THEN
+    RETURN _base || 'companies/' || fetchMetricText('AvalaraCompany') || '/transactions/' ||
+           _number || '/refund';
   ELSE
     RETURN _base || 'utilities/ping';
   END IF;

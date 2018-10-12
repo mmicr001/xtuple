@@ -819,6 +819,7 @@
     "public/functions/recallshipment.sql",
     "public/functions/recallwo.sql",
     "public/functions/receipts.sql",
+    "public/functions/refundtax.sql",
     "public/functions/releasenumber.sql",
     "public/functions/releasepr.sql",
     "public/functions/releasepurchaseorder.sql",
