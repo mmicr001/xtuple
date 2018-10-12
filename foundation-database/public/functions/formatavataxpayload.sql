@@ -154,7 +154,7 @@ BEGIN
     "description": %s,
     "discount": %s,',
     to_jsonb(_transactionType),
-    to_jsonb(pordernumber),
+    to_jsonb(pordertype || '-' || pordernumber),
     to_jsonb(fetchmetrictext('AvalaraCompany')),
     to_jsonb(pdocdate),
     to_jsonb(pCust),
