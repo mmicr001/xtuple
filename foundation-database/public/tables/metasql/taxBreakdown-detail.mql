@@ -22,9 +22,20 @@ SELECT NULL::INTEGER AS taxdetail_id,
        COALESCE(MAX(taxdetail_taxable), 0.0) AS taxdetail_taxable,
        NULL::TEXT AS tax_code, NULL::TEXT AS tax_descrip, NULL::INTEGER AS taxdetail_sequence,
        COALESCE(SUM(taxdetail_amount), 0.0) AS taxdetail_amount,
-       COALESCE(SUM(taxdetail_percent), 0.0) * 100 AS taxdetail_percent,
+       COALESCE(SUM(taxdetail_percent), 0.0) AS taxdetail_percent,
        COALESCE(SUM(taxdetail_tax), 0.0) AS taxdetail_tax,
        taxline_extended + COALESCE(SUM(taxdetail_tax), 0.0) AS total,
+       'qty' AS taxline_qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('Q', 'S', 'COB', 'INV', 'RA', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type IN ('P', 'VCH') THEN 'purchprice'
+            ELSE 'curr'
+        END AS taxline_amount_xtnumericrole,
+       'extprice' AS taxline_extended_xtnumericrole,
+       'curr' AS taxdetail_taxable_xtnumericrole,
+       'curr' AS taxdetail_amount_xtnumericrole,
+       'percent' AS taxdetail_percent_xtnumericrole,
+       'curr' AS taxdetail_tax_xtnumericrole,
+       'curr' AS total_xtnumericrole,
        0 AS xtindentrole
   FROM taxhead
   JOIN taxline ON taxhead_id = taxline_taxhead_id
@@ -37,7 +48,7 @@ SELECT NULL::INTEGER AS taxdetail_id,
 <? endif ?>
  GROUP BY taxline_id, taxline_line_type, taxline_linenumber, taxline_subnumber,
           taxline_number, taxline_item_number,
-          taxline_qty, taxline_amount, taxline_extended
+          taxline_qty, taxline_amount, taxline_extended, taxhead_doc_type
 UNION
 SELECT taxdetail_id,
        CASE taxline_line_type WHEN 'L' THEN 1
@@ -52,9 +63,20 @@ SELECT taxdetail_id,
        taxdetail_taxable,
        COALESCE(taxdetail_tax_code, tax_code), tax_descrip, taxdetail_sequence,
        taxdetail_amount,
-       taxdetail_percent * 100,
+       taxdetail_percent,
        taxdetail_tax,
        NULL,
+       'qty' AS taxline_qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('Q', 'S', 'COB', 'INV', 'RA', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type IN ('P', 'VCH') THEN 'purchprice'
+            ELSE 'curr'
+        END AS taxline_amount_xtnumericrole,
+       'extprice' AS taxline_extended_xtnumericrole,
+       'curr' AS taxdetail_taxable_xtnumericrole,
+       'curr' AS taxdetail_amount_xtnumericrole,
+       'percent' AS taxdetail_percent_xtnumericrole,
+       'curr' AS taxdetail_tax_xtnumericrole,
+       'curr' AS total_xtnumericrole,
        1
   FROM taxhead
   JOIN taxline ON taxhead_id = taxline_taxhead_id
@@ -81,13 +103,25 @@ SELECT NULL,
             THEN COALESCE(MAX(taxline_percent), 0.0)
             ELSE (COALESCE(SUM(taxline_tax), 0.0) - COALESCE(SUM(taxline_amount), 0.0)) /
                  COALESCE(NULLIF(SUM(taxline_taxable), 0.0), 1.0)
-        END * 100,
+        END,
        COALESCE(SUM(taxline_tax), 0.0),
        COALESCE(SUM(taxline_extended), 0.0) + COALESCE(SUM(taxline_tax), 0.0),
+       'qty' AS taxline_qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('Q', 'S', 'COB', 'INV', 'RA', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type IN ('P', 'VCH') THEN 'purchprice'
+            ELSE 'curr'
+        END AS taxline_amount_xtnumericrole,
+       'extprice' AS taxline_extended_xtnumericrole,
+       'curr' AS taxdetail_taxable_xtnumericrole,
+       'curr' AS taxdetail_amount_xtnumericrole,
+       'percent' AS taxdetail_percent_xtnumericrole,
+       'curr' AS taxdetail_tax_xtnumericrole,
+       'curr' AS total_xtnumericrole,
        0
   FROM
   (
-   SELECT taxline_extended,
+   SELECT taxhead_doc_type,
+          taxline_extended,
           COALESCE(MAX(taxdetail_taxable), 0.0) AS taxline_taxable,
           COALESCE(SUM(taxdetail_amount), 0.0) AS taxline_amount,
           COALESCE(SUM(taxdetail_percent), 0.0) AS taxline_percent,
@@ -97,8 +131,9 @@ SELECT NULL,
      LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
     WHERE taxhead_doc_type = <? value("doctype") ?>
       AND taxhead_doc_id = <? value("dochead_id") ?>
-    GROUP BY taxline_id, taxline_extended
+    GROUP BY taxline_id, taxline_extended, taxhead_doc_type
   ) lines
+ GROUP BY taxhead_doc_type
 <? endif ?>
 ORDER BY linetype, taxline_linenumber, taxline_subnumber, taxline_number, xtindentrole,
          taxdetail_sequence, tax_code;

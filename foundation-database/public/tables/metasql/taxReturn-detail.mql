@@ -33,34 +33,34 @@ SELECT taxauth,
        COALESCE(SUM(CASE WHEN purchase THEN taxbase END), 0.0) AS nettaxbase,
        formatMoney(COALESCE(SUM(CASE WHEN sales THEN taxbase END), 0.0) -
                    COALESCE(SUM(CASE WHEN purchase THEN taxbase END), 0.0))
-       AS f_nettaxbase
+       AS f_nettaxbase,
+       'curr' AS salesbase_xtnumericrole,
+       'curr' AS salestaxbase_xtnumericrole,
+       'curr' AS reversechargebase_xtnumericrole,
+       'curr' AS reversechargetaxbase_xtnumericrole,
+       'curr' AS purchasebase_xtnumericrole,
+       'curr' AS purchasetax_xtnumericrole,
+       'curr' AS nettaxbase_xtnumericrole,
+       0 AS salesbase_xttotalrole,
+       0 AS salestaxbase_xttotalrole,
+       0 AS reversechargebase_xttotalrole,
+       0 AS reversechargetaxbase_xttotalrole,
+       0 AS purchasebase_xttotalrole,
+       0 AS purchasetaxbase_xttotalrole,
+       0 AS nettaxbase_xttotalrole
   FROM (
         SELECT taxhead_doc_type IN ('INV', 'CM', 'AR', 'CR') AS sales,
                taxhead_doc_type IN ('VCH', 'AP', 'CK') AS purchase,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) < 0 AS reverse,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) = 0 AS exempt,
                taxauth_code AS taxauth, taxauth_name AS description,
-               taxline_extended / taxhead_curr_rate *
-               CASE WHEN taxhead_doc_type = 'CM' OR
-                         taxhead_doc_type = 'AR' AND aropen_doctype = 'C' OR
-                         taxhead_doc_type = 'AP' AND apopen_doctype = 'C'
-                    THEN -1
-                    ELSE 1
-                END AS extended,
+               taxline_extended / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+               AS extended,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate) *
-               CASE WHEN taxhead_doc_type = 'CM' OR
-                         taxhead_doc_type = 'AR' AND aropen_doctype = 'C' OR
-                         taxhead_doc_type = 'AP' AND apopen_doctype = 'C'
-                    THEN -1
-                    ELSE 1
-                END AS taxbase
+               docSense(taxhead_doc_type, taxhead_doc_id) AS taxbase
           FROM taxhead
           JOIN taxline ON taxhead_id = taxline_taxhead_id
           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
-          LEFT OUTER JOIN aropen ON taxhead_doc_type = 'AR'
-                                AND taxhead_doc_id = aropen_id
-          LEFT OUTER JOIN apopen ON taxhead_doc_type = 'AP'
-                                AND taxhead_doc_id = apopen_id
           LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
           LEFT OUTER JOIN taxauth ON tax_taxauth_id = taxauth_id
          WHERE taxhead_status = 'P'
@@ -75,8 +75,8 @@ SELECT taxauth,
         <? if exists("cashbasedtax") ?>
            AND taxdetail_paydate IS NOT NULL
         <? endif ?>
-         GROUP BY taxhead_doc_type, taxhead_curr_rate, taxline_id, taxline_extended,
-                  taxauth_code, taxauth_name, aropen_doctype, apopen_doctype
+         GROUP BY taxhead_doc_type, taxhead_doc_id, taxhead_curr_rate, taxline_id, taxline_extended,
+                  taxauth_code, taxauth_name
         ) data
  GROUP BY taxauth, description, sortorder, source
  ORDER BY sortorder, source;

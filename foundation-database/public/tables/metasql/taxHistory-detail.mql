@@ -35,10 +35,12 @@ SELECT taxhead_date, dochead_number,
         END AS service,
        COALESCE(taxzone_code, <? value("none") ?>) AS taxzone, taxzone_descrip,
        taxhead_exemption_code AS exemption,
-       taxhead_discount AS discountlocal,
-       taxhead_discount / taxhead_curr_rate AS discountbase,
-       taxhead_tax_paid AS taxpaidlocal,
-       taxhead_tax_paid / taxhead_curr_rate AS taxpaidbase,
+       taxhead_discount * docSense(taxhead_doc_type, taxhead_doc_id) AS discountlocal,
+       taxhead_discount / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS discountbase,
+       taxhead_tax_paid * docSense(taxhead_doc_type, taxhead_doc_id) AS taxpaidlocal,
+       taxhead_tax_paid / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS taxpaidbase,
        taxhead_journalnumber AS journalnumber,
        0 AS linetype,
        NULL AS taxline_number,
@@ -47,13 +49,16 @@ SELECT taxhead_date, dochead_number,
        NULL AS item_number, NULL AS item_descrip,
        NULL AS taxtype, NULL AS taxtype_descrip,
        NULL AS qty,
-       NULL AS amount,
+       NULL AS amountlocal,
+       NULL AS amountbase,
        COALESCE((SELECT SUM(taxline_extended)
                    FROM taxline
-                  WHERE taxline_taxhead_id = taxhead_id), 0.0) AS extendedlocal,
+                  WHERE taxline_taxhead_id = taxhead_id), 0.0) *
+       docSense(taxhead_doc_type, taxhead_doc_id) AS extendedlocal,
        COALESCE((SELECT SUM(taxline_extended)
                    FROM taxline
-                  WHERE taxline_taxhead_id = taxhead_id), 0.0) / taxhead_curr_rate AS extendedbase,
+                  WHERE taxline_taxhead_id = taxhead_id), 0.0) / taxhead_curr_rate *
+       docSense(taxhead_doc_type, taxhead_doc_id) AS extendedbase,
        NULL::DATE AS distdate,
        NULL AS taxablelocal,
        NULL AS taxablebase,
@@ -62,16 +67,55 @@ SELECT taxhead_date, dochead_number,
        NULL AS taxauth, NULL AS taxauth_descrip,
        NULL::INTEGER AS taxdetail_sequence,
        NULL AS basistax,
-       SUM(taxdetail_amount) AS flatlocal,
-       SUM(taxdetail_amount) / taxhead_curr_rate AS flatbase,
+       NULL AS flatlocal,
+       NULL AS flatbase,
        NULL AS percent,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) AS salestaxlocal,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate AS salestaxbase,
-       SUM(taxdetail_tax_owed) AS usetaxlocal,
-       SUM(taxdetail_tax_owed) AS usetaxbase,
-       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax))) AS f_salestaxlocal,
-       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate)
-       AS f_salestaxbase,
+       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS salestaxlocal,
+       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
+       SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
+       SUM(taxdetail_tax_owed) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS usetaxbase,
+       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
+                   docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
+       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+                   docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxbase,
+       'uomratio' AS rate_xtnumericrole,
+       'curr' AS discountlocal_xtnumericrole,
+       'curr' AS discountbase_xtnumericrole,
+       'curr' AS taxpaidlocal_xtnumericrole,
+       'curr' AS taxpaidbase_xtnumericrole,
+       'qty' AS qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountlocal_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountbase_xtnumericrole,
+       'extprice' AS extendedlocal_xtnumericrole,
+       'extprice' AS extendedbase_xtnumericrole,
+       'curr' AS taxablelocal_xtnumericrole,
+       'curr' AS taxablebase_xtnumericrole,
+       'curr' AS flatlocal_xtnumericrole,
+       'curr' AS flatbase_xtnumericrole,
+       'percent' AS percent_xtnumericrole,
+       'curr' AS salestaxlocal_xtnumericrole,
+       'curr' AS salestaxbase_xtnumericrole,
+       'curr' AS usetaxlocal_xtnumericrole,
+       'curr' AS usetaxbase_xtnumericrole,
+       0 AS discountlocal_xttotalrole,
+       0 AS discountbase_xttotalrole,
+       0 AS taxpaidlocal_xttotalrole,
+       0 AS taxpaidbase_xttotalrole,
+       0 AS extendedlocal_xttotalrole,
+       0 AS extendedbase_xttotalrole,
+       0 AS salestaxlocal_xttotalrole,
+       0 AS salestaxbase_xttotalrole,
+       0 AS usetaxlocal_xttotalrole,
+       0 AS usetaxbase_xttotalrole,
        0 AS xtindentrole
   FROM taxhead
   LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
@@ -190,27 +234,72 @@ SELECT taxhead_date, dochead_number,
        docitem_item_number AS item_number, docitem_item_descrip AS item_descrip,
        COALESCE(taxtype_name, <? value("none") ?>) AS taxtype, taxtype_descrip,
        taxline_qty AS qty,
-       taxline_amount AS amount,
-       taxline_extended AS extendedlocal,
-       taxline_extended / taxhead_curr_rate AS extendedbase,
+       taxline_amount * docSense(taxhead_doc_type, taxhead_doc_id) AS amountlocal,
+       taxline_amount / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS amountbase,
+       taxline_extended * docSense(taxhead_doc_type, taxhead_doc_id) AS extendedlocal,
+       taxline_extended / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS extendedbase,
        NULL AS distdate,
-       MAX(taxdetail_taxable) AS taxablelocal,
-       MAX(taxdetail_taxable) / taxhead_curr_rate AS taxablebase,
+       MAX(taxdetail_taxable) * docSense(taxhead_doc_type, taxhead_doc_id) AS taxablelocal,
+       MAX(taxdetail_taxable) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS taxablebase,
        NULL AS tax, NULL AS tax_descrip,
        NULL AS taxclass, NULL AS taxclass_descrip,
        NULL AS taxauth, NULL AS taxauth_descrip,
        NULL AS taxdetail_sequence,
        NULL AS basistax,
-       SUM(taxdetail_amount) AS flatlocal,
-       SUM(taxdetail_amount) / taxhead_curr_rate AS flatbase,
+       SUM(taxdetail_amount) * docSense(taxhead_doc_type, taxhead_doc_id) AS flatlocal,
+       SUM(taxdetail_amount) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS flatbase,
        SUM(taxdetail_percent) AS percent,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) AS salestaxlocal,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate AS salestaxbase,
-       SUM(taxdetail_tax_owed) AS usetaxlocal,
-       SUM(taxdetail_tax_owed) / taxhead_curr_rate AS usetaxbase,
-       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax))) AS f_salestaxlocal,
-       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate)
+       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS salestaxlocal,
+       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
+       SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
+       SUM(taxdetail_tax_owed) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS usetaxbase,
+       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
+                   docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
+       formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+                   docSense(taxhead_doc_type, taxhead_doc_id))
        AS f_salestaxbase,
+       'uomratio' AS rate_xtnumericrole,
+       'curr' AS discountlocal_xtnumericrole,
+       'curr' AS discountbase_xtnumericrole,
+       'curr' AS taxpaidlocal_xtnumericrole,
+       'curr' AS taxpaidbase_xtnumericrole,
+       'qty' AS qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountlocal_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountbase_xtnumericrole,
+       'extprice' AS extendedlocal_xtnumericrole,
+       'extprice' AS extendedbase_xtnumericrole,
+       'extprice' AS taxablelocal_xtnumericrole,
+       'extprice' AS taxablebase_xtnumericrole,
+       'curr' AS flatlocal_xtnumericrole,
+       'curr' AS flatbase_xtnumericrole,
+       'percent' AS percent_xtnumericrole,
+       'curr' AS salestaxlocal_xtnumericrole,
+       'curr' AS salestaxbase_xtnumericrole,
+       'curr' AS usetaxlocal_xtnumericrole,
+       'curr' AS usetaxbase_xtnumericrole,
+       -1 AS discountlocal_xttotalrole,
+       -1 AS discountbase_xttotalrole,
+       -1 AS taxpaidlocal_xttotalrole,
+       -1 AS taxpaidbase_xttotalrole,
+       -1 AS extendedlocal_xttotalrole,
+       -1 AS extendedbase_xttotalrole,
+       -1 AS salestaxlocal_xttotalrole,
+       -1 AS salestaxbase_xttotalrole,
+       -1 AS usetaxlocal_xttotalrole,
+       -1 AS usetaxbase_xttotalrole,
        1 AS xtindentrole
   FROM taxhead
   JOIN taxline ON taxhead_id = taxline_taxhead_id
@@ -275,8 +364,8 @@ SELECT taxhead_date, dochead_number,
                WHERE taxdetail_taxline_id = taxline_id
                  AND taxdetail_paydate IS NOT NULL)
 <? endif ?>
- GROUP BY taxline_id, taxhead_date, taxhead_curr_rate, dochead_number,
-          docitem_item_number, docitem_item_descrip, taxtype_name, taxtype_descrip
+ GROUP BY taxline_id, taxhead_doc_type, taxhead_doc_id, taxhead_date, taxhead_curr_rate,
+          dochead_number, docitem_item_number, docitem_item_descrip, taxtype_name, taxtype_descrip
 UNION ALL
 SELECT taxhead_date, dochead_number,
        NULL AS source,
@@ -306,27 +395,70 @@ SELECT taxhead_date, dochead_number,
        NULL AS item_number, NULL AS item_descrip,
        NULL AS taxtype, NULL AS taxtype_descrip,
        NULL AS qty,
-       NULL AS amount,
+       NULL AS amountlocal,
+       NULL AS amountbase,
        NULL AS extendedlocal,
        NULL AS extendedbase,
        COALESCE(taxdetail_paydate, taxhead_distdate) AS distdate,
-       taxdetail_taxable AS taxablelocal,
-       taxdetail_taxable / taxhead_curr_rate AS taxablebase,
+       taxdetail_taxable * docSense(taxhead_doc_type, taxhead_doc_id) AS taxablelocal,
+       taxdetail_taxable / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS taxablebase,
        COALESCE(taxdetail_tax_code, tax.tax_code) AS tax, tax.tax_descrip,
        COALESCE(taxclass_code,<? value("none") ?>) AS taxclass, taxclass_descrip,
        COALESCE(taxauth_code,<? value("none") ?>) AS taxauth, taxauth_name AS taxauth_descrip,
        taxdetail_sequence,
        basis.tax_code AS basistax,
-       taxdetail_amount AS flatlocal,
-       taxdetail_amount / taxhead_curr_rate AS flatbase,
+       taxdetail_amount * docSense(taxhead_doc_type, taxhead_doc_id) AS flatlocal,
+       taxdetail_amount / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS flatbase,
        taxdetail_percent AS percent,
-       COALESCE(taxdetail_tax_paid, taxdetail_tax) AS salestaxlocal,
-       COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate AS salestaxbase,
-       taxdetail_tax_owed AS usetaxlocal,
-       taxdetail_tax_owed / taxhead_curr_rate AS usetaxbase,
-       formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax)) AS f_salestaxlocal,
-       formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate)
+       COALESCE(taxdetail_tax_paid, taxdetail_tax) * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS salestaxlocal,
+       COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate *
+       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
+       taxdetail_tax_owed * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
+       taxdetail_tax_owed / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+       AS usetaxbase,
+       formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax) *
+                   docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
+       formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate *
+                   docSense(taxhead_doc_type, taxhead_doc_id))
        AS f_salestaxbase,
+       'uomratio' AS rate_xtnumericrole,
+       'curr' AS discountlocal_xtnumericrole,
+       'curr' AS discountbase_xtnumericrole,
+       'curr' AS taxpaidlocal_xtnumericrole,
+       'curr' AS taxpaidbase_xtnumericrole,
+       'qty' AS qty_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountlocal_xtnumericrole,
+       CASE WHEN taxhead_doc_type IN ('INV', 'CM') THEN 'saleprice'
+            WHEN taxhead_doc_type = 'VCH' THEN 'purchprice'
+            ELSE 'curr'
+        END AS amountbase_xtnumericrole,
+       'extprice' AS extendedlocal_xtnumericrole,
+       'extprice' AS extendedbase_xtnumericrole,
+       'extprice' AS taxablelocal_xtnumericrole,
+       'extprice' AS taxablebase_xtnumericrole,
+       'curr' AS flatlocal_xtnumericrole,
+       'curr' AS flatbase_xtnumericrole,
+       'percent' AS percent_xtnumericrole,
+       'curr' AS salestaxlocal_xtnumericrole,
+       'curr' AS salestaxbase_xtnumericrole,
+       'curr' AS usetaxlocal_xtnumericrole,
+       'curr' AS usetaxbase_xtnumericrole,
+       -1 AS discountlocal_xttotalrole,
+       -1 AS discountbase_xttotalrole,
+       -1 AS taxpaidlocal_xttotalrole,
+       -1 AS taxpaidbase_xttotalrole,
+       -1 AS extendedlocal_xttotalrole,
+       -1 AS extendedbase_xttotalrole,
+       -1 AS salestaxlocal_xttotalrole,
+       -1 AS salestaxbase_xttotalrole,
+       -1 AS usetaxlocal_xttotalrole,
+       -1 AS usetaxbase_xttotalrole,
        2 AS xtindentrole
   FROM taxhead
   JOIN taxline ON taxhead_id = taxline_taxhead_id
