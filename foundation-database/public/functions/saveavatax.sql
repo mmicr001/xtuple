@@ -96,7 +96,7 @@ BEGIN
            addr_state, addr_postalcode,
            addr_country,
            _taxtypeid, (_r.value->>'taxCode'), docitem_qty,
-           docitem_unitprice, (_r.value->>'lineAmount')::NUMERIC
+           docitem_unitprice, (_r.value->>'lineAmount')::NUMERIC * _return
       FROM dochead
       LEFT OUTER JOIN docitem ON docitem_type = pOrderType
                              AND docitem_id = _lineid
