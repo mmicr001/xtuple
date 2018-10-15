@@ -48,8 +48,12 @@ SELECT taxhead_date, dochead_number,
        NULL AS taxtype, NULL AS taxtype_descrip,
        NULL AS qty,
        NULL AS amount,
-       COALESCE(SUM(taxline_extended), 0.0) AS extendedlocal,
-       COALESCE(SUM(taxline_extended), 0.0) / taxhead_curr_rate AS extendedbase,
+       COALESCE((SELECT SUM(taxline_extended)
+                   FROM taxline
+                  WHERE taxline_taxhead_id = taxhead_id), 0.0) AS extendedlocal,
+       COALESCE((SELECT SUM(taxline_extended)
+                   FROM taxline
+                  WHERE taxline_taxhead_id = taxhead_id), 0.0) / taxhead_curr_rate AS extendedbase,
        NULL::DATE AS distdate,
        NULL AS taxablelocal,
        NULL AS taxablebase,
@@ -218,9 +222,6 @@ SELECT taxhead_date, dochead_number,
                          AND taxline_line_id = docitem_id
   JOIN taxtype ON taxline_taxtype_id = taxtype_id
  WHERE taxhead_status = 'P'
-   AND EXISTS(SELECT 1
-                FROM taxdetail
-               WHERE taxdetail_taxline_id = taxline_id)
    AND taxhead_doc_type IN 
        (
 <? if exists("showSales") ?>
