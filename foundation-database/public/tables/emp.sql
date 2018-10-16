@@ -67,6 +67,7 @@ BEGIN
 END$$;
 
 ALTER TABLE emp ALTER COLUMN emp_crmacct_id SET NOT NULL;
+
 ALTER TABLE public.emp DROP CONSTRAINT IF EXISTS emp_emp_image_id_fkey;
 
 ALTER TABLE public.emp ENABLE TRIGGER ALL;

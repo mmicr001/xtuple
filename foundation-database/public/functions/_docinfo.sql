@@ -6,7 +6,6 @@ $$
 DECLARE
   _id           INTEGER;
   _column       TEXT;
-  _row          _docinfo%ROWTYPE;
   _target       RECORD;
   _crmacct      JSON;
   _src          TEXT[];
@@ -18,47 +17,43 @@ DECLARE
   _s  text[];
 BEGIN
 
-  -- Unify images, urls, and documents into one "view" for the given reference item
-  FOR _row IN
-
+  RETURN QUERY
     SELECT imageass_id            AS doc_id,
            image_id::text         AS doc_target_number,
-           'IMG'                  AS doc_target_type,
+           'IMG'::text            AS doc_target_type,
            imageass_image_id      AS doc_target_id,
-           imageass_source        AS doc_source_type,
+           imageass_source::text  AS doc_source_type,
            imageass_source_id     AS doc_source_id,
-           image_name             AS doc_name,
-           image_descrip          AS doc_descrip,
-           imageass_purpose::text AS doc_purpose
+           image_name::text       AS doc_name,
+           image_descrip::text    AS doc_descrip,
+           imageass_purpose::text AS doc_purpose,
+           NULL::TEXT             AS doc_notes
       FROM imageass
       JOIN image ON image_id = imageass_image_id
      WHERE imageass_source_id = pRefId
-       AND imageass_source = pRefType
+       AND imageass_source = pRefType;
 
-    UNION
+  RETURN QUERY
     SELECT url_id                 AS doc_id,
            url_id::text           AS doc_target_number,
            CASE WHEN url_stream IS NULL
                 THEN 'URL'
                 ELSE 'FILE'
            END                    AS doc_target_type,
-           url_id                 AS doc_target_id,
+           url_file_id            AS doc_target_id,
            url_source             AS doc_source_type,
            url_source_id          AS doc_source_id,
            url_title              AS doc_name,
            url_url                AS doc_descrip,
-           'S'::text              AS doc_purpose
+           'S'::text              AS doc_purpose,
+           url_notes              AS doc_notes  
       FROM url
      WHERE url_source_id = pRefId
-       AND url_source = pRefType
-
-  LOOP
-    RETURN NEXT _row;
-  END LOOP;
+       AND url_source = pRefType;
 
   FOR _target IN SELECT docass_id,        docass_purpose,
                         docass_target_id, docass_target_type,
-                        source_id
+                        source_id, docass_notes
                    FROM docass
                    JOIN source         ON docass_target_type = source_docass
                    JOIN pg_class c     ON source_table = relname
@@ -70,7 +65,7 @@ BEGIN
 
            UNION SELECT docass_id,        docass_purpose,
                         docass_source_id, docass_source_type,
-                        source_id
+                        source_id, docass_notes
                    FROM docass
                    JOIN source         ON docass_source_type = source_docass
                    JOIN pg_class c     ON source_table = relname
@@ -81,21 +76,17 @@ BEGIN
                     AND docass_target_type = pRefType
 
   LOOP
-
-    FOR _row IN SELECT _target.docass_id,
-                       target_doc_number,
-                       _target.docass_target_type,
-                       _target.docass_target_id,
-                       pRefType,
-                       pRefId,
-                       target_doc_name,
-                       target_doc_descrip,
-                       _target.docass_purpose
-                  FROM _getTargetDocument(_target.docass_id, _target.source_id, pRefId)
-     LOOP
-       RETURN NEXT _row;
-    END LOOP;
-
+    RETURN QUERY SELECT _target.docass_id::INTEGER,
+                         target_doc_number::TEXT,
+                         _target.docass_target_type::TEXT,
+                         _target.docass_target_id::INTEGER,
+                         pRefType::TEXT,
+                         pRefId::INTEGER,
+                         target_doc_name::TEXT,
+                         target_doc_descrip::TEXT,
+                         _target.docass_purpose::TEXT,
+                         _target.docass_notes::TEXT
+                    FROM _getTargetDocument(_target.docass_id, _target.source_id, pRefId);
   END LOOP;
 
   IF NOT pRecursive THEN
@@ -106,9 +97,7 @@ BEGIN
                 WHERE NULLIF(value::TEXT, 'null') IS NOT NULL
       LOOP
         _s := '{'||_r.key||'}';
-        FOR _row IN SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE) LOOP
-          RETURN NEXT _row;
-        END LOOP;
+        RETURN QUERY SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE);
       END LOOP;
     END IF;
 
@@ -122,12 +111,10 @@ BEGIN
     _id := (_crmacct#>>_s)::INTEGER;
    
     IF _id IS NOT NULL THEN
-      FOR _row IN SELECT * FROM _docinfo(_id, 'CRMA', TRUE) LOOP
-        RETURN NEXT _row;
-      END LOOP;
+      RETURN QUERY SELECT * FROM _docinfo(_id, 'CRMA', TRUE);
     END IF;
   END IF;
 
-  END;
+END;
 $$ LANGUAGE plpgsql;
 

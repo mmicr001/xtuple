@@ -34,7 +34,8 @@ declare
       ['CRM', 'MaintainContactGroups', 'Allows Maintenance of Contact Groups'],
       ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
       ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups'],
-      ['Sales', 'MaintainCustomerNumbers', 'Can edit or update Customer or Prospect numbers']
+      ['Sales', 'MaintainCustomerNumbers', 'Can edit or update Customer or Prospect numbers'],
+      ['CRM', 'ViewDocuments', 'Allows viewing Document list']
     ];
   _p TEXT[];
 begin
