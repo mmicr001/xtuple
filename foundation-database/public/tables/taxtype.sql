@@ -15,14 +15,6 @@ UPDATE taxtype
    SET taxtype_descrip = 'Default Freight Tax Type'
  WHERE taxtype_name = 'Freight';
 
-DO $$
-BEGIN
-  IF (SELECT NOT EXISTS(SELECT 1
-                          FROM taxtype
-                         WHERE taxtype_name = 'Misc')) THEN
-    INSERT INTO taxtype
-    (taxtype_name, taxtype_descrip, taxtype_sys)
-    VALUES ('Misc', 'Default Misc Tax Type', true);
-  END IF;
-END
-$$ LANGUAGE plpgsql;
+INSERT INTO taxtype (taxtype_name, taxtype_descrip, taxtype_sys)
+             VALUES ('Misc', 'Default Misc Tax Type', true)
+ON CONFLICT (taxtype_name) DO NOTHING;
