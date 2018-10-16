@@ -160,16 +160,16 @@ BEGIN
   IF pOrderType = 'CM' THEN
     IF (_includePkgWeight) THEN
       _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * (item_prodweight + item_packweight)) AS weight, ';
-  ELSE
-    _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * item_prodweight) AS weight, ';
-  END IF;
+    ELSE
+      _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * item_prodweight) AS weight, ';
+    END IF;
 
-  _qry := _qry || 'itemsite_warehous_id, COALESCE(item_freightclass_id, -1) AS item_freightclass_id
-    FROM cmitem
-    JOIN itemsite ON (itemsite_id=cmitem_itemsite_id)
-    JOIN item ON (item_id=itemsite_item_id)
-    WHERE ( (cmitem_cmhead_id=' || quote_literal(pOrderId) || ') )
-    GROUP BY itemsite_warehous_id, item_freightclass_id;';
+    _qry := _qry || 'itemsite_warehous_id, COALESCE(item_freightclass_id, -1) AS item_freightclass_id
+      FROM cmitem
+      JOIN itemsite ON (itemsite_id=cmitem_itemsite_id)
+      JOIN item ON (item_id=itemsite_item_id)
+      WHERE ( (cmitem_cmhead_id=' || quote_literal(pOrderId) || ') )
+      GROUP BY itemsite_warehous_id, item_freightclass_id;';
   END IF;
 
   FOR _weights IN

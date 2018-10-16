@@ -1,5 +1,3 @@
 CREATE OR REPLACE FUNCTION XTCEILING(pValue NUMERIC, pPrecision INTEGER) RETURNS NUMERIC IMMUTABLE AS $$
-BEGIN
-  RETURN CEILING(pValue * 10^(pPrecision))/(10^(pPrecision));
-END
-$$ LANGUAGE plpgsql;
+  SELECT (CEILING(pValue * 10^(pPrecision))/(10^(pPrecision)))::NUMERIC;
+$$ LANGUAGE sql;
