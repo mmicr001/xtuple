@@ -281,9 +281,10 @@ BEGIN
                                 _p.cashrcpt_distdate, _p.custnote );
   END LOOP;
 
-  DELETE FROM taxhead
+  UPDATE taxhead
+     SET taxhead_status = 'V'
    WHERE taxhead_doc_type = 'CR'
-     AND tahead_doc_id = pCashrcptid;
+     AND taxhead_doc_id = pCashrcptid;
 
 --  Post any remaining Cash to an A/R Debit Memo
 --  this credit memo may absorb an occasional currency exchange rounding error
