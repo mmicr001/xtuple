@@ -103,11 +103,11 @@ BEGIN
         _r.qty, _r.toclose,
          _r.coitem_taxtype_id, _r.coitem_tax_exemption)
       RETURNING cobill_id INTO _cobillid;
-
-      PERFORM copyTax('S', _r.coitem_id, 'COB', _cobillid, _cobmiscid);
      END IF;
 
   END LOOP;
+
+  EXECUTE format('NOTIFY calculatetax, %L', 'COB,' || _cobmiscid);
 
   RETURN _cobmiscid;
 

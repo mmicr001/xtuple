@@ -161,8 +161,6 @@ BEGIN
                  AND (COALESCE(cohead_shipzone_id, 0)        = COALESCE(_c.cohead_shipzone_id, 0))
                 ) LOOP
 
-        PERFORM copyTax('COB', _i.cobmisc_id, 'INV', _invcheadid);
-
     --  Give this selection a number if it has not been assigned one
         UPDATE cobmisc
            SET cobmisc_invcnumber=_invcnumber
@@ -209,8 +207,6 @@ BEGIN
             _r.cobill_taxtype_id, _r.cobill_tax_exemption,
             _r.coitem_id );
 
-          PERFORM copyTax('COB', _r.cobill_id, 'INV', _invcitemid, _invcheadid);
-          
       --  Find and mark any Lot/Serial invdetail records associated with this bill
           UPDATE invdetail SET invdetail_invcitem_id = _invcitemid
            WHERE (invdetail_id IN (SELECT invdetail_id
@@ -284,6 +280,8 @@ BEGIN
       --  All done
         _count := (_count + 1);
       END LOOP;
+
+      EXECUTE format('NOTIFY calculatetax, %L', 'INV,' || _invcheadid);
     END IF;
   END LOOP;
   RETURN _count;

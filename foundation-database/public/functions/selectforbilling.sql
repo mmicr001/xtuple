@@ -125,8 +125,6 @@ BEGIN
       CURRENT_DATE, getEffectiveXtUser(),
       pQty, pClose,
       ptaxtypeid, ptaxexemption);
-
-    PERFORM copyTax('S', _r.coitem_id, 'COB', _cobillid, _r.cobmisc_id);
   END IF;
 
   RETURN _cobillid;

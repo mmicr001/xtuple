@@ -145,8 +145,6 @@ BEGIN
 	FROM custinfo
 	WHERE (cust_id=_cohead.cohead_cust_id);
 
-  PERFORM copyTax('S', pSoheadid, 'COB', _cobmiscid);
-
   RETURN _cobmiscid;
 
 END;
