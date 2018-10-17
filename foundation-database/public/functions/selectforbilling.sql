@@ -29,30 +29,7 @@ $BODY$ LANGUAGE 'plpgsql' VOLATILE;
 
 ---------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer)
-  RETURNS integer AS
-$BODY$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  pSoitemid     ALIAS FOR $1;
-  pQty  ALIAS FOR $2;
-  pClose        ALIAS FOR $3;
-  pTaxtypeid    ALIAS FOR $4;
-  _taxexemption    TEXT := NULL;
-
-BEGIN
-  SELECT coitem_tax_exemption
-  INTO _taxexemption
-  FROM coitem
-  WHERE (coitem_id = pSoitemid)
-  LIMIT 1;
-
-   RETURN selectforbilling(pSoitemid, pQty, pClose, pTaxtypeid, _taxexemption);
-END;
-$BODY$ LANGUAGE 'plpgsql' VOLATILE;
-
-CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text)
+CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text default null)
   RETURNS integer AS
 $BODY$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
@@ -70,7 +47,8 @@ BEGIN
 
 -- Get some information
   SELECT cobmisc_id, cobmisc_taxzone_id, coitem_id, coitem_price,
-    coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id
+    coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id,
+    COALESCE(ptaxexemption, coitem_tax_exemption) AS taxexemption
   INTO _r
   FROM cobmisc, coitem, itemsite, item, site()
   WHERE ((cobmisc_cohead_id = coitem_cohead_id)
@@ -110,7 +88,7 @@ BEGIN
         cobill_qty = pQty,
         cobill_toclose = pClose,
 	cobill_taxtype_id = ptaxtypeid,
-        cobill_tax_exemption = ptaxexemption
+        cobill_tax_exemption = _r.taxexemption
     WHERE (cobill_id=_cobillid);
 
   ELSE
@@ -124,7 +102,7 @@ BEGIN
     (_cobillid, _r.coitem_id, _r.cobmisc_id,
       CURRENT_DATE, getEffectiveXtUser(),
       pQty, pClose,
-      ptaxtypeid, ptaxexemption);
+      ptaxtypeid, _r.taxexemption);
   END IF;
 
   RETURN _cobillid;

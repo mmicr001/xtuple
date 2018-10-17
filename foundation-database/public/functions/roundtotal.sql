@@ -9,7 +9,7 @@ BEGIN
                            FROM UNNEST(pValues) AS value)
                     AND (SELECT SUM(XTCEILING(value, pPrecision))
                            FROM UNNEST(pValues) AS value) THEN
-    RAISE EXCEPTION 'Values cannot add up to total';
+    RAISE EXCEPTION 'Values cannot add up to total [xtuple: roundTotal, -1]';
   END IF;
 
   RETURN ARRAY(WITH values AS (SELECT value, ROW_NUMBER() OVER () AS index
