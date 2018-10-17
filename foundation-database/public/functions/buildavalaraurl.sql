@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION buildAvalaraUrl(pType        TEXT,
                                            pOrderType   TEXT,
                                            pOrderId     INTEGER,
-                                           pOverrideUrl TEXT) RETURNS TEXT AS $$
+                                           pOverrideUrl TEXT,
+                                           pOverrideNumber TEXT) RETURNS TEXT AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -18,11 +19,17 @@ BEGIN
 
   _base := _base || 'api/v2/';
 
-  SELECT pOrderType || '-' || dochead_number
-    INTO _number
-    FROM dochead
-   WHERE dochead_type = pOrderType
-     AND dochead_id = pOrderId;
+  IF pOverrideNumber IS NOT NULL THEN
+    _number = pOverrideNumber;
+  ELSE
+    SELECT dochead_number
+      INTO _number
+      FROM dochead
+     WHERE dochead_type = pOrderType
+       AND dochead_id = pOrderId;
+  END IF;
+
+  _number := pOrderType || '-' || _number;
 
   IF pType = 'taxcodes' THEN
     RETURN _base || 'definitions/taxcodes';
