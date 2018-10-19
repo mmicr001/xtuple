@@ -10,7 +10,6 @@ DECLARE
   _taxlineid INTEGER;
 
 BEGIN
-
   IF pTargetHeadId IS NULL THEN
     INSERT INTO taxhead (taxhead_service, taxhead_status, taxhead_valid, taxhead_doc_type,
                          taxhead_doc_id, taxhead_cust_id, taxhead_exemption_code, taxhead_date,
@@ -39,7 +38,7 @@ BEGIN
               FROM taxhead
               JOIN taxline ON taxhead_id = taxline_taxhead_id
              WHERE taxhead_doc_type = pSourceType
-               AND CASE WHEN pTargetHeadId IS NOT NULL
+               AND CASE WHEN pTargetHeadId IS NULL
                         THEN taxhead_doc_id = pSourceId AND taxline_line_type != 'L'
                         ELSE taxline_line_id = pSourceId
                     END

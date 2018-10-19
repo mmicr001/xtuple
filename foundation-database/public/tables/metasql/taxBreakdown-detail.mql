@@ -11,6 +11,7 @@ SELECT NULL::INTEGER AS taxdetail_id,
                               WHEN 'A' THEN 4
         END AS linetype,
        taxline_linenumber, taxline_subnumber,
+       CASE WHEN taxline_line_type = 'F' THEN taxline_number END AS freightgroup,
        CASE taxline_line_type WHEN 'L' THEN taxline_number
                               WHEN 'F' THEN <? value("freight") ?> ||
                                             COALESCE(' ' || taxline_number, '')
@@ -57,6 +58,7 @@ SELECT taxdetail_id,
                               WHEN 'A' THEN 4
         END,
        taxline_linenumber, taxline_subnumber,
+       CASE WHEN taxline_line_type = 'F' THEN taxline_number END AS freightgroup,
        NULL,
        NULL,
        NULL, NULL, NULL,
@@ -93,6 +95,7 @@ UNION
 SELECT NULL,
        5,
        NULL, NULL,
+       NULL,
        <? value("total") ?>,
        NULL,
        NULL, NULL, COALESCE(SUM(taxline_extended), 0.0),
@@ -135,5 +138,5 @@ SELECT NULL,
   ) lines
  GROUP BY taxhead_doc_type
 <? endif ?>
-ORDER BY linetype, taxline_linenumber, taxline_subnumber, taxline_number, xtindentrole,
+ORDER BY linetype, taxline_linenumber, taxline_subnumber, freightgroup, xtindentrole,
          taxdetail_sequence, tax_code;
