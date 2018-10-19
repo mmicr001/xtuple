@@ -468,7 +468,7 @@ BEGIN
       _soitem.coitem_tax_exemption )
     RETURNING coitem_id INTO _soitemid;
 
-  PERFORM copyTax('S', _soitem.coitem_id, 'S', _soitemid);
+  PERFORM copyTax('S', _soitem.coitem_id, 'S', _soitemid, _soheadid);
 
     -- insert characteristics first so they can be copied to associated supply order
     INSERT INTO charass

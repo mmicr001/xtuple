@@ -227,7 +227,7 @@ BEGIN
     IF pUsages[_line] IS DISTINCT FROM pUsage THEN
       _payload := _payload ||
                 format(',"entityUseCode": %s',
-                to_jsonb(COALESCE(pUsage, '')));
+                to_jsonb(COALESCE(pUsages[_line], '')));
     END IF;
 
     IF pOrderType IN ('P', 'VCH') THEN
