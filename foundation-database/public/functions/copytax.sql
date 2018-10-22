@@ -10,6 +10,7 @@ DECLARE
   _taxlineid INTEGER;
 
 BEGIN
+
   IF pTargetHeadId IS NULL THEN
     INSERT INTO taxhead (taxhead_service, taxhead_status, taxhead_valid, taxhead_doc_type,
                          taxhead_doc_id, taxhead_cust_id, taxhead_exemption_code, taxhead_date,
@@ -51,7 +52,10 @@ BEGIN
                          taxline_shipfromaddr_postalcode, taxline_shipfromaddr_country,
                          taxline_taxtype_id, taxline_taxtype_external_code, taxline_qty,
                          taxline_amount, taxline_extended)
-    SELECT taxhead_id, taxline_line_type, taxline_line_id,
+    SELECT taxhead_id, taxline_line_type, CASE WHEN pTargetHeadId IS NOT NULL
+                                               THEN pTargetId
+                                               ELSE taxline_line_id
+                                           END,
            taxline_linenumber, taxline_subnumber, taxline_number,
            taxline_item_number, taxline_shipfromaddr_line1,
            taxline_shipfromaddr_line2, taxline_shipfromaddr_line3,
