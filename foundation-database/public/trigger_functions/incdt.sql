@@ -24,21 +24,6 @@ BEGIN
     PERFORM clearNumberIssue('IncidentNumber', NEW.incdt_number);
   END IF;
 
-  -- Description is required
-  IF (LENGTH(COALESCE(NEW.incdt_summary,''))=0) THEN
-    RAISE EXCEPTION 'You must supply a valid Incident Description.';
-  END IF;
-
-  -- CRM Account is required
-  IF (NEW.incdt_crmacct_id IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid CRM Account.';
-  END IF;
-
-  -- Contact is required
-  IF (NEW.incdt_cntct_id IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid Contact.';
-  END IF;
-
   NEW.incdt_updated := now();
 
   -- Timestamps
