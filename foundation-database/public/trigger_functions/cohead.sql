@@ -666,13 +666,13 @@ BEGIN
   --recurrence cleanup
   SELECT recur_id INTO _recurid
     FROM recur
-   WHERE ((recur_parent_id = OLD.cohead_id)
-     AND  (recur_parent_type = "SALESORDER"));
+   WHERE recur_parent_id = OLD.cohead_id
+     AND recur_parent_type = 'S';
   IF (_recurid IS NOT NULL) THEN -- The deleted SO is the parent of a recurrence series
     SELECT cohead_id INTO _newparentid
       FROM cohead
-     WHERE ((cohead_recurring_cohead_id = OLD.cohead_id)
-       AND  (cohead_id != OLD.cohead_id))
+     WHERE cohead_recurring_cohead_id = OLD.cohead_id
+       AND cohead_id != OLD.cohead_id 
      ORDER BY cohead_packdate
      LIMIT 1; -- Find the next recurring SO whose parent is the deleted SO
     IF (_newparentid IS NULL) THEN -- The deleted SO is the only SO in the series
