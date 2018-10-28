@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION itemipsprice(pItemid INTEGER,
                                         pSiteid INTEGER,
                                         pShipzoneid INTEGER DEFAULT (-1),
                                         pSaletypeid INTEGER DEFAULT (-1)) RETURNS SETOF itemprice AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _row  itemprice%ROWTYPE;
@@ -80,7 +80,7 @@ BEGIN
                             pSiteid,
                             _listprice,
                             pEffective) AS protoprice,
-           CASE WHEN (ipsitem_item_id=_item.item_id) THEN itemuomtouom(ipsitem_item_id, ipsitem_qty_uom_id, NULL, ipsitem_qtybreak)
+           CASE WHEN (ipsitem_item_id=_item.item_id) THEN itemuomtouom(ipsitem_item_id, ipsitem_qty_uom_id, pQtyuom, ipsitem_qtybreak)
                 ELSE ipsitem_qtybreak
            END AS protoqtybreak,
            (COALESCE(ipsitem_price_uom_id, -1)=COALESCE(pPriceUOM,-1)) AS uommatched,
@@ -121,7 +121,7 @@ BEGIN
                             pSiteid,
                             _listprice,
                             pEffective) AS protoprice,
-           CASE WHEN (ipsitem_item_id=_item.item_id) THEN itemuomtouom(ipsitem_item_id, ipsitem_qty_uom_id, NULL, ipsitem_qtybreak)
+           CASE WHEN (ipsitem_item_id=_item.item_id) THEN itemuomtouom(ipsitem_item_id, ipsitem_qty_uom_id, pQtyuom, ipsitem_qtybreak)
                 ELSE ipsitem_qtybreak
            END AS protoqtybreak,
            (COALESCE(ipsitem_price_uom_id, -1)=COALESCE(pPriceUOM,-1)) AS uommatched,
