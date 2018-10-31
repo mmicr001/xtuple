@@ -4,12 +4,6 @@ BEGIN
   IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0-alpha') = -1 THEN
     PERFORM setMetric('TaxService', 'N');
 
-    PERFORM saveTax('Q', quhead_id, calculateOrderTax('Q', quhead_id))
-       FROM quhead;
-
-    PERFORM saveTax('S', cohead_id, calculateOrderTax('S', cohead_id))
-       FROM cohead;
-
     -- Old data must be fixed or the recalculation will error
     UPDATE cobill
        SET cobill_qty = (SELECT SUM(cobill_qty)
@@ -22,6 +16,18 @@ BEGIN
                            FROM cobill b
                           WHERE b.cobill_cobmisc_id = cobill.cobill_cobmisc_id
                             AND b.cobill_coitem_id = cobill.cobill_coitem_id);
+
+    -- Speeds up saveTax/calculateOrderTax calls by about an order of magnitude
+    CREATE TEMPORARY TABLE dochead ON COMMIT DROP AS SELECT * FROM dochead;
+    CREATE TEMPORARY TABLE docitem ON COMMIT DROP AS SELECT * FROM docitem;
+    CREATE INDEX ON dochead (dochead_type, dochead_id);
+    CREATE INDEX ON docitem (docitem_type, docitem_dochead_id);
+
+    PERFORM saveTax('Q', quhead_id, calculateOrderTax('Q', quhead_id))
+       FROM quhead;
+
+    PERFORM saveTax('S', cohead_id, calculateOrderTax('S', cohead_id))
+       FROM cohead;
 
     PERFORM saveTax('COB', cobmisc_id, calculateOrderTax('COB', cobmisc_id))
        FROM cobmisc;
