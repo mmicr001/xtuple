@@ -14,14 +14,14 @@ BEGIN
     UPDATE cobill
        SET cobill_qty = (SELECT SUM(cobill_qty)
                            FROM cobill b
-                          WHERE b.cobill_cobmisc_id = cobill_cobmisc_id
-                            AND b.cobill_coitem_id = cobill_coitem_id);
+                          WHERE b.cobill_cobmisc_id = cobill.cobill_cobmisc_id
+                            AND b.cobill_coitem_id = cobill.cobill_coitem_id);
 
     DELETE FROM cobill
      WHERE cobill_id != (SELECT MIN(cobill_id)
                            FROM cobill b
-                          WHERE b.cobill_cobmisc_id = cobill_cobmisc_id
-                            AND b.cobill_coitem_id = cobill_coitem_id);
+                          WHERE b.cobill_cobmisc_id = cobill.cobill_cobmisc_id
+                            AND b.cobill_coitem_id = cobill.cobill_coitem_id);
 
     PERFORM saveTax('COB', cobmisc_id, calculateOrderTax('COB', cobmisc_id))
        FROM cobmisc;
