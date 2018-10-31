@@ -25,7 +25,7 @@ var _      = require('underscore'),
                 " RETURNING aropen_id;";
       datasource.query(sql, adminCred, function (err, res) {
         dblib.assertErrorCode(err, res, "_aropenTrigger", -5);
-        //aropenfail = res.rows[0].aropen_id;
+        aropenfail = res.rows[0].aropen_id;
         done();
       });
     });
