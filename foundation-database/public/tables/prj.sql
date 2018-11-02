@@ -33,7 +33,7 @@ SELECT
   xt.add_constraint('prj', 'prj_prj_number_check',
                     $$CHECK (prj_number <> '')$$, 'public'),
   xt.add_constraint('prj', 'prj_prj_status_check',
-                    $$CHECK (prj_status IN ('P', 'O', 'C'))$$, 'public'),
+                    $$CHECK (prj_status IN ('N', 'P', 'O', 'C'))$$, 'public'),
   xt.add_constraint('prj', 'prj_prj_cntct_id_fkey',
                     'FOREIGN KEY (prj_cntct_id) REFERENCES cntct(cntct_id)', 'public'),
   xt.add_constraint('prj', 'prj_prj_crmacct_id_fkey',
