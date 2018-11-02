@@ -50,7 +50,7 @@ WHERE (true)
   AND ((emp_code ~* <? value("search_pattern") ?>)
        OR (emp_number ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
+       OR ((SELECT array_to_string(array_agg(cntctphone_phone),',') FROM cntctphone where cntct_id=cntctphone_cntct_id) ~* <? value("search_pattern") ?>)
        OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>))
 <? endif ?>
 <? literal("charClause") ?>
