@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION createARCreditMemo(pId            INTEGER,
                                               pArAccntid     INTEGER = NULL,
                                               pCoCcpayId     INTEGER = NULL,
                                               pTaxZoneid     INTEGER = NULL,
-                                              pPaid          NUMERIC = NULL) RETURNS INTEGER AS $$
+                                              pPaid          NUMERIC = 0) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
