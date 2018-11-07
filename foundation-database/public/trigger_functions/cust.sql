@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _custTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters') OR
@@ -52,7 +52,7 @@ CREATE TRIGGER custTrigger
   EXECUTE PROCEDURE _custTrigger();
 
 CREATE OR REPLACE FUNCTION _custAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _whsId      INTEGER := -1;
@@ -192,7 +192,7 @@ CREATE TRIGGER custAfterTrigger
   EXECUTE PROCEDURE _custAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _custinfoBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters')) THEN
@@ -214,7 +214,7 @@ CREATE TRIGGER custinfoBeforeDeleteTrigger
   EXECUTE PROCEDURE _custinfoBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _custinfoAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   -- handle transitory state when converting customer to prospect

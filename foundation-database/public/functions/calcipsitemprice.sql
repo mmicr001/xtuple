@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION calcIpsitemPrice(pIpsitemid INTEGER,
                                             pWarehousid INTEGER DEFAULT (NULL),
                                             pListPrice NUMERIC DEFAULT (NULL),
                                             pAsOf DATE DEFAULT CURRENT_DATE) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _result NUMERIC := 0.0;

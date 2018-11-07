@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS checkPrivilege(text);
 CREATE OR REPLACE FUNCTION checkPrivilege(text, text DEFAULT getEffectiveXtUser()) RETURNS BOOLEAN STABLE AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pPrivilege ALIAS FOR $1;

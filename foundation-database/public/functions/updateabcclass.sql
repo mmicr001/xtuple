@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION updateABCClass(TEXT, NUMERIC, NUMERIC, DATE, DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pClassCodePattern ALIAS FOR $1;
@@ -19,7 +19,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION updateABCClass(TEXT, INTEGER, NUMERIC, NUMERIC, DATE, DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pClassCodePattern ALIAS FOR $1;
@@ -131,7 +131,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION updateABCClass(INTEGER, NUMERIC, NUMERIC, DATE, DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pClasscodeid ALIAS FOR $1;
@@ -151,7 +151,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION updateABCClass(INTEGER, INTEGER, NUMERIC, NUMERIC, DATE, DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pClasscodeid ALIAS FOR $1;

@@ -4794,7 +4794,7 @@ ALTER TABLE script DISABLE TRIGGER ALL;
 INSERT INTO script (script_id, script_name, script_order, script_enabled, script_source, script_notes) VALUES (1, 'storedProcErrorLookup', 0, true, '/*
  * This file is part of the xTuple ERP: PostBooks Edition, a free and
  * open source Enterprise Resource Planning software suite,
- * Copyright (c) 1999-2009 by OpenMFG LLC, d/b/a xTuple.
+ * Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
  * is available at www.xtuple.com/CPAL.  By using this software, you agree
