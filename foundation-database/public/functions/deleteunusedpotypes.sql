@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS xt.deleteUnusedPOTypes();
 
 CREATE OR REPLACE FUNCTION deleteUnusedPOTypes() RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 

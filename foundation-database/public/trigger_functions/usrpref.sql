@@ -9,7 +9,7 @@ TODO: should usrpref_name='active' be calculated from pg_authid's
  */
 
 CREATE OR REPLACE FUNCTION _usrprefBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainUsers') OR
@@ -54,7 +54,7 @@ CREATE TRIGGER usrprefBeforeTrigger BEFORE INSERT OR UPDATE OR DELETE ON usrpref
        FOR EACH ROW EXECUTE PROCEDURE _usrprefBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _usrprefAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 

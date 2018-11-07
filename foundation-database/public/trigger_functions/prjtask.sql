@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _prjtaskTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -35,7 +35,7 @@ CREATE TRIGGER prjtaskTrigger
   EXECUTE PROCEDURE _prjtaskTrigger();
 
 CREATE OR REPLACE FUNCTION _prjtaskAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -82,7 +82,7 @@ CREATE TRIGGER prjtaskAfterTrigger
   EXECUTE PROCEDURE _prjtaskAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _prjtaskAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

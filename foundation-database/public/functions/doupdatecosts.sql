@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION doUpdateCosts(plowerMaterial      BOOLEAN,
                                          plowerUser          BOOLEAN,
                                          prollUp             BOOLEAN)
   RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN doUpdateCosts(plowerMaterial, pdirectLabor, plowerDirectLabor,
@@ -28,7 +28,7 @@ CREATE OR REPLACE FUNCTION doUpdateCosts(plowerMaterial      BOOLEAN,
                                          prollUp             BOOLEAN,
                                          pActual             BOOLEAN)
   RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _item RECORD;
@@ -65,7 +65,7 @@ CREATE OR REPLACE FUNCTION doUpdateCosts(pItemId             INTEGER,
                                          plowerUser          BOOLEAN,
                                          prollUp             BOOLEAN)
    RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
     RETURN doUpdateCosts(pItemId, pResetLowLevel, plowerMaterial, pdirectLabor,
@@ -88,7 +88,7 @@ CREATE OR REPLACE FUNCTION doUpdateCosts(pItemId             INTEGER,
                                          prollUp             BOOLEAN,
                                          pUpdateActual       BOOLEAN)
   RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

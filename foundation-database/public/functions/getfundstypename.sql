@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION getFundsTypeName(pFundsTypeCode text) RETURNS TEXT IMMUTABLE AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal TEXT;
