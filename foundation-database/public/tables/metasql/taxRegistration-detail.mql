@@ -1,0 +1,24 @@
+-- Group: taxRegistration
+-- Name:  detail
+-- Notes: Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT taxreg_id, taxreg_taxzone_id, taxreg_taxauth_id,
+       CASE WHEN taxreg_taxzone_id ISNULL THEN '~Any~'
+            ELSE taxzone_code END AS taxzone_code, 
+       taxauth_code, taxreg_number, 
+       taxreg_effective, taxreg_expires 
+FROM taxreg 
+LEFT OUTER JOIN taxauth ON (taxreg_taxauth_id = taxauth_id) 
+LEFT OUTER JOIN taxzone ON (taxreg_taxzone_id = taxzone_id)
+WHERE true
+<? if exists("hasContext") ?>
+  <? if exists("cust_id") ?>
+  AND (taxreg_rel_type='C' AND taxreg_rel_id=<? value("cust_id") ?>)
+  <? endif ?>
+  <? if exists("vend_id") ?>
+  AND (taxreg_rel_type='V' AND taxreg_rel_id=<? value("vend_id") ?>)
+  <? endif ?>
+<? else ?>
+  AND taxreg_rel_type IS NULL
+<? endif ?>
+ORDER BY taxzone_code, taxauth_code, taxreg_number;
