@@ -67,18 +67,18 @@ BEGIN
   _glDate := COALESCE(_p.vohead_gldistdate, _p.vohead_distdate);
 
 --  Disallow posting voucher if it has any voucherItems without any tagged receipts or distributions
-  IF(EXISTS(SELECT 1 
-              FROM voitem 
-             WHERE voitem_vohead_id = pVoheadId 
-               AND (NOT EXISTS(SELECT 1 
-                                FROM recv 
-                               WHERE recv_voitem_id = voitem_id 
-                                 AND recv_vohead_id = voitem_vohead_id) 
-                    OR NOT EXISTS(SELECT 1 
-                                   FROM vodist 
-                                  WHERE vodist_vohead_id = voitem_vohead_id 
-                                    AND vodist_poitem_id = voitem_poitem_id))))
-    THEN RAISE EXCEPTION 'Cannot post Voucher #% as it has items without any tagged receipts or without distributions [xtuple: postVoucher, -11, %]',
+  IF ( EXISTS ( SELECT 1 
+                  FROM voitem 
+                 WHERE voitem_vohead_id = pVoheadId 
+                   AND (NOT EXISTS(SELECT 1 
+                                     FROM recv 
+                                    WHERE recv_voitem_id = voitem_id 
+                                      AND recv_vohead_id = voitem_vohead_id) 
+                        OR NOT EXISTS(SELECT 1 
+                                        FROM vodist 
+                                       WHERE vodist_vohead_id = voitem_vohead_id 
+                                         AND vodist_poitem_id = voitem_poitem_id ))))THEN 
+    RAISE EXCEPTION 'Cannot post Voucher #% as it has items without any tagged receipts or without distributions [xtuple: postVoucher, -11, %]',
 			_p.vohead_number, _p.vohead_number;
   END IF;
 
