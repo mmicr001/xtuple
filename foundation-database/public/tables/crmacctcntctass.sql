@@ -7,6 +7,7 @@ SELECT
   xt.add_column('crmacctcntctass', 'crmacctcntctass_crmacct_id',     'INTEGER', 'NOT NULL', 'public'),
   xt.add_column('crmacctcntctass', 'crmacctcntctass_cntct_id',       'INTEGER', 'NOT NULL', 'public'),
   xt.add_column('crmacctcntctass', 'crmacctcntctass_crmrole_id',     'INTEGER', 'NOT NULL', 'public'),
+  xt.add_column('crmacctcntctass', 'crmacctcntctass_active',         'BOOLEAN', 'NOT NULL DEFAULT true', 'public'),
   xt.add_column('crmacctcntctass', 'crmacctcntctass_default',        'BOOLEAN', 'NOT NULL DEFAULT false', 'public'),
   xt.add_column('crmacctcntctass', 'crmacctcntctass_createdby',      'TEXT', 'NOT NULL DEFAULT geteffectivextuser()', 'public'),
   xt.add_column('crmacctcntctass', 'crmacctcntctass_created',        'TIMESTAMP WITH TIME ZONE', 'NOT NULL DEFAULT now()', 'public'),

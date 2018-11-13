@@ -7,18 +7,18 @@
 <? if exists("hasContext") ?>
 SELECT * FROM (
 <? endif ?>
-
   SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0,
-                      cntct_last_name, cntct_first_name, cntct_number)
+                      cntct_last_name, cntct_first_name, cntct_number
+                      <? if exists("hasContext") ?>, crmrole_name <? endif ?> )
   cntct_id AS id
 <? if exists("hasContext") ?>
-, crmrole_sort, crmrole_name AS crmrole
+, crmacctcntctass_id, crmrole_sort, crmrole_name AS crmrole, crmacctcntctass_active
 <? endif ?>
 <? if not exists("idOnly") ?> 
 , addr_id AS altId,
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
-  regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
+  regexp_replace(array_agg(DISTINCT crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
   cntct_active, cntct_companyname AS company,
   cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
   getContactPhone(cntct_id, 'Office') AS contact_phone,
@@ -75,6 +75,9 @@ WHERE true
 <? endif ?>
 <? if exists("activeOnly") ?> 
   AND cntct_active
+  <? if exists("hasContext") ?>
+    AND crmacctcntctass_active
+  <? endif ?>
 <? endif ?>
 <? if exists("search_pattern") ?>
   AND (
@@ -154,7 +157,7 @@ WHERE true
 
 GROUP BY cntct_id, cntct_number, cntcteml_primary
 <? if exists("hasContext") ?>
-    , crmrole_sort, crmrole_name
+    , crmacctcntctass_id, crmrole_sort, crmrole_name, crmacctcntctass_active
 <? endif ?>
 <? if not exists("idOnly") ?> 
   ,addr_id,addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
@@ -174,9 +177,10 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
 <? endif ?>
  ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0,
          cntct_last_name, cntct_first_name, cntct_number,
+         <? if exists("hasContext") ?>crmrole_name,<? endif ?>
          cntcteml_primary desc
 <? if exists("hasContext") ?>
 ) foo
-ORDER BY crmrole_sort
+ORDER BY crmacctcntctass_active DESC, crmrole_sort
 <? endif ?>
 ;
