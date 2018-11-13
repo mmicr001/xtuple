@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -e
+set -i
 PROG=$(basename $0)
 PROGDIR=$(dirname $0)
 
 DEBUG=false
 ADMIN=admin
 PASSWD=admin
-PORT=5432
+PGPORT=${PGPORT:-5432}
 HOST=localhost
 MAJ=
 MIN=
@@ -26,8 +27,8 @@ XTUPLEDIR=$(pwd)
 declare -a CONFIG=(\
   "xtuple                  default true  https://github.com/xtuple  false skip    " \
   "private-extensions      default true  git@github.com:xtuple      true  skip    " \
-  "qt-client               default skip  https://github.com/xtuple  false skip    " \
-  "updater                 default skip  https://github.com/xtuple  false skip    " \
+  "qt-client               default true  https://github.com/xtuple  false skip    " \
+  "updater                 default true  https://github.com/xtuple  false skip    " \
   "address-verification    default true  https://github.com/xtuple  true  ^[demp] " \
   "connect                 default true  git@github.com:xtuple      true  ^[e]    " \
   "enhanced-pricing        default true  git@github.com:xtuple      true  ^[e]    " \
@@ -37,7 +38,7 @@ declare -a CONFIG=(\
   "payment-gateways        default true  git@github.com:xtuple      true  ^[e]    " \
   "xdruple-extension       default false git@github.com:xtuple      true  ^[e]    " \
   "xtcommission            default true  git@github.com:xtuple      true  ^[e]    " \
-  "xtdash                  default false git@github.com:xtuple      true  ^[dem]  " \
+  "xtdash                  default true  git@github.com:xtuple      true  ^[dem]  " \
   "xtdesktop               default true  https://github.com/xtuple  true  ^[demp] " \
   "xtprjaccnt              default true  git@github.com:xtuple      true  ^[e]    " \
   "xtte                    default true  https://github.com/xtuple  true  ^[demp] " \
@@ -100,7 +101,8 @@ setConfig() {
 }
 
 gitco() {
-  local REPO="$1" GITDEST="${2:-$1}" GITTAG="${3:-$(getConfig $REPO tag)}" GITURL="${4:-$(getConfig $REPO source)}"
+  local REPO="$1" GITDEST="${2:-$1}"
+  local GITTAG="${3:-$(getConfig $REPO tag)}" GITURL="${4:-$(getConfig $REPO source)}"
 
   if [ "$GITTAG" == skip -a -d $XTUPLEDIR/../$REPO ] ; then
     return 0
@@ -134,7 +136,7 @@ while [[ $1 =~ ^- ]] ; do
     -h) HOST=$2
         shift
         ;;
-    -p) PORT=$2
+    -p) PGPORT=$2
         shift
         ;;
     -t) TRANSLATIONS=false
@@ -217,6 +219,8 @@ done
 
 cd $XTUPLEDIR
 rm -rf scripts/output
+npm install
+[ -e node-datasource/config.js ] || cp node-datasource/sample_config.js node-datasource/config.js
 
 MODES="upgrade install"
 EDITIONS="postbooks manufacturing distribution"
@@ -224,49 +228,56 @@ DATABASES="empty quickstart demo"
 PACKAGES="commercialcore inventory"
 
 if $TRANSLATIONS ; then
-  cd ../xtuple
-  for TRANSLATION in $(find foundation-database/public/tables/dict/*.ts) ; do
+  cd $XTUPLEDIR
+  for TRANSLATION in $(echo foundation-database/public/tables/dict/*.ts) ; do
+    xsltproc --stringparam ts ../../$TRANSLATION scripts/xml/reports.xsl \
+                        foundation-database/public/tables/report/*.xml | \
+      sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
     cat <<-EOHEADER > $TRANSLATION
 	<?xml version="1.0" encoding="utf-8"?>
 	<TS version="2.0">
+	$(cat reports.ts)
+	</TS>
 	EOHEADER
-    for REPORT in $(find foundation-database/public/tables/report/*.xml) ; do
-      xsltproc --stringparam ts ../../$TRANSLATION scripts/xml/reports.xsl $REPORT | \
-        sed -e '/<?xml version/d' -e 's/^/  /' >> $TRANSLATION
-    done
-    echo '</TS>' >> $TRANSLATION
+    rm reports.ts
 
-    lrelease $TRANSLATION
   done
+  lrelease -silent $TRANSLATION foundation-database/public/tables/dict/*.ts
   mkdir -p scripts/output/dict/postbooks
   mv foundation-database/public/tables/dict/*.qm scripts/output/dict/postbooks
 
   cd ../private-extensions
   for PACKAGE in commercialcore inventory manufacturing distribution ; do
     mkdir -p $XTUPLEDIR/scripts/output/dict/$PACKAGE
-
-    if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
-      for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
-        for REPORT in $(find source/$PACKAGE/foundation-database/*/tables/pkgreport/*.xml) ; do
-          xsltproc --stringparam ts ../../../private-extensions/$TRANSLATION ../xtuple/scripts/xml/reports.xsl $REPORT | \
-            sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
+    if [ -d source/$PACKAGE/foundation-database/*/tables/dict ] ; then
+      # get report translations before make below removes "unused" translations
+      # TODO: move report translation gathering to the individual makefiles?
+      if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
+        for TRANSLATION in $(echo source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+          xsltproc --stringparam ts ../../../private-extensions/$TRANSLATION ../xtuple/scripts/xml/reports.xsl \
+                                                source/$PACKAGE/foundation-database/*/tables/pkgreport/*.xml | \
+            sed -e '/<?xml version/d' -e 's/^/  /' >> $TRANSLATION.rpt
         done
-      done
+      fi
+
+      cd source/$PACKAGE/foundation-database/*/tables/dict
+      make
+      cd $XTUPLEDIR/../private-extensions
+
+      if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
+        for TRANSLATION in $(echo source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+          sed -i -e '/<\/TS>/d' $TRANSLATION
+          cat $TRANSLATION.rpt >> $TRANSLATION
+          echo '</TS>' >> $TRANSLATION
+          rm $TRANSLATION.rpt
+        done
+      fi
     fi
 
-    lupdate -no-obsolete source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
-
-    if [ -e reports.ts ] ; then
-      for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
-        sed -i -e '/<\/TS>/d' $TRANSLATION
-        cat reports.ts >> $TRANSLATION
-        echo '</TS>' >> $TRANSLATION
-      done
-      rm reports.ts
+    if [ -e source/$PACKAGE/foundation-database/*/tables/dict/ts.pro ] ; then
+      lrelease -silent source/$PACKAGE/foundation-database/*/tables/dict/ts.pro
+      mv source/$PACKAGE/foundation-database/*/tables/dict/*.qm ../xtuple/scripts/output/dict/$PACKAGE
     fi
-
-    lrelease source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
-    mv source/$PACKAGE/foundation-database/*/tables/dict/*.qm ../xtuple/scripts/output/dict/$PACKAGE
   done
 fi
 
@@ -331,7 +342,8 @@ for EDITION in $EDITIONS enterprise ; do
           fi
         done
 
-        if [ -d scripts/output/dict/$SUBPACKAGE ] ; then
+        # german is a standard translation language; use it as a proxy for all
+        if [ -e scripts/output/dict/$SUBPACKAGE/*de.qm ] ; then
           cp scripts/output/dict/$SUBPACKAGE/*.qm scripts/output/$FULLNAME
         fi
       done
@@ -342,8 +354,9 @@ for EDITION in $EDITIONS enterprise ; do
   MODES="upgrade install"
 done
 
-if [ ! -e ${XTUPLEDIR}/../updater/bin/updater ] ; then
-  cd ${XTUPLEDIR}/../qt-client
+cd ${XTUPLEDIR}/..
+if [ ! -e updater/bin/updater ] ; then
+  cd qt-client
   git submodule update --init --recursive
   cd openrpt
   qmake
@@ -363,28 +376,30 @@ cd ${XTUPLEDIR}
 for EDITION in $EDITIONS ; do
   for DATABASE in $DATABASES ; do
     scripts/build_app.js -d ${EDITION}_${DATABASE} --databaseonly -e foundation-database -i -s foundation-database/${DATABASE}_data.sql
-    if [ "$EDITION" != postbooks ] ; then
-      for PACKAGE in postbooks commercialcore inventory manufacturing distribution ; do
-        scripts/build_app.js -d ${EDITION}_${DATABASE} --databaseonly -e ../private-extensions/source/$PACKAGE/foundation-database -f
-      done
-    fi
+    case $EDITION in
+      distribution)  PACKAGELIST="commercialcore inventory distribution"  ;;
+      manufacturing) PACKAGELIST="commercialcore inventory manufacturing" ;;
+      *)             PACKAGELIST=""                                       ;;
+    esac
+    for PACKAGE in $PACKAGELIST ; do
+      scripts/build_app.js -d ${EDITION}_${DATABASE} --databaseonly -e ../private-extensions/source/$PACKAGE/foundation-database -f
+    done
 
-    if $TRANSLATIONS ; then
-      ../updater/bin/updater -h $HOST -U $ADMIN -p $PORT -d ${EDITION}_${DATABASE} \
-                             -f scripts/output/$EDITION-upgrade-$MAJ.$MIN.$PAT.gz -autorun
+    PKGFILE=scripts/output/$EDITION-upgrade-$MAJ.$MIN.$PAT.gz
+    if [ -e $PKGFILE ] ; then
+      ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d ${EDITION}_${DATABASE} -autorun -f $PKGFILE
     fi
   done
 done
 
 awk '/databaseServer: {/,/}/ {
       if ($1 == "hostname:") { $2 = "\"'$HOST'\",";  }
-      if ($1 == "port:")     { $2 = "'$PORT',";      }
+      if ($1 == "port:")     { $2 = "'$PGPORT',";      }
       if ($1 == "admin:")    { $2 = "\"'$ADMIN'\","; }
       if ($1 == "password:") { $2 = "\"'$PASSWD'\""; }
     }
     { print
     }' node-datasource/config.js > scripts/output/config.js
-
 
 for EDITION in $EDITIONS ; do
   for DATABASE in $DATABASES ; do
@@ -396,15 +411,17 @@ for EDITION in $EDITIONS ; do
         cd $XTUPLEDIR/../$MODULE
         for MAKEFILE in "$(find * -name Makefile | \
                            egrep -v 'dict|node_modules|node-datasource|test|updatescripts')" ; do
-          pushd $(dirname $MAKEFILE) ; make ; popd
+          pushd $(dirname $MAKEFILE)
+          if  $TRANSLATIONS ; then make ; else make no-translations || make ; fi
+          popd
         done
         for PACKAGEXML in "$(find * -name package.xml)" ; do
-          ../updater/bin/updater -h $HOST -U $ADMIN -p $PORT -d $DB -autorun -D \
+          ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d $DB -autorun -D \
                                  -f packages/$(packageInfo name $PACKAGEXML)-$(packageInfo version $PACKAGEXML).gz
         done
       fi
     done
-    pg_dump --host $HOST --username $ADMIN --port $PORT --format c --file $XTUPLEDIR/$DB-$MAJ.$MIN.$PAT.backup $DB
+    pg_dump --host $HOST --username $ADMIN --port $PGPORT --format c --file $XTUPLEDIR/$DB-$MAJ.$MIN.$PAT.backup $DB
   done
 done
 
@@ -427,3 +444,4 @@ done
 rm -rf scripts/output/add-manufacturing-to-distribution-$MAJ.$MIN.$PAT/
 rm -rf scripts/output/config.js
 rm -rf scripts/output/dict
+rm -f  distribution_demo-$MAJ.$MIN.$PAT.backup  # because it's useless
