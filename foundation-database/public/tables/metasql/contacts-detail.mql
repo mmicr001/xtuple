@@ -79,6 +79,12 @@ WHERE true
     AND crmacctcntctass_active
   <? endif ?>
 <? endif ?>
+<? if exists("campaign") ?>
+   AND CASE WHEN <? value("campaign") ?> =1 THEN NULLIF(cntct_email, '') IS NOT NULL AND cntct_email_optin
+            WHEN <? value("campaign") ?> =2 THEN cntct_addr_id IS NOT NULL AND cntct_email_optin
+            WHEN <? value("campaign") ?> =3 THEN getContactPhone(cntct_id, 'Office') IS NOT NULL AND cntct_email_optin
+       ELSE true END
+<? endif ?>
 <? if exists("search_pattern") ?>
   AND (
  (crmacct_number ~* <? value("search_pattern") ?>)
