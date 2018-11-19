@@ -179,9 +179,9 @@ FROM (
 --  Cash Receipt headers
 SELECT cashrcpt_id AS id, 0 AS type, cashrcpt_number,
        CASE WHEN (cashrcpt_cust_id <> -1) THEN cust_number
-		ELSE (SELECT groups_name FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_number,
+		ELSE (SELECT groups_name FROM custgrp WHERE groups_id=cashrcpt_custgrp_id) END AS cust_number,
        CASE WHEN (cashrcpt_cust_id <> -1) THEN cust_name
-		ELSE (SELECT groups_descrip FROM custgrp WHERE custgrp_id=cashrcpt_custgrp_id) END AS cust_name,
+		ELSE (SELECT groups_descrip FROM custgrp WHERE groups_id=cashrcpt_custgrp_id) END AS cust_name,
        cashrcpt_distdate AS postdate, cashrcpt_posted AS posted, cashrcpt_void AS voided,
        ( CASE WHEN (cashrcpt_fundstype='C') THEN <? value("check") ?>
               WHEN (cashrcpt_fundstype='T') THEN <? value("certifiedCheck") ?>

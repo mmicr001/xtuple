@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION explodewo(pWoid INTEGER, pExplodeChildren BOOLEAN)
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   newWo RECORD;

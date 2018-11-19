@@ -68,7 +68,6 @@ SELECT
                     $$CHECK (cust_creditstatus IN ('G', 'W', 'H'))$$, 'public'),
   xt.add_constraint('custinfo', 'custinfo_cust_number_check',
                     $$CHECK (cust_number <> ''::text)$$, 'public'),
-  xt.add_constraint('custinfo', 'custinfo_cust_number_key', 'UNIQUE (cust_number)', 'public'),
   xt.add_constraint('custinfo', 'custinfo_crmacct_id_fkey',
                     'FOREIGN KEY (cust_crmacct_id) REFERENCES crmacct(crmacct_id)
                      MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
@@ -126,6 +125,11 @@ BEGIN
 END$$;
 
 ALTER TABLE custinfo ALTER COLUMN cust_crmacct_id SET NOT NULL;
+
+-- replace the old constraining index with one better suited to the custcluster completer
+-- but xt.add_index() can't handle UNIQUE yet
+ALTER TABLE public.custinfo drop constraint IF EXISTS custinfo_cust_number_key;
+CREATE UNIQUE INDEX IF NOT EXISTS custinfo_cust_number_key ON public.custinfo (cust_number text_pattern_ops);
 
 ALTER TABLE public.custinfo ENABLE TRIGGER ALL;
 

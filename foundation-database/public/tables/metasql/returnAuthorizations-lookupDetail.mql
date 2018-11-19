@@ -2,7 +2,7 @@
 -- Name:  lookupDetail
 -- Notes: 
 --        Notes:
---        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT DISTINCT ON ( rahead_number ) rahead_id, rahead_number, cohead_number, rahead_billtoname,

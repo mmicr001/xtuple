@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS xt.deletePOType(INTEGER);
 
 CREATE OR REPLACE FUNCTION deletePOType(pPotypeid INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 

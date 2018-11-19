@@ -20,6 +20,8 @@ SELECT
   xt.add_column('cntctsel', 'cntctsel_mrg_cntct_title',      'boolean', 'DEFAULT false', 'public'),
   xt.add_column('cntctsel', 'cntctsel_mrg_cntct_middle',     'boolean', 'DEFAULT false', 'public'),
   xt.add_column('cntctsel', 'cntctsel_mrg_cntct_suffix',     'boolean', 'DEFAULT false', 'public'),
+  xt.add_column('cntctsel', 'cntctsel_mrg_cntct_companyname', 'boolean', 'DEFAULT false', 'public'),
+  xt.add_column('cntctsel', 'cntctsel_mrg_cntct_email_optin', 'boolean', 'DEFAULT false', 'public'),
   xt.add_column('cntctsel', 'cntctsel_mrg_cntct_owner_username', 'boolean', 'DEFAULT false', 'public');
 
 SELECT
@@ -27,7 +29,7 @@ SELECT
   xt.add_constraint('cntctsel', 'cntctsel_cntct_id_fkey',
                     'FOREIGN KEY (cntctsel_cntct_id) REFERENCES public.cntct (cntct_id) 
                      MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE', 'public');
-  
+
 ALTER TABLE public.cntctsel ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE public.cntctsel

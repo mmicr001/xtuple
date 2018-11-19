@@ -65,7 +65,7 @@ ORDER BY cohead_number,coitem_linenumber,coitem_subnumber;
 GRANT ALL ON TABLE api.salesline TO xtrole;
 COMMENT ON VIEW api.salesline IS 'Sales Order Line Item';
 
-DROP FUNCTION IF EXISTS public.insertsalesline(api.salesline);
+DROP FUNCTION IF EXISTS public.insertsalesline(api.salesline) CASCADE;
 
 CREATE OR REPLACE FUNCTION api.insertSalesLine(api.salesline) RETURNS boolean AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.

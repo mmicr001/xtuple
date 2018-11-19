@@ -12,9 +12,11 @@ SELECT dropIfExists('VIEW', 'contact', 'api');
     cntct_suffix AS suffix,
     cntct_initials AS initials,
     cntct_active AS active,
+    cntct_companyname AS company,
     cntct_title AS job_title,
     phoneJson(cntct_id) AS phones,
     cntct_email AS email,
+    cntct_email_optin AS email_opt_in,
     cntct_webaddr AS web,
     ''::TEXT AS contact_change, 
     addr_number AS address_number,
@@ -60,12 +62,15 @@ SELECT saveCntct(
           NEW.suffix,
           NEW.initials,
           COALESCE(NEW.active,TRUE),
-          NEW.phones,
+          replace((NEW.phones)::CHARACTER VARYING, 'null', '[]')::JSON,
           NEW.email,
           NEW.web,
           NEW.notes,
           NEW.job_title,
-          NEW.contact_change
+          NEW.contact_change,
+          NULL,
+          NEW.email_opt_in,
+          NEW.company
           );
 
 CREATE OR REPLACE RULE "_UPDATE" AS
@@ -92,12 +97,15 @@ SELECT saveCntct(
           NEW.suffix,
           NEW.initials,
           NEW.active,
-          NEW.phones,
+          replace((NEW.phones)::CHARACTER VARYING, 'null', '[]')::JSON,
           NEW.email,
           NEW.web,
           NEW.notes,
           NEW.job_title,
-          NEW.contact_change
+          NEW.contact_change,
+          NULL,
+          NEW.email_opt_in,
+          NEW.company        
           );
 
 CREATE OR REPLACE RULE "_DELETE" AS
