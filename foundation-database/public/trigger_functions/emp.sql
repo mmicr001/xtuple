@@ -1,22 +1,26 @@
 CREATE OR REPLACE FUNCTION _empBeforeTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
   IF NOT (checkPrivilege('MaintainEmployees')) THEN
-    RAISE EXCEPTION 'You do not have privileges to maintain Employees.';
+    RAISE EXCEPTION 'You do not have privileges to maintain Employees. [xtuple: _empBeforeTrigger, -1]';
   END IF;
 
   IF (NEW.emp_code IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid Employee Code.';
+    RAISE EXCEPTION 'You must supply a valid Employee Code. [xtuple: _empBeforeTrigger, -2]';
   END IF;
 
   IF (NEW.emp_number IS NULL) THEN
-    RAISE EXCEPTION 'You must supply a valid Employee Number.';
+    RAISE EXCEPTION 'You must supply a valid Employee Number.  [xtuple: _empBeforeTrigger, -3]';
   END IF;
 
   IF (NEW.emp_id = NEW.emp_mgr_emp_id) THEN
-    RAISE EXCEPTION 'An Employee may not be his or her own Manager.';
+    RAISE EXCEPTION 'An Employee may not be his or her own Manager. [xtuple: _empBeforeTrigger, -4]';
+  END IF;
+
+  IF (NEW.emp_image_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM image WHERE image_id=NEW.emp_image_id)) THEN
+    RAISE EXCEPTION 'An invalid image was selected. [xtuple: _empBeforeTrigger, -5]';
   END IF;
 
   -- ERROR:  cannot use column references in default expression
@@ -85,7 +89,7 @@ CREATE TRIGGER empBeforeTrigger
   EXECUTE PROCEDURE _empBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _empAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _newcrmacctname TEXT;
@@ -156,7 +160,7 @@ CREATE TRIGGER empAfterTrigger
   EXECUTE PROCEDURE _empAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _empBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainEmployees')) THEN
@@ -178,7 +182,7 @@ CREATE TRIGGER empBeforeDeleteTrigger
   EXECUTE PROCEDURE _empBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _empAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (fetchMetricBool('EmployeeChangeLog')) THEN

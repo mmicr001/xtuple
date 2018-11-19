@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION _soheadTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _p RECORD;
@@ -604,7 +604,7 @@ CREATE TRIGGER soheadTrigger
   EXECUTE PROCEDURE _soheadTrigger();
 
 CREATE OR REPLACE FUNCTION _soheadTriggerAfter() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.cohead_taxzone_id,-1) <> COALESCE(OLD.cohead_taxzone_id,-1)) THEN
@@ -615,7 +615,8 @@ BEGIN
   END IF;
 
   -- update comments on any associated drop ship POs
-  IF (COALESCE(NEW.cohead_shipcomments, TEXT('')) <> COALESCE(OLD.cohead_shipcomments, TEXT(''))) THEN
+  IF (fetchmetricbool('CopySOShippingNotestoPO') 
+      AND COALESCE(NEW.cohead_shipcomments, TEXT('')) <> COALESCE(OLD.cohead_shipcomments, TEXT(''))) THEN
     UPDATE pohead SET pohead_comments=NEW.cohead_shipcomments
     FROM poitem JOIN coitem ON (coitem_cohead_id=NEW.cohead_id AND coitem_order_type='P' AND coitem_order_id=poitem_id)
     WHERE (pohead_id=poitem_pohead_id);
@@ -656,7 +657,7 @@ CREATE TRIGGER soheadTriggerAfter
   EXECUTE PROCEDURE _soheadTriggerAfter();
 
 CREATE OR REPLACE FUNCTION _coheadBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -686,9 +687,11 @@ CREATE TRIGGER coheadBeforeDeleteTrigger
   EXECUTE PROCEDURE _coheadBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _coheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
+_recurid     INTEGER;
+_newparentid INTEGER;
 
 BEGIN
 
@@ -699,6 +702,30 @@ BEGIN
   DELETE FROM taxhead
    WHERE taxhead_doc_type = 'S'
      AND taxhead_doc_id = OLD.cohead_id;
+
+  --recurrence cleanup
+  SELECT recur_id INTO _recurid
+    FROM recur
+   WHERE recur_parent_id = OLD.cohead_id
+     AND recur_parent_type = 'S';
+  IF (_recurid IS NOT NULL) THEN -- The deleted SO is the parent of a recurrence series
+    SELECT cohead_id INTO _newparentid
+      FROM cohead
+     WHERE cohead_recurring_cohead_id = OLD.cohead_id
+       AND cohead_id != OLD.cohead_id 
+     ORDER BY cohead_packdate
+     LIMIT 1; -- Find the next recurring SO whose parent is the deleted SO
+    IF (_newparentid IS NULL) THEN -- The deleted SO is the only SO in the series
+      DELETE FROM recur WHERE recur_id = _recurid;
+    ELSE
+      UPDATE recur SET recur_parent_id = _newparentid
+       WHERE recur_id = _recurid;
+
+      UPDATE cohead SET cohead_recurring_cohead_id = _newparentid
+       WHERE cohead_recurring_cohead_id = OLD.cohead_id
+         AND cohead_id != OLD.cohead_id;
+    END IF;
+  END IF;
 
   RETURN OLD;
 END;

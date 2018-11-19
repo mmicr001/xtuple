@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION relocateInventory(INTEGER, INTEGER, INTEGER, NUMERIC, TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN relocateInventory($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);
@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION relocateInventory(pSourceItemlocid INTEGER,
                                              pQty NUMERIC,
                                              pComments TEXT,
                                              pGLDistTS TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _GlDistTS             TIMESTAMP WITH TIME ZONE;

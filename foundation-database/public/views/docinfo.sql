@@ -8,7 +8,8 @@ CREATE OR REPLACE VIEW docinfo AS
            (_docinfo).source_id,
            (_docinfo).name,
            (_docinfo).description,
-           (_docinfo).purpose
+           (_docinfo).purpose,
+           (_docinfo).notes
       FROM (SELECT DISTINCT _docinfo(id, type)
               FROM (
                   SELECT docass_source_id AS id,   docass_source_type AS type

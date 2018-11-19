@@ -46,8 +46,6 @@ SELECT
   xt.add_constraint('emp', 'emp_crmacct_id_key', 'UNIQUE (emp_crmacct_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_dept_id_fkey',
                     'FOREIGN KEY (emp_dept_id) REFERENCES dept(dept_id)', 'public'),
-  xt.add_constraint('emp', 'emp_emp_image_id_fkey',
-                    'FOREIGN KEY (emp_image_id) REFERENCES image(image_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_mgr_emp_id_fkey',
                     'FOREIGN KEY (emp_mgr_emp_id) REFERENCES emp(emp_id)', 'public'),
   xt.add_constraint('emp', 'emp_emp_shift_id_fkey',
@@ -69,6 +67,8 @@ BEGIN
 END$$;
 
 ALTER TABLE emp ALTER COLUMN emp_crmacct_id SET NOT NULL;
+
+ALTER TABLE public.emp DROP CONSTRAINT IF EXISTS emp_emp_image_id_fkey;
 
 ALTER TABLE public.emp ENABLE TRIGGER ALL;
 

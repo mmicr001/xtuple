@@ -19,7 +19,7 @@ SELECT * FROM (
   addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
   regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
-  cntct_active,
+  cntct_active, cntct_companyname AS company,
   cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
   getContactPhone(cntct_id, 'Office') AS contact_phone,
   getContactPhone(cntct_id, 'Mobile') AS contact_phone2,                   
@@ -83,6 +83,7 @@ WHERE true
   OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
   OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntcteml_email,'') ~* <? value("search_pattern") ?>)
+  OR (COALESCE(cntct_companyname,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
@@ -101,6 +102,11 @@ WHERE true
 <? endif ?>
 <? if exists("cntct_name_pattern") ?>
   AND (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("cntct_name_pattern") ?>)
+<? endif ?>
+<? if exists("company_pattern") ?>
+  AND ((COALESCE(cntct_companyname,'') ~* <? value("company_pattern") ?>)
+       OR (crmacct_number ~* <? value("company_pattern") ?>)
+       OR (crmacct_name ~* <? value("company_pattern") ?>))
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
   AND phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
@@ -154,7 +160,7 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
   ,addr_id,addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode,
   addr_country, addr_notes, addr_number,
   cntct_active, cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
-  contact_phone,contact_phone2,contact_phone3,
+  contact_phone,contact_phone2,contact_phone3, cntct_companyname,
   cntct_email, cntct_webaddr
 <? foreach("char_id_text_list") ?>
   , charass_alias<? literal("char_id_text_list") ?>.charass_value

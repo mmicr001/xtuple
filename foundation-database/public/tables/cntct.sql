@@ -5,6 +5,7 @@ ALTER TABLE public.cntct DISABLE TRIGGER ALL;
 SELECT
   xt.add_column('cntct', 'cntct_id',           'SERIAL', 'NOT NULL', 'public'),
   xt.add_column('cntct', 'cntct_addr_id',     'INTEGER', NULL,       'public'),
+  xt.add_column('cntct', 'cntct_companyname',    'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_first_name',     'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_last_name',      'TEXT', NULL,       'public'),
   xt.add_column('cntct', 'cntct_honorific',      'TEXT', NULL,       'public'),
@@ -74,3 +75,4 @@ ALTER TABLE public.cntct ENABLE TRIGGER ALL;
 
 COMMENT ON TABLE cntct IS 'Contact - information on how to reach a living person';
 COMMENT ON COLUMN public.cntct.cntct_email_optin IS 'Contact email address opt in/out';
+COMMENT ON COLUMN public.cntct.cntct_companyname IS 'Company associated with Contact.  Gets superceded by CRM Account assignment';

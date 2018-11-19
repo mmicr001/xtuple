@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION public.saveaddr(
     pAccuracy NUMERIC DEFAULT NULL,
     pMktg BOOLEAN DEFAULT FALSE)
   RETURNS integer AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _addr   addr%ROWTYPE;
@@ -171,7 +171,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION saveAddr(int4, text, text, text, text, text, text, text, text, text)
   RETURNS integer AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pAddrId ALIAS FOR $1;

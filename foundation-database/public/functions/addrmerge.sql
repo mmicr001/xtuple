@@ -8,6 +8,7 @@ DECLARE
   _fk		RECORD;
   _coldesc      RECORD;
   _seq  	INTEGER;
+  _mrgcol       BOOLEAN;
   _col		TEXT;
 
 BEGIN
@@ -17,10 +18,10 @@ BEGIN
   ELSIF (pTargetAddrId IS NULL) THEN
     RAISE EXCEPTION 'Target address id can not be null';
   END IF;
-  
+
   -- Determine where this address is used by analyzing foreign key linkages and update each
   FOR _fk IN
-    SELECT pg_namespace.nspname AS schemaname, con.relname AS tablename, conkey AS seq, conrelid AS class_id 
+    SELECT pg_namespace.nspname AS schemaname, con.relname AS tablename, conkey AS seq, conrelid AS class_id
     FROM pg_constraint, pg_class f, pg_class con, pg_namespace
     WHERE confrelid=f.oid
     AND conrelid=con.oid
@@ -33,7 +34,7 @@ BEGIN
       RAISE EXCEPTION 'Updates to tables where the address is one of multiple foreign key columns is not supported. Error on Table: %',
         pg_namespace.nspname || '.' || con.relname;
     END IF;
-    
+
     _seq := _fk.seq[1];
 
     -- Get the specific column name
@@ -48,7 +49,7 @@ BEGIN
                     WHERE (%I=%L);',
                     _fk.schemaname, _fk.tablename,
                     _col, pTargetAddrId, _col, pSourceAddrId);
-         
+
   END LOOP;
 
   -- Merge cases with no foreign key
@@ -85,10 +86,12 @@ BEGIN
                      'addr_lat', 'addr_lon', 'addr_accuracy')
   LOOP
 
-    IF (format('SELECT addrsel_mrg_%I FROM addrsel
-                    WHERE (addrsel_addr_id=%L)', 
-                    _coldesc.attname, pSourceAddrId)) THEN
+    EXECUTE format('SELECT addrsel_mrg_%I FROM addrsel
+                    WHERE (addrsel_addr_id=%L)',
+                    _coldesc.attname, pSourceAddrId)
+            INTO _mrgcol;
 
+    IF (_mrgcol) THEN
       EXECUTE format('UPDATE addr dest SET %I=src.%I
                       FROM addr src
                       WHERE ((dest.addr_id=%L)
@@ -101,7 +104,7 @@ BEGIN
   -- Disposition of source address
   DELETE FROM addr WHERE addr_id = pSourceAddrId;
   DELETE FROM crmacctaddrass WHERE crmacctaddrass_addr_id = pSourceAddrId;
- 
+
   -- Clean up
   DELETE FROM addrsel WHERE (addrsel_addr_id=pSourceAddrId);
 
