@@ -2,7 +2,7 @@ SELECT dropifexists('FUNCTION', 'updatemiscvouchertax(integer, integer, date, in
 
 CREATE OR REPLACE FUNCTION updatemiscvouchertax(pvoheadid integer, ptaxzone integer, pdate date, pcurr integer)
   RETURNS numeric AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
    _distid	integer;

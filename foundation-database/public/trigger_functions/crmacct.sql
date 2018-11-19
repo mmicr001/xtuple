@@ -57,7 +57,7 @@ CREATE TRIGGER crmacctBeforeUpsertTrigger BEFORE INSERT OR UPDATE ON crmacct
   FOR EACH ROW EXECUTE PROCEDURE _crmacctBeforeUpsertTrigger();
 
 CREATE OR REPLACE FUNCTION _crmacctBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   DELETE FROM crmacctcntctass 
@@ -75,7 +75,7 @@ CREATE TRIGGER crmacctBeforeDeleteTrigger BEFORE DELETE ON crmacct
   FOR EACH ROW EXECUTE PROCEDURE _crmacctBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _crmacctAfterUpsertTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   /* update _number and _name separately to propagate just what changed.
@@ -190,7 +190,7 @@ CREATE TRIGGER crmacctAfterUpsertTrigger AFTER INSERT OR UPDATE ON crmacct
   FOR EACH ROW EXECUTE PROCEDURE _crmacctAfterUpsertTrigger();
 
 CREATE OR REPLACE FUNCTION _crmacctAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full te`xt of the software license.
 BEGIN
 

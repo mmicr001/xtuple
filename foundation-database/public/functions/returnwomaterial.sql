@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION returnWoMaterial(pWomatlid INTEGER,
                                             pQty NUMERIC,
                                             pGlDistTS TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocSeries INTEGER;
@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION returnWoMaterial(pWomatlid INTEGER,
                                             pGlDistTS TIMESTAMP WITH TIME ZONE,
                                             pInvhistId INTEGER)
 RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _woNumber TEXT;
@@ -144,7 +144,7 @@ CREATE OR REPLACE FUNCTION returnWoMaterial(pWomatlid INTEGER,
                                             pReqStdCost BOOLEAN DEFAULT FALSE,
                                             pPreDistributed BOOLEAN DEFAULT FALSE,
                                             pPostDistDetail BOOLEAN DEFAULT TRUE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _woNumber TEXT;
