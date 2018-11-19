@@ -243,7 +243,6 @@
     "public/functions/copyso.sql",
     "public/functions/copysoheader.sql",
     "public/functions/copytask.sql",
-    "public/functions/copytodoitem.sql",
     "public/functions/copyvoucher.sql",
     "public/functions/correctporeceipt.sql",
     "public/functions/correctproduction.sql",
