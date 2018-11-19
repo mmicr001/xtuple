@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _poitemTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cmnttypeid 	INTEGER;
@@ -179,7 +179,7 @@ CREATE TRIGGER poitemTrigger
   EXECUTE PROCEDURE _poitemTrigger();
 
 CREATE OR REPLACE FUNCTION _poitemAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -257,7 +257,7 @@ CREATE TRIGGER poitemAfterTrigger
   EXECUTE PROCEDURE _poitemAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _poitemDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 BEGIN
@@ -295,7 +295,7 @@ CREATE TRIGGER poitemDeleteTrigger
   EXECUTE PROCEDURE _poitemDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _poitemAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 

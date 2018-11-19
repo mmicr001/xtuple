@@ -29,7 +29,7 @@ GRANT ALL ON TABLE api.apmemo TO xtrole;
 COMMENT ON VIEW api.apmemo IS 'A/P Credit and Debit Memo';
 
 CREATE OR REPLACE FUNCTION insertapmemo(api.apmemo) RETURNS boolean AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pNew ALIAS FOR $1;

@@ -3,7 +3,7 @@ DROP TRIGGER IF EXISTS pkgheadbeforedeletetrigger ON pkghead;
 DROP TRIGGER IF EXISTS pkgheadbeforeupserttrigger ON pkghead;
 
 CREATE OR REPLACE FUNCTION _pkgheadbeforeupserttrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   BEGIN
     IF (TG_OP = 'UPDATE') THEN
@@ -35,7 +35,7 @@ CREATE TRIGGER pkgheadbeforeupserttrigger BEFORE INSERT OR UPDATE ON pkghead
   FOR EACH ROW EXECUTE PROCEDURE _pkgheadbeforeupserttrigger();
 
 CREATE OR REPLACE FUNCTION _pkgheadbeforedeletetrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   BEGIN
     DELETE FROM pkgdep WHERE pkgdep_pkghead_id=OLD.pkghead_id;

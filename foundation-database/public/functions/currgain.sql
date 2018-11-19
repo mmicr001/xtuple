@@ -9,7 +9,7 @@
 -- rather than from the curr_rate table.
 CREATE OR REPLACE FUNCTION currGain(INTEGER, NUMERIC, DATE, DATE)
 RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pId ALIAS FOR $1;

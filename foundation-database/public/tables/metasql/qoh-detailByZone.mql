@@ -2,7 +2,7 @@
 -- Name:  detailByZone
 -- Notes: 
 --        Quantity on Hand By Warehouse Zone
---        Copyright (c) 2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 2015-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 SELECT itemsite_id, itemloc_id AS altid, item_number AS sortkey, warehous_code, item_number,
        item_descrip1,
