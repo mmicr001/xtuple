@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION createItemlocdistParent(
   pItemlocdistId INTEGER DEFAULT NULL, -- Used in enterPoReceipt.cpp for TO (from WH) for example, it sets the itemlocdist_source_id record 
   pTransType TEXT DEFAULT NULL
 ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocdistId  INTEGER;

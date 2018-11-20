@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION returnItemShipments(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN returnItemShipments('SO', $1, 0, CURRENT_TIMESTAMP);
@@ -8,7 +8,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION returnItemShipments(INTEGER, INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN returnItemShipments('SO', $1, $2, CURRENT_TIMESTAMP);
@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION returnItemShipments(pordertype TEXT,
                                                pItemlocSeries INTEGER, 
                                                pTimestamp TIMESTAMP WITH TIME ZONE)
 RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocSeries	INTEGER := pItemlocSeries;

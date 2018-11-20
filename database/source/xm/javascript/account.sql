@@ -1,6 +1,6 @@
 select xt.install_js('XM','Account','xtuple', $$
-  /* Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
-     See www.xtuple.com/CPAL for the full text of the software license. */
+  /* Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+     See www.xm.ple.com/CPAL for the full text of the software license. */
   
   XM.Account = {};
 

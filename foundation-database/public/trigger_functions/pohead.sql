@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _poheadTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check	BOOLEAN;
@@ -92,7 +92,7 @@ CREATE TRIGGER poheadTrigger
   EXECUTE PROCEDURE _poheadTrigger();
 
 CREATE OR REPLACE FUNCTION _poheadTriggerAfter() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (COALESCE(NEW.pohead_taxzone_id,-1) <> COALESCE(OLD.pohead_taxzone_id,-1)) THEN
@@ -124,7 +124,7 @@ CREATE TRIGGER poheadTriggerAfter
   EXECUTE PROCEDURE _poheadTriggerAfter();
 
 CREATE OR REPLACE FUNCTION _poheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
