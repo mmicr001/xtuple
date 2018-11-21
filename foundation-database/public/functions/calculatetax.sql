@@ -247,7 +247,8 @@ BEGIN
               COALESCE(subtax.tax_basis_tax_id, -1) AS tax_basis_tax_id,
               COALESCE(subtaxclass.taxclass_id, -1) AS taxclass_id,
               COALESCE(subtaxrate.taxrate_percent, 0.0) AS taxrate_percent,
-              COALESCE(subtaxrate.taxrate_amount, 0.0) AS taxrate_amount
+              COALESCE(currToCurr(subtaxrate.taxrate_curr_id, pCurrId, subtaxrate.taxrate_amount,
+                                  pDocDate), 0.0) AS taxrate_amount
          FROM _taxamount
          JOIN tax subtax ON _taxamount.tax_id = subtax.tax_basis_tax_id
          LEFT OUTER JOIN taxclass subtaxclass ON subtax.tax_taxclass_id = subtaxclass.taxclass_id
