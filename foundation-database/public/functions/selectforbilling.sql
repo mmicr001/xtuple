@@ -29,7 +29,7 @@ $BODY$ LANGUAGE 'plpgsql' VOLATILE;
 
 ---------------------------------------------------------------------
 
-DROP FUNCTION selectforbilling(integer, numeric, boolean, integer);
+DROP FUNCTION IF EXISTS selectforbilling(integer, numeric, boolean, integer);
 CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text default null)
   RETURNS integer AS
 $BODY$
