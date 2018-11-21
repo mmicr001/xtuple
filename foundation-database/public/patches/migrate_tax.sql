@@ -18,8 +18,8 @@ BEGIN
                             AND b.cobill_coitem_id = cobill.cobill_coitem_id);
 
     -- Speeds up saveTax/calculateOrderTax calls by about an order of magnitude
-    CREATE TEMPORARY TABLE dochead ON COMMIT DROP AS SELECT * FROM dochead;
-    CREATE TEMPORARY TABLE docitem ON COMMIT DROP AS SELECT * FROM docitem;
+    CREATE TEMPORARY TABLE dochead AS SELECT * FROM dochead;
+    CREATE TEMPORARY TABLE docitem AS SELECT * FROM docitem;
     CREATE INDEX ON dochead (dochead_type, dochead_id);
     CREATE INDEX ON docitem (docitem_type, docitem_dochead_id);
 
@@ -46,6 +46,9 @@ BEGIN
     PERFORM saveTax('CM', cmhead_id, calculateOrderTax('CM', cmhead_id))
        FROM cmhead
       WHERE NOT cmhead_posted;
+
+    DROP TABLE dochead;
+    DROP TABLE docitem;
 
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_taxtype_id)
     SELECT taxhead_id, 'A', getAdjustmentTaxtypeId()
