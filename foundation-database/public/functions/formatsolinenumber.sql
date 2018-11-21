@@ -1,5 +1,7 @@
+DROP FUNCTION IF EXISTS formatSoLineNumber(INTEGER) CASCADE;
 
-CREATE OR REPLACE FUNCTION formatSoLineNumber(pSoitemid INTEGER) RETURNS TEXT IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION formatSoLineNumber(pOrderitemId   INTEGER,
+                                              pOrderType TEXT DEFAULT 'SI') RETURNS TEXT AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
@@ -7,20 +9,27 @@ DECLARE
 
 BEGIN
 
-  SELECT coitem_linenumber, coitem_subnumber
-    INTO _r
-    FROM coitem
-   WHERE(coitem_id=pSoitemid);
+  IF pOrderType = 'SI' THEN
+    SELECT coitem_linenumber AS linenumber, coitem_subnumber AS subnumber
+      INTO _r
+      FROM coitem
+     WHERE coitem_id = pOrderitemId;
+  ELSIF pOrderType = 'QI' THEN
+    SELECT quitem_linenumber AS linenumber, quitem_subnumber AS subnumber
+      INTO _r
+      FROM quitem
+     WHERE quitem_id = pOrderitemId;
+  END IF;
 
-  IF(NOT FOUND) THEN
+  IF NOT FOUND THEN
     RETURN NULL;
   END IF;
 
-  IF(COALESCE(_r.coitem_subnumber, 0) > 0) THEN
-    RETURN LPAD(_r.coitem_linenumber::TEXT, 3, '0') || '.' || LPAD(_r.coitem_subnumber::TEXT, 3, '0');
+  IF COALESCE(_r.subnumber, 0) > 0 THEN
+    RETURN LPAD(_r.linenumber::TEXT, 3, '0') || '.' || LPAD(_r.subnumber::TEXT, 3, '0');
+  ELSE
+    RETURN LPAD(_r.linenumber::TEXT, 3, '0'); 
   END IF;
 
-  RETURN LPAD(_r.coitem_linenumber::TEXT, 3, '0'); 
-END;
-$$ LANGUAGE plpgsql;
-
+END
+$$ language plpgsql;

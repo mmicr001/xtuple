@@ -12,7 +12,7 @@ select coitem.*,
   xt.co_line_ship_balance(coitem) as ship_balance,
   xt.co_line_at_shipping(coitem) as at_shipping,
   xt.co_line_margin(coitem) as margin,
-  xt.co_line_tax(coitem) as tax,
+  0.00 as tax,
   sochild_uuid as child_uuid
 from coitem
   join itemsite on coitem_itemsite_id=itemsite_id

@@ -63,14 +63,20 @@ BEGIN
   SELECT invchead.*, fetchGLSequence() AS sequence,
          findFreightAccount(invchead_cust_id) AS freightaccntid,
          findARAccount(invchead_cust_id) AS araccntid,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM invcheadtax
-           WHERE ( (taxhist_parent_id = invchead_id)
-             AND   (taxhist_taxtype_id = getFreightTaxtypeId()) ) ) AS freighttax,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM invcheadtax
-           WHERE ( (taxhist_parent_id = invchead_id)
-             AND   (taxhist_taxtype_id = getAdjustmentTaxtypeId()) ) ) AS adjtax
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'INV'
+             AND taxhead_doc_id = invchead_id
+             AND taxline_line_type = 'F') AS freighttax,
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'INV'
+             AND taxhead_doc_id = invchead_id 
+             AND taxline_line_type = 'A' ) AS adjtax
        INTO _p
   FROM invchead
   WHERE (invchead_id=pInvcheadid);
@@ -100,12 +106,19 @@ BEGIN
   FOR _r IN SELECT tax_sales_accnt_id,
               round(sum(taxdetail_tax),2) AS tax,
               currToBase(_p.invchead_curr_id, round(sum(taxdetail_tax),2), _firstExchDate) AS taxbasevalue
-            FROM tax
-             JOIN calculateTaxDetailSummary('I', pInvcheadid, 'T') ON (taxdetail_tax_id=tax_id)
+            FROM taxhead
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+            WHERE taxhead_doc_type = 'INV'
+              AND taxhead_doc_id = pInvcheadid
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _p.sequence, 'A/R', 'IN', _p.invchead_invcnumber,
-                                _r.tax_sales_accnt_id,
+                                CASE WHEN fetchMetricText('TaxService') = 'A'
+                                     THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
+                                     ELSE _r.tax_sales_accnt_id
+                                 END,
                                 _r.taxbasevalue,
                                 _glDate, _p.invchead_billto_name );
 
@@ -113,34 +126,19 @@ BEGIN
     _totalRoundedBase := _totalRoundedBase + _r.taxbasevalue;
   END LOOP;
 
--- Update item tax records with posting data
-    UPDATE invcitemtax SET
-      taxhist_docdate=_firstExchDate,
-      taxhist_distdate=_glDate,
-      taxhist_curr_id=_p.invchead_curr_id,
-      taxhist_curr_rate=curr_rate,
-      taxhist_journalnumber=pJournalNumber
-    FROM invchead
-     JOIN invcitem ON (invchead_id=invcitem_invchead_id),
-     curr_rate
-    WHERE ((invchead_id=pInvcheadId)
-      AND (taxhist_parent_id=invcitem_id)
-      AND (_p.invchead_curr_id=curr_id)
-      AND ( _firstExchDate BETWEEN curr_effective
-                           AND curr_expires) );
-
--- Update Invchead taxes (Freight and Adjustments) with posting data
-    UPDATE invcheadtax SET
-      taxhist_docdate=_firstExchDate,
-      taxhist_distdate=_glDate,
-      taxhist_curr_id=_p.invchead_curr_id,
-      taxhist_curr_rate=curr_rate,
-      taxhist_journalnumber=pJournalNumber
+-- Update tax records with posting data
+    UPDATE taxhead SET
+      taxhead_date=_firstExchDate,
+      taxhead_distdate=_glDate,
+      taxhead_curr_id=_p.invchead_curr_id,
+      taxhead_curr_rate=curr_rate,
+      taxhead_journalnumber=pJournalNumber
     FROM curr_rate
-    WHERE ((taxhist_parent_id=pInvcheadid)
+    WHERE taxhead_doc_type = 'INV'
+      AND taxhead_doc_id = pInvcheadid
       AND (_p.invchead_curr_id=curr_id)
       AND ( _firstExchDate BETWEEN curr_effective
-                           AND curr_expires) );
+                           AND curr_expires);
 
 --  March through the Non-Misc. Invcitems
   FOR _r IN SELECT *
@@ -229,21 +227,6 @@ BEGIN
       _p.sequence, _r.invcitem_taxtype_id, _p.invchead_taxzone_id,
       _p.invchead_shipzone_id, _p.invchead_saletype_id, _r.coitem_promdate,
       pInvcheadid, _r.invcitem_id, _r.invcitem_coitem_id );
-
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber
-    FROM invcitemtax
-    WHERE (taxhist_parent_id=_r.invcitem_id);
-
   END LOOP;
 
 --  March through the Misc. Invcitems
@@ -317,20 +300,6 @@ BEGIN
       _p.sequence, _r.invcitem_taxtype_id, _p.invchead_taxzone_id,
       _p.invchead_shipzone_id, _p.invchead_saletype_id,
       pInvcheadid, _r.invcitem_id );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber
-    FROM invcitemtax
-    WHERE (taxhist_parent_id=_r.invcitem_id);
-
   END LOOP;
 
 --  Credit the Freight Account for Freight Charges
@@ -398,21 +367,6 @@ BEGIN
       _p.sequence, getFreightTaxtypeId(), _p.invchead_taxzone_id,
       _p.invchead_shipzone_id, _p.invchead_saletype_id,
       pInvcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber
-    FROM invcheadtax
-    WHERE ( (taxhist_parent_id=_p.invchead_id)
-      AND   (taxhist_taxtype_id=getFreightTaxtypeId()) );
-
   END IF;
 
 --  Credit the Misc. Account for Miscellaneous Charges
@@ -518,21 +472,6 @@ BEGIN
       _p.sequence, getAdjustmentTaxtypeId(), _p.invchead_taxzone_id,
       _p.invchead_shipzone_id, _p.invchead_saletype_id,
       pInvcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber
-    FROM invcheadtax
-    WHERE ( (taxhist_parent_id=_p.invchead_id)
-      AND   (taxhist_taxtype_id=getAdjustmentTaxtypeId()) );
-
   END IF;
 
 -- ToDo: handle rounding errors

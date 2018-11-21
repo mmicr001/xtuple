@@ -42,7 +42,9 @@ BEGIN
 	invchead_misc_amount,invchead_misc_descrip,invchead_misc_accnt_id,invchead_payment,
 	invchead_paymentref,invchead_notes,invchead_prj_id,invchead_curr_id,
 	invchead_taxzone_id, invchead_shipchrg_id,
-        invchead_saletype_id, invchead_shipzone_id
+        invchead_saletype_id, invchead_shipzone_id, invchead_warehous_id,
+        invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
+        invchead_tax_exemption
    )
   SELECT 
 	_invcheadid,cohead_cust_id,cohead_shipto_id,cohead_number,cohead_orderdate,
@@ -55,20 +57,16 @@ BEGIN
 	COALESCE(cobmisc_misc, 0.00),cobmisc_misc_descrip,cobmisc_misc_accnt_id,cobmisc_payment,
 	cobmisc_paymentref,cobmisc_notes,cohead_prj_id,cobmisc_curr_id,
 	cobmisc_taxzone_id, cohead_shipchrg_id,
-        cohead_saletype_id, cohead_shipzone_id
+        cohead_saletype_id, cohead_shipzone_id, cohead_warehous_id,
+        cobmisc_freight_taxtype_id, cobmisc_misc_taxtype_id, cobmisc_misc_discount,
+        cobmisc_tax_exemption
     FROM cobmisc, cohead, custinfo
     LEFT OUTER JOIN cntct ON (cust_cntct_id=cntct_id)
   WHERE ( (cobmisc_cohead_id=cohead_id)
    AND (cohead_cust_id=cust_id)
    AND (cobmisc_id=pCobmiscid) );
 
-	INSERT INTO invcheadtax(taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-			taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate)
-        SELECT _invcheadid,taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-			taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate
-        FROM cobmisctax 
-	WHERE taxhist_parent_id = pCobmiscid 
-	AND taxhist_taxtype_id = getadjustmenttaxtypeid();
+  PERFORM copyTax('COB', pCobmiscid, 'INV', _invcheadid);
 
 --  Create the Invoice Characteristic Assignments
   INSERT INTO charass
@@ -82,13 +80,13 @@ BEGIN
 
 --  Create the Invoice items
   FOR _r IN SELECT coitem_id, coitem_linenumber, coitem_subnumber, coitem_custpn,
-                   coitem_qtyord, cobill_qty,
+                   coitem_qtyord, cobill_id, cobill_qty,
                    coitem_qty_uom_id, coitem_qty_invuomratio,
                    coitem_custprice, coitem_price, coitem_listprice,
                    coitem_price_uom_id, coitem_price_invuomratio,
                    coitem_memo, coitem_rev_accnt_id,
                    itemsite_item_id, itemsite_warehous_id,
-                   cobill_taxtype_id,
+                   cobill_taxtype_id, cobill_tax_exemption,
                    formatSoItemNumber(coitem_id) AS ordnumber
             FROM coitem, cobill, itemsite
             WHERE ( (cobill_coitem_id=coitem_id)
@@ -114,7 +112,7 @@ BEGIN
       invcitem_qty_uom_id, invcitem_qty_invuomratio,
       invcitem_custprice, invcitem_price, invcitem_listprice,
       invcitem_price_uom_id, invcitem_price_invuomratio,
-      invcitem_notes, invcitem_taxtype_id,
+      invcitem_notes, invcitem_taxtype_id, invcitem_tax_exemption,
       invcitem_coitem_id, invcitem_rev_accnt_id,
       invcitem_subnumber )
     VALUES
@@ -126,9 +124,11 @@ BEGIN
       _r.coitem_qty_uom_id, _r.coitem_qty_invuomratio,
       _r.coitem_custprice, _r.coitem_price, _r.coitem_listprice,
       _r.coitem_price_uom_id, _r.coitem_price_invuomratio,
-      _r.coitem_memo, _r.cobill_taxtype_id,
+      _r.coitem_memo, _r.cobill_taxtype_id, _r.cobill_tax_exemption,
       _r.coitem_id, _r.coitem_rev_accnt_id,
       _lastsubnumber );
+
+    PERFORM copyTax('COB', _r.cobill_id, 'INV', _invcitemid, _invcheadid);
 
 --  Create the Invoice Item Characteristic Assignments
     INSERT INTO charass

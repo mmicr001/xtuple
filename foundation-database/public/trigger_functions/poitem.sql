@@ -159,6 +159,21 @@ BEGIN
     END IF;
   END IF;
 
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.poitem_qty_ordered != OLD.poitem_qty_ordered OR
+       NEW.poitem_unitprice != OLD.poitem_unitprice OR
+       NEW.poitem_freight != OLD.poitem_freight OR
+       NEW.poitem_taxtype_id != OLD.poitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.poitem_itemsite_id != OLD.poitem_itemsite_id OR
+         NEW.poitem_tax_exemption != OLD.poitem_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'P'
+       AND taxhead_doc_id = NEW.poitem_pohead_id;
+  END IF;
+
   -- Timestamps
   IF (TG_OP = 'INSERT') THEN
     NEW.poitem_created := now();
@@ -319,6 +334,11 @@ BEGIN
   FROM charass
   WHERE charass_target_type = 'PI'
     AND charass_target_id = OLD.poitem_id;
+
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'P'
+     AND taxhead_doc_id = OLD.poitem_pohead_id;
 
   RETURN OLD;
 END;

@@ -23,7 +23,8 @@ SELECT
   xt.add_column('cmitem', 'cmitem_descrip',            'TEXT', NULL, 'public'),
   xt.add_column('cmitem', 'cmitem_salescat_id',     'INTEGER', NULL, 'public'),
   xt.add_column('cmitem', 'cmitem_rev_accnt_id',    'INTEGER', NULL, 'public'),
-  xt.add_column('cmitem', 'cmitem_listprice', 'NUMERIC(16,4)', NULL, 'public');
+  xt.add_column('cmitem', 'cmitem_listprice', 'NUMERIC(16,4)', NULL, 'public'),
+  xt.add_column('cmitem', 'cmitem_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('cmitem', 'cmitem_pkey', 'PRIMARY KEY (cmitem_id)', 'public'),

@@ -89,11 +89,7 @@ WHERE (cmhead_id=&lt;? value("cmhead_id") ?>);</sql>
  <querysource>
   <name>GroupExtended</name>
   <sql>SELECT formatExtPrice( COALESCE(cmhead_freight,0.0) +
-                       ( SELECT COALESCE(SUM(tax * -1.0), 0)
-                         FROM ( SELECT ROUND(SUM(taxdetail_tax), 2) AS tax
-                                FROM tax JOIN calculateTaxDetailSummary('CM', cmhead_id, 'T')
-                                           ON (taxdetail_tax_id=tax_id)
-                                GROUP BY tax_id ) AS data ) +
+                       getOrderTax('CM', &lt;? value("cmhead_id") ?>) +
                        COALESCE(cmhead_misc,0.0) +
                        ( SELECT COALESCE(SUM((cmitem_qtycredit * cmitem_qty_invuomratio) *
                                               cmitem_unitprice / cmitem_price_invuomratio), 0.0)
@@ -101,11 +97,7 @@ WHERE (cmhead_id=&lt;? value("cmhead_id") ?>);</sql>
                          WHERE (cmitem_cmhead_id=&lt;? value("cmhead_id") ?>) ) 
                      ) AS totaldue,
        formatExtPrice(COALESCE(cmhead_freight,0.0)) AS freight,
-       ( SELECT formatExtPrice(COALESCE(SUM(tax * -1.0), 0))
-         FROM ( SELECT ROUND(SUM(taxdetail_tax), 2) AS tax
-                FROM tax JOIN calculateTaxDetailSummary('CM', cmhead_id, 'T')
-                           ON (taxdetail_tax_id=tax_id)
-                GROUP BY tax_id ) AS data ) AS tax,
+       formatExtPrice(getOrderTax('CM', &lt;? value("cmhead_id") ?>)) AS tax,
        formatExtPrice(COALESCE(cmhead_misc,0.0)) AS misc
   FROM cmhead
  WHERE (cmhead_id=&lt;? value("cmhead_id") ?>);

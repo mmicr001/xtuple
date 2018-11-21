@@ -5,8 +5,9 @@ DECLARE
 
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM cobmisctax
-    WHERE (taxhist_parent_id=OLD.cobmisc_id);
+    DELETE FROM taxhead
+     WHERE taxhead_doc_type = 'COB'
+       AND taxhead_doc_id = OLD.cobmisc_id;
 
     RETURN OLD;
   END IF;
@@ -31,55 +32,33 @@ BEGIN
     RETURN OLD;
   END IF;
 
--- Insert new row
-  IF (TG_OP = 'INSERT') THEN
-
-  -- Calculate Freight Tax
-    IF (NEW.cobmisc_freight <> 0) THEN
-      PERFORM calculateTaxHist( 'cobmisctax',
-                                NEW.cobmisc_id,
-                                NEW.cobmisc_taxzone_id,
-                                getFreightTaxtypeId(),
-                                NEW.cobmisc_invcdate,
-                                NEW.cobmisc_curr_id,
-                                NEW.cobmisc_freight );
-    END IF;
-  END IF;
-
 -- Update row
   IF (TG_OP = 'UPDATE') THEN
 
   -- Calculate Tax
-    IF (COALESCE(NEW.cobmisc_taxzone_id,-1) <> COALESCE(OLD.cobmisc_taxzone_id,-1)) THEN
+    IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.cobmisc_taxzone_id,-1) <> COALESCE(OLD.cobmisc_taxzone_id,-1)) THEN
       UPDATE cobill SET cobill_taxtype_id=getItemTaxType(itemsite_item_id,NEW.cobmisc_taxzone_id)
       FROM coitem
         JOIN itemsite ON (coitem_itemsite_id=itemsite_id)
       WHERE ((coitem_id=cobill_coitem_id)
        AND (cobill_cobmisc_id=NEW.cobmisc_id));
     END IF;
-    
-    IF ( (NEW.cobmisc_freight <> OLD.cobmisc_freight) OR
-         (COALESCE(NEW.cobmisc_taxzone_id,-1) <> COALESCE(OLD.cobmisc_taxzone_id,-1)) OR
-         (NEW.cobmisc_invcdate <> OLD.cobmisc_invcdate) OR
-         (NEW.cobmisc_curr_id <> OLD.cobmisc_curr_id) ) THEN
-      PERFORM calculateTaxHist( 'cobmisctax',
-                                NEW.cobmisc_id,
-                                NEW.cobmisc_taxzone_id,
-                                getFreightTaxtypeId(),
-                                NEW.cobmisc_invcdate,
-                                NEW.cobmisc_curr_id,
-                                NEW.cobmisc_freight );
-      PERFORM calculateTaxHist( 'cobilltax',
-                                cobill_id,
-                                NEW.cobmisc_taxzone_id,
-                                cobill_taxtype_id,
-                                NEW.cobmisc_invcdate,
-                                NEW.cobmisc_curr_id,
-                                (cobill_qty * coitem_qty_invuomratio) *
-                                (coitem_price / coitem_price_invuomratio) )
-      FROM cobill JOIN coitem ON (coitem_id = cobill_coitem_id)
-      WHERE (cobill_cobmisc_id = NEW.cobmisc_id);
-    END IF;
+  END IF;
+
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.cobmisc_freight != OLD.cobmisc_freight OR
+       NEW.cobmisc_freight_taxtype_id != OLD.cobmisc_freight_taxtype_id OR
+       NEW.cobmisc_misc != OLD.cobmisc_misc OR
+       NEW.cobmisc_misc_taxtype_id != OLD.cobmisc_misc_taxtype_id OR
+       NEW.cobmisc_misc_discount != OLD.cobmisc_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.cobmisc_taxzone_id != OLD.cobmisc_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.cobmisc_tax_exemption != OLD.cobmisc_tax_exemption))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'COB'
+       AND taxhead_doc_id = NEW.cobmisc_id;
   END IF;
 
   RETURN NEW;

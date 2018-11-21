@@ -257,11 +257,12 @@ BEGIN
   _taxBaseValue := addTaxToGLSeries(_glSequence,
 				      'A/P', 'DM', pDocNumber,
 				      pCurrId, pDocDate, pDocDate,
-                                      'apopentax', _apopenid,
+                                      'AP', _apopenid,
                                       _vendName);
 
-  UPDATE apopentax SET taxhist_journalnumber = _journalNumber
-  WHERE taxhist_parent_id=_apopenid;
+  UPDATE taxhead SET taxhead_journalnumber = _journalNumber
+  WHERE taxhead_doc_type = 'AP'
+    AND taxhead_doc_id = _apopenid;
 
   -- Debit the Prepaid account for the basis amount
   -- Note, the taxBaseValue is negative so it is added

@@ -29,7 +29,8 @@ $BODY$ LANGUAGE 'plpgsql' VOLATILE;
 
 ---------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer)
+DROP FUNCTION IF EXISTS selectforbilling(integer, numeric, boolean, integer);
+CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text default null)
   RETURNS integer AS
 $BODY$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
@@ -39,6 +40,7 @@ DECLARE
   pQty		ALIAS FOR $2;
   pClose	ALIAS FOR $3;
   ptaxtypeid	ALIAS FOR $4;
+  ptaxexemption ALIAS FOR $5;
   _cobillid INTEGER;
   _r RECORD;
 
@@ -46,7 +48,8 @@ BEGIN
 
 -- Get some information
   SELECT cobmisc_id, cobmisc_taxzone_id, coitem_id, coitem_price,
-    coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id
+    coitem_price_invuomratio AS invpricerat, coitem_qty_invuomratio, item_id,
+    COALESCE(ptaxexemption, coitem_tax_exemption) AS taxexemption
   INTO _r
   FROM cobmisc, coitem, itemsite, item, site()
   WHERE ((cobmisc_cohead_id = coitem_cohead_id)
@@ -85,7 +88,8 @@ BEGIN
         cobill_select_username = getEffectiveXtUser(),
         cobill_qty = pQty,
         cobill_toclose = pClose,
-	cobill_taxtype_id = ptaxtypeid
+	cobill_taxtype_id = ptaxtypeid,
+        cobill_tax_exemption = _r.taxexemption
     WHERE (cobill_id=_cobillid);
 
   ELSE
@@ -94,12 +98,12 @@ BEGIN
     (cobill_id, cobill_coitem_id, cobill_cobmisc_id,
      cobill_selectdate, cobill_select_username,
      cobill_qty, cobill_toclose,
-     cobill_taxtype_id)
+     cobill_taxtype_id, cobill_tax_exemption)
     VALUES
     (_cobillid, _r.coitem_id, _r.cobmisc_id,
       CURRENT_DATE, getEffectiveXtUser(),
       pQty, pClose,
-      ptaxtypeid);
+      ptaxtypeid, _r.taxexemption);
   END IF;
 
   RETURN _cobillid;

@@ -28,7 +28,8 @@ BEGIN
     quhead_billtocity, quhead_billtostate, quhead_billtozip,
     quhead_misc_accnt_id, quhead_misc_descrip, quhead_misc, quhead_freight, quhead_commission,
     quhead_ordercomments, quhead_shipcomments,
-    quhead_imported, quhead_curr_id, quhead_taxzone_id, quhead_taxtype_id, quhead_ophead_id, quhead_status,
+    quhead_imported, quhead_curr_id, quhead_taxzone_id, quhead_freight_taxtype_id,
+    quhead_misc_taxtype_id, quhead_misc_discount, quhead_tax_exemption, quhead_ophead_id, quhead_status,
     quhead_shipto_cntct_id, quhead_shipto_cntct_honorific, quhead_shipto_cntct_first_name, quhead_shipto_cntct_middle,
     quhead_shipto_cntct_last_name, quhead_shipto_cntct_suffix, quhead_shipto_cntct_phone, quhead_shipto_cntct_title,
     quhead_shipto_cntct_fax, quhead_shipto_cntct_email, quhead_billto_cntct_id, quhead_billto_cntct_honorific,
@@ -44,7 +45,8 @@ BEGIN
          quhead_billtocity, quhead_billtostate, quhead_billtozip,
          quhead_misc_accnt_id, quhead_misc_descrip, quhead_misc, quhead_freight, quhead_commission,
          quhead_ordercomments, quhead_shipcomments,
-         FALSE, quhead_curr_id, quhead_taxzone_id, quhead_taxtype_id, quhead_ophead_id, 'O',
+         FALSE, quhead_curr_id, quhead_taxzone_id, quhead_freight_taxtype_id,
+         quhead_misc_taxtype_id, quhead_misc_discount, quhead_tax_exemption, quhead_ophead_id, 'O',
          quhead_shipto_cntct_id, quhead_shipto_cntct_honorific, quhead_shipto_cntct_first_name, quhead_shipto_cntct_middle,
          quhead_shipto_cntct_last_name, quhead_shipto_cntct_suffix, quhead_shipto_cntct_phone, quhead_shipto_cntct_title,
          quhead_shipto_cntct_fax, quhead_shipto_cntct_email, quhead_billto_cntct_id, quhead_billto_cntct_honorific,
@@ -52,6 +54,8 @@ BEGIN
          quhead_billto_cntct_phone, quhead_billto_cntct_title, quhead_billto_cntct_fax, quhead_billto_cntct_email
   FROM quhead
   WHERE (quhead_id=pQuheadid);
+
+  PERFORM copyTax('Q', pQuheadid, 'Q', _quheadid);
 
   INSERT INTO quitem
   ( quitem_quhead_id, quitem_linenumber, quitem_itemsite_id,
@@ -61,7 +65,7 @@ BEGIN
     quitem_qty_invuomratio, quitem_price_invuomratio,
     quitem_memo, quitem_custpn, quitem_imported, quitem_taxtype_id,
     quitem_createorder, quitem_order_warehous_id, quitem_item_id, quitem_prcost,
-    quitem_dropship, quitem_itemsrc_id, quitem_pricemode )
+    quitem_dropship, quitem_itemsrc_id, quitem_pricemode, quitem_tax_exemption )
   SELECT _quheadid, quitem_linenumber, quitem_itemsite_id,
          COALESCE(pSchedDate, quitem_scheddate),
          quitem_promdate,
@@ -72,10 +76,17 @@ BEGIN
          quitem_qty_invuomratio, quitem_price_invuomratio,
          quitem_memo, quitem_custpn, FALSE, quitem_taxtype_id,
          quitem_createorder, quitem_order_warehous_id, quitem_item_id, quitem_prcost,
-         quitem_dropship, quitem_itemsrc_id, quitem_pricemode
+         quitem_dropship, quitem_itemsrc_id, quitem_pricemode, quitem_tax_exemption
   FROM quitem, itemsite
   WHERE ( (quitem_itemsite_id=itemsite_id)
    AND (quitem_quhead_id=pQuheadid));
+
+  PERFORM copyTax('Q', old.quitem_id, 'Q', new.quitem_id, _quheadid)
+     FROM quitem new
+     JOIN quitem old ON old.quitem_quhead_id = pQuheadid
+                    AND new.quitem_linenumber = old.quitem_linenumber
+                    AND new.quitem_subnumber = old.quitem_subnumber
+    WHERE new.quitem_quhead_id = _quheadid;
 
   INSERT INTO charass
         (charass_target_type, charass_target_id,

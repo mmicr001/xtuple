@@ -307,14 +307,6 @@
         }
       },
       {
-        "name": "taxType",
-        "toOne": {
-          "type": "TaxType",
-          "column": "pohead_taxtype_id",
-          "isNested": true
-        }
-      },
-      {
         "name": "vendorAddress",
         "toOne": {
           "type": "VendorAddressRelation",

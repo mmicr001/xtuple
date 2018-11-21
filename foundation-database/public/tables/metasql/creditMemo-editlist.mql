@@ -100,29 +100,14 @@ SELECT cmhead_id, -1,
        CASE WHEN (tax_sales_accnt_id IS NULL) THEN <? value("taxes") ?>
             ELSE formatGLAccountLong(tax_sales_accnt_id)
        END,
-       NULL, NULL, SUM(taxhist_tax * -1.0),
-       SUM(taxhist_tax * -1.0),
+       NULL, NULL, SUM(taxdetail_tax),
+       SUM(taxdetail_tax),
        cmhead_curr_id AS curr_id,
        99999, 1 AS xtindentrole, 5 AS seq
-FROM cmhead JOIN cmheadtax ON ((taxhist_parent_id=cmhead_id) AND (taxhist_tax <> 0.0))
-            JOIN tax ON (tax_id=taxhist_tax_id)
-WHERE ((NOT cmhead_posted)
-  AND  (NOT cmhead_hold))
-GROUP BY cmhead_id, tax_sales_accnt_id, cmhead_curr_id
-
-UNION
-SELECT cmhead_id, -1,
-       NULL, <? value("debit") ?>,
-       CASE WHEN (tax_sales_accnt_id IS NULL) THEN <? value("taxes") ?>
-            ELSE formatGLAccountLong(tax_sales_accnt_id)
-       END,
-       NULL, NULL, SUM(taxhist_tax * -1.0),
-       SUM(taxhist_tax * -1.0),
-       cmhead_curr_id AS curr_id,
-       99999, 1 AS xtindentrole, 5 AS seq
-FROM cmhead JOIN cmitem ON (cmitem_cmhead_id=cmhead_id)
-            JOIN cmitemtax ON ((taxhist_parent_id=cmitem_id) AND (taxhist_tax <> 0.0))
-            JOIN tax ON (tax_id=taxhist_tax_id)
+FROM cmhead JOIN taxhead ON taxhead_doc_type = 'CM' AND taxhead_doc_id = cmhead_id
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id AND taxdetail_tax <> 0.0
+            LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
 WHERE ((NOT cmhead_posted)
   AND  (NOT cmhead_hold))
 GROUP BY cmhead_id, tax_sales_accnt_id, cmhead_curr_id
@@ -137,9 +122,9 @@ SELECT cmhead_id, -1,
        SUM((cmitem_qtycredit * cmitem_qty_invuomratio) *
            (cmitem_unitprice / cmitem_price_invuomratio)) +
            cmhead_freight + cmhead_misc +
-           (SELECT COALESCE(SUM(taxhist_tax * -1.0), 0.0) FROM cmheadtax WHERE (taxhist_parent_id=cmhead_id)) +
-           (SELECT COALESCE(SUM(taxhist_tax * -1.0), 0.0) FROM cmitem JOIN cmitemtax ON (taxhist_parent_id=cmitem_id)
-                                    WHERE (cmitem_cmhead_id=cmhead_id))
+           (SELECT COALESCE(SUM(taxdetail_tax), 0.0) FROM taxhead JOIN taxline ON taxhead_id = taxline_taxhead_id 
+                                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                    WHERE taxhead_doctype = 'CM' AND taxhead_doc_id=cmhead_id)
             AS extprice,
        cmhead_curr_id AS curr_id,
        99999, 1 AS xtindentrole, 6 AS seq

@@ -6,8 +6,10 @@ BEGIN
     RAISE EXCEPTION 'You do not have privileges to maintain Credit Memos.';
   END IF;
 
-  DELETE FROM cmitemtax
-   WHERE (taxhist_parent_id=OLD.cmitem_id);
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'CM'
+     AND taxhead_doc_id = OLD.cmitem_cmhead_id;
 
   RETURN OLD;
 END;
@@ -73,48 +75,21 @@ BEGIN
     RETURN OLD;
   END IF;
 
--- Cache Credit Memo Head
-  SELECT * INTO _r
-  FROM cmhead
-  WHERE (cmhead_id=NEW.cmitem_cmhead_id);
-  IF (NOT FOUND) THEN
-    RAISE EXCEPTION 'Credit Memo head not found';
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.cmitem_qtycredit != OLD.cmitem_qtycredit OR
+       NEW.cmitem_qty_invuomratio != OLD.cmitem_qty_invuomratio OR
+       NEW.cmitem_unitprice != OLD.cmitem_unitprice OR
+       NEW.cmitem_price_invuomratio != OLD.cmitem_price_invuomratio OR
+       NEW.cmitem_taxtype_id != OLD.cmitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.cmitem_itemsite_id != OLD.cmitem_itemsite_id OR
+         NEW.cmitem_tax_exemption != OLD.cmitem_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'CM'
+       AND taxhead_doc_id = NEW.cmitem_cmhead_id;
   END IF;
-
--- Insert new row
-  IF (TG_OP = 'INSERT') THEN
-
-  -- Calculate Tax
-      PERFORM calculateTaxHist( 'cmitemtax',
-                                NEW.cmitem_id,
-                                COALESCE(_r.cmhead_taxzone_id, -1),
-                                NEW.cmitem_taxtype_id,
-                                COALESCE(_r.cmhead_docdate, CURRENT_DATE),
-                                COALESCE(_r.cmhead_curr_id, -1),
-                                (NEW.cmitem_qtycredit * NEW.cmitem_qty_invuomratio) *
-                                (NEW.cmitem_unitprice / NEW.cmitem_price_invuomratio) * -1);
-  END IF;
-
--- Update row
-  IF (TG_OP = 'UPDATE') THEN
-
-  -- Calculate Tax
-    IF ( (NEW.cmitem_qtycredit <> OLD.cmitem_qtycredit) OR
-         (NEW.cmitem_qty_invuomratio <> OLD.cmitem_qty_invuomratio) OR
-         (NEW.cmitem_unitprice <> OLD.cmitem_unitprice) OR
-         (NEW.cmitem_price_invuomratio <> OLD.cmitem_price_invuomratio) OR
-         (COALESCE(NEW.cmitem_taxtype_id, -1) <> COALESCE(OLD.cmitem_taxtype_id, -1)) ) THEN
-      PERFORM calculateTaxHist( 'cmitemtax',
-                                NEW.cmitem_id,
-                                COALESCE(_r.cmhead_taxzone_id, -1),
-                                NEW.cmitem_taxtype_id,
-                                COALESCE(_r.cmhead_docdate, CURRENT_DATE),
-                                COALESCE(_r.cmhead_curr_id, -1),
-                                (NEW.cmitem_qtycredit * NEW.cmitem_qty_invuomratio) *
-                                (NEW.cmitem_unitprice / NEW.cmitem_price_invuomratio) * -1);
-    END IF;
-  END IF;
-
 
   RETURN NEW;
 END;

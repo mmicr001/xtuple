@@ -9,9 +9,13 @@ SELECT cmitem.*, itemsite_item_id AS item_id,
                   COALESCE(round((cmitem_qtycredit * cmitem_qty_invuomratio) *
                                  (cmitem_unitprice / cmitem_price_invuomratio), 2), 0),
                   cmhead_docdate) AS baseextprice,
-       ( SELECT COALESCE(SUM(taxhist_tax), 0)
-         FROM cmitemtax
-         WHERE (taxhist_parent_id = cmitem_id) ) AS tax,
+       ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+         FROM taxhead
+         JOIN taxline ON taxhead_id = taxline_taxhead_id
+         JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+         WHERE taxhead_doc_type = 'CM'
+           AND taxhead_doc_id = cmhead_id
+           AND taxline_line_id = cmitem_id ) AS tax,
        CASE WHEN (itemsite_costmethod='A') THEN avgCost(itemsite_id)
             ELSE stdCost(itemsite_item_id)
        END AS unitcost

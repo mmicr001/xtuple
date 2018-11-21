@@ -71,7 +71,6 @@ DECLARE
   _c RECORD;
   _poheadid INTEGER := -1;
   _poitemid INTEGER := -1;
-  _taxtypeid INTEGER := -1;
   _charassid INTEGER := -1;
   _polinenumber INTEGER;
   _ponumber NUMERIC;
@@ -315,10 +314,6 @@ BEGIN
   FROM poitem
   WHERE (poitem_pohead_id = _poheadid);
 
-  SELECT COALESCE(itemtax_taxtype_id, -1) INTO _taxtypeid
-  FROM itemtax
-  WHERE (itemtax_item_id = _i.itemsrc_item_id);
-
   IF (pPrice IS NULL) THEN
     SELECT itemsrcPrice(pItemSourceId,
                         COALESCE(_s.cohead_warehous_id, -1),
@@ -348,7 +343,7 @@ BEGIN
         _price, COALESCE(_i.itemsrc_vend_item_number, TEXT('')),
         pItemSourceId, pCoitemId, 'S', _s.cohead_prj_id, stdcost(_i.itemsrc_item_id),
         COALESCE(_i.itemsrc_manuf_name, TEXT('')), COALESCE(_i.itemsrc_manuf_item_number, TEXT('')),
-        COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), _taxtypeid,
+        COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), getItemTaxType(_i.itemsrc_item_id, _i.vend_taxzone_id),
         COALESCE(_s.coitem_memo, TEXT('')));
   ELSE
     INSERT INTO poitem
@@ -368,7 +363,7 @@ BEGIN
         _price, COALESCE(_i.itemsrc_vend_item_number, TEXT('')),
         pItemSourceId, pCoitemId, 'S', _s.cohead_prj_id, stdcost(_i.itemsrc_item_id),
         COALESCE(_i.itemsrc_manuf_name, TEXT('')), COALESCE(_i.itemsrc_manuf_item_number, TEXT('')),
-        COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), _taxtypeid,
+        COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), getItemTaxType(_i.itemsrc_item_id, _i.vend_taxzone_id),
         COALESCE(_s.coitem_memo, TEXT('')));
   END IF;
 

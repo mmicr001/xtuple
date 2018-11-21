@@ -144,7 +144,9 @@ BEGIN
     invchead_misc_amount, invchead_misc_accnt_id, invchead_misc_descrip,
     invchead_prj_id, invchead_curr_id, invchead_taxzone_id,
     invchead_posted, invchead_printed, invchead_invcdate,
-    invchead_saletype_id, invchead_shipzone_id
+    invchead_saletype_id, invchead_shipzone_id,
+    invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
+    invchead_tax_exemption
     --invchead_taxtype_id,
     --invchead_shipto_cntct_id, invchead_shipto_cntct_honorific, invchead_shipto_cntct_first_name,
     --invchead_shipto_cntct_middle, invchead_shipto_cntct_last_name, invchead_shipto_cntct_suffix,
@@ -172,7 +174,9 @@ BEGIN
          quhead_misc, quhead_misc_accnt_id, quhead_misc_descrip,
          quhead_prj_id, quhead_curr_id, quhead_taxzone_id,
          'f','f',current_date,
-         quhead_saletype_id, quhead_shipzone_id
+         quhead_saletype_id, quhead_shipzone_id,
+         quhead_freight_taxtype_id, quhead_misc_taxtype_id, quhead_misc_discount,
+         quhead_tax_exemption
          --quhead_shipto_cntct_id, quhead_shipto_cntct_honorific,
 	 --quhead_shipto_cntct_first_name, quhead_shipto_cntct_middle, quhead_shipto_cntct_last_name,
 	 --quhead_shipto_cntct_suffix, quhead_shipto_cntct_phone, quhead_shipto_cntct_title,
@@ -183,6 +187,8 @@ BEGIN
          --quhead_calcfreight
   FROM quhead JOIN custinfo ON (cust_id=quhead_cust_id)
   WHERE (quhead_id=pQuheadid);
+
+  PERFORM copyTax('Q', pQuheadid, 'INV', _iheadid);
 
   -- Copy characteristics from the quhead to the invoice head   
   INSERT INTO charass
@@ -247,7 +253,7 @@ BEGIN
       invcitem_ordered, invcitem_billed,
       invcitem_qty_uom_id, invcitem_qty_invuomratio,
       invcitem_price_uom_id, invcitem_price_invuomratio,
-      invcitem_custpn, invcitem_notes, invcitem_taxtype_id )
+      invcitem_custpn, invcitem_notes, invcitem_taxtype_id, invcitem_tax_exemption )
     VALUES
     ( _iitemid, _iheadid, _r.quitem_linenumber, _r.quitem_subnumber,
       (SELECT itemsite_item_id FROM itemsite WHERE itemsite_id = _r.quitem_itemsite_id),
@@ -258,7 +264,9 @@ BEGIN
       _r.quitem_qtyord, _r.quitem_qtyord,
       _r.quitem_qty_uom_id, _r.quitem_qty_invuomratio,
       _r.quitem_price_uom_id, _r.quitem_price_invuomratio,
-      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id );
+      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, _r.invcitem_tax_exemption );
+
+    PERFORM copyTax('Q', _r.quitem_id, 'INV', _iitemid, _iheadid);
 
     IF (fetchMetricBool('enablextcommissionission')) THEN
       PERFORM xtcommission.getSalesReps(quhead_cust_id, quhead_shipto_id,

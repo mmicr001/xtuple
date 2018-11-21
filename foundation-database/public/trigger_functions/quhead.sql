@@ -333,6 +333,33 @@ BEGIN
 
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.quhead_quotedate != OLD.quhead_quotedate OR
+       NEW.quhead_curr_id != OLD.quhead_curr_id OR
+       NEW.quhead_freight != OLD.quhead_freight OR
+       NEW.quhead_freight_taxtype_id != OLD.quhead_freight_taxtype_id OR
+       NEW.quhead_misc != OLD.quhead_misc OR
+       NEW.quhead_misc_taxtype_id != OLD.quhead_misc_taxtype_id OR
+       NEW.quhead_misc_discount != OLD.quhead_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.quhead_taxzone_id != OLD.quhead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.quhead_cust_id != OLD.quhead_cust_id OR
+         NEW.quhead_warehous_id != OLD.quhead_warehous_id OR
+         NEW.quhead_shiptoaddress1 != OLD.quhead_shiptoaddress1 OR
+         NEW.quhead_shiptoaddress2 != OLD.quhead_shiptoaddress2 OR
+         NEW.quhead_shiptoaddress3 != OLD.quhead_shiptoaddress3 OR
+         NEW.quhead_shiptocity != OLD.quhead_shiptocity OR
+         NEW.quhead_shiptostate != OLD.quhead_shiptostate OR
+         NEW.quhead_shiptozipcode != OLD.quhead_shiptozipcode OR
+         NEW.quhead_shiptocountry != OLD.quhead_shiptocountry OR
+         NEW.quhead_tax_exemption != OLD.quhead_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'Q'
+       AND taxhead_doc_id = NEW.quhead_id;
+  END IF;
+
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
     IF (TG_OP = 'INSERT') THEN
       PERFORM postComment('ChangeLog', 'Q', NEW.quhead_id, 'Created');
@@ -379,6 +406,10 @@ BEGIN
   DELETE FROM comment
    WHERE ( (comment_source='Q')
      AND (comment_source_id=OLD.quhead_id) );
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'Q'
+     AND taxhead_doc_id = OLD.quhead_id;
 
   RETURN OLD;
 END;

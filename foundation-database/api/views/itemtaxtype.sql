@@ -11,7 +11,8 @@ AS
        ELSE
          taxzone_code::varchar
      END AS tax_zone,
-     taxtype_name AS tax_type
+     taxtype_name AS tax_type,
+     itemtax_default AS default
    FROM item, itemtax
      LEFT OUTER JOIN taxzone ON (itemtax_taxzone_id=taxzone_id),
      taxtype
@@ -29,7 +30,8 @@ CREATE OR REPLACE RULE "_INSERT" AS
   INSERT INTO itemtax (
     itemtax_item_id,
     itemtax_taxzone_id,
-    itemtax_taxtype_id)
+    itemtax_taxtype_id,
+    itemtax_default)
   VALUES (
     getItemId(NEW.item_number),
     CASE
@@ -38,7 +40,8 @@ CREATE OR REPLACE RULE "_INSERT" AS
       ELSE
         getTaxZoneId(NEW.tax_zone)
     END,
-    getTaxTypeId(NEW.tax_type));
+    getTaxTypeId(NEW.tax_type),
+    COALESCE(NEW.default, FALSE));
 
 CREATE OR REPLACE RULE "_UPDATE" AS 
     ON UPDATE TO api.itemtaxtype DO INSTEAD
@@ -51,7 +54,8 @@ CREATE OR REPLACE RULE "_UPDATE" AS
       ELSE
         getTaxZoneId(NEW.tax_zone)
     END,
-    itemtax_taxtype_id=getTaxTypeId(NEW.tax_type)
+    itemtax_taxtype_id=getTaxTypeId(NEW.tax_type),
+    itemtax_default=COALESCE(NEW.default, FALSE)
   WHERE  ((itemtax_item_id=getItemId(OLD.item_number))
   AND (CASE WHEN (OLD.tax_zone = 'Any') THEN
               itemtax_taxzone_id IS NULL

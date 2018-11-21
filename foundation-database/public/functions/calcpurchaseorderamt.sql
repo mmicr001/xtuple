@@ -54,10 +54,7 @@ BEGIN
   FROM poitem
   WHERE (poitem_pohead_id=pPoheadid);
 
-  SELECT COALESCE(SUM(tax), 0) INTO _tax
-  FROM ( SELECT COALESCE(ROUND(SUM(taxdetail_tax), 2), 0.0) AS tax
-         FROM tax JOIN calculateTaxDetailSummary('PO', pPoheadid, 'T', COALESCE(pTaxzoneId, -1), COALESCE(pOrderDate, CURRENT_DATE), pCurrId, COALESCE(pFreight,0.0), pQuick) ON (taxdetail_tax_id=tax_id)
-         GROUP BY tax_id ) AS data;
+  _tax := getOrderTax('P', pPoheadid);
 
   IF (pQuick) THEN
     SELECT COALESCE(pFreight, 0), pCurrId, pOrderDate INTO _freight, _currid, _effdate;

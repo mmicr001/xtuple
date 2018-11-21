@@ -17,12 +17,7 @@ BEGIN
   FROM invcitem
   WHERE (invcitem_invchead_id=pInvoiceId);
 
-  -- TODO: why sum on the result of select round(sum(), 2)?
-  SELECT SUM(tax) INTO _linetax
-    FROM (SELECT ROUND(SUM(COALESCE(taxdetail_tax, 0)),2) AS tax 
-            FROM tax 
-            JOIN calculateTaxDetailSummary('I', pInvoiceId, 'T') ON (taxdetail_tax_id=tax_id)
-	  GROUP BY tax_id) AS data;
+  _linetax := getOrderTax('INV', pInvoiceId);
 
   SELECT noNeg(invchead_freight + invchead_misc_amount + COALESCE(_linetax, 0) + COALESCE(_linesum, 0)),
          invchead_posted INTO _result, _posted

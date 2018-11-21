@@ -11,6 +11,22 @@ BEGIN
     RAISE EXCEPTION 'You do not have privileges to maintain Quotes.';
   END IF;
 
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.quitem_qtyord != OLD.quitem_qtyord OR
+       NEW.quitem_qty_invuomratio != OLD.quitem_qty_invuomratio OR
+       NEW.quitem_price != OLD.quitem_price OR
+       NEW.quitem_price_invuomratio != OLD.quitem_price_invuomratio OR
+       NEW.quitem_taxtype_id != OLD.quitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.quitem_itemsite_id != OLD.quitem_itemsite_id OR
+         NEW.quitem_tax_exemption != OLD.quitem_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'Q'
+       AND taxhead_doc_id = NEW.quitem_quhead_id;
+  END IF;
+
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
     IF (TG_OP = 'INSERT') THEN
       PERFORM postComment('ChangeLog', 'QI', NEW.quitem_id, 'Created');
@@ -143,6 +159,11 @@ BEGIN
   DELETE FROM charass
    WHERE ((charass_target_type='QI')
      AND  (charass_target_id=OLD.quitem_id));
+
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'Q'
+     AND taxhead_doc_id = OLD.quitem_quhead_id;
 
   RETURN OLD;
 END;

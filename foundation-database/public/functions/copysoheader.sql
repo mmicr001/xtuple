@@ -96,7 +96,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id )
+    cohead_recurring_cohead_id,
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption )
   SELECT
     fetchSoNumber(),
     cohead_cust_id,
@@ -175,7 +179,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -279,7 +287,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id )
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption )
    SELECT
     fetchSoNumber(),
     pCustomer,
@@ -356,7 +368,11 @@ BEGIN
     'O',
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -365,6 +381,8 @@ BEGIN
   IF _soheadid IS NULL THEN
     RAISE EXCEPTION 'Could not find sales order to copy [xtuple: copysoheader, -1, %]', _pSoheadid;
   END IF;
+
+  PERFORM copyTax('S', pSoheadid, 'S', _soheadid);
 
   INSERT INTO charass
         (charass_target_type, charass_target_id,

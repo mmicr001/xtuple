@@ -54,7 +54,8 @@ BEGIN
       coitem_subnumber,
       coitem_firm,
       coitem_taxtype_id, 
-      coitem_dropship )
+      coitem_dropship,
+      coitem_tax_exemption )
     VALUES (
       _soheadid,
       _soitem.coitem_linenumber,
@@ -92,8 +93,11 @@ BEGIN
       _soitem.coitem_subnumber,
       _soitem.coitem_firm,
       _soitem.coitem_taxtype_id,
-      _soitem.coitem_dropship )
+      _soitem.coitem_dropship,
+      _soitem.coitem_tax_exemption )
     RETURNING coitem_id INTO _soitemid;
+
+  PERFORM copyTax('S', _soitem.coitem_id, 'S', _soitemid, _soheadid);
 
     -- insert characteristics first so they can be copied to associated supply order
     INSERT INTO charass
