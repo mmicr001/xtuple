@@ -20,4 +20,5 @@ ALTER TABLE public.expcat ENABLE TRIGGER ALL;
 COMMENT ON TABLE expcat IS 'Expense Category information';
 
 UPDATE expcat
-   SET expcat_tax_accnt_id = expcat_exp_accnt_id;
+   SET expcat_tax_accnt_id = expcat_exp_accnt_id
+ WHERE expcat_tax_accnt_id IS NULL;
