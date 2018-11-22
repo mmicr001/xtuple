@@ -48,3 +48,15 @@ INSERT INTO orderseq (orderseq_name, orderseq_number, orderseq_table, orderseq_n
          ('WoNumber',          20000, 'wo',        'wo_number',           NULL)
   ON CONFLICT (orderseq_name) DO NOTHING;
 ALTER TABLE orderseq ENABLE TRIGGER ALL;
+
+
+-- Set the default Auto/Manual numbering metric for newly created Order Number types
+DO $$
+BEGIN
+  IF (fetchmetrictext('ProjectNumberGeneration') IS NULL) THEN
+    PERFORM setmetric('ProjectNumberGeneration', 'M');
+  END IF;
+  IF (fetchmetrictext('TaskNumberGeneration') IS NULL) THEN
+    PERFORM setmetric('TaskNumberGeneration', 'A');
+  END IF;
+END; $$;
