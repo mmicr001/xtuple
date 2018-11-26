@@ -25,7 +25,7 @@ BEGIN
     SELECT curr_rate INTO _fromRate
     FROM curr_rate
     WHERE ( (curr_id=pFromCurr)
-    AND (pDate BETWEEN curr_effective AND curr_expires) );
+    AND (COALESCE(pDate, CURRENT_DATE) BETWEEN curr_effective AND curr_expires) );
 
     IF ( NOT FOUND) THEN
       RAISE EXCEPTION 'Currency exchange rate for currency % not found on %', pFromCurr, formatDate(pDate);
@@ -36,7 +36,7 @@ BEGIN
     SELECT curr_rate INTO _toRate
     FROM curr_rate
     WHERE ( (curr_id=pToCurr)
-    AND (pDate BETWEEN curr_effective AND curr_expires) );
+    AND (COALESCE(pDate, CURRENT_DATE) BETWEEN curr_effective AND curr_expires) );
 
     IF ( NOT FOUND) THEN
       RAISE EXCEPTION 'Currency exchange rate for currency % not found on %', pToCurr, formatDate(pDate);
