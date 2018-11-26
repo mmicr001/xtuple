@@ -515,7 +515,7 @@ INSERT INTO country (country_id, country_abbr, country_name, country_curr_abbr, 
   (213, 'TZ', 'Tanzania', 'TZS', 'Tanzanian Shilling', '834', NULL, 210),
   (227, 'UA', 'Ukraine', 'UAH', 'Hryvnia', '980', '₴', 222),
   (226, 'UG', 'Uganda', 'UGX', 'Uganda Shilling', '800', NULL, 221),
-  (229, 'UK', 'United Kingdom', 'GBP', 'Pound Sterling', '826', '£', 224),
+  (229, 'GB', 'United Kingdom', 'GBP', 'Pound Sterling', '826', '£', 224),
   (232, 'UM', 'U.S. Minor Outlying Islands', 'USD', 'US Dollar', '840', '$', 226),
   (230, 'US', 'United States', 'USD', 'US Dollar', '840', '$', 225),
   (231, 'UY', 'Uruguay', 'UYU', 'Peso Uruguayo', '858', '$U', 227),
@@ -1533,6 +1533,7 @@ INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES 
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (178, 'desktop/welcome', 'http://welcome.xtuple.org/index.html', NULL);
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (179, 'desktop/timer', '900000', NULL);
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (173, 'ServerVersion', '4.4.0', NULL);
+INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (194, 'ISOCountries', 't', NULL);
 
 ALTER TABLE metric ENABLE TRIGGER ALL;
 
