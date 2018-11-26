@@ -2,7 +2,7 @@
 -- Name:  summary
 -- Notes: This query totals checks and the accounts their corresponding voucher
 --        posts to and provides a summary figure based on the date range.
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT to_char(count(distinct vend_id),'9,999') as cvend,

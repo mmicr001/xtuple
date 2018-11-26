@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION public.deletetax(integer)
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   ptaxid	ALIAS FOR $1;
@@ -10,7 +10,7 @@ BEGIN
   IF EXISTS(SELECT taxass_id FROM taxass WHERE (taxass_tax_id=ptaxid)) THEN
     RETURN -10;
   END IF;
-  IF EXISTS(SELECT taxhist_id FROM taxhist WHERE (taxhist_tax_id=ptaxid)) THEN
+  IF EXISTS(SELECT taxdetail_id FROM taxdetail WHERE (taxdetail_tax_id=ptaxid)) THEN
     RETURN -20;
   END IF;
 

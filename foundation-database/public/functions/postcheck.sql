@@ -18,6 +18,8 @@ DECLARE
   _test                 INTEGER;
   _cm                   BOOLEAN;
   _amount_check         NUMERIC := 0;
+  _taxheadid            INTEGER;
+  _taxlineid            INTEGER;
 
 BEGIN
 
@@ -135,18 +137,40 @@ BEGIN
 
     IF (_p.total_tax > 0) THEN
       -- Now apply Expense Category taxation (if applicable)
-      INSERT INTO checkheadtax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax, 
-                                taxhist_taxtype_id, taxhist_parent_id, taxhist_journalnumber ) 
-          SELECT 0, 0, 0, _p.checkhead_checkdate, taxdetail_tax_id, (taxdetail_tax * -1), _p.checkhead_taxtype_id,
-              pCheckid, _journalNumber
-          FROM calculatetaxdetail(_p.checkhead_taxzone_id,
-                            _p.checkhead_taxtype_id,_p.checkhead_checkdate,
-                            _p.checkhead_curr_id,(_p.checkhead_amount-_p.total_tax));
+          INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
+                               taxhead_date, taxhead_curr_id, taxhead_curr_rate,
+                               taxhead_taxzone_id, taxhead_journalnumber)
+          SELECT 'P', 'CK', pCheckId, _p.checkhead_recip_id,
+                 _p.checkhead_checkdate, _p.checkhead_curr_id, _p.checkhead_curr_rate,
+                 _p.checkhead_taxzone_id, _journalNumber
+          RETURNING taxhead_id INTO _taxheadid;
+
+          INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                               taxline_taxtype_id, taxline_qty, taxline_amount,
+                               taxline_extended)
+          SELECT _taxheadid, 'L', pCheckId,
+                 _p.checkhead_taxtype_id, 1.0, _p.checkhead_amount - _p.total_tax,
+                 _p.checkhead_amount - _p.total_tax
+          RETURNING taxline_id INTO _taxlineid;
+
+          INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+                                 taxdetail_taxclass_id, taxdetail_sequence,
+                                 taxdetail_basis_tax_id, taxdetail_amount,
+                                 taxdetail_percent, taxdetail_tax)
+          SELECT _taxlineid, _p.checkhead_amount - _p.total_tax, (value->>'taxid')::INTEGER,
+                 (value->>'taxclassid')::INTEGER, (value->>'sequence')::INTEGER,
+                 (value->>'basistaxid')::INTEGER, (value->>'amount')::NUMERIC,
+                 (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC
+            FROM jsonb_array_elements(calculatetax(_p.checkhead_taxzone_id,_p.checkhead_curr_id,
+                                      _p.checkhead_checkdate, 0.0, 0.0, getFreightTaxtypeId(),
+                                      getMiscTaxtypeId(), FALSE, ARRAY[''],
+                                      ARRAY[_p.checkhead_taxtype_id],
+                                      ARRAY[_p.checkhead_amount-_p.total_tax])->'lines'->0->'tax');
               
       PERFORM addTaxToGLSeries(_sequence,
 		       _t.checkrecip_gltrans_source, 'CK', CAST(_p.checkhead_number AS TEXT),
 		       _p.checkhead_curr_id, _p.checkhead_checkdate, _p.checkhead_checkdate,
-                      'checkheadtax', pcheckid,
+                      'CK', pcheckid,
                       _gltransNote);      
 
     END IF;

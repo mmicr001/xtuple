@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION _soheadTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _p RECORD;
@@ -486,6 +486,33 @@ BEGIN
 
   END IF;
 
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.cohead_orderdate != OLD.cohead_orderdate OR
+       NEW.cohead_curr_id != OLD.cohead_curr_id OR
+       NEW.cohead_freight != OLD.cohead_freight OR
+       NEW.cohead_freight_taxtype_id != OLD.cohead_freight_taxtype_id OR
+       NEW.cohead_misc != OLD.cohead_misc OR
+       NEW.cohead_misc_taxtype_id != OLD.cohead_misc_taxtype_id OR
+       NEW.cohead_misc_discount != OLD.cohead_misc_discount OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.cohead_taxzone_id != OLD.cohead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.cohead_cust_id != OLD.cohead_cust_id OR
+         NEW.cohead_warehous_id != OLD.cohead_warehous_id OR
+         NEW.cohead_shiptoaddress1 != OLD.cohead_shiptoaddress1 OR
+         NEW.cohead_shiptoaddress2 != OLD.cohead_shiptoaddress2 OR
+         NEW.cohead_shiptoaddress3 != OLD.cohead_shiptoaddress3 OR
+         NEW.cohead_shiptocity != OLD.cohead_shiptocity OR
+         NEW.cohead_shiptostate != OLD.cohead_shiptostate OR
+         NEW.cohead_shiptozipcode != OLD.cohead_shiptozipcode OR
+         NEW.cohead_shiptocountry != OLD.cohead_shiptocountry OR
+         NEW.cohead_tax_exemption != OLD.cohead_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'S'
+       AND taxhead_doc_id = NEW.cohead_id;
+  END IF;
+
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
 
     IF (TG_OP = 'INSERT') THEN
@@ -577,10 +604,10 @@ CREATE TRIGGER soheadTrigger
   EXECUTE PROCEDURE _soheadTrigger();
 
 CREATE OR REPLACE FUNCTION _soheadTriggerAfter() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
-  IF (COALESCE(NEW.cohead_taxzone_id,-1) <> COALESCE(OLD.cohead_taxzone_id,-1)) THEN
+  IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.cohead_taxzone_id,-1) <> COALESCE(OLD.cohead_taxzone_id,-1)) THEN
     UPDATE coitem SET coitem_taxtype_id=getItemTaxType(itemsite_item_id,NEW.cohead_taxzone_id)
     FROM itemsite
     WHERE ((itemsite_id=coitem_itemsite_id)
@@ -630,7 +657,7 @@ CREATE TRIGGER soheadTriggerAfter
   EXECUTE PROCEDURE _soheadTriggerAfter();
 
 CREATE OR REPLACE FUNCTION _coheadBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -660,15 +687,45 @@ CREATE TRIGGER coheadBeforeDeleteTrigger
   EXECUTE PROCEDURE _coheadBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _coheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
+_recurid     INTEGER;
+_newparentid INTEGER;
 
 BEGIN
 
   DELETE FROM charass
   WHERE charass_target_type = 'SO'
     AND charass_target_id = OLD.cohead_id;
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'S'
+     AND taxhead_doc_id = OLD.cohead_id;
+
+  --recurrence cleanup
+  SELECT recur_id INTO _recurid
+    FROM recur
+   WHERE recur_parent_id = OLD.cohead_id
+     AND recur_parent_type = 'S';
+  IF (_recurid IS NOT NULL) THEN -- The deleted SO is the parent of a recurrence series
+    SELECT cohead_id INTO _newparentid
+      FROM cohead
+     WHERE cohead_recurring_cohead_id = OLD.cohead_id
+       AND cohead_id != OLD.cohead_id 
+     ORDER BY cohead_packdate
+     LIMIT 1; -- Find the next recurring SO whose parent is the deleted SO
+    IF (_newparentid IS NULL) THEN -- The deleted SO is the only SO in the series
+      DELETE FROM recur WHERE recur_id = _recurid;
+    ELSE
+      UPDATE recur SET recur_parent_id = _newparentid
+       WHERE recur_id = _recurid;
+
+      UPDATE cohead SET cohead_recurring_cohead_id = _newparentid
+       WHERE cohead_recurring_cohead_id = OLD.cohead_id
+         AND cohead_id != OLD.cohead_id;
+    END IF;
+  END IF;
 
   RETURN OLD;
 END;

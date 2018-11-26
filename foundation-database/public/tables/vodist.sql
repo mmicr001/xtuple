@@ -16,7 +16,9 @@ SELECT
   xt.add_column('vodist', 'vodist_notes',                'TEXT', NULL, 'public'),
   xt.add_column('vodist', 'vodist_taxtype_id',        'INTEGER', NULL, 'public'),
   xt.add_column('vodist', 'vodist_freight_vohead_id', 'INTEGER', NULL, 'public'),
-  xt.add_column('vodist', 'vodist_freight_dist_method',  'TEXT', NULL, 'public');
+  xt.add_column('vodist', 'vodist_freight_dist_method',  'TEXT', NULL, 'public'),
+  xt.add_column('vodist', 'vodist_warehous_id',       'INTEGER', NULL, 'public'),
+  xt.add_column('vodist', 'vodist_tax_exemption',        'TEXT', NULL, 'public');
 
 SELECT
   xt.add_constraint('vodist', 'vodist_pkey', 'PRIMARY KEY (vodist_id)', 'public'),
@@ -24,6 +26,8 @@ SELECT
                     'FOREIGN KEY (vodist_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('vodist','vodist_freight_vohead_id_fkey',
                     'FOREIGN KEY (vodist_freight_vohead_id) REFERENCES vohead(vohead_id)', 'public'),
+  xt.add_constraint('vodist','vodist_warehous_id_fkey',
+                    'FOREIGN KEY (vodist_warehous_id) REFERENCES whsinfo(warehous_id)', 'public'),
   xt.add_constraint('vodist','vodist_freight_dist_method_check',
                     $$CHECK (vodist_freight_dist_method IN ('Q', 'V', 'W'))$$, 'public');
 

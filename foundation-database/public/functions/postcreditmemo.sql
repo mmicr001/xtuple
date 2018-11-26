@@ -40,10 +40,13 @@ BEGIN
 --  Cache some parameters
   SELECT cmhead.*,
          findARAccount(cmhead_cust_id) AS ar_accnt_id,
-         ( SELECT COALESCE(SUM(taxhist_tax), 0)
-           FROM cmheadtax
-           WHERE ( (taxhist_parent_id = cmhead_id)
-             AND   (taxhist_taxtype_id = getAdjustmentTaxtypeId()) ) ) AS adjtax
+         ( SELECT COALESCE(SUM(taxdetail_tax), 0)
+           FROM taxhead
+           JOIN taxline ON taxhead_id = taxline_taxhead_id
+           JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+           WHERE taxhead_doc_type = 'CM'
+             AND taxhead_doc_id = cmhead_id
+             AND taxline_line_type = 'A' ) AS adjtax
          INTO _p
   FROM cmhead
   WHERE (cmhead_id=pCmheadid);
@@ -70,46 +73,38 @@ BEGIN
   FOR _r IN SELECT tax_sales_accnt_id, 
               round(sum(taxdetail_tax),2) AS tax,
               currToBase(_p.cmhead_curr_id, round(sum(taxdetail_tax),2), _p.cmhead_docdate) AS taxbasevalue
-            FROM tax 
-             JOIN calculateTaxDetailSummary('CM', pCmheadid, 'T') ON (taxdetail_tax_id=tax_id)
+            FROM taxhead
+            JOIN taxline ON taxhead_id = taxline_taxhead_id
+            JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+            LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+            WHERE taxhead_doc_type = 'CM'
+              AND taxhead_doc_id = pCmheadid
 	    GROUP BY tax_id, tax_sales_accnt_id LOOP
 
     PERFORM insertIntoGLSeries( _sequence, 'A/R', 'CM', _p.cmhead_number,
-                                _r.tax_sales_accnt_id, 
-                                _r.taxbasevalue,
+                                CASE WHEN fetchMetricText('TaxService') = 'A'
+                                     THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
+                                     ELSE _r.tax_sales_accnt_id
+                                 END,
+                                _r.taxbasevalue * -1,
                                 _glDate, _p.cmhead_billtoname );
 
-    _totalAmount := _totalAmount + _r.tax * -1;
+    _totalAmount := _totalAmount + _r.tax;
   END LOOP;
 
--- Update item tax records with posting data
-  UPDATE cmitemtax SET 
-    taxhist_docdate=_p.cmhead_docdate,
-    taxhist_distdate=_glDate,
-    taxhist_curr_id=_p.cmhead_curr_id,
-    taxhist_curr_rate=curr_rate,
-    taxhist_journalnumber=pJournalNumber
-  FROM cmhead
-   JOIN cmitem ON (cmhead_id=cmitem_cmhead_id),
-   curr_rate
-  WHERE ((cmhead_id=pCmheadId)
-    AND (taxhist_parent_id=cmitem_id)
-    AND (_p.cmhead_curr_id=curr_id)
-    AND (_p.cmhead_docdate BETWEEN curr_effective 
-                           AND curr_expires) );
-
--- Update Header taxes (Freight and Adjustments) with posting data
-  UPDATE cmheadtax SET 
-    taxhist_docdate=_p.cmhead_docdate,
-    taxhist_distdate=_glDate,
-    taxhist_curr_id=_p.cmhead_curr_id,
-    taxhist_curr_rate=curr_rate,
-    taxhist_journalnumber=pJournalNumber
+-- Update tax records with posting data
+  UPDATE taxhead SET 
+    taxhead_date=_p.cmhead_docdate,
+    taxhead_distdate=_glDate,
+    taxhead_curr_id=_p.cmhead_curr_id,
+    taxhead_curr_rate=curr_rate,
+    taxhead_journalnumber=pJournalNumber
   FROM curr_rate
-  WHERE ((taxhist_parent_id=pCmheadId)
+  WHERE taxhead_doc_type = 'CM'
+    AND taxhead_doc_id = pCmheadid
     AND (_p.cmhead_curr_id=curr_id)
     AND (_p.cmhead_docdate BETWEEN curr_effective 
-                           AND curr_expires) );
+                           AND curr_expires);
 
 -- Process Non-Misc. C/M Items
 -- Always use std cost
@@ -193,19 +188,6 @@ BEGIN
       _p.cmhead_shipto_city, _p.cmhead_shipto_state, _p.cmhead_shipto_zipcode,
       _p.cmhead_curr_id, _r.cmitem_taxtype_id, _p.cmhead_taxzone_id,
       _p.cmhead_shipzone_id, _p.cmhead_saletype_id, _invcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber 
-    FROM cmitemtax
-    WHERE (taxhist_parent_id=_r.cmitem_id);
 
     _totalAmount := _totalAmount + round(_r.extprice, 2);
 
@@ -275,19 +257,6 @@ BEGIN
       _p.cmhead_shipto_city, _p.cmhead_shipto_state, _p.cmhead_shipto_zipcode,
       _p.cmhead_curr_id, _r.cmitem_taxtype_id, _p.cmhead_taxzone_id,
       _p.cmhead_shipzone_id, _p.cmhead_saletype_id, _invcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber 
-    FROM cmitemtax
-    WHERE (taxhist_parent_id=_r.cmitem_id);
 
     _totalAmount := _totalAmount + round(_r.extprice, 2);
     
@@ -387,21 +356,6 @@ BEGIN
       _p.cmhead_shipto_city, _p.cmhead_shipto_state, _p.cmhead_shipto_zipcode,
       _p.cmhead_curr_id, getAdjustmentTaxtypeId(), _p.cmhead_taxzone_id,
       _p.cmhead_shipzone_id, _p.cmhead_saletype_id, _invcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber  )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           (taxhist_basis * -1), taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber 
-    FROM cmheadtax
-    WHERE ( (taxhist_parent_id=_p.cmhead_id)
-      AND   (taxhist_taxtype_id=getAdjustmentTaxtypeId()) );
-
   END IF;
 
 --  Debit the Freight Account
@@ -460,21 +414,6 @@ BEGIN
       _p.cmhead_shipto_city, _p.cmhead_shipto_state, _p.cmhead_shipto_zipcode,
       _p.cmhead_curr_id, getFreightTaxtypeId(), _p.cmhead_taxzone_id,
       _p.cmhead_shipzone_id, _p.cmhead_saletype_id, _invcheadid );
-    INSERT INTO cohisttax
-    ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-      taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-      taxhist_percent, taxhist_amount, taxhist_tax,
-      taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-      taxhist_journalnumber  )
-    SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-           (taxhist_basis * -1), taxhist_basis_tax_id, taxhist_sequence,
-           taxhist_percent, taxhist_amount, taxhist_tax,
-           taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-           taxhist_journalnumber 
-    FROM cmheadtax
-    WHERE ( (taxhist_parent_id=_p.cmhead_id)
-      AND   (taxhist_taxtype_id=getFreightTaxtypeId()) );
-
   END IF;
 
   _totalAmount := _totalAmount;

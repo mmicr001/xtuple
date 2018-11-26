@@ -1,7 +1,7 @@
 -- Group: purchaseOrderItems
 -- Name: detail
 -- Notes: used by purchaseOrderItem
---        Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT pohead_number, pohead_taxzone_id,
@@ -17,6 +17,7 @@ SELECT pohead_number, pohead_taxzone_id,
        poitem_prj_id, poitem_bom_rev_id,
        poitem_boo_rev_id, poitem_manuf_name,
        poitem_manuf_item_number, poitem_manuf_item_descrip,
+       poitem_tax_exemption,
        COALESCE(poitem_itemsite_id, -1) AS poitem_itemsite_id,
        COALESCE(poitem_itemsrc_id, -1) AS poitem_itemsrc_id,
        COALESCE(poitem_expcat_id, -1) AS poitem_expcat_id,

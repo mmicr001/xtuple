@@ -55,6 +55,7 @@ SELECT
   xt.add_column('custinfo', 'cust_ediemailhtml',     'BOOLEAN', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('custinfo', 'cust_soediemailhtml',   'BOOLEAN', 'DEFAULT false NOT NULL', 'public'),
   xt.add_column('custinfo', 'cust_taxzone_id',       'INTEGER', NULL,                     'public'),
+  xt.add_column('custinfo', 'cust_tax_exemption',    'TEXT',    'NULL',                   'public'),
   xt.add_column('custinfo', 'cust_statementcycle',   'TEXT',    NULL,                     'public'),
   xt.add_column('custinfo', 'cust_created',      'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
   xt.add_column('custinfo', 'cust_lastupdated',  'TIMESTAMP WITH TIME ZONE', NULL, 'public');

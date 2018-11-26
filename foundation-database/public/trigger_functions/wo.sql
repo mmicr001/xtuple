@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _woTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -85,7 +85,7 @@ DROP TRIGGER IF EXISTS woTrigger ON wo;
 CREATE TRIGGER woTrigger BEFORE INSERT OR UPDATE ON wo FOR EACH ROW EXECUTE PROCEDURE _woTrigger();
 
 CREATE OR REPLACE FUNCTION _woBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

@@ -300,15 +300,30 @@ BEGIN
                                 round(_r.cashrcptmisc_amount_base, 2),
                                 _p.cashrcpt_distdate, _p.custnote, pCashrcptid );
     ELSE
---  Misc Tax Distribution, record in taxhist
-      INSERT INTO cashrcpttax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax,
-                                taxhist_taxtype_id, taxhist_parent_id, taxhist_journalnumber )
-          VALUES (0, 0, 0, _p.cashrcpt_distdate, _r.cashrcptmisc_tax_id, _r.cashrcptmisc_amount_base,
-                          getadjustmenttaxtypeid(), pcashrcptid, pjournalnumber);
+--  Misc Tax Distribution
+      INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
+                           taxhead_date, taxhead_curr_id, taxhead_curr_rate, taxhead_journalnumber)
+      SELECT 'P', 'CR', pcashrcptid, _p.cashrcpt_cust_id,
+             _p.cashrcpt_distdate, _p.cashrcpt_curr_id, _p.cashrcpt_curr_rate, pjournalnumber;
+
+      INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id,
+                           taxline_taxtype_id)
+      SELECT taxhead_id, 'A', pcashrcptid,
+             getadjustmenttaxtypeid()
+        FROM taxhead
+       WHERE taxhead_doc_type = 'CR'
+         AND taxhead_doc_id = pcashrcptid;
+
+      INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_tax_id, taxdetail_tax)
+      SELECT taxline_id, _r.cashrcptmisc_tax_id, _r.cashrcptmisc_amount_base
+        FROM taxhead
+        JOIN taxline ON taxhead_id = taxline_taxhead_id
+       WHERE taxhead_doc_type = 'CR'
+         AND taxhead_doc_id = pcashrcptid;
 
       PERFORM addTaxToGLSeries(_sequence, 'A/R'::TEXT, 'CR'::TEXT, _p.cashrcpt_number,
 		       _p.cashrcpt_curr_id, _p.cashrcpt_distdate, _p.cashrcpt_distdate,
-                      'cashrcpttax'::TEXT, pcashrcptid,_p.custnote);
+                      'CR'::TEXT, pcashrcptid,_p.custnote);
     END IF;
   END LOOP;
 

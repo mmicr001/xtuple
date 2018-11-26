@@ -1,16 +1,16 @@
 -- Group: billingSelections
 -- Name: detail
 -- Notes: used by dspBillingSelections
---        Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT cobmisc_id, cohead_id,
        cohead_number, cust_number, cust_name,
        sum(round(coitem_price*cobill_qty,2)) AS subtotal,
-       cobmisc_misc, cobmisc_freight, calcCobmiscTax(cobmisc_id) AS cobmisc_tax, cobmisc_payment,
+       cobmisc_misc, cobmisc_freight, getOrderTax('COB', cobmisc_id) AS cobmisc_tax, cobmisc_payment,
        (sum(round(coitem_price * cobill_qty, 2)) +
                   cobmisc_misc + cobmisc_freight +
-                  calcCobmiscTax(cobmisc_id)) AS total,
+                  getOrderTax('COB', cobmisc_id)) AS total,
        'curr' AS subtotal_xtnumericrole,
        'curr' AS total_xtnumericrole,
        'curr' AS cobmisc_misc_xtnumericrole,

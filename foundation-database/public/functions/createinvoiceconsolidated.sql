@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION createInvoiceConsolidated(INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCustid ALIAS FOR $1;
@@ -33,6 +33,10 @@ BEGIN
                    cohead_shipchrg_id,
                    cohead_saletype_id,
                    cohead_shipzone_id,
+                   cohead_freight_taxtype_id,
+                   cohead_misc_taxtype_id,
+                   cohead_misc_discount,
+                   cohead_tax_exemption,
                    
 		-- the following are consolidated values to use in creating the header
                    MIN(cohead_number) AS cohead_number,
@@ -62,7 +66,11 @@ BEGIN
                    cobmisc_taxzone_id,
                    cohead_shipchrg_id,
                    cohead_saletype_id,
-                   cohead_shipzone_id
+                   cohead_shipzone_id,
+                   cohead_freight_taxtype_id,
+                   cohead_misc_taxtype_id,
+                   cohead_misc_discount,
+                   cohead_tax_exemption
 		LOOP
 
     IF(_c.cnt = 1) THEN
@@ -96,7 +104,9 @@ BEGIN
         invchead_notes, invchead_prj_id, invchead_curr_id,
         invchead_taxzone_id,
         invchead_shipchrg_id,
-        invchead_saletype_id, invchead_shipzone_id )
+        invchead_saletype_id, invchead_shipzone_id,
+        invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
+        invchead_tax_exemption )
       VALUES(_invcheadid,
              pCustid, -1,
              NULL, _c.cohead_orderdate,
@@ -118,7 +128,9 @@ BEGIN
              'Multiple Sales Order # Invoice', _c.cohead_prj_id, _c.cobmisc_curr_id,
              _c.cobmisc_taxzone_id,
              _c.cohead_shipchrg_id,
-             _c.cohead_saletype_id, _c.cohead_shipzone_id
+             _c.cohead_saletype_id, _c.cohead_shipzone_id,
+             _c.cohead_freight_taxtype_id, _c.cohead_misc_taxtype_id, _c.cohead_misc_discount,
+             _c.cohead_tax_exemption
              );
  
     _lastlinenumber := 1;
@@ -149,15 +161,6 @@ BEGIN
                  AND (COALESCE(cohead_shipzone_id, 0)        = COALESCE(_c.cohead_shipzone_id, 0))
                 ) LOOP
 
-    --  Create the Invoice Head tax
-        INSERT INTO invcheadtax(taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-                                taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate)
-        SELECT _invcheadid,taxhist_taxtype_id, taxhist_tax_id, taxhist_basis, 
-               taxhist_basis_tax_id, taxhist_sequence, taxhist_percent, taxhist_amount, taxhist_tax, taxhist_docdate
-        FROM cobmisctax 
-        WHERE taxhist_parent_id = _i.cobmisc_id
-          AND taxhist_taxtype_id = getadjustmenttaxtypeid();
-
     --  Give this selection a number if it has not been assigned one
         UPDATE cobmisc
            SET cobmisc_invcnumber=_invcnumber
@@ -171,7 +174,7 @@ BEGIN
                          coitem_price_uom_id, coitem_price_invuomratio,
                          coitem_memo,
                          itemsite_item_id, itemsite_warehous_id,
-                         cobill_taxtype_id
+                         cobill_taxtype_id, cobill_tax_exemption, cobill_id
                     FROM cohead, coitem, cobill, itemsite
                    WHERE((cobill_coitem_id=coitem_id)
                      AND (cohead_id=coitem_cohead_id)
@@ -189,7 +192,7 @@ BEGIN
             invcitem_custprice, invcitem_price, invcitem_listprice,
             invcitem_price_uom_id, invcitem_price_invuomratio,
             invcitem_notes,
-            invcitem_taxtype_id,
+            invcitem_taxtype_id, invcitem_tax_exemption,
             invcitem_coitem_id )
           VALUES
           ( _invcitemid, _invcheadid,
@@ -201,9 +204,9 @@ BEGIN
             _r.coitem_custprice, _r.coitem_price, _r.coitem_listprice,
             _r.coitem_price_uom_id, _r.coitem_price_invuomratio,
             _r.coitem_memo,
-            _r.cobill_taxtype_id,
+            _r.cobill_taxtype_id, _r.cobill_tax_exemption,
             _r.coitem_id );
-          
+
       --  Find and mark any Lot/Serial invdetail records associated with this bill
           UPDATE invdetail SET invdetail_invcitem_id = _invcitemid
            WHERE (invdetail_id IN (SELECT invdetail_id
@@ -277,6 +280,8 @@ BEGIN
       --  All done
         _count := (_count + 1);
       END LOOP;
+
+      EXECUTE format('NOTIFY calculatetax, %L', 'INV,' || _invcheadid);
     END IF;
   END LOOP;
   RETURN _count;

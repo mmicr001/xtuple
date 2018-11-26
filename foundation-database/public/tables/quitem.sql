@@ -31,7 +31,8 @@ SELECT
   xt.add_column('quitem', 'quitem_pricemode',           'CHARACTER(1)', $$DEFAULT 'D' NOT NULL$$, 'public'),
   xt.add_column('quitem', 'quitem_listprice',          'NUMERIC(16,4)', NULL,     'public'),
   xt.add_column('quitem', 'quitem_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
-  xt.add_column('quitem', 'quitem_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
+  xt.add_column('quitem', 'quitem_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
+  xt.add_column('quitem', 'quitem_tax_exemption', 'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('quitem', 'quitem_pkey', 'PRIMARY KEY (quitem_id)', 'public'),

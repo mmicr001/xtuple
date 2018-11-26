@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION enterPoReturn(INTEGER, NUMERIC, INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN enterPoReturn($1, $2, $3, NULL);
@@ -10,7 +10,7 @@ DROP FUNCTION IF EXISTS enterPoReturn(INTEGER, NUMERIC, INTEGER, INTEGER);
 
 CREATE OR REPLACE FUNCTION enterPoReturn(pPoitemid INTEGER, pQty NUMERIC, pRjctcodeid INTEGER, pRecvid INTEGER, 
                                          pRMA TEXT DEFAULT NULL ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _porejectid INTEGER;

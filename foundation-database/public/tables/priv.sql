@@ -35,7 +35,8 @@ declare
       ['CRM', 'ViewContactGroups', 'Allows Viewing of Contact Groups'],
       ['CRM', 'MaintainDynamicFilters', 'Allows Maintenance of dynamic filters for CRM Groups'],
       ['Sales', 'MaintainCustomerNumbers', 'Can edit or update Customer or Prospect numbers'],
-      ['CRM', 'ViewDocuments', 'Allows viewing Document list']
+      ['CRM', 'ViewDocuments', 'Allows viewing Document list'],
+      ['System', 'ConfigureTax', 'User is allowed to alter the Tax Service Configuration']
     ];
   _p TEXT[];
 begin

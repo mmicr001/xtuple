@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION indentedwo(pwoid       integer,
                                       pshowmatl   boolean,
                                       pshowindent boolean)
   RETURNS SETOF wodata AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _row wodata%ROWTYPE;
@@ -124,7 +124,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION indentedwo(integer, integer, integer, boolean, boolean) RETURNS SETOF wodata AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
    pwoid ALIAS FOR $1;

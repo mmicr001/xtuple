@@ -1,7 +1,7 @@
 -- Group: salesOrder
 -- Name: simple
 -- Notes: simple sales order maintain cohead table
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 <? if exists("NewMode") ?>
@@ -79,7 +79,6 @@
     cohead_billto_cntct_fax,
     cohead_billto_cntct_email,
     cohead_taxzone_id,
-    cohead_taxtype_id,
     cohead_ophead_id,
     cohead_status,
     cohead_saletype_id,
@@ -164,7 +163,6 @@
     COALESCE(billcntct.cntct_fax,''),
     COALESCE(billcntct.cntct_email,''),
     <? value("taxzone_id") ?>,
-    NULL,
     NULL,
     'O',
     fetchMetricValue('SSOSDefaultSaleTypeId'),
@@ -258,7 +256,6 @@
     cohead_billto_cntct_fax=COALESCE(billcntct.cntct_fax,''),
     cohead_billto_cntct_email=COALESCE(billcntct.cntct_email,''),
     cohead_taxzone_id=<? value("taxzone_id") ?>,
-    cohead_taxtype_id=NULL,
     cohead_ophead_id=NULL,
     cohead_status='O',
     cohead_saletype_id=fetchMetricValue('SSOSDefaultSaleTypeId'),

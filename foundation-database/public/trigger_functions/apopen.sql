@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _apopenTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _currrate NUMERIC;
@@ -45,6 +45,13 @@ BEGIN
       NEW.apopen_status='O';
       NEW.apopen_closedate=NULL;
     END IF;
+  END IF;
+
+  IF (TG_OP = 'UPDATE' AND NEW.apopen_doctype = 'V' AND
+      NEW.apopen_void AND NOT OLD.apopen_void) THEN
+    EXECUTE format('NOTIFY cancel, %L', 'VCH,' || (SELECT vohead_id
+                                                     FROM vohead
+                                                    WHERE vohead_number = NEW.apopen_docnumber));
   END IF;
 
   RETURN NEW;

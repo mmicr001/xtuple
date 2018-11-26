@@ -1,4 +1,4 @@
-SELECT dropifexists( 'FUNCTION', 'createarcreditmemo(integer, integer, text, text, date, numeric, text, integer, integer, integer, date, integer, integer, numeric, integer, integer, integer, integer)');
+DROP FUNCTION IF EXISTS createarcreditmemo(integer, integer, text, text, date, numeric, text, integer, integer, integer, date, integer, integer, numeric, integer, integer, integer, integer, integer);
 
 CREATE OR REPLACE FUNCTION createARCreditMemo(pId            INTEGER,
                                               pCustid        INTEGER,
@@ -18,8 +18,9 @@ CREATE OR REPLACE FUNCTION createARCreditMemo(pId            INTEGER,
                                               pCurrId        INTEGER = baseCurrId(),
                                               pArAccntid     INTEGER = NULL,
                                               pCoCcpayId     INTEGER = NULL,
-                                              pTaxZoneid     INTEGER = NULL) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+                                              pTaxZoneid     INTEGER = NULL,
+                                              pPaid          NUMERIC = 0) RETURNS INTEGER AS $$
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _accntid        INTEGER;
@@ -82,7 +83,7 @@ BEGIN
       aropen_cust_id=pCustid, aropen_docnumber=pDocNumber, aropen_doctype='C',
       aropen_ordernumber=pOrderNumber,aropen_docdate=pDocDate, aropen_duedate=_duedate,
       aropen_distdate=pDocDate, aropen_terms_id=pTermsid,
-      aropen_salesrep_id=pSalesrepid, aropen_amount=round(pAmount, 2), aropen_paid=0,
+      aropen_salesrep_id=pSalesrepid, aropen_amount=round(pAmount, 2), aropen_paid=pPaid,
       aropen_commission_due=pCommissiondue, aropen_commission_paid=FALSE,
       aropen_applyto='', aropen_ponumber='', aropen_cobmisc_id=-1,
       aropen_open=TRUE, aropen_notes=pNotes, aropen_rsncode_id=pRsncodeid,
@@ -104,7 +105,7 @@ BEGIN
     ( _aropenid, getEffectiveXtUser(), _journalNumber,
       pCustid, pDocNumber, 'C', pOrderNumber,
       pDocDate, _duedate, pDocDate, pTermsid, pSalesrepid,
-      round(pAmount, 2), 0, pCommissiondue, FALSE,
+      round(pAmount, 2), pPaid, pCommissiondue, FALSE,
       '', '', -1,
       TRUE, pNotes, pRsncodeid,
       _salescatid, _accntid, pCurrId, currrate(pCurrId, pDocDate), pTaxZoneid );
@@ -120,11 +121,12 @@ BEGIN
   _taxBaseValue := addTaxToGLSeries(_glSequence,
 				      'A/R', 'CM', pDocNumber,
 				      pCurrId, pDocDate, pDocDate,
-                                      'aropentax', _aropenid,
+                                      'AR', _aropenid,
                                       (_custName || ' ' || pNotes));
 
-  UPDATE aropentax SET taxhist_journalnumber = _journalNumber
-  WHERE taxhist_parent_id=_aropenid;
+  UPDATE taxhead SET taxhead_journalnumber = _journalNumber
+  WHERE taxhead_doc_type = 'AR'
+    AND taxhead_doc_id = _aropenid;
 
   -- Debit the Prepaid account for the basis amount
   -- Note, _taxBaseValue is negative so it is added to pAmount
@@ -165,20 +167,6 @@ BEGIN
     (pCommissiondue * -1.0), FALSE,
     pCurrId, _glSequence, pCoCcpayId)
   RETURNING cohist_id INTO _cohistid;
-
-  INSERT INTO cohisttax
-  ( taxhist_parent_id, taxhist_taxtype_id, taxhist_tax_id,
-    taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-    taxhist_percent, taxhist_amount, taxhist_tax,
-    taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-    taxhist_journalnumber )
-  SELECT _cohistid, taxhist_taxtype_id, taxhist_tax_id,
-         taxhist_basis, taxhist_basis_tax_id, taxhist_sequence,
-         taxhist_percent, taxhist_amount, taxhist_tax,
-         taxhist_docdate, taxhist_distdate, taxhist_curr_id, taxhist_curr_rate,
-         taxhist_journalnumber
-  FROM aropentax
-  WHERE (taxhist_parent_id=_aropenid);
 
   RETURN _aropenid;
 

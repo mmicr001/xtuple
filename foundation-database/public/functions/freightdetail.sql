@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION freightDetail(text,integer,integer,integer,date,text,integer)
   RETURNS SETOF freightData AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pOrderType ALIAS FOR $1;
@@ -72,6 +72,28 @@ BEGIN
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=quhead_shipto_id)
     WHERE (quhead_id=pOrderId);
 
+  ELSIF (pOrderType = 'CM') THEN
+    SELECT
+      cust_id AS cust_id,
+      custtype_id,
+      custtype_code,
+      COALESCE(shipto_id, -1) AS shipto_id,
+      COALESCE(shipto_num, '') AS shipto_num,
+      COALESCE(pOrderDate, invchead_orderdate, cohead_orderdate, cmhead_docdate) AS orderdate,
+      COALESCE(pShipVia, invchead_shipvia, cohead_shipvia, cmhead_shipvia) AS shipvia,
+      shipto_shipzone_id AS shipzone_id,
+      COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id)) AS currAbbr
+    INTO _order
+      FROM cmhead
+      JOIN custinfo ON (cust_id=COALESCE(pCustId, cmhead_cust_id))
+      JOIN custtype ON (custtype_id=cust_custtype_id)
+      LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, cmhead_shipto_id))
+      LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber
+      LEFT OUTER JOIN rahead ON cmhead_rahead_id = rahead_id
+      LEFT OUTER JOIN cohead ON rahead_orig_cohead_id = cohead_id
+    WHERE (cmhead_id=pOrderId);
+
   ELSIF (pOrderType = 'RA') THEN
     SELECT
       cust_id AS cust_id,
@@ -79,16 +101,17 @@ BEGIN
       custtype_code,
       COALESCE(shipto_id, -1) AS shipto_id,
       COALESCE(shipto_num, '') AS shipto_num,
-      COALESCE(pOrderDate, rahead_authdate) AS orderdate,
-      ''::text AS shipvia,
+      COALESCE(pOrderDate, cohead_orderdate, rahead_authdate) AS orderdate,
+      COALESCE(pShipVia, cohead_shipvia, rahead_shipvia) AS shipvia,
       shipto_shipzone_id AS shipzone_id,
-      COALESCE(pCurrId, rahead_curr_id) AS curr_id,
-      currConcat(COALESCE(pCurrId, rahead_curr_id)) AS currAbbr
+      COALESCE(pCurrId, cohead_curr_id, rahead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, cohead_curr_id, rahead_curr_id)) AS currAbbr
     INTO _order
       FROM rahead
       JOIN custinfo ON (cust_id=COALESCE(pCustId, rahead_cust_id))
       JOIN custtype ON (custtype_id=cust_custtype_id)
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, rahead_shipto_id))
+      LEFT OUTER JOIN cohead ON rahead_orig_cohead_id = cohead_id
     WHERE (rahead_id=pOrderId);
 
   ELSE
@@ -133,6 +156,21 @@ BEGIN
       AND (orderitem_orderhead_id=' || quote_literal(pOrderId) || ')
       AND (orderitem_status <> ''X'') )
     GROUP BY itemsite_warehous_id, item_freightclass_id;';
+
+  IF pOrderType = 'CM' THEN
+    IF (_includePkgWeight) THEN
+      _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * (item_prodweight + item_packweight)) AS weight, ';
+    ELSE
+      _qry := 'SELECT SUM(cmitem_qtycredit * cmitem_qty_invuomratio * item_prodweight) AS weight, ';
+    END IF;
+
+    _qry := _qry || 'itemsite_warehous_id, COALESCE(item_freightclass_id, -1) AS item_freightclass_id
+      FROM cmitem
+      JOIN itemsite ON (itemsite_id=cmitem_itemsite_id)
+      JOIN item ON (item_id=itemsite_item_id)
+      WHERE ( (cmitem_cmhead_id=' || quote_literal(pOrderId) || ') )
+      GROUP BY itemsite_warehous_id, item_freightclass_id;';
+  END IF;
 
   FOR _weights IN
     EXECUTE _qry LOOP

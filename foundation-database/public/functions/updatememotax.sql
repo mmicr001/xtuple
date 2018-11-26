@@ -13,41 +13,36 @@ CREATE OR REPLACE FUNCTION updatememotax(
     pAutoOverride BOOLEAN DEFAULT FALSE
     )
   RETURNS numeric AS $func$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-   _table       text;
    _total 	numeric := 0;
    _sense       integer := 1;
+   _custid      INTEGER;
+   _taxheadid   INTEGER;
+   _taxlineid   INTEGER;
    _taxd	RECORD;
    _taxt	RECORD;
    _taxamount	numeric;
    _tax		numeric;
    _taxamnt	numeric;
    _subtotal	numeric;
-   _delSql      text := $$DELETE FROM %s WHERE taxhist_parent_id = %s; $$;
-   _sql         text := $$INSERT INTO %s (taxhist_basis, taxhist_percent,
-                                          taxhist_amount,taxhist_docdate,
-                                          taxhist_tax_id, taxhist_tax,
-                                          taxhist_taxtype_id, taxhist_parent_id,
-                                          taxhist_curr_id, taxhist_curr_rate, taxhist_distdate  )
-	                   VALUES (0, 0, 0, '%s'::DATE, %s, %s, %s, %s, %s, %s, '%s'::DATE); $$;
-   _revsql      text := $$INSERT INTO %s (taxhist_basis, taxhist_percent,
-                                          taxhist_amount,taxhist_docdate,
-                                          taxhist_tax_id, taxhist_tax,
-                                          taxhist_taxtype_id, taxhist_parent_id,
-                                          taxhist_reverse_charge)
-	                   VALUES (0, 0, 0, '%s'::DATE, %s, (%s * -1), %s, %s, TRUE); $$;
 BEGIN
 -- A/P memos
    IF (pDocSource = 'AP') THEN
-     _table = 'apopentax';
-     IF (pDocType = 'D') THEN
+     SELECT apopen_vend_id INTO _custid
+       FROM apopen
+      WHERE apopen_id = pMemoid;
+
+     IF ( pDocType = 'D') THEN
        _sense = -1;
      END IF;
 -- A/R memos
    ELSIF (pDocSource = 'AR') THEN
-     _table = 'aropentax';
+     SELECT aropen_cust_id INTO _custid
+       FROM aropen 
+      WHERE aropen_id = pMemoid;
+
      IF (pDocType = 'C') THEN
        _sense = -1;
      END IF;
@@ -55,7 +50,23 @@ BEGIN
      RAISE EXCEPTION 'Invalid memo type %', pDocSource;
    END IF;
 
-   EXECUTE format(_delSql, _table, pMemoid);
+   DELETE FROM taxhead
+    WHERE taxhead_doc_type = pDocSource
+      AND taxhead_doc_id = pMemoid;
+
+   INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
+                        taxhead_date, taxhead_curr_id, taxhead_curr_rate, taxhead_taxzone_id,
+                        taxhead_distdate)
+   SELECT 'P', pDocSource, pMemoid, _custid,
+          pDate, pCurr, COALESCE(pCurrRate, currRate(pCurr, pDate)), NULLIF(pTaxZone, -1),
+          pDate
+   RETURNING taxhead_id INTO _taxheadid;
+
+   INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_line_id, taxline_qty,
+                        taxline_amount, taxline_extended)
+   SELECT _taxheadid, 'L', pMemoid, 1.0,
+          pAmount, pAmount
+   RETURNING taxline_id INTO _taxlineid;
 
    -- Get Tax Adjustment Type(s) from configuration (auto-tax only)
    <<taxtypes>>
@@ -69,35 +80,49 @@ BEGIN
       AND  (taxass_taxzone_id = ptaxzone))
    LOOP  
 
-     -- Determine pre-tax subtotal
-     _subtotal := (SELECT calculatepretaxtotal(ptaxzone, _taxt.taxass_taxtype_id, pdate, pcurr, pamount));
-
      -- Determine the Tax details for the Voucher Tax Zone
      <<taxdetail>>
      FOR _taxd IN
-	SELECT taxdetail_tax_code, taxdetail_tax_id,taxdetail_taxrate_percent,COALESCE(taxdetail_taxrate_amount,0.00) as taxdetail_taxrate_amount,
-	       taxdetail_taxclass_sequence as seq
-	FROM calculatetaxdetail(ptaxzone, _taxt.taxass_taxtype_id, pdate, pcurr, pamount)
-	ORDER BY taxdetail_taxclass_sequence DESC
+        SELECT tax_id, (value->>'tax')::NUMERIC AS tax,
+               (value->>'sequence')::INTEGER AS sequence,
+               (value->>'taxclassid')::INTEGER AS taxclassid,
+               (value->>'basistaxid')::INTEGER AS basistaxid,
+               (value->>'amount')::NUMERIC AS amount,
+               (value->>'percent')::NUMERIC AS percent
+          FROM jsonb_array_elements(calculateTaxIncluded(ptaxzone, pcurr, pdate,
+                                                        0.0, 0.0, -1, -1, FALSE,
+                                                        ARRAY[''],
+                                                        ARRAY[_taxt.taxass_taxtype_id],
+                                                        ARRAY[pamount])->'lines'->0->'tax')
+          JOIN tax ON (value->>'taxid')::INTEGER = tax_id
+	ORDER BY sequence DESC
 
      LOOP
      -- Calculate Tax Amount
-       _taxamount = ((_subtotal * _taxd.taxdetail_taxrate_percent) + _taxd.taxdetail_taxrate_amount) * _sense;
+       _taxamount = _taxd.tax;
 
        -- Insert Tax Line
-       EXECUTE format(_sql, _table, pDate, _taxd.taxdetail_tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid, pCurr,
-                      COALESCE(pCurrRate, currrate(pCurr,pDate)), pDate);
+       INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+                              taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id,
+                              taxdetail_amount, taxdetail_percent, taxdetail_tax)
+       SELECT _taxlineid, pAmount, _taxd.tax_id,
+              _taxd.taxclassid, _taxd.sequence, _taxd.basistaxid,
+              _taxd.amount, _taxd.percent, _taxd.tax;
 
        -- Check for and post reverse VAT charges
        IF (EXISTS(SELECT 1 FROM taxass
                   WHERE ((taxass_reverse_tax)
                   AND (COALESCE(taxass_taxzone_id, -1) = ptaxzone)
                   AND (COALESCE(taxass_taxtype_id, -1) IN (getAdjustmentTaxTypeId(), -1))))) THEN
-          EXECUTE format(_revsql, _table, pDate, _taxd.taxdetail_tax_id, _taxamount, _taxt.taxass_taxtype_id, pMemoid);
+       INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
+                              taxdetail_taxclass_id, taxdetail_sequence, taxdetail_basis_tax_id,
+                              taxdetail_amount, taxdetail_percent, taxdetail_tax)
+       SELECT _taxlineid, pAmount, _taxd.tax_id,
+              _taxd.taxclassid, _taxd.sequence, _taxd.basistaxid,
+              _taxd.amount, _taxd.percent, _taxd.tax * -1;
        END IF;
 
        _total = _total + _taxamount;
-       -- _subtotal = _subtotal - _taxamount;
 
      END LOOP taxdetail;
    END LOOP taxtypes;

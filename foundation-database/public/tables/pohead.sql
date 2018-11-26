@@ -20,7 +20,6 @@ SELECT
   xt.add_column('pohead', 'pohead_curr_id',              'INTEGER', 'DEFAULT basecurrid()', 'public'),
   xt.add_column('pohead', 'pohead_saved',                'BOOLEAN', 'DEFAULT true NOT NULL', 'public'),
   xt.add_column('pohead', 'pohead_taxzone_id',           'INTEGER', NULL, 'public'),
-  xt.add_column('pohead', 'pohead_taxtype_id',           'INTEGER', NULL, 'public'),
   xt.add_column('pohead', 'pohead_dropship',             'BOOLEAN', 'DEFAULT false', 'public'),
   xt.add_column('pohead', 'pohead_vend_cntct_id',        'INTEGER', NULL, 'public'),
   xt.add_column('pohead', 'pohead_vend_cntct_honorific',    'TEXT', NULL, 'public'),
@@ -62,7 +61,9 @@ SELECT
   xt.add_column('pohead', 'pohead_shiptoname',              'TEXT', NULL, 'public'),
   xt.add_column('pohead', 'pohead_potype_id',            'INTEGER', NULL, 'public'),
   xt.add_column('pohead', 'pohead_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
-  xt.add_column('pohead', 'pohead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
+  xt.add_column('pohead', 'pohead_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
+  xt.add_column('pohead', 'pohead_freight_taxtype_id',   'INTEGER', 'NOT NULL DEFAULT getFreightTaxtypeId()', 'public'),
+  xt.add_column('pohead', 'pohead_tax_exemption',           'TEXT', 'NULL', 'public');
 
 SELECT
   xt.add_constraint('pohead', 'pohead_pkey', 'PRIMARY KEY (pohead_id)', 'public'),
@@ -78,8 +79,6 @@ SELECT
                    'FOREIGN KEY (pohead_shipto_cntct_id) REFERENCES cntct(cntct_id)', 'public'),
   xt.add_constraint('pohead', 'pohead_pohead_shiptoddress_id_fkey',
                    'FOREIGN KEY (pohead_shiptoaddress_id) REFERENCES addr(addr_id)', 'public'),
-  xt.add_constraint('pohead', 'pohead_pohead_taxtype_id_fkey',
-                   'FOREIGN KEY (pohead_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
   xt.add_constraint('pohead', 'pohead_pohead_taxzone_id_fkey',
                    'FOREIGN KEY (pohead_taxzone_id) REFERENCES taxzone(taxzone_id)', 'public'),
   xt.add_constraint('pohead', 'pohead_pohead_terms_id_fkey',
@@ -97,7 +96,11 @@ SELECT
   xt.add_constraint('pohead', 'pohead_potype_id_fkey',
                     'FOREIGN KEY (pohead_potype_id)
                      REFERENCES public.potype (potype_id) MATCH SIMPLE
-                     ON UPDATE NO ACTION ON DELETE NO ACTION', 'public');
+                     ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+  xt.add_constraint('pohead', 'pohead_pohead_freight_taxtype_id_fkey',
+                    'FOREIGN KEY (pohead_freight_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+
+ALTER TABLE pohead DROP COLUMN IF EXISTS pohead_taxtype_id;
                          
 -- Migrate POTYPE table from original xt extension into public
 DO $$

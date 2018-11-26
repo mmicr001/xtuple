@@ -1,23 +1,14 @@
 -- Group: creditMemoCreditCards
 -- Name: detail
 -- Notes: used by arWorkBench, returnAuthorization, returnAuthorizationWorkbench
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT cmhead_number, cmhead_freight, cmhead_curr_id,
        SUM(ROUND((cmitem_qtycredit * cmitem_qty_invuomratio) * 
                  (cmitem_unitprice / cmitem_price_invuomratio), 2)) +
-       cmhead_freight + cmhead_misc +
-       COALESCE( (SELECT SUM(tax) * -1 AS tax FROM
-                 (SELECT ROUND(SUM(taxdetail_tax), 2) AS tax
-                  FROM tax
-                   JOIN calculateTaxDetailSummary('CM', <? value("cmhead_id") ?>, 'T') ON (taxdetail_tax_id=tax_id)
-                  GROUP BY tax_id) AS data), 0) AS total,
-       COALESCE( (SELECT SUM(tax) * -1 AS tax FROM
-                 (SELECT ROUND(SUM(taxdetail_tax), 2) AS tax
-                  FROM tax
-                   JOIN calculateTaxDetailSummary('CM', <? value("cmhead_id") ?>, 'T') ON (taxdetail_tax_id=tax_id)
-                  GROUP BY tax_id) AS data), 0) AS tax_in_cmcurr,
+       cmhead_freight + cmhead_misc + getOrderTax('CM', <? value("cmhead_id") ?>) AS total,
+                  getOrderTax('CM', <? value("cmhead_id") ?>) AS tax_in_cmcurr,
        ccard_id, ccard_seq, ccpay_id,
        cohead_number,
        COALESCE(cohead_id, -1) AS cohead_id

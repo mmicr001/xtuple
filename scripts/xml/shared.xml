@@ -16,6 +16,13 @@
   </prerequisite>
 
   <prerequisite type = "query"
+                name = "Checking for valid countries" >
+    <query>SELECT fetchMetricBool('ISOCountries');</query>
+    <message>You must migrate countries using the fixcountry extension before upgrading to this version.
+    </message>
+  </prerequisite>
+
+  <prerequisite type = "query"
                name = "Checking for plv8 setup in postgresql.conf" >
     <query>
       DO $$

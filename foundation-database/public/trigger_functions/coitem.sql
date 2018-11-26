@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _soitemTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _changelog BOOLEAN := FALSE;
@@ -14,6 +14,22 @@ BEGIN
   SELECT checkPrivilege('MaintainSalesOrders') OR checkPrivilege('ShipOrders') OR checkPrivilege('IssueStockToShipping') INTO _check;
   IF NOT (_check) THEN
     RAISE EXCEPTION 'You do not have privileges to alter a Sales Order.';
+  END IF;
+
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.coitem_qtyord != OLD.coitem_qtyord OR
+       NEW.coitem_qty_invuomratio != OLD.coitem_qty_invuomratio OR
+       NEW.coitem_price != OLD.coitem_price OR
+       NEW.coitem_price_invuomratio != OLD.coitem_price_invuomratio OR
+       NEW.coitem_taxtype_id != OLD.coitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.coitem_itemsite_id != OLD.coitem_itemsite_id OR
+         NEW.coitem_tax_exemption != OLD.coitem_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'S'
+       AND taxhead_doc_id = NEW.coitem_cohead_id;
   END IF;
 
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
@@ -240,7 +256,7 @@ CREATE TRIGGER soitemTrigger
   EXECUTE PROCEDURE _soitemTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check NUMERIC;
@@ -388,7 +404,7 @@ CREATE TRIGGER soitemBeforeTrigger
 
 
 CREATE OR REPLACE FUNCTION _soitemAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 -- 20160211:rks added new.coitem_memo to explodekit call when UPDATE
 
@@ -713,7 +729,7 @@ CREATE TRIGGER soitemAfterTrigger
   EXECUTE PROCEDURE _soitemAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -802,7 +818,7 @@ CREATE TRIGGER soitemBeforeDeleteTrigger
   EXECUTE PROCEDURE _soitemBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -825,6 +841,11 @@ BEGIN
   WHERE charass_target_type = 'SI'
     AND charass_target_id = OLD.coitem_id;
 
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'S'
+     AND taxhead_doc_id = OLD.coitem_cohead_id;
+
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -837,7 +858,7 @@ CREATE TRIGGER soitemAfterDeleteTrigger
   EXECUTE PROCEDURE _soitemAfterDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _coitemBeforeImpTaxTypeDefTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemid INTEGER := 0;
@@ -877,7 +898,7 @@ CREATE TRIGGER coitemBeforeImpTaxTypeDef
 CREATE OR REPLACE FUNCTION _coitemImportedPOPRbeforetrigger()
   RETURNS trigger AS
 $BODY$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _isImported BOOLEAN;

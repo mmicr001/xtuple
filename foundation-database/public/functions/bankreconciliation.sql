@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION bankReconciliation(pBankrecid INTEGER, pTask TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 -- posting and reopening bank reconciliations are nearly identical.
 -- the main differences revolve around what cleanup is done before starting.
@@ -102,7 +102,7 @@ BEGIN
       -- for each tax code
       FOR _tax IN SELECT docnumber, custname, distdate, source, doctype,
                          tax_sales_accnt_id, tax_dist_accnt_id,
-                         ROUND(currToBase(currid, ROUND(SUM(taxhist_tax),2), taxhist_docdate) * percentpaid, 2) AS taxbasevalue
+                         ROUND(currToBase(currid, ROUND(SUM(taxdetail_tax),2), taxhead_date) * percentpaid, 2) AS taxbasevalue
                   FROM (
                         -- Cash receipt, gltrans
                         SELECT aropen_docnumber AS docnumber, cust_name AS custname,
@@ -110,16 +110,29 @@ BEGIN
                                (cashrcptitem_amount / aropen_amount) AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM gltrans JOIN cashrcpt  ON ((gltrans_source='A/R')
                                                     AND (gltrans_doctype='CR')
                                                     AND (gltrans_misc_id=cashrcpt_id))
                                      JOIN cashrcptitem ON (cashrcptitem_cashrcpt_id=cashrcpt_id)
                                      JOIN aropen ON (aropen_id=cashrcptitem_aropen_id)
                                      JOIN custinfo ON (cust_id=aropen_cust_id)
-                                     JOIN cohist ON (cohist_invcnumber=aropen_docnumber AND cohist_doctype=aropen_doctype)
-                                     JOIN cohisttax ON (taxhist_parent_id=cohist_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
+                                     LEFT OUTER JOIN invchead ON aropen_cobmisc_id = invchead_id
+                                     LEFT OUTER JOIN cmhead ON aropen_doctype = 'C'
+                                                           AND COALESCE(aropen_applyto, '') != ''
+                                                           AND aropen_cobmisc_id = -1
+                                                           AND aropen_docnumber = cmhead_number
+                                     JOIN taxhead ON taxhead_doc_type =
+                                                     CASE WHEN invchead_id IS NOT NULL THEN 'INV'
+                                                          WHEN cmhead_id IS NOT NULL THEN 'CM'
+                                                          ELSE 'AR'
+                                                      END
+                                                 AND taxhead_doc_id = COALESCE(invchead_id,
+                                                                               cmhead_id,
+                                                                               aropen_id)
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                         WHERE (gltrans_id=_r.bankrecitem_source_id)
                         -- Cash receipt, sltrans
                         UNION ALL
@@ -128,16 +141,29 @@ BEGIN
                                (cashrcptitem_amount / aropen_amount) AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM sltrans JOIN cashrcpt  ON ((sltrans_source='A/R')
                                                     AND (sltrans_doctype='CR')
                                                     AND (sltrans_misc_id=cashrcpt_id))
                                      JOIN cashrcptitem ON (cashrcptitem_cashrcpt_id=cashrcpt_id)
                                      JOIN aropen ON (aropen_id=cashrcptitem_aropen_id)
                                      JOIN custinfo ON (cust_id=aropen_cust_id)
-                                     JOIN cohist ON (cohist_invcnumber=aropen_docnumber AND cohist_doctype=aropen_doctype)
-                                     JOIN cohisttax ON (taxhist_parent_id=cohist_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
+                                     LEFT OUTER JOIN invchead ON aropen_cobmisc_id = invchead_id
+                                     LEFT OUTER JOIN cmhead ON aropen_doctype = 'C'
+                                                           AND COALESCE(aropen_applyto, '') != ''
+                                                           AND aropen_cobmisc_id = -1
+                                                           AND aropen_docnumber = cmhead_number
+                                     JOIN taxhead ON taxhead_doc_type =
+                                                     CASE WHEN invchead_id IS NOT NULL THEN 'INV'
+                                                          WHEN cmhead_id IS NOT NULL THEN 'CM'
+                                                          ELSE 'AR'
+                                                      END
+                                                 AND taxhead_doc_id = COALESCE(invchead_id, 
+                                                                               cmhead_id,
+                                                                               aropen_id)
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                         WHERE (sltrans_id=_r.bankrecitem_source_id)
                         -- Cash payment, gltrans
                         UNION ALL
@@ -146,7 +172,7 @@ BEGIN
                                (checkitem_amount / apopen_amount) AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
                                                     AND (gltrans_doctype='CK')
                                                     AND (gltrans_misc_id=checkhead_id))
@@ -154,42 +180,11 @@ BEGIN
                                      JOIN apopen ON (apopen_id=checkitem_apopen_id)
                                      JOIN vohead ON (vohead_number=apopen_docnumber)
                                      JOIN vendinfo ON (vend_id=apopen_vend_id)
-                                     JOIN voheadtax ON (taxhist_parent_id=vohead_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
-                        WHERE (gltrans_id=_r.bankrecitem_source_id)
-                        UNION ALL
-                        SELECT apopen_docnumber AS docnumber, vend_name AS vendname,
-                               apopen_curr_id AS currid, gltrans_date AS distdate,
-                               (checkitem_amount / apopen_amount) AS percentpaid,
-                               gltrans_source AS source, gltrans_doctype AS doctype,
-                               tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
-                        FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
-                                                    AND (gltrans_doctype='CK')
-                                                    AND (gltrans_misc_id=checkhead_id))
-                                     JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
-                                     JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                     JOIN vohead ON (vohead_number=apopen_docnumber)
-                                     JOIN vendinfo ON (vend_id=apopen_vend_id)
-                                     JOIN voitem ON (voitem_vohead_id=vohead_id)
-                                     JOIN voitemtax ON (taxhist_parent_id=voitem_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
-                        WHERE (gltrans_id=_r.bankrecitem_source_id)
-                        UNION ALL
-                        SELECT checkhead_number::TEXT AS docnumber, 
-                               COALESCE(vend_name, cust_name) AS vendname,
-                               checkhead_curr_id AS currid, gltrans_date AS distdate,
-                               1 AS percentpaid,
-                               gltrans_source AS source, gltrans_doctype AS doctype,
-                               tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
-                        FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
-                                                    AND (gltrans_doctype='CK')
-                                                    AND (gltrans_misc_id=checkhead_id))
-                                     JOIN checkheadtax ON (taxhist_parent_id=checkhead_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
-                                     LEFT OUTER JOIN vendinfo ON (checkhead_recip_id=vend_id)
-                                     LEFT OUTER JOIN custinfo ON (checkhead_recip_id=cust_id)
+                                     JOIN taxhead ON taxhead_doc_type = 'VCH'
+                                                 AND taxhead_doc_id = vohead_id
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                         WHERE (gltrans_id=_r.bankrecitem_source_id)
                         -- Cash payment, sltrans
                         UNION ALL
@@ -198,7 +193,7 @@ BEGIN
                                (checkitem_amount / apopen_amount) AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM sltrans JOIN checkhead ON ((sltrans_source='A/P')
                                                     AND (sltrans_doctype='CK')
                                                     AND (sltrans_misc_id=checkhead_id))
@@ -206,26 +201,11 @@ BEGIN
                                      JOIN apopen ON (apopen_id=checkitem_apopen_id)
                                      JOIN vohead ON (vohead_number=apopen_docnumber)
                                      JOIN vendinfo ON (vend_id=apopen_vend_id)
-                                     JOIN voheadtax ON (taxhist_parent_id=vohead_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
-                        WHERE (sltrans_id=_r.bankrecitem_source_id)
-                        UNION ALL
-                        SELECT apopen_docnumber AS docnumber, vend_name AS vendname,
-                               apopen_curr_id AS currid, sltrans_date AS distdate,
-                               (checkitem_amount / apopen_amount) AS percentpaid,
-                               sltrans_source AS source, sltrans_doctype AS doctype,
-                               tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
-                        FROM sltrans JOIN checkhead ON ((sltrans_source='A/P')
-                                                    AND (sltrans_doctype='CK')
-                                                    AND (sltrans_misc_id=checkhead_id))
-                                     JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
-                                     JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                     JOIN vohead ON (vohead_number=apopen_docnumber)
-                                     JOIN vendinfo ON (vend_id=apopen_vend_id)
-                                     JOIN voitem ON (voitem_vohead_id=vohead_id)
-                                     JOIN voitemtax ON (taxhist_parent_id=voitem_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
+                                     JOIN taxhead ON taxhead_doc_type = 'VCH'
+                                                 AND taxhead_doc_id = vohead_id
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                         WHERE (sltrans_id=_r.bankrecitem_source_id)
                         -- Miscellaneous Payments, gltrans
                         UNION ALL
@@ -235,12 +215,15 @@ BEGIN
                                1 AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
                                                     AND (gltrans_doctype='CK')
                                                     AND (gltrans_misc_id=checkhead_id))
-                                     JOIN checkheadtax ON (taxhist_parent_id=checkhead_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
+                                     JOIN taxhead ON taxhead_doc_type = 'CK'
+                                                 AND taxhead_doc_id = checkhead_id
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                                      LEFT OUTER JOIN vendinfo ON (checkhead_recip_id=vend_id)
                                      LEFT OUTER JOIN custinfo ON (checkhead_recip_id=cust_id)
                         WHERE (gltrans_id=_r.bankrecitem_source_id)
@@ -252,19 +235,22 @@ BEGIN
                                1 AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxhist_tax, taxhist_docdate
+                               taxdetail_tax, taxhead_docdate
                         FROM sltrans JOIN checkhead ON ((sltrans_source='A/P')
                                                     AND (sltrans_doctype='CK')
                                                     AND (sltrans_misc_id=checkhead_id))
-                                     JOIN checkheadtax ON (taxhist_parent_id=checkhead_id)
-                                     JOIN tax ON (tax_id=taxhist_tax_id)
+                                     JOIN taxhead ON taxhead_doc_type = 'CK'
+                                                 AND taxhead_doc_id = checkhead_id
+                                     JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                     JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+                                     LEFT OUTER JOIN tax ON (tax_id=taxdetail_tax_id)
                                      LEFT OUTER JOIN vendinfo ON (checkhead_recip_id=vend_id)
                                      LEFT OUTER JOIN custinfo ON (checkhead_recip_id=cust_id)
                         WHERE (sltrans_id=_r.bankrecitem_source_id)
                        ) AS data
                   GROUP BY docnumber, custname, currid, distdate, percentpaid,
                            source, doctype,
-                           tax_sales_accnt_id, tax_dist_accnt_id, taxhist_docdate
+                           tax_sales_accnt_id, tax_dist_accnt_id, taxhead_docdate
       LOOP
         IF (_tax.tax_sales_accnt_id IS NULL OR _tax.tax_dist_accnt_id IS NULL) THEN
           RAISE EXCEPTION 'Cannot post this bank reconciliation due to missing Tax Code G/L Account mappings';
@@ -285,112 +271,123 @@ BEGIN
         END IF;
       END LOOP;
 
-      -- second, create a taxpay row for each taxhist
-      FOR _tax IN SELECT taxhist_id, applyid, distdate,
-                         ROUND(taxhist_tax * percentpaid, 2) AS taxpaid
+      -- second, add taxpay info to each taxdetail
+      FOR _tax IN SELECT taxdetail_id, distdate,
+                         ROUND(taxdetail_tax * percentpaid, 2) AS taxpaid
                   FROM (
                         -- Cash receipt, gltrans
-                        SELECT taxhist_id, aropen_id AS applyid, gltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, gltrans_date AS distdate, taxdetail_tax,
                                (cashrcptitem_amount / aropen_amount) AS percentpaid
                           FROM gltrans JOIN cashrcpt  ON ((gltrans_source='A/R')
                                                       AND (gltrans_doctype='CR')
                                                       AND (gltrans_misc_id=cashrcpt_id))
                                        JOIN cashrcptitem ON (cashrcptitem_cashrcpt_id=cashrcpt_id)
                                        JOIN aropen ON (aropen_id=cashrcptitem_aropen_id)
-                                       JOIN cohist ON (cohist_invcnumber=aropen_docnumber AND cohist_doctype=aropen_doctype)
-                                       JOIN cohisttax ON (taxhist_parent_id=cohist_id)
+                                       LEFT OUTER JOIN invchead ON aropen_cobmisc_id = invchead_id
+                                       LEFT OUTER JOIN cmhead ON aropen_doctype = 'C'
+                                                             AND COALESCE(aropen_applyto, '') != ''
+                                                             AND aropen_cobmisc_id = -1
+                                                             AND aropen_docnumber = cmhead_number
+                                       JOIN taxhead ON taxhead_doc_type =
+                                                       CASE WHEN invchead_id IS NOT NULL THEN 'INV'
+                                                            WHEN cmhead_id IS NOT NULL THEN 'CM'
+                                                            ELSE 'AR'
+                                                        END
+                                                   AND taxhead_doc_id = COALESCE(invchead_id,
+                                                                                 cmhead_id,
+                                                                                 aropen_id)
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (gltrans_id=_r.bankrecitem_source_id)
                         -- Cash receipt, sltrans
                         UNION
-                        SELECT taxhist_id, aropen_id AS applyid, sltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, sltrans_date AS distdate, taxdetail_tax,
                                (cashrcptitem_amount / aropen_amount) AS percentpaid
                           FROM sltrans JOIN cashrcpt  ON ((sltrans_source='A/R')
                                                       AND (sltrans_doctype='CR')
                                                       AND (sltrans_misc_id=cashrcpt_id))
                                        JOIN cashrcptitem ON (cashrcptitem_cashrcpt_id=cashrcpt_id)
                                        JOIN aropen ON (aropen_id=cashrcptitem_aropen_id)
-                                       JOIN cohist ON (cohist_invcnumber=aropen_docnumber AND cohist_doctype=aropen_doctype)
-                                       JOIN cohisttax ON (taxhist_parent_id=cohist_id)
+                                       LEFT OUTER JOIN invchead ON aropen_cobmisc_id = invchead_id
+                                       LEFT OUTER JOIN cmhead ON aropen_doctype = 'C'
+                                                             AND COALESCE(aropen_applyto, '') != ''
+                                                             AND aropen_cobmisc_id = -1
+                                                             AND aropen_docnumber = cmhead_number
+                                       JOIN taxhead ON taxhead_doc_type =
+                                                       CASE WHEN invchead_id IS NOT NULL THEN 'INV'
+                                                            WHEN cmhead_id IS NOT NULL THEN 'CM'
+                                                            ELSE 'AR'
+                                                        END
+                                                   AND taxhead_doc_id = COALESCE(invchead_id,
+                                                                                 cmhead_id,
+                                                                                 aropen_id)
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (sltrans_id=_r.bankrecitem_source_id)
                         -- Cash payment, gltrans
                         UNION
-                        SELECT taxhist_id, apopen_id AS applyid, gltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, gltrans_date AS distdate, taxdetail_tax,
                                (checkitem_amount / apopen_amount) AS percentpaid
                           FROM gltrans JOIN checkhead  ON ((gltrans_source='A/P')
                                                        AND (gltrans_doctype='CK')
                                                        AND (gltrans_misc_id=checkhead_id))
                                        JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
                                        JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                       JOIN vohead ON (vohead_number=apopen_docnumber)
-                                       JOIN voheadtax ON (taxhist_parent_id=vohead_id)
+                                       JOIN taxhead ON taxhead_doc_type = 'VCH'
+                                                   AND taxhead_doc_id = vohead_id
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (gltrans_id=_r.bankrecitem_source_id)
-                        UNION
-                        SELECT taxhist_id, apopen_id AS applyid, gltrans_date AS distdate, taxhist_tax,
-                               (checkitem_amount / apopen_amount) AS percentpaid
-                          FROM gltrans JOIN checkhead  ON ((gltrans_source='A/P')
-                                                       AND (gltrans_doctype='CK')
-                                                       AND (gltrans_misc_id=checkhead_id))
-                                       JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
-                                       JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                       JOIN vohead ON (vohead_number=apopen_docnumber)
-                                       JOIN voitem ON (voitem_vohead_id=vohead_id)
-                                       JOIN voitemtax ON (taxhist_parent_id=voitem_id)
-                          WHERE (gltrans_id=_r.bankrecitem_source_id)                      
                         -- Cash payment, sltrans
                         UNION
-                        SELECT taxhist_id, apopen_id AS applyid, sltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, sltrans_date AS distdate, taxdetail_tax,
                                (checkitem_amount / apopen_amount) AS percentpaid
                           FROM sltrans JOIN checkhead  ON ((sltrans_source='A/P')
                                                        AND (sltrans_doctype='CK')
                                                        AND (sltrans_misc_id=checkhead_id))
                                        JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
                                        JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                       JOIN vohead ON (vohead_number=apopen_docnumber)
-                                       JOIN voheadtax ON (taxhist_parent_id=vohead_id)
-                          WHERE (sltrans_id=_r.bankrecitem_source_id)
-                        UNION
-                        SELECT taxhist_id, apopen_id AS applyid, sltrans_date AS distdate, taxhist_tax,
-                               (checkitem_amount / apopen_amount) AS percentpaid
-                          FROM sltrans JOIN checkhead  ON ((sltrans_source='A/P')
-                                                       AND (sltrans_doctype='CK')
-                                                       AND (sltrans_misc_id=checkhead_id))
-                                       JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
-                                       JOIN apopen ON (apopen_id=checkitem_apopen_id)
-                                       JOIN vohead ON (vohead_number=apopen_docnumber)
-                                       JOIN voitem ON (voitem_vohead_id=vohead_id)
-                                       JOIN voitemtax ON (taxhist_parent_id=voitem_id)
+                                       JOIN taxhead ON taxhead_doc_type = 'VCH'
+                                                   AND taxhead_doc_id = vohead_id
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (sltrans_id=_r.bankrecitem_source_id)
                         -- Miscellaneous Payment , gltrans
                         UNION
-                        SELECT taxhist_id, checkhead_id AS applyid, gltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, gltrans_date AS distdate, taxdetail_tax,
                                1.00 AS percentpaid
                           FROM gltrans JOIN checkhead  ON ((gltrans_source='A/P')
                                                        AND (gltrans_doctype='CK')
                                                        AND (gltrans_misc_id=checkhead_id))
-                                       JOIN checkheadtax ON (taxhist_parent_id=checkhead_id)
+                                       JOIN taxhead ON taxhead_doc_type = 'CK'
+                                                   AND taxhead_doc_id = checkhead_id
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (gltrans_id=_r.bankrecitem_source_id)
                         -- Miscellaneous Payment , sltrans
                         UNION
-                        SELECT taxhist_id, checkhead_id AS applyid, sltrans_date AS distdate, taxhist_tax,
+                        SELECT taxdetail_id, sltrans_date AS distdate, taxdetail_tax,
                                1.00 AS percentpaid
                           FROM sltrans JOIN checkhead  ON ((sltrans_source='A/P')
                                                        AND (sltrans_doctype='CK')
                                                        AND (sltrans_misc_id=checkhead_id))
-                                       JOIN checkheadtax ON (taxhist_parent_id=checkhead_id)
+                                       JOIN taxhead ON taxhead_doc_type = 'CK'
+                                                   AND taxhead_doc_id = checkhead_id
+                                       JOIN taxline ON taxhead_id = taxline_taxhead_id
+                                       JOIN taxdetail ON taxline_id = taxdetail_taxline_id
                           WHERE (sltrans_id=_r.bankrecitem_source_id)
                        ) AS data
       LOOP
         IF _post THEN
-          INSERT INTO taxpay
-          ( taxpay_taxhist_id, taxpay_apply_id, taxpay_distdate, taxpay_tax )
-          VALUES
-          ( _tax.taxhist_id, _tax.applyid, COALESCE(_r.bankrecitem_effdate, _tax.distdate), _tax.taxpaid );
+          UPDATE taxdetail
+             SET taxdetail_paydate = COALESCE(_r.bankrecitem_effdate, _tax.distdate),
+                 taxdetail_tax_paid = _tax.taxpaid
+           WHERE taxdetail_id = _tax.taxdetail_id;
         ELSE
-          DELETE FROM taxpay
-          WHERE ((taxpay_taxhist_id=_tax.taxhist_id)
-             AND (taxpay_apply_id=_tax.applyid)
-             AND (taxpay_distdate=COALESCE(_r.bankrecitem_effdate, _tax.distdate))
-             AND (taxpay_tax=_tax.taxpaid));
+          UPDATE taxdetail
+             SET taxdetail_paydate = NULL,
+                 taxdetail_tax_paid = NULL
+           WHERE taxdetail_id = _tax.taxdetail_id;
         END IF;
       END LOOP;
 

@@ -2,7 +2,7 @@ SELECT dropIfExists('TRIGGER', 'voheadBeforeTrigger');
 SELECT dropIfExists('TRIGGER', 'voheadAfterTrigger');
 
 CREATE OR REPLACE FUNCTION _voheadBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
@@ -29,7 +29,6 @@ BEGIN
      WHERE poreject_vohead_id = OLD.vohead_id;
 
     DELETE FROM vodist    WHERE vodist_vohead_id  = OLD.vohead_id;
-    DELETE FROM voheadtax WHERE taxhist_parent_id = OLD.vohead_id;
     DELETE FROM voitem    WHERE voitem_vohead_id  = OLD.vohead_id;
 
     SELECT recur_id INTO _recurid
@@ -69,13 +68,37 @@ CREATE TRIGGER voheadBeforeTrigger
   EXECUTE PROCEDURE _voheadBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _voheadAfterTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     PERFORM releaseVoNumber(CAST(OLD.vohead_number AS INTEGER));
     RETURN OLD;
   END IF;
+
+  IF (TG_OP = 'UPDATE' AND
+      (NEW.vohead_docdate != OLD.vohead_docdate OR
+       NEW.vohead_curr_id != OLD.vohead_curr_id OR
+       NEW.vohead_freight != OLD.vohead_freight OR
+       NEW.vohead_freight_taxtype_id != OLD.vohead_freight_taxtype_id OR
+       (fetchMetricText('TaxService') = 'N' AND
+        NEW.vohead_taxzone_id != OLD.vohead_taxzone_id) OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.vohead_tax_exemption != OLD.vohead_tax_exemption))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = NEW.vohead_id;
+  END IF;
+
+  IF (TG_OP = 'UPDATE' AND NEW.vohead_posted AND NOT OLD.vohead_posted) THEN
+    EXECUTE format('NOTIFY commit, %L', 'VCH,' || OLD.vohead_id);
+  END IF;
+
+  IF (TG_OP = 'DELETE' AND getOrderTax('VCH', OLD.vohead_id) - OLD.vohead_tax_charged > 0.0) THEN
+    EXECUTE format('NOTIFY cancel, %L', 'VCH,' || OLD.vohead_id || ',' || OLD.vohead_number);
+  END IF;
+
 
   IF (TG_OP = 'INSERT') THEN
     PERFORM clearNumberIssue('VcNumber', NEW.vohead_number);
@@ -84,42 +107,12 @@ BEGIN
   END IF;
 
   IF (TG_OP = 'UPDATE') THEN
-    IF ( (COALESCE(NEW.vohead_taxzone_id,-1) <> COALESCE(OLD.vohead_taxzone_id,-1)) OR
-         (NEW.vohead_docdate <> OLD.vohead_docdate) OR
-         (NEW.vohead_curr_id <> OLD.vohead_curr_id) ) THEN
-      PERFORM calculateTaxHist( 'voitemtax',
-                                voitem_id,
-                                NEW.vohead_taxzone_id,
-                                voitem_taxtype_id,
-                                NEW.vohead_docdate,
-                                NEW.vohead_curr_id,
-                                (vodist_amount * -1) )
-      FROM voitem JOIN vodist ON ( (vodist_vohead_id=voitem_vohead_id) AND
-                                   (vodist_poitem_id=voitem_poitem_id) )
-      WHERE (voitem_vohead_id = NEW.vohead_id);
-    END IF;
-
     -- Touch any Misc Tax Distributions so voheadtax is recalculated
     IF (NEW.vohead_docdate <> OLD.vohead_docdate) THEN
       UPDATE vodist SET vodist_vohead_id=NEW.vohead_id
       WHERE ( (vodist_vohead_id=OLD.vohead_id)
         AND   (vodist_tax_id <> -1) );
     END IF;
-
-    -- Calculate Freight Tax
-    IF (NEW.vohead_freight <> 0 AND NOT NEW.vohead_posted) THEN
-      PERFORM calculateTaxHist( 'voheadtax',
-                                NEW.vohead_id,
-                                NEW.vohead_taxzone_id,
-                                getFreightTaxtypeId(),
-                                NEW.vohead_docdate,
-                                baseCurrId(),
-                                NEW.vohead_freight * -1 );
-    ELSIF (NEW.vohead_freight = 0) THEN
-      DELETE FROM voheadtax
-      WHERE ((taxhist_parent_id=NEW.vohead_id)
-        AND  (taxhist_taxtype_id = getFreightTaxtypeId()));
-    END IF;    
   END IF;
 
   RETURN NEW;
@@ -133,7 +126,7 @@ CREATE TRIGGER voheadAfterTrigger
   EXECUTE PROCEDURE _voheadAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _voheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -143,6 +136,10 @@ BEGIN
   FROM charass
   WHERE charass_target_type = 'VCH'
     AND charass_target_id = OLD.vohead_id;
+
+  DELETE FROM taxhead
+   WHERE taxhead_doc_type = 'VCH'
+     AND taxhead_doc_id = OLD.vohead_id;
 
   RETURN OLD;
 END;

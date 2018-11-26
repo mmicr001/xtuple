@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION releasePR(pPrId INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _pr RECORD;
@@ -10,7 +10,6 @@ DECLARE
   _itemsrcid INTEGER := -1;
   _poheadid INTEGER := -1;
   _poitemid INTEGER := -1;
-  _taxtypeid INTEGER := -1;
   _polinenumber INTEGER;
   _ponumber NUMERIC;
   _poqty NUMERIC := 0.0;
@@ -169,10 +168,6 @@ BEGIN
   FROM poitem
   WHERE (poitem_pohead_id = _poheadid);
 
-  SELECT COALESCE(itemtax_taxtype_id, -1) INTO _taxtypeid
-  FROM itemtax
-  WHERE (itemtax_item_id = _i.itemsrc_item_id);
-
   SELECT itemsrcPrice(_i.itemsrc_id,
                       COALESCE(_pr.itemsite_warehous_id, -1),
                       FALSE,
@@ -207,7 +202,7 @@ BEGIN
       END,
       _pr.prj_id, stdcost(_i.itemsrc_item_id),
       COALESCE(_i.itemsrc_manuf_name, TEXT('')), COALESCE(_i.itemsrc_manuf_item_number, TEXT('')),
-      COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), _taxtypeid,
+      COALESCE(_i.itemsrc_manuf_item_descrip, TEXT('')), getItemTaxType(_i.itemsrc_item_id, _i.vend_taxzone_id),
       COALESCE(_pr.pr_releasenote, TEXT('')));
 
   -- Copy characteristics from the pr to the poitem

@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS insertItemCost(INTEGER, INTEGER, INTEGER, NUMERIC, BOOLEAN) CASCADE;
 CREATE OR REPLACE FUNCTION insertItemCost(pItemId INTEGER, pCostElemId INTEGER, pCurrId INTEGER, pCost NUMERIC, pPostToStandard BOOLEAN) RETURNS INTEGER AS $BODY$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 _itemcost_id INTEGER;

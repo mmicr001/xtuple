@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION deleteTaxType(INTEGER) RETURNS INTEGER AS '
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pTaxtypeid ALIAS FOR $1;
@@ -23,10 +23,10 @@ BEGIN
     RETURN -2;
   END IF;
 
-  SELECT taxhist_id
+  SELECT taxdetail_id
     INTO _result
-    FROM taxhist
-   WHERE (taxhist_taxtype_id=pTaxtypeid);
+    FROM taxdetail
+   WHERE (taxdetail_taxtype_id=pTaxtypeid);
   IF (FOUND) THEN
     RETURN -3;
   END IF;

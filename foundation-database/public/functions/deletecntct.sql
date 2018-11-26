@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION deleteCntct(pCntctId INTEGER, pCascade BOOLEAN) RETURNS BOOLEAN AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _fk RECORD;
@@ -15,7 +15,7 @@ BEGIN
     JOIN pg_namespace ON child.relnamespace=pg_namespace.oid
     JOIN pg_class parent ON confrelid=parent.oid
    WHERE parent.relname='cntct'
-     AND child.relname NOT IN ('cntcteml',
+     AND child.relname NOT IN ('cntcteml',  'cntctphone',
                                'cohead',    'pohead',    'quhead',   'tohead',
                                'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist')
   LOOP

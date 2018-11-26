@@ -39,7 +39,8 @@ SELECT
   xt.add_column('poitem', 'poitem_order_type', 'CHARACTER(1)', NULL, 'public'),
 
   xt.add_column('poitem', 'poitem_created',     'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
-  xt.add_column('poitem', 'poitem_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public');
+  xt.add_column('poitem', 'poitem_lastupdated', 'TIMESTAMP WITH TIME ZONE', NULL, 'public'),
+  xt.add_column('poitem', 'poitem_tax_exemption', 'TEXT', 'NULL', 'public');
 
 DELETE FROM poitem
  WHERE NOT EXISTS(SELECT 1

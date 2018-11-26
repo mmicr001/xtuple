@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION calculateinversetax(
     pCurrId integer,
     pAmount numeric)
   RETURNS numeric AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license
 BEGIN
 
@@ -13,7 +13,9 @@ BEGIN
     RETURN 0.00;
   END IF;  
 
-  RETURN (pAmount - calculatepretaxtotal(pTaxZoneId,pTaxTypeId,pDate, pCurrId, pAmount));
+  RETURN (pAmount - (calculateTaxIncluded(pTaxZoneId, pCurrId, pDate, 0.0, 0.0, -1, -1, FALSE,
+                                          ARRAY[''], ARRAY[pTaxtypeId],
+                                          ARRAY[pAmount])->>'total')::NUMERIC);
   
 END;
 $$ LANGUAGE plpgsql;

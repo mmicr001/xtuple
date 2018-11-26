@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION createbillingheader(integer)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSoheadid		ALIAS FOR $1;
@@ -9,12 +9,10 @@ DECLARE
   _cohead		cohead%ROWTYPE;
   _miscApplied          NUMERIC := 0.0;
   _freight		NUMERIC;
-  _freighttypeid        INTEGER;
   _invcDate		DATE;
   _schedDate		DATE;
   _shipDate		DATE;
   _shipVia		TEXT;
-  _tax			NUMERIC;
 
 BEGIN
 
@@ -120,13 +118,6 @@ BEGIN
     _shipVia := _cohead.cohead_shipvia;
   END IF;
 
-  --Determine any tax
-
-  SELECT 
-  getFreightTaxTypeId() INTO _freighttypeid;
-  SELECT SUM(COALESCE(taxdetail_tax, 0.00)) INTO _tax
-  FROM calculatetaxdetail(_cohead.cohead_taxzone_id, _freighttypeid, _cohead.cohead_orderdate,_cohead.cohead_curr_id, _freight);
-
   --  Determine if we are using the _shipDate or _schedDate or current_date for the _invcDate
   IF( fetchMetricText('InvoiceDateSource')='scheddate') THEN
     _invcDate := _schedDate;
@@ -140,7 +131,8 @@ BEGIN
 	cobmisc_id, cobmisc_cohead_id, cobmisc_shipvia, cobmisc_freight, cobmisc_misc, cobmisc_payment 
 	,cobmisc_notes,cobmisc_shipdate ,cobmisc_invcdate,cobmisc_posted ,cobmisc_misc_accnt_id 
 	,cobmisc_misc_descrip,cobmisc_closeorder,cobmisc_curr_id
-	,cobmisc_taxtype_id,cobmisc_taxzone_id
+	,cobmisc_taxzone_id, cobmisc_freight_taxtype_id
+        ,cobmisc_misc_taxtype_id, cobmisc_misc_discount, cobmisc_tax_exemption
 	)
 	SELECT
 	_cobmiscid,_cohead.cohead_id,_shipVia,_freight,
@@ -148,7 +140,8 @@ BEGIN
              ELSE (_cohead.cohead_misc - _miscApplied) END,0,
         _cohead.cohead_ordercomments,_shipDate,_invcDate,FALSE,_cohead.cohead_misc_accnt_id,
         _cohead.cohead_misc_descrip,NOT(cust_backorder),_cohead.cohead_curr_id,
-	_cohead.cohead_taxtype_id,_cohead.cohead_taxzone_id
+	_cohead.cohead_taxzone_id, _cohead.cohead_freight_taxtype_id,
+        _cohead.cohead_misc_taxtype_id, _cohead.cohead_misc_discount, _cohead.cohead_tax_exemption
 	FROM custinfo
 	WHERE (cust_id=_cohead.cohead_cust_id);
 

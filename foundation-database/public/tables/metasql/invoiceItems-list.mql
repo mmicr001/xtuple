@@ -1,7 +1,7 @@
 -- Group: invoiceItems
 -- Name:  list
 -- Notes: --        used by Invoice
---        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 SELECT invcitem_id,
        CASE WHEN COALESCE(invcitem_subnumber, 0) > 0 THEN

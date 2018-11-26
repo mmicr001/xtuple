@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION cntctdups(pSearchText        text,
                                      pCheckPhone        boolean,
                                      pCheckEmail        boolean)
   RETURNS SETOF cntctdup AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntct    cntctdup%ROWTYPE;
@@ -30,7 +30,7 @@ DECLARE
                               UPPER(cntct_honorific) AS cntct_honorific,
                               cntct_initials,
                               cntct_active,
-                              (SELECT array_to_string(array_agg(cntctphone_phone), '', '')
+                              (SELECT array_to_string(array_agg(cntctphone_phone), '','', '''')
                                FROM cntctphone
                                WHERE cntctphone_cntct_id=cntct_id) AS contact_phones,
                               UPPER(cntct_email) AS cntct_email,

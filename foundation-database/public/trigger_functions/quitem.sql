@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _quitemtrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check BOOLEAN;
@@ -9,6 +9,22 @@ BEGIN
   SELECT checkPrivilege('MaintainQuotes') INTO _check;
   IF NOT (_check) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Quotes.';
+  END IF;
+
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.quitem_qtyord != OLD.quitem_qtyord OR
+       NEW.quitem_qty_invuomratio != OLD.quitem_qty_invuomratio OR
+       NEW.quitem_price != OLD.quitem_price OR
+       NEW.quitem_price_invuomratio != OLD.quitem_price_invuomratio OR
+       NEW.quitem_taxtype_id != OLD.quitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.quitem_itemsite_id != OLD.quitem_itemsite_id OR
+         NEW.quitem_tax_exemption != OLD.quitem_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'Q'
+       AND taxhead_doc_id = NEW.quitem_quhead_id;
   END IF;
 
   IF (fetchMetricBool('SalesOrderChangeLog')) THEN
@@ -55,7 +71,7 @@ CREATE TRIGGER quitemtrigger
   EXECUTE PROCEDURE _quitemtrigger();
 
 CREATE OR REPLACE FUNCTION _quitemBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check NUMERIC;
@@ -95,7 +111,7 @@ CREATE TRIGGER quitemBeforeTrigger
 
 
 CREATE OR REPLACE FUNCTION _quitemAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check NUMERIC;
@@ -126,7 +142,7 @@ CREATE TRIGGER quitemAfterTrigger
   EXECUTE PROCEDURE _quitemAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _quitemAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -143,6 +159,11 @@ BEGIN
   DELETE FROM charass
    WHERE ((charass_target_type='QI')
      AND  (charass_target_id=OLD.quitem_id));
+
+  UPDATE taxhead
+     SET taxhead_valid = FALSE
+   WHERE taxhead_doc_type = 'Q'
+     AND taxhead_doc_id = OLD.quitem_quhead_id;
 
   RETURN OLD;
 END;

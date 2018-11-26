@@ -1,12 +1,14 @@
 CREATE OR REPLACE FUNCTION _voitemBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM voitemtax
-    WHERE (taxhist_parent_id=OLD.voitem_id);
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = OLD.voitem_vohead_id;
 
     RETURN OLD;
   END IF;
@@ -23,52 +25,22 @@ CREATE TRIGGER voitemBeforeTrigger
   EXECUTE PROCEDURE _voitemBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _voitemAfterTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  _r RECORD;
-
 BEGIN
-  IF (TG_OP = 'DELETE') THEN
-    RETURN OLD;
+
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.voitem_qty != OLD.voitem_qty OR
+       NEW.voitem_freight != OLD.voitem_freight OR
+       NEW.voitem_taxtype_id != OLD.voitem_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        NEW.voitem_tax_exemption != OLD.voitem_tax_exemption))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = NEW.voitem_vohead_id;
   END IF;
-
--- Cache Voucher Head
-  SELECT * INTO _r
-  FROM vohead
-  WHERE (vohead_id=NEW.voitem_vohead_id);
-  IF (NOT FOUND) THEN
-    RAISE EXCEPTION 'Voucher head not found';
-  END IF;
-
--- Calculate Tax
-  PERFORM calculateTaxHist( 'voitemtax',
-                            NEW.voitem_id,
-                            COALESCE(_r.vohead_taxzone_id, -1),
-                            NEW.voitem_taxtype_id,
-                            COALESCE(_r.vohead_docdate, CURRENT_DATE),
-                            COALESCE(_r.vohead_curr_id, -1),
-                            COALESCE(SUM(vodist_amount * -1), 0) )
-  FROM vodist
-  WHERE ( (vodist_vohead_id=_r.vohead_id)
-    AND   (vodist_poitem_id=NEW.voitem_poitem_id) );
-
-  -- Calculate Freight Tax
-  IF (NEW.voitem_freight <> 0) THEN
-    PERFORM calculateTaxHist( 'voitemtax',
-                              NEW.voitem_id,
-                              COALESCE(vohead_taxzone_id, -1),
-                              getFreightTaxtypeId(),
-                              COALESCE(vohead_docdate, CURRENT_DATE),
-                              COALESCE(vohead_curr_id, -1),
-                              COALESCE(NEW.voitem_freight * -1, 0))
-    FROM vohead
-    WHERE (vohead_id=NEW.voitem_vohead_id);
-  ELSIF (NEW.voitem_freight = 0) THEN
-    DELETE FROM voitemtax
-    WHERE ((taxhist_parent_id=NEW.voitem_id)
-      AND  (taxhist_taxtype_id = getFreightTaxtypeId()));
-  END IF;     
 
   RETURN NEW;
 END;

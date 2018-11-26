@@ -48,6 +48,10 @@ FROM addr
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
 WHERE true
+<? if exists("campaign") ?>
+  AND CASE WHEN <? value("campaign") ?> = 1 THEN addr_allowmktg
+           ELSE true END
+<? endif ?>
 <? if exists("address") ?>
  AND concat(addr_line1, addr_line2, addr_line3) ~* <? value("address") ?>
 <? endif ?>
@@ -58,7 +62,7 @@ WHERE true
  AND addr_state ~* <? value("state") ?>
 <? endif ?>
 <? if exists("country") ?>
- AND addr_country = (SELECT country_name FROM country WHERE country_id=<? value("country") ?>)
+ AND addr_country = (SELECT country_abbr FROM country WHERE country_id=<? value("country") ?>)
 <? endif ?>
 <? if exists("postalcode") ?>
  AND addr_postalcode ~* <? value("postalcode") ?>
@@ -85,7 +89,7 @@ WHERE true
  AND addr_state ~ <? value("state") ?>
 <? endif ?>
 <? if exists("country") ?>
- AND addr_country = (SELECT country_name FROM country WHERE country_id=<? value("country") ?>)
+ AND addr_country = (SELECT country_abbr FROM country WHERE country_id=<? value("country") ?>)
 <? endif ?>
 <? if exists("postalcode") ?>
  AND addr_postalcode ~ <? value("postalcode") ?>

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION copyBOM(pSItemid       INTEGER,
                                    pTItemid       INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _result INTEGER;
@@ -17,7 +17,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION copyBOM(pSItemid       INTEGER,
                                    pTItemid       INTEGER,
                                    pCopyUsedAt    BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _bh RECORD;

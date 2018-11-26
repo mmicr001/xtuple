@@ -29,7 +29,7 @@ WHERE
            <? if exists('searchCity' ?>,addr_city <? endif ?>
             <? if exists('searchPostal' ?>,addr_postalcode <? endif ?>) ~* <? value('searchText') ?>
 <? if exists("countries") ?>
-  AND addr_country  = (SELECT country_name FROM country WHERE country_id = <? value("countries") ?>)
+  AND addr_country  = (SELECT country_abbr FROM country WHERE country_id = <? value("countries") ?>)
 <? endif ?>
 <? if exists("states") ?>
   AND addr_state ~ <? value("states") ?>

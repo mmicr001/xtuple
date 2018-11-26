@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION voidPostedCheck(INTEGER, INTEGER, DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pCheckid		ALIAS FOR $1;
@@ -106,7 +106,7 @@ BEGIN
     END IF;
 
     -- Check for tax records
-    _tax = COALESCE((SELECT sum(taxhist_tax) FROM checkheadtax WHERE taxhist_parent_id=_p.checkhead_id), 0.00);
+    _tax = getOrderTax('CK', _p.checkhead_id);
 
     PERFORM insertIntoGLSeries( _sequence, _p.checkrecip_gltrans_source, 'CK',
 				text(_p.checkhead_number),
@@ -117,19 +117,17 @@ BEGIN
     -- Process Tax reversal (if applicable)
     IF (_tax <> 0) THEN
       FOR _t IN 
-        SELECT * FROM checkheadtax 
-        JOIN tax ON (taxhist_tax_id = tax_id)
-        WHERE (taxhist_parent_id = pCheckid)
+        SELECT * FROM taxhead
+        JOIN taxline ON taxhead_id = taxline_taxhead_id
+        JOIN taxdetail ON taxline_id = taxdetail_taxline_id
+        JOIN tax ON (taxdetail_tax_id = tax_id)
+        WHERE taxhead_doc_type = 'CK'
+          AND taxhead_doc_id = pCheckid
       LOOP  
-        INSERT INTO checkheadtax (taxhist_basis,taxhist_percent,taxhist_amount,taxhist_docdate, taxhist_tax_id, taxhist_tax, 
-                                taxhist_taxtype_id, taxhist_parent_id, taxhist_distdate,
-                                taxhist_curr_id, taxhist_curr_rate, taxhist_journalnumber ) 
-          SELECT 0, 0, 0, pVoidDate, _t.taxhist_tax_id, (_t.taxhist_tax * -1), _p.checkhead_taxtype_id,
-              pCheckid, pVoidDate, _t.taxhist_curr_id, _t.taxhist_curr_rate, pJournalNumber;
         PERFORM insertIntoGLSeries( _sequence, _p.checkrecip_gltrans_source, 'CK',
 				text(_p.checkhead_number),
 				_t.tax_sales_accnt_id,
-				round((_t.taxhist_tax * -1) / _t.taxhist_curr_rate, 2),
+				round((_t.taxdetail_tax * -1) / _t.taxhead_curr_rate, 2),
 				pVoidDate, _gltransNote, pCheckid);              
       END LOOP;                      
  

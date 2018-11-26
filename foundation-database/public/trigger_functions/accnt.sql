@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _accntTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   ffSub BOOLEAN;
@@ -59,7 +59,7 @@ SELECT dropIfExists('TRIGGER', 'accntTrigger');
 CREATE TRIGGER accntTrigger BEFORE INSERT OR UPDATE ON accnt FOR EACH ROW EXECUTE PROCEDURE _accntTrigger();
 
 CREATE OR REPLACE FUNCTION _accntUniqueTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 BEGIN
@@ -78,7 +78,7 @@ SELECT dropIfExists('TRIGGER', 'accntUniqueTrigger');
 CREATE TRIGGER accntUniqueTrigger BEFORE INSERT ON accnt FOR EACH ROW EXECUTE PROCEDURE _accntUniqueTrigger();
 
 CREATE OR REPLACE FUNCTION _accntDeleteTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _accntnum     TEXT := formatGLAccount(OLD.accnt_id);

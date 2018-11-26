@@ -1,66 +1,27 @@
-/*
-    Logic appears to be duplicated in the AFTER trigger
-    Remove this trigger function and check no side-effects found
-*/
-SELECT dropIfExists('TRIGGER', 'vodistBeforeTrigger');
-DROP FUNCTION IF EXISTS _vodistBeforeTrigger();
-
 CREATE OR REPLACE FUNCTION _vodistAfterTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
-DECLARE
-  _r RECORD;
-
 BEGIN
-  IF ( (TG_OP = 'UPDATE') OR (TG_OP = 'DELETE') ) THEN
-    IF (OLD.vodist_tax_id <> -1) THEN
-    -- Delete any existing voheadtax records
-      DELETE FROM voheadtax
-      WHERE ( (taxhist_parent_id=OLD.vodist_vohead_id)
-        AND   (taxhist_tax_id=OLD.vodist_tax_id)
-        AND   (COALESCE(taxhist_taxtype_id,-1) <> getFreightTaxtypeId()) );
-    END IF;
-  END IF;
-
   IF (TG_OP = 'DELETE') THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = OLD.vodist_vohead_id;
+
     RETURN OLD;
   END IF;
 
--- Cache Voucher Head
-  SELECT * INTO _r
-  FROM vohead
-  WHERE (vohead_id=NEW.vodist_vohead_id);
-  IF (NOT FOUND) THEN
-    RAISE EXCEPTION 'Voucher head not found';
-  END IF;
-
-  IF (NEW.vodist_tax_id <> -1) THEN
-  -- Insert adjustment voheadtax
-    INSERT INTO voheadtax
-      ( taxhist_parent_id,
-        taxhist_taxtype_id,
-        taxhist_tax_id,
-        taxhist_basis,
-        taxhist_basis_tax_id,
-        taxhist_sequence,
-        taxhist_percent,
-        taxhist_amount,
-        taxhist_tax,
-        taxhist_docdate,
-        taxhist_reverse_charge )
-    VALUES
-      ( NEW.vodist_vohead_id,
-        COALESCE(NEW.vodist_taxtype_id, getAdjustmentTaxTypeid()),
-        NEW.vodist_tax_id,
-        0,
-        NULL,
-        1,
-        0,
-        0,
-        (NEW.vodist_amount * -1),
-        _r.vohead_docdate,
-        CASE WHEN NEW.vodist_amount < 0 THEN true ELSE FALSE END );
-            
+  IF (TG_OP = 'INSERT' OR
+      TG_OP = 'UPDATE' AND
+      (NEW.vodist_amount != OLD.vodist_amount OR
+       NEW.vodist_taxtype_id != OLD.vodist_taxtype_id OR
+       (fetchMetricText('TaxService') != 'N' AND
+        (NEW.vodist_warehous_id != OLD.vodist_warehous_id OR
+        NEW.vodist_tax_exemption != OLD.vodist_tax_exemption)))) THEN
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'VCH'
+       AND taxhead_doc_id = NEW.vodist_vohead_id;
   END IF;
 
   RETURN NEW;
