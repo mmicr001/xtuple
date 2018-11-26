@@ -15,7 +15,7 @@ SELECT
   xt.add_constraint('cntctphone', 'cntctphone_pkey', 'PRIMARY KEY (cntctphone_id)', 'public'),
   xt.add_constraint('cntctphone', 'cntctphone_cntct_id_fkey',
                     'FOREIGN KEY (cntctphone_cntct_id) REFERENCES cntct(cntct_id)
-                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),
+                     MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE', 'public'),
   xt.add_constraint('cntctphone', 'cntctphone_crmrole_id_fkey',
                     'FOREIGN KEY (cntctphone_crmrole_id) REFERENCES crmrole(crmrole_id)
                      MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION', 'public'),

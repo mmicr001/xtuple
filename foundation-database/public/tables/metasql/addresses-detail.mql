@@ -48,6 +48,10 @@ FROM addr
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
 WHERE true
+<? if exists("campaign") ?>
+  AND CASE WHEN <? value("campaign") ?> = 1 THEN addr_allowmktg
+           ELSE true END
+<? endif ?>
 <? if exists("address") ?>
  AND concat(addr_line1, addr_line2, addr_line3) ~* <? value("address") ?>
 <? endif ?>
