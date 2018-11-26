@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION buildSimplePhoneJson(pPhone TEXT, pMobile TEXT, pFax TEXT)
 RETURNS json AS $$
--- Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 -- Takes Legacy phone number information and builds correctly formatted Json string
