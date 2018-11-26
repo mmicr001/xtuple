@@ -14,7 +14,7 @@ SELECT xt.add_column('taxhead', 'taxhead_id', 'SERIAL', 'PRIMARY KEY', 'public')
        xt.add_column('taxhead', 'taxhead_orig_doc_type', 'TEXT', 'NULL', 'public'),
        xt.add_column('taxhead', 'taxhead_orig_doc_id', 'INTEGER', 'NULL', 'public'),
        xt.add_column('taxhead', 'taxhead_orig_date', 'DATE', 'NULL', 'public'),
-       xt.add_column('taxhead', 'taxhead_curr_id', 'INTEGER', 'NOT NULL DEFAULT baseCurrId()', 'public'),
+       xt.add_column('taxhead', 'taxhead_curr_id',   'INTEGER', '',                     'public'),
        xt.add_column('taxhead', 'taxhead_curr_rate', 'NUMERIC', 'NOT NULL DEFAULT 1.0', 'public'),
        xt.add_column('taxhead', 'taxhead_taxzone_id', 'INTEGER', 'NULL', 'public'),
        xt.add_column('taxhead', 'taxhead_shiptoaddr_line1', 'TEXT', 'NULL', 'public'),
@@ -37,5 +37,11 @@ SELECT xt.add_constraint('taxhead', 'taxhead_curr_id_fkey', 'FOREIGN KEY (taxhea
        xt.add_constraint('taxhead', 'taxhead_taxhead_status_check', $$CHECK (taxhead_status IN ('O', 'P', 'V'))$$, 'public'),
        xt.add_constraint('taxhead', 'taxhead_taxhead_orig_doc_check', $$CHECK ((taxhead_orig_doc_type IS NULL) = (taxhead_orig_doc_id IS NULL) AND (taxhead_orig_doc_type IS NULL) = (taxhead_orig_date IS NULL))$$, 'public'),
        xt.add_constraint('taxhead', 'taxhead_taxhead_addr_check', $$CHECK ((taxhead_service != 'N') = (taxhead_shiptoaddr_line1 IS NOT NULL OR taxhead_shiptoaddr_line2 IS NOT NULL OR taxhead_shiptoaddr_line3 IS NOT NULL OR taxhead_shiptoaddr_city IS NOT NULL OR taxhead_shiptoaddr_region IS NOT NULL OR taxhead_shiptoaddr_postalcode IS NOT NULL OR taxhead_shiptoaddr_country IS NOT NULL))$$, 'public');
+
+-- it is unclear why this works but
+-- xt.add_column('taxhead', 'taxhead_curr_id', 'INTEGER', 'NOT NULL DEFAULT basecurrid()', 'public')
+-- does not
+ALTER TABLE public.taxhead ALTER taxhead_curr_id SET NOT NULL,
+                           ALTER taxhead_curr_id SET DEFAULT basecurrid();
 
 ALTER TABLE public.taxhead ENABLE TRIGGER ALL;
