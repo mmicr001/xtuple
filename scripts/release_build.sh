@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -e
-
+set -i
 PROG=$(basename $0)
+PROGDIR=$(dirname $0)
+
 DEBUG=false
 ADMIN=admin
 PASSWD=admin
-PORT=5432
+PGPORT=${PGPORT:-5432}
 HOST=localhost
 MAJ=
 MIN=
@@ -15,119 +17,118 @@ export PGOPTIONS="-c client_min_messages=warning"
 
 XTUPLEDIR=$(pwd)
 
-#  github repo        ARGS=derive from command line, skip=use existing checkout,
-#                     default=default github branch
-#                     |       load into these editions (d = distribution, e = enterprise, ...)
-#                     |       |        true=use this in the build
-#                     |       |        |     path for build_app -e, relative to repo root
-#  module             tag     edition  build source
+#  github repository       default=default github branch
+#                          |     true=use this in the build
+#                          |     |       repository URL prefix (git protocol for private repos)
+#                          |     |       |                      run make to build extensions
+#                          |     |       |                      |         regex: d = distribution, e = enterprise, ...
+#                          |     |       |                      |         |
+  module=1                 tag=2 build=3 source=4               runmake=5 edition=6
 declare -a CONFIG=(\
-  "xtuple             skip    skip     skip  not-needed"                                  \
-  "private-extensions skip    skip     skip  not-needed"                                  \
-  "qt-client          skip    skip     skip  not-needed"                                  \
-  "updater            default skip     skip  not-needed"                                  \
-  "xtdesktop          skip    [demp]   skip  resources"                                   \
-  "xtte               2_4_x   [demp]   true  extensions/time_expense/foundation-database" \
-  "nodejsshim         skip    [dem]    true  foundation-database"                         \
-  "xtdash             skip    [dem]    true  foundation-database"                         \
+  "xtuple                  default true  https://github.com/xtuple  false skip    " \
+  "private-extensions      default true  git@github.com:xtuple      true  skip    " \
+  "qt-client               default true  https://github.com/xtuple  false skip    " \
+  "updater                 default true  https://github.com/xtuple  false skip    " \
+  "address-verification    default true  https://github.com/xtuple  true  ^[demp] " \
+  "connect                 default true  git@github.com:xtuple      true  ^[e]    " \
+  "enhanced-pricing        default true  git@github.com:xtuple      true  ^[e]    " \
+  "fixed-assets            default true  https://github.com/xtuple  true  ^[e]    " \
+  "fixed-assets-commercial default true  git@github.com:xtuple      true  ^[e]    " \
+  "nodejsshim              default true  https://github.com/xtuple  true  ^[dem]  " \
+  "payment-gateways        default true  git@github.com:xtuple      true  ^[e]    " \
+  "xdruple-extension       default false git@github.com:xtuple      true  ^[e]    " \
+  "xtcommission            default true  git@github.com:xtuple      true  ^[e]    " \
+  "xtdash                  default true  git@github.com:xtuple      true  ^[dem]  " \
+  "xtdesktop               default true  https://github.com/xtuple  true  ^[demp] " \
+  "xtprjaccnt              default true  git@github.com:xtuple      true  ^[e]    " \
+  "xtte                    default true  https://github.com/xtuple  true  ^[demp] " \
 )
 
 usage() {
   local CNT=0
   cat <<EOUSAGE
-$PROG [ -x ] [ -h hostname ] [ -p port ] [ -U username ] [ -W password ] [ --XXX=tag ... ] [ -t | +t ] [ Major Minor Patch ]
+$PROG [ -x ] [ -h hostname ] [ -p port ] [ -U username ] [ -W password ] [ --XXX=tag [ git-repo-url ] [ -t | +t ] [ Major Minor Patch ]
 
 -h, -p, -U, and -W describe database server connection information
 -t              do not include translations in the updater packages
 +t              include translations in the updater packages
 -x              turns on debugging
 --XXX=tag       "tag" is the commit-ish to check out the XXX repository
+  git-repo-url  is an optional argument describing where to get the repository
+                if not from the default, which is typically github.com/xtuple/XXX
 EOUSAGE
   echo -n "possible values of XXX: "
-  while [ $CNT -lt ${#CONFIG[*]} ] ; do
-    echo ${CONFIG[$CNT]} | awk '{ printf "%s ", $1 }'
-    CNT=$(($CNT + 1))
+  for KEY in $(configKeys) ; do
+    echo "	$KEY"
   done
   echo
 }
 
-getConfig() {
-  local MODULE=$1 COL=$2 ROWNUM=0 ROW
-
-  while [ -z "$ROW" -a -n "${CONFIG[$ROWNUM]}" ] ; do
-    if [ "$MODULE" = $(echo "${CONFIG[$ROWNUM]}" | awk '{ print $1 }') ] ; then
-      ROW="${CONFIG[$ROWNUM]}"
-    else
-      ROWNUM=$(($ROWNUM + 1))
-    fi
+configKeys() {
+  local ROW ROWNUM KEYS
+  for (( ROWNUM=0 ; ROWNUM < ${#CONFIG[@]} ; ROWNUM++ )) ; do
+    ROW="${CONFIG[$ROWNUM]}"
+    KEYS="$KEYS $(echo $ROW | awk '{print $1}')"
   done
-
-  case $COL in
-    module) COL=1 ;;
-    tag)    COL=2 ;;
-    edition) COL=3 ;;
-    build)  COL=4 ;;
-    source) COL=5 ;;
-    *) echo "getConfig: unknown build config column $2"; return 1;;
-  esac
-  echo "$ROW" | awk -v COLNUM=$COL '{ print $COLNUM }'
+  echo $KEYS
 }
 
-setConfig() {
-# setConfig module column-by-name value
-  local MODULE=$1 COL=$2 ROWNUM=0 NEWROW
+# getConfig module column-name
+getConfig() {
+  local MODULE=$1 COL="${!2}" ROWNUM
 
-  while [ $ROWNUM -lt ${#CONFIG[*]} ] ; do
-    if [ "$MODULE" = $(echo "${CONFIG[$ROWNUM]}" | awk '{ print $1 }') ] ; then
-      break
+  for (( ROWNUM=0; ROWNUM < ${#CONFIG[@]} ; ROWNUM++ )) ; do
+    if [ "$MODULE" = $(awk '{ print $1 }' <<< "${CONFIG[$ROWNUM]}") ] ; then
+      awk -v COLNUM=$COL '{ print $COLNUM }' <<< "${CONFIG[$ROWNUM]}"
+      return 0
     fi
-    ROWNUM=$(($ROWNUM + 1))
+  done
+  return 1
+}
+
+# setConfig module column-name value
+setConfig() {
+  local MODULE=$1 COL=${!2} ROWNUM=0 NEWROW
+
+  for (( ROWNUM=0 ; $ROWNUM < ${#CONFIG[@]} ; ROWNUM++ )) ; do
+    if [ "$MODULE" = $(echo "${CONFIG[$ROWNUM]}" | awk '{ print $1 }') ] ; then
+      CONFIG[$ROWNUM]=$(awk -v COL=$COL -v NEWVAL=$3 '{ $COL = NEWVAL ; print }' <<< ${CONFIG[$ROWNUM]} )
+      return 0
+    fi
   done
 
-  case $COL in
-    module) COL=1 ;;
-    tag)    COL=2 ;;
-    edition) COL=3 ;;
-    build)  COL=4 ;;
-    source) COL=5 ;;
-    *) echo "setConfig: unknown build config column $2"; return 1;;
-  esac
-  CONFIG[$ROWNUM]=$(echo ${CONFIG[$ROWNUM]} | \
-                awk -v COL=$COL -v NEWVAL=$3 '{ for (i = 1; i <= NF; i++) {
-                                                if (i == COL)
-                                                  printf "%s\t", NEWVAL;
-                                                else printf "%s\t", $i; }
-                                            }')
-  return 0
+  return 1
 }
 
 gitco() {
-  local REPO=$1
-  local GITTAG=$(getConfig $REPO tag)
-  if [ ! -d $XTUPLEDIR/../$REPO ] ; then
-    GITTAG=default
-    cd $XTUPLEDIR/..
-    git clone https://github.com/xtuple/${REPO}.git
-  elif [ "$GITTAG" == skip ] ; then
-    return 0;
+  local REPO="$1" GITDEST="${2:-$1}"
+  local GITTAG="${3:-$(getConfig $REPO tag)}" GITURL="${4:-$(getConfig $REPO source)}"
+
+  if [ "$GITTAG" == skip -a -d $XTUPLEDIR/../$REPO ] ; then
+    return 0
   fi
-
-  cd $XTUPLEDIR/../$REPO                                        || return 2
-
-  local XTUPLE=$(git remote -v | grep /xtuple/ | head -n 1 | cut -f1)
-  git fetch    $XTUPLE                                          || return 2
-
-  local GITURL=$(git remote -v | grep /xtuple/ | head -n 1 | cut -f2)
-
-  if [ $GITTAG = default ] ; then
-    GITHUBREPO=$(echo $GITURL | sed -e "s,.*xtuple/,xtuple/," -e "s,\.git,,")
-    GITTAG=$XTUPLE/$(curl https://api.github.com/repos/${GITHUBREPO} | \
-                     awk -v FS='"' '/default_branch/ { print $4 }')
-    if [ -z "$GITTAG" ] ; then
-      GITTAG=$XTUPLE/master
+  if [ ! -d $XTUPLEDIR/../$REPO ] ; then
+    cd $XTUPLEDIR/..
+    if [[ $GITURL =~ \.git$ ]] ; then
+      git clone $GITURL $GITDEST                || return 2
+    else
+      git clone $GITURL/${REPO}.git $GITDEST    || return 2
     fi
   fi
-  git checkout $GITTAG                                          || return 2
+
+  if [ "$GITTAG" != skip -a "$GITTAG" != default ] ; then
+    cd $XTUPLEDIR/../$GITDEST                   || return 2
+    git checkout $GITTAG                        || return 2
+  fi
+}
+
+packageInfo() {
+  local ATTRIBUTE=$1 PACKAGEXML=$2
+  awk -v ATTR=$ATTRIBUTE -v FS='["= ]*' '$0 ~ ATTR {
+                                           for (i = 0; i < NF; i++) {
+                                             if ($i == ATTR) { print $(i+1); exit }
+                                           }
+                                         }' $PACKAGEXML
 }
 
 while [[ $1 =~ ^- ]] ; do
@@ -135,7 +136,7 @@ while [[ $1 =~ ^- ]] ; do
     -h) HOST=$2
         shift
         ;;
-    -p) PORT=$2
+    -p) PGPORT=$2
         shift
         ;;
     -t) TRANSLATIONS=false
@@ -160,6 +161,10 @@ while [[ $1 =~ ^- ]] ; do
         else
           setConfig $REPO tag   $RAWTAG
           setConfig $REPO build true
+        fi
+        if expr "$2" : "[^-]" ; then            # next arg is not -something
+          setConfig $REPO source "$2"           # & so must be the source url
+          shift
         fi
         ;;
     *)  echo "$PROG: unrecognized option $1"
@@ -206,17 +211,16 @@ echo "BUILDING RELEASE ${MAJ}.${MIN}.${PAT}"
 
 # check out the code that we need #########################################
 
-CNT=0
-while [ $CNT -lt ${#CONFIG[*]} ] ; do
-  MODULE=$(echo ${CONFIG[$CNT]} | awk '{ print $1 }')
-  if $($(getConfig $MODULE build)) ; then
+for MODULE in $(configKeys) ; do
+  if [ $(getConfig $MODULE build) = true ] ; then
     gitco $MODULE || $DEBUG
   fi
-  CNT=$(($CNT + 1))
 done
 
 cd $XTUPLEDIR
 rm -rf scripts/output
+npm install
+[ -e node-datasource/config.js ] || cp node-datasource/sample_config.js node-datasource/config.js
 
 MODES="upgrade install"
 EDITIONS="postbooks manufacturing distribution"
@@ -224,53 +228,54 @@ DATABASES="empty quickstart demo"
 PACKAGES="commercialcore inventory"
 
 if $TRANSLATIONS ; then
-  for PACKAGE in $EDITIONS $PACKAGES ; do
-    if [ "$PACKAGE" = postbooks -o -d ../private-extensions/source/$PACKAGE/foundation-database/*/tables/dict ] ; then
-      mkdir -p $XTUPLEDIR/scripts/output/dict/$PACKAGE
-    fi
-  done
-
-  cd ../xtuple
-  for TRANSLATION in $(find foundation-database/public/tables/dict/*.ts) ; do
-    for REPORT in $(find foundation-database/public/tables/report/*.xml) ; do
-      xsltproc --stringparam ts ../../$TRANSLATION scripts/xml/reports.xsl $REPORT |
+  cd $XTUPLEDIR
+  for TRANSLATION in $(echo foundation-database/public/tables/dict/*.ts) ; do
+    xsltproc --stringparam ts ../../$TRANSLATION scripts/xml/reports.xsl \
+                        foundation-database/public/tables/report/*.xml | \
       sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
-    done
-
-    echo '<?xml version="1.0" encoding="utf-8"?>' > $TRANSLATION
-    echo '<TS version="2.0">' >> $TRANSLATION
-    cat reports.ts >> $TRANSLATION
-    echo '</TS>' >> $TRANSLATION
+    cat <<-EOHEADER > $TRANSLATION
+	<?xml version="1.0" encoding="utf-8"?>
+	<TS version="2.0">
+	$(cat reports.ts)
+	</TS>
+	EOHEADER
     rm reports.ts
 
-    lrelease $TRANSLATION
   done
+  lrelease -silent $TRANSLATION foundation-database/public/tables/dict/*.ts
+  mkdir -p scripts/output/dict/postbooks
   mv foundation-database/public/tables/dict/*.qm scripts/output/dict/postbooks
 
   cd ../private-extensions
-  for PACKAGE in $EDITIONS $PACKAGES ; do
-    if [ "$PACKAGE" != postbooks -a -d ../xtuple/scripts/output/dict/$PACKAGE ] ; then
+  for PACKAGE in commercialcore inventory manufacturing distribution ; do
+    mkdir -p $XTUPLEDIR/scripts/output/dict/$PACKAGE
+    if [ -d source/$PACKAGE/foundation-database/*/tables/dict ] ; then
+      # get report translations before make below removes "unused" translations
+      # TODO: move report translation gathering to the individual makefiles?
       if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
-        for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
-          for REPORT in $(find source/$PACKAGE/foundation-database/*/tables/pkgreport/*.xml) ; do
-            xsltproc --stringparam ts ../../../private-extensions/$TRANSLATION ../xtuple/scripts/xml/reports.xsl $REPORT |
-            sed -e '/<?xml version/d' -e 's/^/  /' >> reports.ts
-          done
+        for TRANSLATION in $(echo source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+          xsltproc --stringparam ts ../../../private-extensions/$TRANSLATION ../xtuple/scripts/xml/reports.xsl \
+                                                source/$PACKAGE/foundation-database/*/tables/pkgreport/*.xml | \
+            sed -e '/<?xml version/d' -e 's/^/  /' >> $TRANSLATION.rpt
         done
       fi
 
-      lupdate -no-obsolete source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
+      cd source/$PACKAGE/foundation-database/*/tables/dict
+      make
+      cd $XTUPLEDIR/../private-extensions
 
-      if [ -e reports.ts ] ; then
-        for TRANSLATION in $(find source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
+      if [ -d source/$PACKAGE/foundation-database/*/tables/pkgreport ] ; then
+        for TRANSLATION in $(echo source/$PACKAGE/foundation-database/*/tables/dict/*.ts) ; do
           sed -i -e '/<\/TS>/d' $TRANSLATION
-          cat reports.ts >> $TRANSLATION
+          cat $TRANSLATION.rpt >> $TRANSLATION
           echo '</TS>' >> $TRANSLATION
+          rm $TRANSLATION.rpt
         done
-        rm reports.ts
       fi
+    fi
 
-      lrelease source/$PACKAGE/foundation-database/*/tables/dict/*_ts.pro
+    if [ -e source/$PACKAGE/foundation-database/*/tables/dict/ts.pro ] ; then
+      lrelease -silent source/$PACKAGE/foundation-database/*/tables/dict/ts.pro
       mv source/$PACKAGE/foundation-database/*/tables/dict/*.qm ../xtuple/scripts/output/dict/$PACKAGE
     fi
   done
@@ -279,7 +284,7 @@ fi
 cd $XTUPLEDIR
 
 for MODE in $MODES ; do
-  for PACKAGE in $EDITIONS $PACKAGES ; do
+  for PACKAGE in postbooks commercialcore inventory manufacturing distribution ; do
     if [ "$MODE" = install ] ; then
       MANIFESTNAME=frozen_manifest.js
     else
@@ -317,15 +322,12 @@ for EDITION in $EDITIONS enterprise ; do
       FULLNAME=$NAME-$MAJ.$MIN.$PAT
       mkdir scripts/output/$FULLNAME
       xsltproc $NO_TRANSLATIONS -o scripts/output/$FULLNAME/package.xml scripts/xml/build.xsl scripts/xml/$NAME.xml
-      SUBPACKAGES=postbooks
-      if [ "$EDITION" != postbooks ] ; then
-        SUBPACKAGES="$SUBPACKAGES $PACKAGES"
-      fi
-      if [ "$EDITION" != enterprise ] ; then
-        SUBPACKAGES="$SUBPACKAGES $EDITION"
-      else
-        SUBPACKAGES="$SUBPACKAGES manufacturing distribution"
-      fi
+      case $EDITION in
+        postbooks)     SUBPACKAGES="postbooks"                                        ;;
+        distribution)  SUBPACKAGES="postbooks commercialcore inventory distribution"  ;;
+        manufacturing) SUBPACKAGES="postbooks commercialcore inventory manufacturing" ;;
+        enterprise)    SUBPACKAGES="postbooks commercialcore inventory distribution manufacturing" ;;
+      esac
       SUBMODES=upgrade
       if [ $MODE = install -o $MODE = add ] ; then
         SUBMODES="$SUBMODES install"
@@ -340,7 +342,8 @@ for EDITION in $EDITIONS enterprise ; do
           fi
         done
 
-        if [ -d scripts/output/dict/$SUBPACKAGE ] ; then
+        # german is a standard translation language; use it as a proxy for all
+        if [ -e scripts/output/dict/$SUBPACKAGE/*de.qm ] ; then
           cp scripts/output/dict/$SUBPACKAGE/*.qm scripts/output/$FULLNAME
         fi
       done
@@ -351,11 +354,9 @@ for EDITION in $EDITIONS enterprise ; do
   MODES="upgrade install"
 done
 
-cd ${XTUPLEDIR}
-
-if $TRANSLATIONS ; then
-  # build updater so we can use it
-  cd ../qt-client
+cd ${XTUPLEDIR}/..
+if [ ! -e updater/bin/updater ] ; then
+  cd qt-client
   git submodule update --init --recursive
   cd openrpt
   qmake
@@ -367,60 +368,66 @@ if $TRANSLATIONS ; then
   qmake
   make
   cd ${XTUPLEDIR}
-
-  export LD_LIBRARY_PATH=${XTUPLEDIR}/../qt-client/openrpt/lib:${XTUPLEDIR}/../qt-client/lib:$LD_LIBRARY_PATH
 fi
+export LD_LIBRARY_PATH=${XTUPLEDIR}/../qt-client/openrpt/lib:${XTUPLEDIR}/../qt-client/lib:$LD_LIBRARY_PATH
+
+cd ${XTUPLEDIR}
 
 for EDITION in $EDITIONS ; do
   for DATABASE in $DATABASES ; do
-    if [ "$EDITION" != distribution -o "$DATABASE" != demo ] ; then
-      scripts/build_app.js -d $EDITION"_"$DATABASE --databaseonly -e foundation-database -i -s foundation-database/$DATABASE"_"data.sql
-      if [ "$EDITION" != postbooks ] ; then
-        for PACKAGE in $PACKAGES $EDITION ; do
-          scripts/build_app.js -d $EDITION"_"$DATABASE --databaseonly -e ../private-extensions/source/$PACKAGE/foundation-database -f
-        done
-      fi
+    scripts/build_app.js -d ${EDITION}_${DATABASE} --databaseonly -e foundation-database -i -s foundation-database/${DATABASE}_data.sql
+    case $EDITION in
+      distribution)  PACKAGELIST="commercialcore inventory distribution"  ;;
+      manufacturing) PACKAGELIST="commercialcore inventory manufacturing" ;;
+      *)             PACKAGELIST=""                                       ;;
+    esac
+    for PACKAGE in $PACKAGELIST ; do
+      scripts/build_app.js -d ${EDITION}_${DATABASE} --databaseonly -e ../private-extensions/source/$PACKAGE/foundation-database -f
+    done
 
-      if $TRANSLATIONS ; then
-        ../updater/bin/updater -h $HOST -U $ADMIN -p $PORT -d $EDITION"_"$DATABASE \
-                               -f scripts/output/$EDITION-upgrade-$MAJ.$MIN.$PAT.gz -autorun
-      fi
+    PKGFILE=scripts/output/$EDITION-upgrade-$MAJ.$MIN.$PAT.gz
+    if [ -e $PKGFILE ] ; then
+      ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d ${EDITION}_${DATABASE} -autorun -f $PKGFILE
     fi
   done
 done
 
 awk '/databaseServer: {/,/}/ {
       if ($1 == "hostname:") { $2 = "\"'$HOST'\",";  }
-      if ($1 == "port:")     { $2 = "'$PORT',";      }
+      if ($1 == "port:")     { $2 = "'$PGPORT',";      }
       if ($1 == "admin:")    { $2 = "\"'$ADMIN'\","; }
       if ($1 == "password:") { $2 = "\"'$PASSWD'\""; }
     }
     { print
     }' node-datasource/config.js > scripts/output/config.js
 
-
 for EDITION in $EDITIONS ; do
   for DATABASE in $DATABASES ; do
-    if [ "$EDITION" != distribution -o "$DATABASE" != demo ] ; then
-      DB=$EDITION"_"$DATABASE
-      CNT=0
-      while [ $CNT -lt ${#CONFIG[*]} ] ; do
-        MODULE=$(echo ${CONFIG[$CNT]} | awk '{ print $1 }')
-        MODULESRCDIR=$XTUPLEDIR/../$MODULE/$(getConfig $MODULE source)
-        if [[ ${EDITION:0:1} =~ $(getConfig $MODULE edition) ]] &&
-           [ $(getConfig $MODULE build) = 'true' ] ; then
-          scripts/build_app.js -c scripts/output/config.js -e $MODULESRCDIR -d $DB
-        fi
-        CNT=$(($CNT + 1))
-      done
-      pg_dump --host $HOST --username $ADMIN --port $PORT --format c --file $DB-$MAJ.$MIN.$PAT.backup $DB
-    fi
+    DB=${EDITION}_${DATABASE}
+    for MODULE in $(configKeys) ; do
+      if [[ ${EDITION} =~ $(getConfig $MODULE edition) ]] &&
+         [ $(getConfig $MODULE build) = 'true' ] &&
+         [ -d $XTUPLEDIR/../$MODULE/packages ] ; then
+        cd $XTUPLEDIR/../$MODULE
+        for MAKEFILE in "$(find * -name Makefile | \
+                           egrep -v 'dict|node_modules|node-datasource|test|updatescripts')" ; do
+          pushd $(dirname $MAKEFILE)
+          if  $TRANSLATIONS ; then make ; else make no-translations || make ; fi
+          popd
+        done
+        for PACKAGEXML in "$(find * -name package.xml)" ; do
+          ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d $DB -autorun -D \
+                                 -f packages/$(packageInfo name $PACKAGEXML)-$(packageInfo version $PACKAGEXML).gz
+        done
+      fi
+    done
+    pg_dump --host $HOST --username $ADMIN --port $PGPORT --format c --file $XTUPLEDIR/$DB-$MAJ.$MIN.$PAT.backup $DB
   done
 done
 
 #cleanup
 cd ${XTUPLEDIR}
-for PACKAGE in $EDITIONS $PACKAGES ; do
+for PACKAGE in postbooks commercialcore inventory manufacturing distribution ; do
   for MODE in $MODES ; do
     if [ $PACKAGE != postbooks -o $MODE != install ] ; then
       rm -rf scripts/output/$EDITION-$MODE.sql
@@ -437,3 +444,4 @@ done
 rm -rf scripts/output/add-manufacturing-to-distribution-$MAJ.$MIN.$PAT/
 rm -rf scripts/output/config.js
 rm -rf scripts/output/dict
+rm -f  distribution_demo-$MAJ.$MIN.$PAT.backup  # because it's useless
