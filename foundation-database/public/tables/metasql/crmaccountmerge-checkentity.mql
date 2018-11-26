@@ -2,7 +2,7 @@
 -- Name:  checkentity
 -- Notes: Check the CRM entities associated with the merge crm accounts.
 --        Used by merge2crmaccts() function
---        Copyright (c) 1999-2017 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT t1.<? literal('colname') ?>_id AS src, t2.<? literal('colname') ?>_id AS tgt
