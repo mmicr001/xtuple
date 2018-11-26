@@ -78,8 +78,8 @@ ALTER TABLE accnt ENABLE TRIGGER ALL;
 
 ALTER TABLE addr DISABLE TRIGGER ALL;
 
-INSERT INTO addr (addr_id, addr_active, addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country, addr_notes, addr_number) VALUES (2, true, 'Warehouse Address Line 1', 'Warehouse Address Line 2', 'Warehouse Address Line 3', 'Warehouse Address Line 4', 'VA', '9999-9999', 'United States', '', '2');
-INSERT INTO addr (addr_id, addr_active, addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country, addr_notes, addr_number) VALUES (3, true, 'Accounts Receivable', 'Moving Forward Business Park', '12100 Let''s Go', 'Norfolk', 'VA', '23100', 'United States', '', '3');
+INSERT INTO addr (addr_id, addr_active, addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country, addr_notes, addr_number) VALUES (2, true, 'Warehouse Address Line 1', 'Warehouse Address Line 2', 'Warehouse Address Line 3', 'Warehouse Address Line 4', 'VA', '9999-9999', 'US', '', '2');
+INSERT INTO addr (addr_id, addr_active, addr_line1, addr_line2, addr_line3, addr_city, addr_state, addr_postalcode, addr_country, addr_notes, addr_number) VALUES (3, true, 'Accounts Receivable', 'Moving Forward Business Park', '12100 Let''s Go', 'Norfolk', 'VA', '23100', 'US', '', '3');
 
 
 ALTER TABLE addr ENABLE TRIGGER ALL;
@@ -1022,7 +1022,7 @@ INSERT INTO country (country_id, country_abbr, country_name, country_curr_abbr, 
   (213, 'TZ', 'Tanzania', 'TZS', 'Tanzanian Shilling', '834', NULL, 210),
   (227, 'UA', 'Ukraine', 'UAH', 'Hryvnia', '980', '₴', 222),
   (226, 'UG', 'Uganda', 'UGX', 'Uganda Shilling', '800', NULL, 221),
-  (229, 'UK', 'United Kingdom', 'GBP', 'Pound Sterling', '826', '£', 224),
+  (229, 'GB', 'United Kingdom', 'GBP', 'Pound Sterling', '826', '£', 224),
   (232, 'UM', 'U.S. Minor Outlying Islands', 'USD', 'US Dollar', '840', '$', 226),
   (230, 'US', 'United States', 'USD', 'US Dollar', '840', '$', 225),
   (231, 'UY', 'Uruguay', 'UYU', 'Peso Uruguayo', '858', '$U', 227),
@@ -4622,6 +4622,7 @@ INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES 
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (312, 'Long30Markups', 'f', NULL);
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (313, 'SOManualReservations', 'f', NULL);
 INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (91, 'YearEndEquityAccount', '84', NULL);
+INSERT INTO metric (metric_id, metric_name, metric_value, metric_module) VALUES (320, 'ISOCountries', 't', NULL);
 
 ALTER TABLE metric ENABLE TRIGGER ALL;
 
@@ -5905,7 +5906,7 @@ DECLARE
   _vend  INTEGER;
 BEGIN
   _addr  := saveAddr(-1, NULL, '119 West York Street', '', '',
-                     'Norfolk', 'VA', '23510', 'United States', TRUE, NULL, 'CHECK');
+                     'Norfolk', 'VA', '23510', 'US', TRUE, NULL, 'CHECK');
   _cntct := saveCntct(NULL, NULL, NULL, _addr, '', 'xTuple', '', 'Sales', '', '', TRUE,
                       '+1-757-461-3022', '', '', '', 'www.xtuple.com', '', '', 'CHECK', 'admin');
 
