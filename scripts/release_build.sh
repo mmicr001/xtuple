@@ -131,7 +131,7 @@ packageInfo() {
                                          }' $PACKAGEXML
 }
 
-while [[ $1 =~ ^- ]] ; do
+while [[ $1 =~ ^[-+] ]] ; do
   case $1 in
     -h) HOST=$2
         shift
