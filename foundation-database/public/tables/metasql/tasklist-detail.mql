@@ -30,7 +30,7 @@ WITH tasklist AS (
          firstLine(task_descrip) AS notes, 
          task_start_date as start, 
          task_due_date AS due, 
-         crmacct_id,
+         COALESCE(prospect_crmacct_id, crmacct_id) AS crmacct_id,
          crmacct_number, 
          crmacct_name, 
          task_parent_type AS parent,
