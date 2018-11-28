@@ -95,7 +95,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id )
+    cohead_recurring_cohead_id,
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption )
   SELECT
     fetchSoNumber(),
     cohead_cust_id,
@@ -173,7 +177,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -183,10 +191,10 @@ BEGIN
     SELECT cust_id, cust_name, cust_salesrep_id, cust_terms_id, cust_shipvia, cust_shipchrg_id,
       cust_shipform_id, cust_commprcnt, cust_partialship, cust_taxzone_id, cust_curr_id,
       bc.cntct_id AS billing_contact_id, bc.cntct_honorific AS billing_honorific, bc.cntct_first_name AS billing_first_name, bc.cntct_middle AS billing_middle, bc.cntct_last_name AS billing_last_name,
-      bc.cntct_suffix AS billing_suffix, bc.cntct_phone AS billing_phone, bc.cntct_title AS billing_title, bc.cntct_fax AS billing_fax, bc.cntct_email AS billing_email,
+      bc.cntct_suffix AS billing_suffix, getcontactphone(bc.cntct_id, 'Office') AS billing_phone, bc.cntct_title AS billing_title, getcontactphone(bc.cntct_id, 'Fax') AS billing_fax, bc.cntct_email AS billing_email,
       ba.addr_line1 AS billing1, ba.addr_line2 AS billing2, ba.addr_line3 AS billing3, ba.addr_city AS billing_city, ba.addr_state AS billing_state, ba.addr_postalcode AS billing_postalcode, ba.addr_country AS billing_country,
-      shipto_id, shipto_name, sc.cntct_id AS shipto_contact_id, sc.cntct_honorific AS shipto_honorific, sc.cntct_phone AS shipto_phone, sc.cntct_first_name AS shipto_first_name, sc.cntct_middle AS shipto_middle, sc.cntct_last_name AS shipto_last_name,
-      sc.cntct_suffix AS shipto_suffix, sc.cntct_phone AS shipto_phone, sc.cntct_title AS shipto_title, sc.cntct_fax AS shipto_fax, sc.cntct_email AS shipto_email,
+      shipto_id, shipto_name, sc.cntct_id AS shipto_contact_id, sc.cntct_honorific AS shipto_honorific, sc.cntct_first_name AS shipto_first_name, sc.cntct_middle AS shipto_middle, sc.cntct_last_name AS shipto_last_name,
+      sc.cntct_suffix AS shipto_suffix, getcontactphone(sc.cntct_id, 'Office') AS shipto_phone, sc.cntct_title AS shipto_title, getcontactphone(sc.cntct_id, 'Fax') AS shipto_fax, sc.cntct_email AS shipto_email,
       sa.addr_line1 AS shipto1, sa.addr_line2 AS shipto2, sa.addr_line3 AS shipto3, sa.addr_city AS shipto_city, sa.addr_state AS shipto_state, sa.addr_postalcode AS shipto_postalcode, sa.addr_country AS shipto_country
     INTO _customer  
     FROM custinfo 
@@ -276,7 +284,11 @@ BEGIN
     cohead_status,
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id )
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption )
    SELECT
     fetchSoNumber(),
     pCustomer,
@@ -352,7 +364,11 @@ BEGIN
     'O',
     cohead_saletype_id,
     cohead_shipzone_id,
-    cohead_recurring_cohead_id
+    cohead_recurring_cohead_id, 
+    cohead_freight_taxtype_id,
+    cohead_misc_taxtype_id,
+    cohead_misc_discount,
+    cohead_tax_exemption
   FROM cohead
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
@@ -361,6 +377,8 @@ BEGIN
   IF _soheadid IS NULL THEN
     RAISE EXCEPTION 'Could not find sales order to copy [xtuple: copysoheader, -1, %]', _pSoheadid;
   END IF;
+
+  PERFORM copyTax('S', pSoheadid, 'S', _soheadid);
 
   INSERT INTO charass
         (charass_target_type, charass_target_id,
