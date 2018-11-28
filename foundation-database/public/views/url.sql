@@ -59,7 +59,6 @@ create or replace rule "_INSERT_URL" as on insert to url
 
 create or replace rule "_INSERT_FILE" as on insert to url 
   where new.url_stream is not null do instead
-
   insert into docass (
     docass_id,
     docass_source_id,
