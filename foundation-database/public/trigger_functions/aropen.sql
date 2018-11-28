@@ -109,7 +109,7 @@ BEGIN
   END IF;
 
   -- Check that 'paid' is a proper value
-  IF (NEW.aropen_paid < 0 OR NEW.aropen_paid>NEW.aropen_amount) THEN
+  IF (NEW.aropen_amount > 0 and (NEW.aropen_paid < 0 OR NEW.aropen_paid>NEW.aropen_amount)) THEN
     RAISE EXCEPTION 'Invalid amount for paid column [xtuple: _aropenTrigger, -5]';
   END IF;
 
