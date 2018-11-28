@@ -108,8 +108,7 @@ BEGIN
   FROM (
   SELECT SUM(vodist_amount) AS amount
     FROM vodist
-   WHERE ( (vodist_vohead_id=pVoheadid)
-     AND   (vodist_tax_id=-1) )
+   WHERE (vodist_vohead_id=pVoheadid)
   UNION ALL
   SELECT (vohead_freight - vohead_freight_distributed) AS amount
     FROM vohead
