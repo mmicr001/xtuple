@@ -19,7 +19,7 @@ BEGIN
     RAISE EXCEPTION 'An Employee may not be his or her own Manager. [xtuple: _empBeforeTrigger, -4]';
   END IF;
 
-  IF (NOT EXISTS (SELECT 1 FROM image WHERE image_id=NEW.emp_image_id)) THEN
+  IF (NEW.emp_image_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM image WHERE image_id=NEW.emp_image_id)) THEN
     RAISE EXCEPTION 'An invalid image was selected. [xtuple: _empBeforeTrigger, -5]';
   END IF;
 
