@@ -112,11 +112,20 @@ BEGIN
     DROP TABLE xt.vendinfoext;
   END IF;
 
+
 -- Version 5.0 data migration
   IF EXISTS(SELECT column_name FROM information_schema.columns 
             WHERE table_name='crmacct' and column_name='crmacct_vend_id') THEN
+    INSERT INTO crmacct (crmacct_number, crmacct_name, crmacct_active, crmacct_type,
+                         crmacct_vend_id, crmacct_cntct_id_1, crmacct_cntct_id_2
+      ) SELECT vend_number, vend_name, vend_active, 'O',
+               vend_id, vend_cntct1_id, vend_cntct2_id
+          FROM vendinfo
+         WHERE vend_id NOT IN (SELECT crmacct_vend_id FROM crmacct
+                                WHERE crmacct_vend_id IS NOT NULL)
+        ON CONFLICT DO NOTHING;
 
-     UPDATE vendinfo SET vend_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_vend_id=vend_id);
+    UPDATE vendinfo SET vend_crmacct_id=(SELECT crmacct_id FROM crmacct WHERE crmacct_vend_id=vend_id);
   END IF;
 
 END
