@@ -264,7 +264,7 @@ BEGIN
       _r.quitem_qtyord, _r.quitem_qtyord,
       _r.quitem_qty_uom_id, _r.quitem_qty_invuomratio,
       _r.quitem_price_uom_id, _r.quitem_price_invuomratio,
-      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, _r.invcitem_tax_exemption );
+      _r.quitem_custpn, _r.quitem_memo, _r.quitem_taxtype_id, _r.quitem_tax_exemption );
 
     PERFORM copyTax('Q', _r.quitem_id, 'INV', _iitemid, _iheadid);
 
