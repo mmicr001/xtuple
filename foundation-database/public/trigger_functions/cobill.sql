@@ -5,11 +5,10 @@ DECLARE
 
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    DELETE FROM taxline
-     WHERE (SELECT taxhead_doc_type = 'COB'
-              FROM taxhead
-             WHERE taxline_taxhead_id = taxhead_id)
-       AND taxline_line_id = OLD.cobill_id;
+    UPDATE taxhead
+       SET taxhead_valid = FALSE
+     WHERE taxhead_doc_type = 'COB'
+       AND taxhead_doc_id = OLD.cobill_cobmisc_id;
 
     RETURN OLD;
   END IF;
