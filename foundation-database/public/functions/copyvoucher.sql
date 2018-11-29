@@ -30,11 +30,12 @@ BEGIN
          vohead_docdate, vohead_1099,
          vohead_distdate, vohead_reference,
          vohead_terms_id, vohead_vend_id,
-         vohead_curr_id, vohead_adjtaxtype_id,
-         vohead_freighttaxtype_id, vohead_gldistdate,
+         vohead_curr_id, vohead_gldistdate,
          vohead_misc, vohead_taxzone_id,
-         vohead_taxtype_id, vohead_notes,
-         vohead_recurring_vohead_id )
+         vohead_notes, vohead_recurring_vohead_id,
+         vohead_freight, vohead_freight_expcat_id,
+         vohead_freight_distributed, vohead_tax_charged,
+         vohead_freight_taxtype_id, vohead_tax_exemption )
   VALUES(_voheadid,
          _vonumber, _i.vohead_pohead_id,
          false, determineDueDate(_i.vohead_terms_id, _vodate),
@@ -42,11 +43,12 @@ BEGIN
          _vodate, _i.vohead_1099,
          _vodate, _i.vohead_reference,
          _i.vohead_terms_id, _i.vohead_vend_id,
-         _i.vohead_curr_id, _i.vohead_adjtaxtype_id,
-         _i.vohead_freighttaxtype_id, _vodate,
+         _i.vohead_curr_id, _vodate,
          _i.vohead_misc, _i.vohead_taxzone_id,
-         _i.vohead_taxtype_id, _i.vohead_notes,
-         _i.vohead_recurring_vohead_id);
+         _i.vohead_notes, _i.vohead_recurring_vohead_id,
+         _i.vohead_freight, _i.vohead_freight_expcat_id,
+         _i.vohead_freight_distributed, _i.vohead_tax_charged,
+         _i.vohead_freight_taxtype_id, _i.vohead_tax_exemption);
 
   FOR _l IN SELECT *
             FROM vodist
