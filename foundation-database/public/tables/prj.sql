@@ -27,6 +27,8 @@ SELECT
   xt.add_column('prj', 'prj_priority_id',  'INTEGER', 'REFERENCES incdtpriority (incdtpriority_id)', 'public'),
   xt.add_column('prj', 'prj_pct_complete', 'NUMERIC', null, 'public');
 
+ALTER TABLE prj DROP CONSTRAINT IF EXISTS prj_prj_status_check;
+
 SELECT
   xt.add_constraint('prj', 'prj_pkey', 'PRIMARY KEY (prj_id)', 'public'),
   xt.add_constraint('prj', 'prj_prj_number_key', 'UNIQUE (prj_number)', 'public'),
