@@ -1,5 +1,5 @@
-<package id        = "manufacturing-upgrade-5.0.0Alpha"
-         version   = "5.0.0Alpha"
+<package id        = "manufacturing-upgrade-5.0.0Beta"
+         version   = "5.0.0Beta"
          developer = "xTuple"
          descrip   = "load Manufacturing resources"
          updater   = "2.2.4" >
