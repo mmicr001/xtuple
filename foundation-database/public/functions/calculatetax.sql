@@ -207,7 +207,7 @@ BEGIN
       INTO _anytaxzone, _anytaxtype
       FROM taxass
      WHERE COALESCE(taxass_taxzone_id, pTaxZoneId) = pTaxZoneId
-       AND COALESCE(taxass_taxtype_id, pTaxTypes[_line]) = _taxtypes[_line]
+       AND COALESCE(taxass_taxtype_id, _taxtypes[_line]) = _taxtypes[_line]
      ORDER BY taxass_taxzone_id IS NULL, taxass_taxtype_id IS NULL
      LIMIT 1;
 
@@ -216,8 +216,12 @@ BEGIN
       FROM taxass
       JOIN tax ON taxass_tax_id = tax_id
       LEFT OUTER JOIN taxclass ON tax_taxclass_id = taxclass_id
-     WHERE (_anytaxzone OR taxass_taxzone_id = pTaxZoneId)
-       AND (_anytaxtype OR taxass_taxtype_id = _taxtypes[_line])
+     WHERE CASE WHEN _anytaxzone THEN taxass_taxzone_id IS NULL
+                ELSE taxass_taxzone_id = pTaxZoneId
+            END
+       AND CASE WHEN _anytaxtype THEN taxass_taxtype_id IS NULL
+                ELSE taxass_taxtype_id = _taxtypes[_line]
+            END
      ORDER BY COALESCE(taxclass_sequence, 0)
     LOOP
       IF _tax.taxclass_sequence != _prevseq THEN

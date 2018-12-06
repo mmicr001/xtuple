@@ -85,8 +85,8 @@ BEGIN
      FOR _taxd IN
         SELECT tax_id, (value->>'tax')::NUMERIC AS tax,
                (value->>'sequence')::INTEGER AS sequence,
-               (value->>'taxclassid')::INTEGER AS taxclassid,
-               (value->>'basistaxid')::INTEGER AS basistaxid,
+               NULLIF((value->>'taxclassid')::INTEGER, -1) AS taxclassid,
+               NULLIF((value->>'basistaxid')::INTEGER, -1) AS basistaxid,
                (value->>'amount')::NUMERIC AS amount,
                (value->>'percent')::NUMERIC AS percent
           FROM jsonb_array_elements(calculateTaxIncluded(ptaxzone, pcurr, pdate,
