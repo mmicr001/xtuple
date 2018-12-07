@@ -23,10 +23,10 @@ BEGIN
     RETURN -2;
   END IF;
 
-  SELECT taxdetail_id
+  SELECT taxline_id
     INTO _result
-    FROM taxdetail
-   WHERE (taxdetail_taxtype_id=pTaxtypeid);
+    FROM taxline
+   WHERE (taxline_taxtype_id=pTaxtypeid);
   IF (FOUND) THEN
     RETURN -3;
   END IF;
