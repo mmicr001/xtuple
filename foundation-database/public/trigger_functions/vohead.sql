@@ -95,7 +95,8 @@ BEGIN
     EXECUTE format('NOTIFY commit, %L', 'VCH,' || OLD.vohead_id);
   END IF;
 
-  IF (TG_OP = 'DELETE' AND getOrderTax('VCH', OLD.vohead_id) - OLD.vohead_tax_charged > 0.0) THEN
+  IF (TG_OP = 'DELETE' AND OLD.vohead_tax_charged IS NOT NULL AND
+                           getOrderTax('VCH', OLD.vohead_id) - OLD.vohead_tax_charged > 0.0) THEN
     EXECUTE format('NOTIFY cancel, %L', 'VCH,' || OLD.vohead_id || ',' || OLD.vohead_number);
   END IF;
 

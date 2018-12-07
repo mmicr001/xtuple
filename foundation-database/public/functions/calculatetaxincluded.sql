@@ -41,6 +41,10 @@ BEGIN
     INTO _total
     FROM UNNEST(pAmounts) AS amount;
 
+  IF _total = 0.0 THEN
+    RETURN _taxdata;
+  END IF;
+
   FOR _line IN
   SELECT value->>'line' AS line, value->'tax' AS taxdetail
     FROM jsonb_array_elements(_taxdata->'lines')

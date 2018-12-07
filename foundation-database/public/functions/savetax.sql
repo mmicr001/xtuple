@@ -134,15 +134,15 @@ BEGIN
   END IF;
 
   IF pOrderType = 'VCH' THEN
-    SELECT vohead_tax_charged INTO _taxcharged
+    _taxtotal := getOrderTax('VCH', pOrderId);
+
+    SELECT COALESCE(vohead_tax_charged, _taxtotal) INTO _taxcharged
       FROM vohead
      WHERE vohead_id = pOrderId;
 
     UPDATE taxhead
        SET taxhead_tax_paid = _taxcharged
      WHERE taxhead_id = _taxheadid;
-
-    _taxtotal := getOrderTax('VCH', pOrderId);
 
     UPDATE taxdetail
        SET taxdetail_tax_owed = taxdetail_tax * GREATEST(_taxtotal - _taxcharged, 0.0) / _taxtotal
