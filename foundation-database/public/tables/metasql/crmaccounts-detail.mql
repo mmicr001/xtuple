@@ -4,6 +4,7 @@
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
+WITH _crmaccounts AS (
 SELECT DISTINCT ON (crmacct_number)
   crmacct_id AS id, crmacct_number, crmacct_name, crmacct_owner_username,
   crmacct_active, crmacct_created,
@@ -63,18 +64,6 @@ WHERE true
 <? if not exists("showInactive") ?> 
   AND crmacct_active 
 <? endif ?>
-<? if exists("search_pattern") ?>
-  AND ((crmacct_number ~* <? value("search_pattern") ?>)
-       OR (crmacct_name ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
-       OR (addr_country ~* <? value("search_pattern") ?>))
-<? endif ?>
 <? if exists("crmacct_number_pattern") ?>
   AND (crmacct_number ~* <? value("crmacct_number_pattern") ?>)
 <? endif ?>
@@ -130,5 +119,15 @@ WHERE true
                                                                              FROM  crmacctrole  
                                                                              WHERE crmacctrole_crmrole_id = (<? value("crmacct_acct_type") ?>-100))
       END
+<? endif ?>
+)
+SELECT * FROM _crmaccounts
+WHERE true
+<? if exists("search_pattern") ?>
+  AND ( FALSE
+  <? foreach("search_fields") ?>
+    OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
+  <? endforeach ?>
+)
 <? endif ?>
 ORDER BY crmacct_number; 

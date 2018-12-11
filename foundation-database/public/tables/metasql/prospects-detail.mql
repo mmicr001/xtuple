@@ -4,6 +4,7 @@
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
+WITH _prospects AS (
 SELECT prospect_id, prospect_crmacct_id,
   prospect.*, prospect_created::DATE AS created,
   opsource_name AS prospect_source,
@@ -55,18 +56,6 @@ WHERE true
 <? elseif exists("owner_usr_pattern") ?>
   AND (prospect_owner_username ~ <? value("owner_usr_pattern") ?>) 
 <? endif ?>
-<? if exists("search_pattern") ?>
-  AND ((prospect_number ~* <? value("search_pattern") ?>)
-       OR (prospect_name ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
-       OR (COALESCE(cntct_email,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(addr_country,'') ~* <? value("search_pattern") ?>))
-<? endif ?>
 <? if exists("pspctgrp") ?>
   AND prospect_id IN (SELECT groupsitem_reference_id FROM pspctgrpitem WHERE groupsitem_groups_id=<? value("pspctgrp") ?>)
 <? endif ?>
@@ -113,4 +102,14 @@ WHERE true
   AND (prospect_id=<? value("id") ?>
 <? endif ?>
 <? literal("charClause") ?>
+)
+SELECT * FROM _prospects
+WHERE true
+<? if exists("search_pattern") ?>
+  AND ( FALSE
+  <? foreach("search_fields") ?>
+    OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
+  <? endforeach ?>
+)
+<? endif ?>
 ORDER BY prospect_number; 
