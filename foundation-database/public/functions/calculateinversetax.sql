@@ -13,9 +13,8 @@ BEGIN
     RETURN 0.00;
   END IF;  
 
-  RETURN (pAmount - (calculateTaxIncluded(pTaxZoneId, pCurrId, pDate, 0.0, 0.0, -1, -1, FALSE,
-                                          ARRAY[''], ARRAY[pTaxtypeId],
-                                          ARRAY[pAmount])->>'total')::NUMERIC);
+  RETURN (calculateTaxIncluded(pTaxZoneId, pCurrId, pDate, 0.0, 0.0, -1, -1, FALSE, ARRAY[''],
+                               ARRAY[pTaxtypeId], ARRAY[pAmount])->>'total')::NUMERIC;
   
 END;
 $$ LANGUAGE plpgsql;

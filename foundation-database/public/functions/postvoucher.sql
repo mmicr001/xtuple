@@ -118,7 +118,7 @@ BEGIN
     FROM voitem
    WHERE (voitem_vohead_id=pVoheadid)
   UNION ALL
-  SELECT vohead_tax_charged
+  SELECT COALESCE(vohead_tax_charged, getOrderTax('VCH', pVoheadid))
     FROM vohead
    WHERE vohead_id = pVoheadid
   ) AS data;
@@ -157,6 +157,7 @@ BEGIN
 
 --  Start by handling taxes
   _taxTotal := getOrderTax('VCH', pVoheadid);
+  _p.vohead_tax_charged := COALESCE(_p.vohead_tax_charged, _taxTotal);
 
   SELECT COALESCE(SUM(taxdetail_tax), 0.0) INTO _freightTax
     FROM taxhead
