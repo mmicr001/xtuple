@@ -158,8 +158,8 @@ BEGIN
                                  taxdetail_basis_tax_id, taxdetail_amount,
                                  taxdetail_percent, taxdetail_tax)
           SELECT _taxlineid, _p.checkhead_amount - _p.total_tax, (value->>'taxid')::INTEGER,
-                 (value->>'taxclassid')::INTEGER, (value->>'sequence')::INTEGER,
-                 (value->>'basistaxid')::INTEGER, (value->>'amount')::NUMERIC,
+                 NULLIF((value->>'taxclassid')::INTEGER, -1), (value->>'sequence')::INTEGER,
+                 NULLIF((value->>'basistaxid')::INTEGER, -1), (value->>'amount')::NUMERIC,
                  (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC
             FROM jsonb_array_elements(calculatetax(_p.checkhead_taxzone_id,_p.checkhead_curr_id,
                                       _p.checkhead_checkdate, 0.0, 0.0, getFreightTaxtypeId(),
