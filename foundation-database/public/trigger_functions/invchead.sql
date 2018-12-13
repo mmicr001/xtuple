@@ -67,19 +67,6 @@ BEGIN
        AND taxhead_doc_id = NEW.invchead_id;
   END IF;
 
-  IF (TG_OP = 'UPDATE' AND NEW.invchead_posted AND NOT OLD.invchead_posted) THEN
-    EXECUTE format('NOTIFY commit, %L', 'INV,' || OLD.invchead_id);
-  END IF;
-
-  IF (TG_OP = 'UPDATE' AND NEW.invchead_void AND NOT OLD.invchead_void) THEN
-    EXECUTE format('NOTIFY cancel, %L', 'INV,' || OLD.invchead_id);
-  END IF;
-
-  IF (TG_OP = 'DELETE') THEN
-    EXECUTE format('NOTIFY cancel, %L', 'INV,' || OLD.invchead_id ||
-                                        ',' || OLD.invchead_invcnumber);
-  END IF;
-
   IF (TG_OP = 'DELETE') THEN
     SELECT recur_id INTO _recurid
       FROM recur

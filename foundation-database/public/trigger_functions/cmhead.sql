@@ -105,18 +105,6 @@ BEGIN
        AND taxhead_doc_id = NEW.cmhead_id;
   END IF;
 
-  IF (TG_OP = 'UPDATE' AND NEW.cmhead_posted AND NOT OLD.cmhead_posted) THEN
-    EXECUTE format('NOTIFY commit, %L', 'CM,' || OLD.cmhead_id);
-  END IF;
-
-  IF (TG_OP = 'UPDATE' AND NEW.cmhead_void AND NOT OLD.cmhead_void) THEN
-    EXECUTE format('NOTIFY cancel, %L', 'CM,' || OLD.cmhead_id);
-  END IF;
-
-  IF (TG_OP = 'DELETE') THEN
-    EXECUTE format('NOTIFY cancel, %L', 'CM,' || OLD.cmhead_id || ',' || OLD.cmhead_number);
-  END IF;
-
   RETURN NEW;
 END;
 $$ LANGUAGE 'plpgsql';
