@@ -34,7 +34,9 @@ BEGIN
               COALESCE(itemsite_id, -1) AS itemsiteid, poitem_invvenduomratio,
               SUM(poreject_qty) AS totalqty, 
               isControlledItemsite(itemsite_id) AS controlled, 
-              itemsite_controlmethod, recv_date
+              itemsite_controlmethod, recv_date,
+              COALESCE(itemsite_costmethod, 'X') AS costmethod,
+              COALESCE(recv_value/recv_qty, 0) AS recvcost
             FROM pohead 
               JOIN poitem ON (poitem_pohead_id=pohead_id)
               JOIN poreject ON (poreject_poitem_id=poitem_id AND NOT poreject_posted) 
@@ -44,7 +46,7 @@ BEGIN
             GROUP BY poreject_id, pohead_id, pohead_number, poreject_poitem_id, poitem_id, poitem_prj_id,
 		          poitem_expcat_id, poitem_linenumber, poitem_unitprice, pohead_curr_id,
 		          pohead_orderdate, itemsite_id, poitem_invvenduomratio, itemsite_controlmethod, recv_date,
-              recv_purchcost_curr_id, recv_purchcost 
+              recv_purchcost_curr_id, recv_purchcost, recv_value, recv_qty
             ORDER BY poreject_id LOOP
 
 
@@ -96,7 +98,12 @@ BEGIN
       END IF;
 
       UPDATE poreject
-      SET poreject_posted=TRUE, poreject_value= round(_p.poitem_unitprice_base * _p.totalqty, 2)
+      SET poreject_posted = TRUE,
+          poreject_value = CASE WHEN _p.costmethod = 'S' THEN
+                                     round(_p.recvcost * _p.totalqty, 2)
+                                ELSE
+                                     round(_p.poitem_unitprice_base * _p.totalqty, 2)
+                           END
       FROM invhist
       WHERE ((poreject_id=_p.poreject_id)
       AND (invhist_id=_returnval));
