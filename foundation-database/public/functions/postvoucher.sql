@@ -174,12 +174,24 @@ BEGIN
    GROUP BY vohead_freight;
 
   IF (_taxTotal != 0.0) THEN
-    FOR _r IN SELECT accnt,
+    FOR _r IN SELECT CASE WHEN taxdetail_vat
+                          THEN CASE WHEN fetchMetricText('TaxService') = 'A'
+                                    THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
+                                    ELSE tax_sales_accnt_id
+                                END
+                          ELSE accnt
+                      END AS accnt,
                      COALESCE(SUM(taxdetail_tax), 0.0) *
                      GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS tax,
                      voitem_freight / COALESCE(NULLIF(_freightTotal, 0.0), 1.0) * _freightTax *
                      GREATEST(_p.vohead_tax_charged, _taxTotal) / _taxTotal AS freighttax,
-                     freightaccnt
+                     CASE WHEN taxdetail_vat
+                          THEN CASE WHEN fetchMetricText('TaxService') = 'A'
+                                    THEN fetchMetricValue('AvalaraSalesAccountId')::INTEGER
+                                    ELSE tax_sales_accnt_id
+                                END
+                          ELSE freightaccnt
+                      END AS freightaccnt
                 FROM (
                       SELECT MIN(vodist_id) AS vodist_id,
                              COALESCE(costcat_purchprice_accnt_id, expcat_tax_accnt_id) AS accnt,
@@ -214,7 +226,9 @@ BEGIN
                 LEFT OUTER JOIN taxline ON taxhead_id = taxline_taxhead_id
                                        AND vodist_id = taxline_line_id
                 LEFT OUTER JOIN taxdetail ON taxline_id = taxdetail_taxline_id
-               GROUP BY vodist_id, accnt, voitem_freight, freightaccnt
+                LEFT OUTER JOIN tax ON taxdetail_tax_id = tax_id
+               GROUP BY vodist_id, accnt, voitem_freight, freightaccnt, taxdetail_vat,
+                        tax_sales_accnt_id
     LOOP
       PERFORM insertIntoGLSeries(_sequence, 'A/P', 'VO', _p.vohead_number,
                                  _r.accnt,

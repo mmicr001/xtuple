@@ -108,10 +108,12 @@ BEGIN
 
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_code,
                            taxdetail_percent, taxdetail_tax,
-                           taxdetail_tax_owed)
+                           taxdetail_tax_owed,
+                           taxdetail_vat)
     SELECT _taxlineid, (value->>'taxableAmount')::NUMERIC * _return, (value->>'taxName'),
            (value->>'rate')::NUMERIC, (value->>'taxCalculated')::NUMERIC * _return,
-           ((value->>'taxCalculated')::NUMERIC - (value->>'tax')::NUMERIC) * _return
+           ((value->>'taxCalculated')::NUMERIC - (value->>'tax')::NUMERIC) * _return,
+           CASE WHEN (value->>'taxType')::TEXT = 'Input' THEN TRUE ELSE FALSE END
       FROM jsonb_array_elements(_r.value->'details');
   END LOOP;
 

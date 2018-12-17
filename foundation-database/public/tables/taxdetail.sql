@@ -23,7 +23,8 @@ SELECT xt.add_column('taxdetail', 'taxdetail_id', 'SERIAL', 'PRIMARY KEY', 'publ
        xt.add_column('taxdetail', 'taxdetail_tax', 'NUMERIC', 'NOT NULL DEFAULT 0.0', 'public'),
        xt.add_column('taxdetail', 'taxdetail_tax_owed', 'NUMERIC', 'NOT NULL DEFAULT 0.0', 'public'),
        xt.add_column('taxdetail', 'taxdetail_paydate', 'DATE', 'NULL', 'public'),
-       xt.add_column('taxdetail', 'taxdetail_tax_paid', 'NUMERIC', 'NULL', 'public');
+       xt.add_column('taxdetail', 'taxdetail_tax_paid', 'NUMERIC', 'NULL', 'public'),
+       xt.add_column('taxdetail', 'taxdetail_vat', 'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
 
 SELECT xt.add_constraint('taxdetail', 'taxdetail_taxline_id_fkey', 'FOREIGN KEY (taxdetail_taxline_id) REFERENCES taxline (taxline_id) ON DELETE CASCADE', 'public'),
        xt.add_constraint('taxdetail', 'taxdetail_tax_id_fkey', 'FOREIGN KEY (taxdetail_tax_id) REFERENCES tax (tax_id)', 'public'),
