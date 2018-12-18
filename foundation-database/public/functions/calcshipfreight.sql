@@ -72,7 +72,7 @@ BEGIN
                     COALESCE((SELECT SUM(shiphead_freight)
                               FROM shiphead
                               WHERE (shiphead_order_id = _shipment.shiphead_order_id)
-                                AND (shiphead_shipped='true')), 0) ) INTO _result;
+                                AND (shiphead_id <> pShipheadId)), 0) ) INTO _result;
       RETURN _result;
     END IF;
 
