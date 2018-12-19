@@ -104,12 +104,10 @@ WHERE true
 <? literal("charClause") ?>
 )
 SELECT * FROM _prospects
-WHERE true
 <? if exists("search_pattern") ?>
-  AND ( FALSE
+  WHERE FALSE
   <? foreach("search_fields") ?>
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
-)
 <? endif ?>
 ORDER BY prospect_number; 

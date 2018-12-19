@@ -172,13 +172,11 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
          cntcteml_primary desc
 )
 SELECT * FROM _contacts
-WHERE true
 <? if exists("search_pattern") ?>
-  AND ( FALSE
+  WHERE FALSE
   <? foreach("search_fields") ?>
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
-)
 <? endif ?>
 <? if exists("hasContext") ?>
   ORDER BY crmacctcntctass_active DESC, crmrole_sort

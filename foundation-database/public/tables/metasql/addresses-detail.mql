@@ -112,13 +112,11 @@ GROUP BY addr_id, addr_line1, addr_line2, addr_line3, addr_country, addr_state,
 ORDER BY addr_country, addr_state, addr_city, addr_line1, addr_number
 )
 SELECT * FROM _addresses
-WHERE true
 <? if exists("search_pattern") ?>
-  AND ( FALSE
+  WHERE FALSE
   <? foreach("search_fields") ?>
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
-)
 <? endif ?>
 <? if exists("hasContext") ?>
 ORDER BY crmrole_sort
