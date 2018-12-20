@@ -70,19 +70,11 @@ BEGIN
    OR  apopen_id = _r.apapply_target_apopen_id);
 
   IF (_r.apapply_source_doctype = 'K') THEN
-    INSERT INTO apopen(
-            apopen_docdate, apopen_duedate,  apopen_vend_id, 
-            apopen_doctype, apopen_docnumber, apopen_amount, 
-            apopen_notes, 
-             apopen_paid, apopen_open, apopen_username, 
-            apopen_discount, apopen_accnt_id, apopen_curr_id, apopen_curr_rate,
-            apopen_distdate, apopen_void, apopen_discountable_amount, apopen_status)
-    VALUES (current_date, current_date, _r.apapply_vend_id,  
-            'C', _r.apapply_source_docnumber, _r.aamt,
-            'Check ' || _r.apapply_source_docnumber || ' to be re-applied; original date: ' || _r.apapply_postdate, 
-            0, true, geteffectivextuser(), 
-            false, -1, _r.apapply_curr_id, currrate(_r.apapply_curr_id, _r.apapply_postdate),
-            current_date, false, 0, 'O');
+    PERFORM createAPCreditMemo(_r.apapply_vend_id, NULL, _r.apapply_source_docnumber, '',
+                               _r.apapply_postdate, _r.aamt,
+                               'Check ' || _r.apapply_source_docnumber ||
+                               ' to be re-applied; original date: ' || _r.apapply_postdate,
+                               -1, CURRENT_DATE, NULL, _r.arapply_curr_id);
   END IF;
 
   UPDATE apapply SET apapply_reversed = true
