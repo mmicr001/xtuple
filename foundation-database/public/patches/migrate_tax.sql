@@ -4,7 +4,7 @@ BEGIN
   IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0-alpha') = -1 THEN
     PERFORM setMetric('TaxService', 'N');
 
-    -- Old data must be fixed or the recalculation will error
+    RAISE NOTICE 'Fixing old cobill data to prevent recalculation errors';
     UPDATE cobill
        SET cobill_qty = (SELECT SUM(cobill_qty)
                            FROM cobill b
@@ -18,31 +18,39 @@ BEGIN
                             AND b.cobill_coitem_id = cobill.cobill_coitem_id);
 
     -- Speeds up saveTax/calculateOrderTax calls by about an order of magnitude
+    RAISE NOTICE 'creating dochead & docitem temporary tables';
     CREATE TEMPORARY TABLE dochead AS SELECT * FROM dochead;
     CREATE TEMPORARY TABLE docitem AS SELECT * FROM docitem;
     CREATE INDEX ON dochead (dochead_type, dochead_id);
     CREATE INDEX ON docitem (docitem_type, docitem_dochead_id);
 
+    RAISE NOTICE 'saveTax(Q)';
     PERFORM saveTax('Q', quhead_id, calculateOrderTax('Q', quhead_id))
        FROM quhead;
 
+    RAISE NOTICE 'saveTax(S)';
     PERFORM saveTax('S', cohead_id, calculateOrderTax('S', cohead_id))
        FROM cohead;
 
+    RAISE NOTICE 'saveTax(COB)';
     PERFORM saveTax('COB', cobmisc_id, calculateOrderTax('COB', cobmisc_id))
        FROM cobmisc;
 
+    RAISE NOTICE 'saveTax(INV)';
     PERFORM saveTax('INV', invchead_id, calculateOrderTax('INV', invchead_id))
        FROM invchead
       WHERE NOT invchead_posted;
 
+    RAISE NOTICE 'saveTax(P)';
     PERFORM saveTax('P', pohead_id, calculateOrderTax('P', pohead_id))
        FROM pohead;
 
+    RAISE NOTICE 'saveTax(VCH)';
     PERFORM saveTax('VCH', vohead_id, calculateOrderTax('VCH', vohead_id))
        FROM vohead
       WHERE NOT vohead_posted;
 
+    RAISE NOTICE 'saveTax(CM)';
     PERFORM saveTax('CM', cmhead_id, calculateOrderTax('CM', cmhead_id))
        FROM cmhead
       WHERE NOT cmhead_posted;
@@ -50,6 +58,7 @@ BEGIN
     DROP TABLE dochead;
     DROP TABLE docitem;
 
+    RAISE NOTICE 'Inserting COB taxline & taxdetail';
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_taxtype_id)
     SELECT taxhead_id, 'A', getAdjustmentTaxtypeId()
       FROM cobmisc
@@ -70,6 +79,7 @@ BEGIN
                   AND taxline_line_type = 'A'
      WHERE taxhist_taxtype_id = getAdjustmentTaxtypeId();
 
+    RAISE NOTICE 'Inserting INV taxline & taxdetail';
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_taxtype_id)
     SELECT taxhead_id, 'A', getAdjustmentTaxtypeId()
       FROM invchead
@@ -92,6 +102,7 @@ BEGIN
      WHERE NOT invchead_posted
        AND taxhist_taxtype_id = getAdjustmentTaxtypeId();
 
+    RAISE NOTICE 'Inserting VCH taxline & taxdetail';
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_taxtype_id)
     SELECT taxhead_id, 'A', getAdjustmentTaxtypeId()
       FROM vohead
@@ -114,6 +125,7 @@ BEGIN
      WHERE NOT vohead_posted
        AND taxhist_taxtype_id = getAdjustmentTaxtypeId();
 
+    RAISE NOTICE 'Inserting CM taxline & taxdetail';
     INSERT INTO taxline (taxline_taxhead_id, taxline_line_type, taxline_taxtype_id)
     SELECT taxhead_id, 'A', getAdjustmentTaxtypeId()
       FROM cmhead
@@ -138,6 +150,7 @@ BEGIN
 
     CREATE TEMPORARY TABLE asohisttmp ON COMMIT DROP AS SELECT asohist_id FROM asohist;
 
+    RAISE NOTICE 'Restoring sales history and tax';
     PERFORM restoreSalesHistory(asohist_id)
        FROM asohist;
 
@@ -175,9 +188,11 @@ BEGIN
 
     CREATE TABLE IF NOT EXISTS checkheadtax() INHERITS (taxhist);
 
+    RAISE NOTICE 'creating taxpay table';
     CREATE TABLE IF NOT EXISTS taxpay
     (taxpay_taxhist_id INTEGER, taxpay_distdate DATE, taxpay_tax NUMERIC);
 
+    RAISE NOTICE 'populating INV taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id,
                          taxhead_cust_id,
                          taxhead_date,
@@ -399,6 +414,7 @@ BEGIN
            ) lines ON invchead_id = headid
       WHERE invchead_posted;
 
+    RAISE NOTICE 'populating VCH taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
                          taxhead_date,
                          taxhead_curr_id,
@@ -548,6 +564,7 @@ BEGIN
            ) lines ON vohead_id = headid
       WHERE vohead_posted;
 
+    RAISE NOTICE 'populating CM taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id,
                          taxhead_cust_id,
                          taxhead_date,
@@ -796,6 +813,7 @@ BEGIN
            ) lines ON cmhead_id = headid
       WHERE cmhead_posted;
 
+    RAISE NOTICE 'populating aropen taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
                          taxhead_date,
                          taxhead_curr_id,
@@ -930,6 +948,7 @@ BEGIN
            ) lines ON aropen_id = headid
       WHERE aropen_posted;
 
+    RAISE NOTICE 'populating apopen taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
                          taxhead_date,
                          taxhead_curr_id,
@@ -1038,6 +1057,7 @@ BEGIN
       WHERE apopen_posted
        AND apopen_doctype IN ('C', 'D');
 
+    RAISE NOTICE 'populating CK taxhead, taxline, & taxdetail';
     INSERT INTO taxhead (taxhead_status, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
                          taxhead_date,
                          taxhead_curr_id,
