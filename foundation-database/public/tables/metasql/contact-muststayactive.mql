@@ -36,7 +36,8 @@ SELECT EXISTS(
    FROM emp
   WHERE (emp_active AND (emp_cntct_id=<? value("id") ?>))
  UNION SELECT 21
-   FROM todoitem
-  WHERE (todoitem_completed_date IS NOT NULL
-    AND (todoitem_cntct_id=<? value("id") ?>))
+   FROM task
+  WHERE task_completed_date IS NOT NULL
+    AND task_parent_id = <? value("id") ?>
+    AND task_parent_type = 'T'
 ) AS inuse;
