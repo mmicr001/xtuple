@@ -11,7 +11,8 @@ SELECT
   xt.add_column('tax', 'tax_taxauth_id',     'INTEGER', NULL, 'public'),
   xt.add_column('tax', 'tax_basis_tax_id',   'INTEGER', NULL, 'public'),
   xt.add_column('tax','tax_dist_accnt_id',   'INTEGER', NULL, 'public'),
-  xt.add_column('tax', 'tax_use_accnt_id',   'INTEGER', 'NULL', 'public');
+  xt.add_column('tax', 'tax_use_accnt_id',   'INTEGER', 'NULL', 'public'),
+  xt.add_column('tax', 'tax_vat',            'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
 
 ALTER TABLE tax DROP COLUMN IF EXISTS tax_armemo;
 ALTER TABLE tax DROP COLUMN IF EXISTS tax_apmemo;

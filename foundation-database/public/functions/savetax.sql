@@ -85,12 +85,13 @@ BEGIN
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
                            taxdetail_taxclass_id, taxdetail_sequence,
                            taxdetail_basis_tax_id, taxdetail_amount,
-                           taxdetail_percent, taxdetail_tax)
+                           taxdetail_percent, taxdetail_tax, taxdetail_vat)
     SELECT _taxlineid, (_r.value->>'taxable')::NUMERIC, (value->>'taxid')::INTEGER,
            NULLIF((value->>'taxclassid')::INTEGER, -1), (value->>'sequence')::INTEGER,
            NULLIF((value->>'basistaxid')::INTEGER, -1), (value->>'amount')::NUMERIC,
-           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC
-      FROM jsonb_array_elements(_r.value->'tax');
+           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC, tax_vat
+      FROM jsonb_array_elements(_r.value->'tax')
+      JOIN tax ON (value->>'taxid')::INTEGER = tax_id;
   END LOOP;
 
   IF pResult->'freight' IS NOT NULL THEN
@@ -105,12 +106,13 @@ BEGIN
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
                            taxdetail_taxclass_id, taxdetail_sequence,
                            taxdetail_basis_tax_id, taxdetail_amount,
-                           taxdetail_percent, taxdetail_tax)
+                           taxdetail_percent, taxdetail_tax, taxdetail_vat)
     SELECT _taxlineid, (pResult->'freight'->>'taxable')::NUMERIC, (value->>'taxid')::INTEGER,
            NULLIF((value->>'taxclassid')::INTEGER, -1), (value->>'sequence')::INTEGER,
            NULLIF((value->>'basistaxid')::INTEGER, -1), (value->>'amount')::NUMERIC,
-           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC
-      FROM jsonb_array_elements(pResult->'freight'->'tax');
+           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC, tax_vat
+      FROM jsonb_array_elements(pResult->'freight'->'tax')
+      JOIN tax ON (value->>'taxid')::INTEGER = tax_id;
   END IF;
 
   IF pResult->'misc' IS NOT NULL THEN
@@ -125,12 +127,13 @@ BEGIN
     INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
                            taxdetail_taxclass_id, taxdetail_sequence,
                            taxdetail_basis_tax_id, taxdetail_amount,
-                           taxdetail_percent, taxdetail_tax)
+                           taxdetail_percent, taxdetail_tax, taxdetail_vat)
     SELECT _taxlineid, (pResult->'freight'->>'taxable')::NUMERIC, (value->>'taxid')::INTEGER,
            NULLIF((value->>'taxclassid')::INTEGER, -1), (value->>'sequence')::INTEGER,
            NULLIF((value->>'basistaxid')::INTEGER, -1), (value->>'amount')::NUMERIC,
-           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC
-      FROM jsonb_array_elements(pResult->'misc'->'tax');
+           (value->>'percent')::NUMERIC, (value->>'tax')::NUMERIC, tax_vat
+      FROM jsonb_array_elements(pResult->'misc'->'tax')
+      JOIN tax ON (value->>'taxid')::INTEGER = tax_id;
   END IF;
 
   IF pOrderType = 'VCH' THEN
