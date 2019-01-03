@@ -47,13 +47,6 @@ BEGIN
     END IF;
   END IF;
 
-  IF (TG_OP = 'UPDATE' AND NEW.apopen_doctype = 'V' AND
-      NEW.apopen_void AND NOT OLD.apopen_void) THEN
-    EXECUTE format('NOTIFY cancel, %L', 'VCH,' || (SELECT vohead_id
-                                                     FROM vohead
-                                                    WHERE vohead_number = NEW.apopen_docnumber));
-  END IF;
-
   RETURN NEW;
 
 END;

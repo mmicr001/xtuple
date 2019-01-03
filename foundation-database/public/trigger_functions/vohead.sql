@@ -91,16 +91,6 @@ BEGIN
        AND taxhead_doc_id = NEW.vohead_id;
   END IF;
 
-  IF (TG_OP = 'UPDATE' AND NEW.vohead_posted AND NOT OLD.vohead_posted) THEN
-    EXECUTE format('NOTIFY commit, %L', 'VCH,' || OLD.vohead_id);
-  END IF;
-
-  IF (TG_OP = 'DELETE' AND OLD.vohead_tax_charged IS NOT NULL AND
-                           getOrderTax('VCH', OLD.vohead_id) - OLD.vohead_tax_charged > 0.0) THEN
-    EXECUTE format('NOTIFY cancel, %L', 'VCH,' || OLD.vohead_id || ',' || OLD.vohead_number);
-  END IF;
-
-
   IF (TG_OP = 'INSERT') THEN
     PERFORM clearNumberIssue('VcNumber', NEW.vohead_number);
     PERFORM postComment('ChangeLog', 'VCH', NEW.vohead_id, 'Created');
