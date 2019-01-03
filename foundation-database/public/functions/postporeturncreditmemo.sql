@@ -137,7 +137,7 @@ BEGIN
                                 getMiscTaxtypeId(), FALSE, ARRAY[''],
                                 ARRAY[_p.poitem_taxtype_id],
                                 ARRAY[_itemAmount])->'lines'->0->'tax')
-      GROUP BY (value->>'taxid')::INTEGER
+      GROUP BY jsonb_array_elements.value, (value->>'taxid')::INTEGER
 
     LOOP
       INSERT INTO taxdetail (taxdetail_taxline_id, taxdetail_taxable, taxdetail_tax_id,
