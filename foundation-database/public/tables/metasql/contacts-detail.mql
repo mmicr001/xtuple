@@ -4,9 +4,7 @@
 --        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
-<? if exists("hasContext") ?>
-SELECT * FROM (
-<? endif ?>
+WITH _contacts AS (
   SELECT DISTINCT ON (length(cntct_last_name)=0, length(cntct_first_name)=0,
                       cntct_last_name, cntct_first_name, cntct_number
                       <? if exists("hasContext") ?>, crmrole_name <? endif ?> )
@@ -70,9 +68,9 @@ FROM cntct()
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
 WHERE true
-<? if exists("owner_username") ?> 
+<? if exists("owner_username") ?>
   AND (cntct_owner_username=<? value("owner_username") ?>) 
-<? elseif exists("owner_usr_pattern") ?>
+<? else if exists("owner_usr_pattern") ?>
   AND (cntct_owner_username ~ <? value("owner_usr_pattern") ?>) 
 <? endif ?>
 <? if exists("activeOnly") ?> 
@@ -86,21 +84,6 @@ WHERE true
             WHEN <? value("campaign") ?> =2 THEN cntct_addr_id IS NOT NULL AND addr_allowmktg
             WHEN <? value("campaign") ?> =3 THEN getContactPhone(cntct_id, 'Office') IS NOT NULL AND cntct_email_optin
        ELSE true END
-<? endif ?>
-<? if exists("search_pattern") ?>
-  AND (
- (crmacct_number ~* <? value("search_pattern") ?>)
-  OR (crmacct_name ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
-  OR (phonejson(cntct_id)::TEXT ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntcteml_email,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntct_companyname,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(addr_postalcode,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(addr_country,'') ~* <? value("search_pattern") ?>)
-)
 <? endif ?>
 <? if exists("cntct_id") ?>
   AND (cntct_id=<? value("cntct_id")?>)
@@ -173,22 +156,29 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
   cntct_active, cntct_first_name, cntct_last_name, cntct_owner_username, cntct_title, 
   contact_phone,contact_phone2,contact_phone3, cntct_companyname,
   cntct_email, cntct_webaddr
-<? foreach("char_id_text_list") ?>
-  , charass_alias<? literal("char_id_text_list") ?>.charass_value
-<? endforeach ?>
-<? foreach("char_id_list_list") ?>
-  , charass_alias<? literal("char_id_list_list") ?>.charass_value
-<? endforeach ?>
-<? foreach("char_id_date_list") ?>
-  , charass_alias<? literal("char_id_date_list") ?>.charass_value::date
-<? endforeach ?>
+  <? foreach("char_id_text_list") ?>
+    , charass_alias<? literal("char_id_text_list") ?>.charass_value
+  <? endforeach ?>
+  <? foreach("char_id_list_list") ?>
+    , charass_alias<? literal("char_id_list_list") ?>.charass_value
+  <? endforeach ?>
+  <? foreach("char_id_date_list") ?>
+    , charass_alias<? literal("char_id_date_list") ?>.charass_value::date
+  <? endforeach ?>
 <? endif ?>
  ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0,
          cntct_last_name, cntct_first_name, cntct_number,
          <? if exists("hasContext") ?>crmrole_name,<? endif ?>
          cntcteml_primary desc
+)
+SELECT * FROM _contacts
+<? if exists("search_pattern") ?>
+  WHERE FALSE
+  <? foreach("search_fields") ?>
+    OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
+  <? endforeach ?>
+<? endif ?>
 <? if exists("hasContext") ?>
-) foo
-ORDER BY crmacctcntctass_active DESC, crmrole_sort
+  ORDER BY crmacctcntctass_active DESC, crmrole_sort
 <? endif ?>
 ;

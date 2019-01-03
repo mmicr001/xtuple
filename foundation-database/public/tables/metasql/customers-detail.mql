@@ -4,6 +4,7 @@
 --        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
+WITH _customers AS (
 SELECT DISTINCT ON ( cust_number ) 
   cust_id, cust_custtype_id, 
   cust_active, cust_number, cust_name,
@@ -82,27 +83,6 @@ WHERE true
 <? if not exists("showInactive") ?> 
   AND cust_active 
 <? endif ?>
-<? if exists("search_pattern") ?>
-  AND ((cust_number ~* <? value("search_pattern") ?>)
-       OR (cust_name ~* <? value("search_pattern") ?>)
-       OR (custtype_code ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (phonejson(bill_cntct.cntct_id)::TEXT ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_cntct.cntct_email, '') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_addr.addr_line1,'') || ' ' || COALESCE(bill_addr.addr_line2,'') || ' ' || COALESCE(bill_addr.addr_line3,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_addr.addr_city,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_addr.addr_state,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_addr.addr_postalcode,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(bill_addr.addr_country,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_cntct.cntct_first_name,'') || ' ' || COALESCE(corr_cntct.cntct_last_name,'') ~* <? value("search_pattern") ?>)
-       OR (phonejson(corr_cntct.cntct_id)::TEXT ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_cntct.cntct_email, '') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_addr.addr_line1,'') || ' ' || COALESCE(corr_addr.addr_line2,'') || ' ' || COALESCE(corr_addr.addr_line3,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_addr.addr_city,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_addr.addr_state,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_addr.addr_postalcode,'') ~* <? value("search_pattern") ?>)
-       OR (COALESCE(corr_addr.addr_country,'') ~* <? value("search_pattern") ?>))
-<? endif ?>
 <? if exists("cust_number_pattern") ?>
   AND (cust_number ~* <? value("cust_number_pattern") ?>)
 <? endif ?>
@@ -159,5 +139,13 @@ WHERE true
 	  ELSE cust_creditstatus = 'G' END
 <? endif ?>
 <? literal("charClause") ?>
+)
+SELECT * FROM _customers
+<? if exists("search_pattern") ?>
+  WHERE FALSE
+  <? foreach("search_fields") ?>
+    OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
+  <? endforeach ?>
+<? endif ?>
 ORDER BY cust_number; 
 

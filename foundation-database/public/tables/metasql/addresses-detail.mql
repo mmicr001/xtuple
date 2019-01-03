@@ -4,9 +4,7 @@
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
- <? if exists("hasContext") ?>
-SELECT * FROM (
-<? endif ?>
+WITH _addresses AS (
 SELECT DISTINCT ON (<? if exists("hasContext") ?> crmrole_name, <? endif ?>addr_country, addr_state, addr_city, addr_line1, addr_number) 
   addr_id, addr_line1, addr_line2, addr_line3, 
   regexp_replace(array_agg(crmacct_number)::TEXT, '\{|\}|\"|NULL', '', 'g')  as crmacct,
@@ -112,8 +110,15 @@ GROUP BY addr_id, addr_line1, addr_line2, addr_line3, addr_country, addr_state,
   , charass_alias<? literal("char_id_date_list") ?>.charass_value
 <? endforeach ?>
 ORDER BY addr_country, addr_state, addr_city, addr_line1, addr_number
+)
+SELECT * FROM _addresses
+<? if exists("search_pattern") ?>
+  WHERE FALSE
+  <? foreach("search_fields") ?>
+    OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
+  <? endforeach ?>
+<? endif ?>
 <? if exists("hasContext") ?>
-) foo
 ORDER BY crmrole_sort
 <? endif ?>
 ;
