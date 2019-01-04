@@ -114,6 +114,29 @@ IF EXISTS (SELECT 1
     FROM prjtaskmap
    WHERE charass_target_type = 'TASK' AND charass_target_id = prjtask_id;
 
+  FOR _rec IN SELECT fn.nspname, ft.relname, attname, conname
+                FROM pg_constraint key
+                JOIN pg_class      tab ON confrelid        = tab.oid
+                JOIN pg_namespace  nsp ON tab.relnamespace = nsp.oid
+                JOIN pg_attribute  col ON key.conrelid     = attrelid
+                                      AND attnum IN (SELECT * FROM unnest(conkey))
+                JOIN pg_class      ft  ON attrelid         = ft.oid
+                JOIN pg_namespace  fn  ON ft.relnamespace  = fn.oid
+               WHERE contype = 'f'
+                 AND nsp.nspname = 'public'
+                 AND tab.relname = 'prjtask'
+                 AND confrelid != conrelid
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT IF EXISTS %I;', _rec.nspname, _rec.relname, _rec.conname);
+    RAISE WARNING 'Upgrade the % extension! The constraint % has been dropped',
+                  _rec.nspname, _rec.conname;
+    EXECUTE format('UPDATE %I.%I
+                       SET %I = task_id
+                      FROM prjtaskmap
+                     WHERE %I = prjtask_id;',
+                   _rec.nspname, _rec.relname, _rec.attname, _rec.attname);
+  END LOOP;
+
   DROP TABLE IF EXISTS prjtask CASCADE;
 END IF;
 
@@ -223,6 +246,29 @@ IF EXISTS (SELECT 1
   UPDATE docass SET docass_source_id = task_id
     FROM todotaskmap
    WHERE docass_source_type = 'TODO' AND docass_source_id = todoitem_id;
+
+  FOR _rec IN SELECT fn.nspname, ft.relname, attname
+                FROM pg_constraint key
+                JOIN pg_class      tab ON confrelid        = tab.oid
+                JOIN pg_namespace  nsp ON tab.relnamespace = nsp.oid
+                JOIN pg_attribute  col ON key.conrelid     = attrelid
+                                      AND attnum IN (SELECT * FROM unnest(conkey))
+                JOIN pg_class      ft  ON attrelid         = ft.oid
+                JOIN pg_namespace  fn  ON ft.relnamespace  = fn.oid
+               WHERE contype = 'f'
+                 AND nsp.nspname = 'public'
+                 AND tab.relname = 'prjtask'
+                 AND confrelid != conrelid
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT IF EXISTS %I;', _rec.nspname, _rec.relname, _rec.conname);
+    RAISE WARNING 'Upgrade the % extension! The constraint % has been dropped',
+                  _rec.nspname, _rec.conname;
+    EXECUTE format('UPDATE %I.%I
+                       SET %I = task_id
+                      FROM todotaskmap
+                     WHERE %I = prjtask_id;',
+                   _rec.nspname, _rec.relname, _rec.attname, _rec.attname);
+  END LOOP;
 
   DROP TABLE IF EXISTS todoitem CASCADE;
 END IF;
