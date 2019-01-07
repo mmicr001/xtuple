@@ -70,7 +70,7 @@ FROM cntct()
 WHERE true
 <? if exists("owner_username") ?>
   AND (cntct_owner_username=<? value("owner_username") ?>) 
-<? else if exists("owner_usr_pattern") ?>
+<? elseif exists("owner_usr_pattern") ?>
   AND (cntct_owner_username ~ <? value("owner_usr_pattern") ?>) 
 <? endif ?>
 <? if exists("activeOnly") ?> 
