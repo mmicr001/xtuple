@@ -145,9 +145,9 @@ SELECT   coitem_id AS id, coitem_cohead_id AS altId,
                      WHERE (groupsitem_groups_id=<? value("custgrp_id") ?>)))
   <? elseif exists("custgrp_pattern") ?>
     AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
-                     FROM custgrp, custgrpitem
-                     WHERE ( (groupsitem_groups_id=groupsitem_groups_id)
-                       AND   (groups_name ~ <? value("custgrp_pattern") ?>) )) )
+                       FROM custgrp
+                       JOIN custgrpitem ON groups_id = groupsitem_groups_id
+                      WHERE groups_name ~ <? value("custgrp_pattern") ?>) )
   <? endif ?>
 
   <? if exists("item_id") ?>
