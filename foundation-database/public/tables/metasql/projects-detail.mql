@@ -124,7 +124,7 @@ SELECT *,
            NULL::text AS uom,
            NULL::numeric AS value,
            task_due_date AS due,
-           task_assigned_date AS assigned,
+           MIN(taskass_assigned_date) AS assigned,
            task_start_date AS started,
            task_completed_date AS completed,
            task_hours_budget AS hrs_budget,
@@ -139,9 +139,9 @@ SELECT *,
            2 AS xtindentrole
       FROM task
       JOIN taskass ON task_id = taskass_task_id
-      LEFT OUTER JOIN te.teprjtask ON task_id = teprjtask_prjtask_id
-      LEFT OUTER JOIN custinfo ON (teprjtask_cust_id=cust_id)
-      LEFT OUTER JOIN cntct ON (cust_corrcntct_id=cntct_id)
+      JOIN prj ON task_parent_id = prj_id
+      LEFT OUTER JOIN custinfo ON prj_crmacct_id = cust_crmacct_id
+      LEFT OUTER JOIN cntct ON prj_cntct_id = cntct_id
       LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
      WHERE task_parent_type = 'J'
 
@@ -149,7 +149,7 @@ SELECT *,
               addr_city, addr_state, cntct_name,
               task_number, task_status, taskass_username,
               task_owner_username, task_name, task_descrip,
-              task_due_date, task_assigned_date, task_start_date,
+              task_due_date, task_start_date,
               task_completed_date, task_hours_budget,
               task_hours_actual, task_exp_budget, task_exp_actual
 
