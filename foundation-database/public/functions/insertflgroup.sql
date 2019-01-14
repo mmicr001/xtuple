@@ -164,10 +164,21 @@ BEGIN
                   flitem_custom_source,flitem_showstartprcnt,flitem_showendprcnt,flitem_showdeltaprcnt,
                   flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,
                   accnt_id,accnt_type,
-                  FIRST(trialbal_id) AS first_trialbal_id, LAST(trialbal_id) AS last_trialbal_id,
+                  first_trialbal_id, last_trialbal_id,
                   SUM(trialbal_debits) AS sum_trialbal_debits, SUM(trialbal_credits) AS sum_trialbal_credits, 
-                  LAST(flitem_period_id) AS last_flitem_period_id,
-                  SUM(budget_amount) AS sum_budget_amount, LAST(budget_amount) AS last_budget_amount
+                  last_flitem_period_id,
+                  SUM(budget_amount) AS sum_budget_amount, last_budget_amount
+                  FROM
+                (SELECT flitem_period_id, period_start,flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
+                        flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
+                        flitem_custom_source,flitem_showstartprcnt,flitem_showendprcnt,flitem_showdeltaprcnt,
+                        flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,
+                        accnt_id,accnt_type,trialbal_id,trialbal_debits,
+                        trialbal_credits,budget_amount,
+                        first_value(trialbal_id) OVER w AS first_trialbal_id,
+                        last_value(trialbal_id) OVER w AS last_trialbal_id,
+                        last_value(flitem_period_id) OVER w AS last_flitem_period_id,
+                        last_value(budget_amount) OVER w AS last_budget_amount
                   FROM
                 (SELECT period_id AS flitem_period_id, period_start,flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
                         flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
@@ -193,7 +204,12 @@ BEGIN
                      ON ((budget_accnt_id=accnt_id)
                      AND (budget_period_id=period_id))
              ORDER BY accnt_id, period_start) AS data
-             GROUP BY flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
+             WINDOW w AS (PARTITION BY flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
+                flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
+                flitem_custom_source,flitem_showstartprcnt,flitem_showendprcnt,flitem_showdeltaprcnt,
+                flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,accnt_id,accnt_type ORDER BY period_start RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)) AS ord
+             GROUP BY first_trialbal_id, last_trialbal_id, last_flitem_period_id, last_budget_amount,
+                flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
                 flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
                 flitem_custom_source,flitem_showstartprcnt,flitem_showendprcnt,flitem_showdeltaprcnt,
                 flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,accnt_id,accnt_type) AS agg
