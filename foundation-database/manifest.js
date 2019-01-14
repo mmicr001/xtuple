@@ -226,6 +226,7 @@
     "public/functions/cosbycustomervalue.sql",
     "public/functions/costsbycustomerbyitemsite.sql",
     "public/functions/costsbycustomervalue.sql",
+    "public/functions/countnotnull.sql",
     "public/functions/createaccountingperiod.sql",
     "public/functions/createaccountingyearperiod.sql",
     "public/functions/createapchecks.sql",
