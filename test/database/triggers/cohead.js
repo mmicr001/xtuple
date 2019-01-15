@@ -62,7 +62,7 @@ var _    = require('underscore'),
                  "    cohead_freight, cohead_calcfreight,"                     +
                  "    cohead_shipto_cntct_id, cohead_shipto_cntct_first_name," +
                  "    cohead_shipto_cntct_last_name,"                          +
-                 "    cohead_curr_id, cohead_taxzone_id, cohead_taxtype_id,"   +
+                 "    cohead_curr_id, cohead_taxzone_id,"                      +
                  "    cohead_saletype_id,"                                     +
                  "    cohead_shipvia,"                                         +
                  "    cohead_shipchrg_id,"                                     +
@@ -77,7 +77,7 @@ var _    = require('underscore'),
                  "    cust_salesrep_id, cust_terms_id, 'N',"                   +
                  "    0, TRUE,"                                                +
                  "    cntct_id, cntct_first_name, cntct_last_name,"            +
-                 "    cust_curr_id, shipto_taxzone_id, taxass_taxtype_id,"     +
+                 "    cust_curr_id, shipto_taxzone_id,"                        +
                  "    (SELECT saletype_id FROM saletype"                       +
                  "      WHERE saletype_code='REP'),"                           +
                  "    (SELECT MIN(shipvia_code) FROM shipvia),"                +

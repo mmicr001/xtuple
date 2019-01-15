@@ -110,7 +110,7 @@ BEGIN
                                (cashrcptitem_amount / aropen_amount) AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM gltrans JOIN cashrcpt  ON ((gltrans_source='A/R')
                                                     AND (gltrans_doctype='CR')
                                                     AND (gltrans_misc_id=cashrcpt_id))
@@ -141,7 +141,7 @@ BEGIN
                                (cashrcptitem_amount / aropen_amount) AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM sltrans JOIN cashrcpt  ON ((sltrans_source='A/R')
                                                     AND (sltrans_doctype='CR')
                                                     AND (sltrans_misc_id=cashrcpt_id))
@@ -172,7 +172,7 @@ BEGIN
                                (checkitem_amount / apopen_amount) AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
                                                     AND (gltrans_doctype='CK')
                                                     AND (gltrans_misc_id=checkhead_id))
@@ -193,7 +193,7 @@ BEGIN
                                (checkitem_amount / apopen_amount) AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM sltrans JOIN checkhead ON ((sltrans_source='A/P')
                                                     AND (sltrans_doctype='CK')
                                                     AND (sltrans_misc_id=checkhead_id))
@@ -215,7 +215,7 @@ BEGIN
                                1 AS percentpaid,
                                gltrans_source AS source, gltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM gltrans JOIN checkhead ON ((gltrans_source='A/P')
                                                     AND (gltrans_doctype='CK')
                                                     AND (gltrans_misc_id=checkhead_id))
@@ -235,7 +235,7 @@ BEGIN
                                1 AS percentpaid,
                                sltrans_source AS source, sltrans_doctype AS doctype,
                                tax_sales_accnt_id, tax_dist_accnt_id,
-                               taxdetail_tax, taxhead_docdate
+                               taxdetail_tax, taxhead_date
                         FROM sltrans JOIN checkhead ON ((sltrans_source='A/P')
                                                     AND (sltrans_doctype='CK')
                                                     AND (sltrans_misc_id=checkhead_id))
@@ -250,7 +250,7 @@ BEGIN
                        ) AS data
                   GROUP BY docnumber, custname, currid, distdate, percentpaid,
                            source, doctype,
-                           tax_sales_accnt_id, tax_dist_accnt_id, taxhead_docdate
+                           tax_sales_accnt_id, tax_dist_accnt_id, taxhead_date
       LOOP
         IF (_tax.tax_sales_accnt_id IS NULL OR _tax.tax_dist_accnt_id IS NULL) THEN
           RAISE EXCEPTION 'Cannot post this bank reconciliation due to missing Tax Code G/L Account mappings';
@@ -333,6 +333,8 @@ BEGIN
                                                        AND (gltrans_misc_id=checkhead_id))
                                        JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
                                        JOIN apopen ON (apopen_id=checkitem_apopen_id)
+                                       JOIN vohead ON (vohead_number=apopen_docnumber)
+                                       JOIN vendinfo ON (vend_id=apopen_vend_id)
                                        JOIN taxhead ON taxhead_doc_type = 'VCH'
                                                    AND taxhead_doc_id = vohead_id
                                        JOIN taxline ON taxhead_id = taxline_taxhead_id
@@ -347,6 +349,8 @@ BEGIN
                                                        AND (sltrans_misc_id=checkhead_id))
                                        JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
                                        JOIN apopen ON (apopen_id=checkitem_apopen_id)
+                                       JOIN vohead ON (vohead_number=apopen_docnumber)
+                                       JOIN vendinfo ON (vend_id=apopen_vend_id)
                                        JOIN taxhead ON taxhead_doc_type = 'VCH'
                                                    AND taxhead_doc_id = vohead_id
                                        JOIN taxline ON taxhead_id = taxline_taxhead_id
