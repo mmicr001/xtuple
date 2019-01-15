@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-set -i
 PROG=$(basename $0)
 PROGDIR=$(dirname $0)
 
