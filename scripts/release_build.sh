@@ -25,10 +25,10 @@ XTUPLEDIR=$(pwd)
   module=1                 tag=2 build=3 source=4               runmake=5 edition=6
 declare -a CONFIG=(\
   "xtuple                  default true  https://github.com/xtuple  false skip    " \
-  "private-extensions      default true  git@github.com:xtuple      true  skip    " \
+  "private-extensions      default true  git@github.com:xtuple      false skip    " \
   "qt-client               default true  https://github.com/xtuple  false skip    " \
   "updater                 default true  https://github.com/xtuple  false skip    " \
-  "address-verification    default true  https://github.com/xtuple  true  ^[demp] " \
+  "address-verification    default true  https://github.com/xtuple  false ^[demp] " \
   "connect                 default true  git@github.com:xtuple      true  ^[e]    " \
   "enhanced-pricing        default true  git@github.com:xtuple      true  ^[e]    " \
   "fixed-assets            default true  https://github.com/xtuple  true  ^[e]    " \
@@ -400,23 +400,37 @@ awk '/databaseServer: {/,/}/ {
     { print
     }' node-datasource/config.js > scripts/output/config.js
 
+for MODULE in $(configKeys) ; do
+  if [ $(getConfig $MODULE build) = 'true' ] &&
+     [ $(getConfig $MODULE runmake) = 'true' ] ; then
+    cd $XTUPLEDIR/../$MODULE
+    for MAKEFILE in $(find * -name Makefile | \
+                      egrep -v 'dict|node_modules|node-datasource|test|updatescripts') ; do
+      pushd $(dirname $MAKEFILE)
+      if  $TRANSLATIONS ; then make ; else make no-translations || make ; fi
+      popd
+    done
+    mkdir $XTUPLEDIR/scripts/output/$MODULE
+    for PACKAGEXML in $(find * -name package.xml | \
+                        egrep -v 'updatescripts') ; do
+      cp $(find * -name $(packageInfo name $PACKAGEXML)-$(packageInfo version $PACKAGEXML).gz) \
+         $XTUPLEDIR/scripts/output/$MODULE
+    done
+    cp $XTUPLEDIR/scripts/output/$MODULE/* $XTUPLEDIR/scripts/output
+  fi
+done
+
+cd $XTUPLEDIR
+
 for EDITION in $EDITIONS ; do
   for DATABASE in $DATABASES ; do
     DB=${EDITION}_${DATABASE}
     for MODULE in $(configKeys) ; do
       if [[ ${EDITION} =~ $(getConfig $MODULE edition) ]] &&
          [ $(getConfig $MODULE build) = 'true' ] &&
-         [ -d $XTUPLEDIR/../$MODULE/packages ] ; then
-        cd $XTUPLEDIR/../$MODULE
-        for MAKEFILE in "$(find * -name Makefile | \
-                           egrep -v 'dict|node_modules|node-datasource|test|updatescripts')" ; do
-          pushd $(dirname $MAKEFILE)
-          if  $TRANSLATIONS ; then make ; else make no-translations || make ; fi
-          popd
-        done
-        for PACKAGEXML in "$(find * -name package.xml)" ; do
-          ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d $DB -autorun -D \
-                                 -f packages/$(packageInfo name $PACKAGEXML)-$(packageInfo version $PACKAGEXML).gz
+         [ $(getConfig $MODULE runmake) = 'true' ] ; then
+        for PACKAGE in $XTUPLEDIR/scripts/output/$MODULE/* ; do
+          ../updater/bin/updater -h $HOST -U $ADMIN -p $PGPORT -d $DB -autorun -D -f $PACKAGE
         done
       fi
     done
