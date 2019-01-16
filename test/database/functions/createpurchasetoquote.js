@@ -4,7 +4,7 @@ var _      = require('underscore'),
 
 (function () {
   'use strict';
-  describe('convertPurchaseToQuote()', function () {
+  describe('createPurchaseToQuote()', function () {
 
     var loginData  = require('../../lib/login_data.js').data,
         datasource = require('../../../node-datasource/lib/ext/datasource').dataSource,
@@ -215,7 +215,6 @@ var _      = require('underscore'),
               + "       quitem_price_uom_id,"
               + "       quitem_price_invuomratio,"
               + "       quitem_promdate,"
-              + "       quitem_taxtype_id,"
               + "       quitem_itemsrc_id"
               + ") SELECT "
               +         quhead_id + ","
@@ -241,7 +240,6 @@ var _      = require('underscore'),
               + "       item_price_uom_id,"
               + "       itemuomtouomratio(item_id, item_inv_uom_id, item_price_uom_id),"
               + "       quhead_expire,"
-              + "       quhead_taxtype_id,"
               + "       itemsrc_id"
               + "  FROM quhead"
               + "  JOIN itemsite ON quhead_warehous_id = itemsite_warehous_id"

@@ -375,7 +375,7 @@ BEGIN
 
   END IF;  -- Order Header population
   IF _soheadid IS NULL THEN
-    RAISE EXCEPTION 'Could not find sales order to copy [xtuple: copysoheader, -1, %]', _pSoheadid;
+    RAISE EXCEPTION 'Could not find sales order to copy [xtuple: copysoheader, -1, %]', pSoheadid;
   END IF;
 
   PERFORM copyTax('S', pSoheadid, 'S', _soheadid);

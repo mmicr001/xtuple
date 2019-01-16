@@ -4,7 +4,7 @@ var _      = require('underscore'),
 
 (function () {
   'use strict';
-  describe('convertPurchaseToSale()', function () {
+  describe('createPurchaseToSale()', function () {
 
     var loginData  = require('../../lib/login_data.js').data,
         datasource = require('../../../node-datasource/lib/ext/datasource').dataSource,
@@ -173,8 +173,7 @@ var _      = require('underscore'),
               + "       coitem_qty_uom_id,"
               + "       coitem_qty_invuomratio,"
               + "       coitem_price_uom_id,"
-              + "       coitem_price_invuomratio,"
-              + "       coitem_taxtype_id"
+              + "       coitem_price_invuomratio"
               + ") SELECT "
               +         cohead_id + ","
               + "       (SELECT COALESCE(MIN(coitem_linenumber), 0) + 1"
@@ -196,8 +195,7 @@ var _      = require('underscore'),
               + "       item_inv_uom_id,"
               + "       1,"
               + "       item_price_uom_id,"
-              + "       itemuomtouomratio(item_id, item_inv_uom_id, item_price_uom_id),"
-              + "       cohead_taxtype_id"
+              + "       itemuomtouomratio(item_id, item_inv_uom_id, item_price_uom_id)"
               + "  FROM cohead"
               + "  JOIN itemsite ON cohead_warehous_id = itemsite_warehous_id"
               + "  JOIN item     ON itemsite_item_id   = item_id"

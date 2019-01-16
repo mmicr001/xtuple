@@ -31,15 +31,18 @@ var _      = require('underscore'),
     });
 
     it("needs a succeeding period record", function(done) {
-      var sql = "SELECT period_id" +
-                " FROM period" +
-                " WHERE NOT period_closed" +
-                " AND NOT EXISTS(" +
-                " SELECT 1" +
-                " FROM gltrans" +
-                " WHERE gltrans_date=period_start" +
-                " OR gltrans_date=period_end)" +
-                " LIMIT 1;";
+      var sql = "SELECT period_id FROM period this"
+              + " WHERE NOT period_closed"
+              + "   AND NOT EXISTS(SELECT 1 FROM gltrans"
+              + "                   WHERE gltrans_date=period_start"
+              + "                      OR gltrans_date=period_end)"
+              + "   AND EXISTS(SELECT 1 FROM gltrans"
+              + "               WHERE gltrans_date BETWEEN period_start AND period_end)"
+              + "   AND EXISTS(SELECT 1 FROM period older"
+              + "               WHERE older.period_start < this.period_start)"
+              + "   AND EXISTS(SELECT 1 FROM period newer"
+              + "               WHERE newer.period_start > this.period_start)"
+              + " LIMIT 1;";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
         periodsucceed = res.rows[0].period_id;
@@ -48,11 +51,10 @@ var _      = require('underscore'),
     });
 
     it("needs a failing start date", function(done) {
-      var sql = "SELECT period_start-1 AS date" +
-                " FROM period" +
-                " WHERE period_id=$1",
-          cred = _.extend({}, adminCred,
-                          { parameters: [ periodsucceed ] });
+      var sql = "SELECT max(period_end) - interval '1 day' AS date" +
+                "  FROM period" +
+                " WHERE period_end < (SELECT period_start FROM period WHERE period_id=$1);",
+          cred = _.extend({}, adminCred, { parameters: [ periodsucceed ] });
 
       datasource.query(sql, cred, function (err, res) {
         assert.isNull(err);
@@ -62,10 +64,10 @@ var _      = require('underscore'),
     });
 
     it("needs another failing start date", function(done) {
-      var sql = "SELECT MIN(gltrans_date)+1 AS date" +
-                " FROM period" +
-                " JOIN gltrans ON gltrans_date BETWEEN period_start AND period_end" +
-                " WHERE period_id=$1",
+      var sql = "SELECT MIN(gltrans_date) + 1 AS date" +
+                "  FROM period" +
+                "  JOIN gltrans ON gltrans_date BETWEEN period_start AND period_end" +
+                " WHERE period_id = $1",
           cred = _.extend({}, adminCred,
                           { parameters: [ periodsucceed ] });
 
@@ -91,9 +93,9 @@ var _      = require('underscore'),
     });
 
     it("needs a failing end date", function(done) {
-      var sql = "SELECT period_end+1 AS date" +
-                " FROM period" +
-                " WHERE period_id=$1",
+      var sql = "SELECT MIN(period_start) + 1 AS date" +
+                "  FROM period" +
+                " WHERE period_start > (SELECT period_end FROM period WHERE period_id = $1);",
           cred = _.extend({}, adminCred,
                           { parameters: [ periodsucceed ] });
 
