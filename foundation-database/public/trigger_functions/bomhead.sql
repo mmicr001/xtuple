@@ -2,7 +2,7 @@ SELECT dropIfExists('TRIGGER','bomheadTrigger');
 SELECT dropIfExists('FUNCTION','_bomheadTrigger()');
 
 CREATE OR REPLACE FUNCTION _bomheadBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 -- Privilege Checks
@@ -27,7 +27,7 @@ CREATE TRIGGER bomheadBeforeTrigger BEFORE INSERT OR UPDATE ON bomhead
 
 
 CREATE OR REPLACE FUNCTION _bomheadAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   -- Changelog
@@ -62,7 +62,7 @@ CREATE TRIGGER bomheadAfterTrigger AFTER INSERT OR UPDATE ON bomhead
 
 
 CREATE OR REPLACE FUNCTION _bomheadBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 BEGIN

@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _invcheadBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
@@ -89,7 +89,7 @@ CREATE TRIGGER invcheadBeforeTrigger
   EXECUTE PROCEDURE _invcheadBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _invcheadTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
@@ -197,7 +197,7 @@ CREATE TRIGGER invcheadtrigger
 
 CREATE OR REPLACE FUNCTION _invcheadaftertrigger()
   RETURNS trigger AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   DECLARE
     _cohead_id INTEGER;
@@ -228,7 +228,7 @@ CREATE TRIGGER invcheadaftertrigger
   EXECUTE PROCEDURE _invcheadaftertrigger();
 
 CREATE OR REPLACE FUNCTION _invcheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

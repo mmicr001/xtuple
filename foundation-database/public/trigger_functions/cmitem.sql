@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _cmitemBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF NOT checkPrivilege('MaintainCreditMemos') THEN
@@ -18,7 +18,7 @@ SELECT dropIfExists('TRIGGER', 'cmitemBeforeDeleteTrigger');
 CREATE TRIGGER cmitemBeforeDeleteTrigger BEFORE DELETE ON cmitem FOR EACH ROW EXECUTE PROCEDURE _cmitemBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _cmitemBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _id INTEGER;
@@ -52,7 +52,7 @@ CREATE TRIGGER cmitembeforetrigger
 
 
 CREATE OR REPLACE FUNCTION _cmitemTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _ext NUMERIC;

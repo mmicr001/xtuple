@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS araging(date);
 DROP FUNCTION IF EXISTS araging(date, boolean);
 
 CREATE OR REPLACE FUNCTION araging(pAsOfDate DATE, pUseDocDate BOOLEAN, pConvBaseCurr BOOLEAN DEFAULT true) RETURNS SETOF araging AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 -- @param pConvBaseCurr if true then convert all amounts to base currency using aropen_docdate to ensure the same exchange rate
 --                      if false then convert to the customer's currency using aropen_docdate to ensure the same exchange rate
