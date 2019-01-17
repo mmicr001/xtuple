@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION formatDate(TIMESTAMP WITH TIME ZONE) RETURNS TEXT IMMUTABLE AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   SELECT TO_CHAR($1, COALESCE((SELECT locale_dateformat
                                  FROM locale
@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION formatDate(TIMESTAMP WITH TIME ZONE) RETURNS TEXT IMM
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION formatDate(DATE) RETURNS TEXT IMMUTABLE AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   SELECT TO_CHAR($1, COALESCE((SELECT locale_dateformat
                                  FROM locale
@@ -23,7 +23,7 @@ $$ LANGUAGE sql;
 
 --DROP FUNCTION IF EXISTS formatDate(DATE, TEXT);
 CREATE OR REPLACE FUNCTION formatDate(pDate DATE, pString TEXT) RETURNS TEXT IMMUTABLE AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF pDate = startOfTime() OR pDate = endOfTime() OR pDate IS NULL THEN

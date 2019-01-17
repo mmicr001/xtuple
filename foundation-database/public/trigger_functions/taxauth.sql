@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _taxauthBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
@@ -33,7 +33,7 @@ CREATE TRIGGER taxauthBeforeTrigger BEFORE INSERT OR UPDATE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthAfterTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'INSERT') THEN
@@ -120,7 +120,7 @@ CREATE TRIGGER taxauthAfterTrigger AFTER INSERT OR UPDATE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
@@ -139,7 +139,7 @@ CREATE TRIGGER taxauthBeforeDeleteTrigger BEFORE DELETE ON taxauth
        FOR EACH ROW EXECUTE PROCEDURE _taxauthBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _taxauthAfterDeleteTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (EXISTS(SELECT 1

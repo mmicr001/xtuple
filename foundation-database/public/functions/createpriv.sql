@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS createPriv(text, text, text);
 
 CREATE OR REPLACE FUNCTION createPriv(pModule text, pName text, pDesc text, pSeq integer = NULL, pPackage text = NULL) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _id     INTEGER;

@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   xTuple Postbooks - Business Management System Framework
-// Copyright: ©2011-2018 OpenMFG LLC, d/b/a xTuple
+// Copyright: ©2011-2019 OpenMFG LLC, d/b/a xTuple
 // ==========================================================================
 
 /**

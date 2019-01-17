@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _prjBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
@@ -46,7 +46,7 @@ CREATE TRIGGER prjbeforedeletetrigger
   EXECUTE PROCEDURE _prjBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _prjAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -69,7 +69,7 @@ CREATE TRIGGER prjAfterDeleteTrigger
   EXECUTE PROCEDURE _prjAfterDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _prjBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -92,7 +92,7 @@ CREATE TRIGGER prjbeforetrigger
   EXECUTE PROCEDURE _prjBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _prjAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 

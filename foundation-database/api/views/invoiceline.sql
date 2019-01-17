@@ -40,7 +40,7 @@ populated';
 
 CREATE OR REPLACE FUNCTION insertInvoiceLineItem(api.invoiceline) RETURNS BOOLEAN AS
 $insertInvoiceLineItem$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 	pNew ALIAS FOR $1;
@@ -143,7 +143,7 @@ $insertInvoiceLineItem$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION updateInvoiceLineItem(api.invoiceline, api.invoiceline) RETURNS BOOLEAN AS
 $updateInvoiceLineItem$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 	pNew ALIAS FOR $1;

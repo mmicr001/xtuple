@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION postInvoice(pInvcheadid INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN postInvoice(pInvcheadid, fetchJournalNumber('AR-IN'));
@@ -8,7 +8,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION postInvoice(pInvcheadid INTEGER,
                                        pJournalNumber INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocSeries INTEGER;
@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION postInvoice(pInvcheadid INTEGER,
                                        pJournalNumber INTEGER,
                                        pItemlocSeries INTEGER,
                                        pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _aropenid             INTEGER;

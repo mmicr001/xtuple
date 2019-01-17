@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION packageIsEnabled(pName TEXT) RETURNS BOOLEAN AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   SELECT EXISTS(SELECT 1
                  FROM pg_inherits
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION packageIsEnabled(pName TEXT) RETURNS BOOLEAN AS $$
 $$ LANGUAGE sql STABLE;
 
 CREATE OR REPLACE FUNCTION packageIsEnabled(pId INTEGER) RETURNS BOOLEAN AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
   SELECT packageIsEnabled(pkghead_name)
     FROM pkghead

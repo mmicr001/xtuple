@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS public.calcinvoiceamt(integer, text);
 
 CREATE OR REPLACE FUNCTION calcInvoiceAmt(pInvcheadid INTEGER) RETURNS NUMERIC STABLE AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -13,7 +13,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION calcInvoiceAmt(pInvcheadid INTEGER,
                                           pType TEXT,
                                           pInvcitemid INTEGER DEFAULT NULL) RETURNS NUMERIC STABLE AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _subtotal NUMERIC := 0.0;

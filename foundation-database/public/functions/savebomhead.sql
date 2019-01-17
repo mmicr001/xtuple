@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS saveBomHead(INTEGER, TEXT, DATE, TEXT, NUMERIC, NUMERIC) CASCADE;
 CREATE OR REPLACE FUNCTION saveBomHead(pItemid INTEGER, pRevision TEXT, pRevisionDate DATE, pDocumentNumber TEXT, pBatchSize NUMERIC, pRequiredQtyPer NUMERIC, pStatus TEXT DEFAULT NULL)
   RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _seq INTEGER;
