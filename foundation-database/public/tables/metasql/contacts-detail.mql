@@ -1,7 +1,7 @@
 -- Group: contacts
 -- Name: detail
 -- Notes: 
---        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 WITH _contacts AS (
@@ -47,8 +47,9 @@ FROM cntct()
   LEFT OUTER JOIN crmacctcntctass ON (crmacctcntctass_cntct_id=cntct_id)
   LEFT OUTER JOIN crmacct ON (crmacctcntctass_crmacct_id=crmacct_id) 
 <? endif ?>
-  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
-  LEFT OUTER JOIN state ON state_abbr=addr_state
+  LEFT OUTER JOIN addr ON cntct_addr_id=addr_id
+  LEFT OUTER JOIN country ON addr_country=country_name
+  LEFT OUTER JOIN state ON addr_state=state_abbr AND state_country_id=country_id
   LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='CNTCT') 
