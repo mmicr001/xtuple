@@ -1,5 +1,5 @@
-SELECT dropIfExists('TRIGGER', 'voheadBeforeTrigger');
-SELECT dropIfExists('TRIGGER', 'voheadAfterTrigger');
+DROP TRIGGER IF EXISTS voheadBeforeTrigger ON public.vohead;
+DROP TRIGGER IF EXISTS voheadAfterTrigger  ON public.vohead;
 
 CREATE OR REPLACE FUNCTION _voheadBeforeTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
@@ -11,7 +11,6 @@ DECLARE
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     IF (OLD.vohead_posted) THEN
-      -- Cannot delete a posted voucher
       RAISE EXCEPTION 'Cannot delete a posted voucher';
     END IF;
 
@@ -59,7 +58,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER voheadBeforeTrigger
   BEFORE INSERT OR UPDATE OR DELETE
@@ -98,7 +97,7 @@ BEGIN
   END IF;
 
   IF (TG_OP = 'UPDATE') THEN
-    -- Touch any Misc Tax Distributions so voheadtax is recalculated
+    -- Touch any Misc Tax Distributions so voucher tax is recalculated
     IF (NEW.vohead_docdate <> OLD.vohead_docdate) THEN
       UPDATE vodist SET vodist_vohead_id=NEW.vohead_id
       WHERE ( (vodist_vohead_id=OLD.vohead_id)
@@ -108,7 +107,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER voheadAfterTrigger
   AFTER INSERT OR UPDATE OR DELETE
@@ -136,7 +135,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-SELECT dropIfExists('TRIGGER', 'voheadAfterDeleteTrigger');
+DROP TRIGGER IF EXISTS voheadAfterDeleteTrigger ON public.vohead;
 CREATE TRIGGER voheadAfterDeleteTrigger
   AFTER DELETE
   ON vohead

@@ -5,8 +5,7 @@ var _      = require("underscore"),
 (function () {
   "use strict";
   var group  = "bookings",
-      name   = "detail",
-      target = 'SO'       // charass_target_type
+      name   = "detail"
       ;
 
   describe(group + '-' + name + ' mql', function () {
@@ -18,7 +17,7 @@ var _      = require("underscore"),
         testcase   = []
         ;
 
-    it("needs the query", function (done) {
+    before("needs the query", function (done) {
       var sql = "select metasql_query from metasql"        +
                 " where metasql_group = '"  + group + "'"  +
                 "   and metasql_name  = '"  + name  + "'"  +
@@ -32,12 +31,13 @@ var _      = require("underscore"),
       });
     });
 
+    //before
     it.skip("needs relevant characteristics", function (done) {
       var sql = "select min(char_id) as char_id, char_type"     +
                 "  from char"                                   +
                 "  join charuse on char_id = charuse_char_id"   +
                 " where char_search"                            +
-                "   and charuse_target_type = '" + target + "'" +
+                "   and charuse_target_type = 'SO'"             +
                 " group by char_type;";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
@@ -75,43 +75,41 @@ var _      = require("underscore"),
       });
     });
 
-    // TODO: need to add charClause and char_id_{date,list,text}_list
-    it.skip("should succeed with various characteristics", function (done) {
-      _.each([ constants,
-             _.extend({}, constants, { cohead_id:          3196 }),
-             _.extend({}, constants, { custgrp:          'true' }),
-             _.extend({}, constants, { custgrp_id:           25 }),
-             _.extend({}, constants, { custgrp_pattern: '[a-m]' }),
-             _.extend({}, constants, { custtype_id:          19 }),
-             _.extend({}, constants, { custtype_pattern: 'MAL-' }),
-             _.extend({}, constants, { item_id:             309 }),
-             _.extend({}, constants, { openOnly:         'true' }),
-             _.extend({}, constants, { orderByOrderdate: 'true' }),
-             _.extend({}, constants, { orderByScheddate: 'true' }),
-             _.extend({}, constants, { poNumber:   'ABCDEFGHIJ' }),
-             _.extend({}, constants, { prodcat_id:           30 }),
-             _.extend({}, constants, { prodcat_pattern: 'CLASS' }),
-             _.extend({}, constants, { salesrep_id:          30 }),
-             _.extend({}, constants, { saletype_id:           2 }),
-             _.extend({}, constants, { shipto_id:            31 }),
-             _.extend({}, constants, { startDate:  '2016-01-01' }),
-             _.extend({}, constants, { warehous_id:          35 })
-        ], function (p, i) {
+    // TODO: add charClause and char_id_{date,list,text}_list
+    _.each([ constants,
+           _.extend({}, constants, { cohead_id:          3196 }),
+           _.extend({}, constants, { custgrp:          'true' }),
+           _.extend({}, constants, { custgrp_id:           25 }),
+           _.extend({}, constants, { custgrp_pattern: '[a-m]' }),
+           _.extend({}, constants, { custtype_id:          19 }),
+           _.extend({}, constants, { custtype_pattern: 'MAL-' }),
+           _.extend({}, constants, { item_id:             309 }),
+           _.extend({}, constants, { openOnly:         'true' }),
+           _.extend({}, constants, { orderByOrderdate: 'true' }),
+           _.extend({}, constants, { orderByScheddate: 'true' }),
+           _.extend({}, constants, { poNumber:   'ABCDEFGHIJ' }),
+           _.extend({}, constants, { prodcat_id:           30 }),
+           _.extend({}, constants, { prodcat_pattern: 'CLASS' }),
+           _.extend({}, constants, { salesrep_id:          30 }),
+           _.extend({}, constants, { saletype_id:           2 }),
+           _.extend({}, constants, { shipto_id:            31 }),
+           _.extend({}, constants, { startDate:  '2016-01-01' }),
+           _.extend({}, constants, { warehous_id:          35 })
+      ], function (p) {
+        it("should succeed with various characteristics", function (done) {
           var sql = "do $$"                 +
                     "var params = { params: " + JSON.stringify(p) + "}," +
                     "    mql    = \""         + mql              + "\"," +
                     "    sql    = XT.MetaSQL.parser.parse(mql, params)," +
                     "    rows   = plv8.execute(sql);"                    +
                     "$$ language plv8;";
-console.log(i, sql);
-          datasource.query(sql, adminCred, function (err /*, res*/) {
+          datasource.query(sql, adminCred, function (err, res) {
             assert.isNull(err);
-            if (i >= testcase.length) { done(); }
+            done();
           });
+        });
       });
-      //done();
-    });
 
   });
 
-}());
+})();
