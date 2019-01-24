@@ -1,6 +1,6 @@
 -- Before trigger
 CREATE OR REPLACE FUNCTION _cntctTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -45,7 +45,7 @@ CREATE TRIGGER cntcttrigger
 
 -- Before Delete trigger
 CREATE OR REPLACE FUNCTION _cntctTriggerBeforeDelete() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
@@ -90,7 +90,7 @@ CREATE TRIGGER cntcttriggerbeforedelete
 
 -- After Delete trigger
 CREATE OR REPLACE FUNCTION _cntctAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -118,7 +118,7 @@ CREATE TRIGGER cntctAfterDeleteTrigger
 
 -- After trigger
 CREATE OR REPLACE FUNCTION _cntctTriggerAfter() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntctemlid INTEGER;

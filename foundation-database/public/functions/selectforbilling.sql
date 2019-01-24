@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSoitemid	ALIAS FOR $1;
@@ -33,7 +33,7 @@ DROP FUNCTION IF EXISTS selectforbilling(integer, numeric, boolean, integer);
 CREATE OR REPLACE FUNCTION selectforbilling(integer, numeric, boolean, integer, text default null)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSoitemid	ALIAS FOR $1;

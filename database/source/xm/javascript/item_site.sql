@@ -2,7 +2,7 @@
 delete from xt.js where js_context='xtuple' and js_type = 'item_site';
 
 select xt.install_js('XM','ItemSite','xtuple', $$
-  /* Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+  /* Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
      See www.xm.ple.com/CPAL for the full text of the software license. */
 
 (function () {

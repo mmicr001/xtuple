@@ -1,6 +1,6 @@
 
 CREATE OR REPLACE FUNCTION calcShipFreight(integer) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pShipheadId ALIAS FOR $1;
@@ -72,7 +72,7 @@ BEGIN
                     COALESCE((SELECT SUM(shiphead_freight)
                               FROM shiphead
                               WHERE (shiphead_order_id = _shipment.shiphead_order_id)
-                                AND (shiphead_shipped='true')), 0) ) INTO _result;
+                                AND (shiphead_id <> pShipheadId)), 0) ) INTO _result;
       RETURN _result;
     END IF;
 

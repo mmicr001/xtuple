@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _aropenTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _openAmount NUMERIC;
@@ -109,7 +109,7 @@ BEGIN
   END IF;
 
   -- Check that 'paid' is a proper value
-  IF (NEW.aropen_paid < 0 OR NEW.aropen_paid>NEW.aropen_amount) THEN
+  IF (NEW.aropen_amount > 0 and (NEW.aropen_paid < 0 OR NEW.aropen_paid>NEW.aropen_amount)) THEN
     RAISE EXCEPTION 'Invalid amount for paid column [xtuple: _aropenTrigger, -5]';
   END IF;
 
@@ -211,7 +211,7 @@ DROP TRIGGER IF EXISTS aropenTrigger ON aropen;
 CREATE TRIGGER aropenTrigger BEFORE INSERT OR UPDATE ON aropen FOR EACH ROW EXECUTE PROCEDURE _aropenTrigger();
 
 CREATE OR REPLACE FUNCTION _aropenAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _openAmount NUMERIC;

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION getItemSrcId(pItemNumber TEXT,
                                         pVendNumber TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION getItemSrcId(pItemNumber TEXT,
                                         pVendNumber TEXT,
                                         pEffective DATE,
                                         pExpires DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
@@ -55,7 +55,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION getItemSrcId(pItemNumber TEXT,
                                         pVendNumber TEXT,
                                         pVendItemNumber TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
@@ -85,7 +85,7 @@ CREATE OR REPLACE FUNCTION getItemSrcId(pItemNumber TEXT,
                                         pVendItemNumber TEXT,
                                         pEffective DATE,
                                         pExpires DATE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;

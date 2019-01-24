@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION listprice(pItemid INTEGER,
                                      pShiptoid INTEGER DEFAULT (NULL),
                                      pSiteid INTEGER DEFAULT (NULL),
                                      pAsOf DATE DEFAULT CURRENT_DATE) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _ips RECORD;

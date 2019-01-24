@@ -1,7 +1,7 @@
 SELECT dropIfExists('TRIGGER', 'prTrigger');
 
 CREATE OR REPLACE FUNCTION _prTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   --- clear the number from the issue cache

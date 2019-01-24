@@ -1,12 +1,13 @@
 -- Group: documents
 -- Name: list
 -- Notes: used by documents tab
---        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 SELECT
-  id, target_number, target_type,
-  target_id AS target_number_xtidrole, source_type, source_id, purpose,
+  id, target_id AS altid,
+  CASE WHEN target_type IN('URL', 'FILE') THEN target_id::TEXT ELSE target_number END AS target_number,
+  target_type, target_id AS target_number_xtidrole, source_type, source_id, purpose,
   name, description, notes,
   hasPrivOnObject('view', target_type, target_id) AS canview,
   hasPrivOnObject('edit', target_type, target_id) AS canedit,

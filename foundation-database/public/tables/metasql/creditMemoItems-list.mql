@@ -1,7 +1,7 @@
 -- Group: creditMemoItems
 -- Name:  list
 -- Notes: -- used by creditMemo
---        Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+--        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 SELECT cmitem_id, cmitem_linenumber, COALESCE(item_number, cmitem_number) AS item_number,
        CASE WHEN (item_number IS NOT NULL) THEN (item_descrip1 || ' ' || item_descrip2) 
