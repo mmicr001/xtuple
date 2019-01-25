@@ -298,3 +298,4 @@ SELECT 'CR',
        0.0,
        NULL
   FROM cashrcpt;
+GRANT ALL ON docitem TO xtrole;

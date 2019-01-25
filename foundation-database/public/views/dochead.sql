@@ -362,3 +362,4 @@ SELECT 'CR',
        FALSE,
        NULL
   FROM cashrcpt;
+GRANT ALL ON dochead TO xtrole;
