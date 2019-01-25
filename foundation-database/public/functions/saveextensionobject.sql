@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION saveExtensionObject(pType TEXT, pGroup TEXT, pName TEXT, pGrade INTEGER, pSource TEXT, pNotes TEXT, pEnabled BOOLEAN, pSchema TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _schema TEXT;

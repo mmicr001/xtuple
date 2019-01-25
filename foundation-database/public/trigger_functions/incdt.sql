@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _incdtBeforeTrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check        BOOLEAN;
@@ -37,7 +37,7 @@ CREATE TRIGGER incdtbeforetrigger
   EXECUTE PROCEDURE _incdtBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _incdtBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
@@ -102,7 +102,7 @@ CREATE TRIGGER incdtbeforedeletetrigger
   EXECUTE PROCEDURE _incdtBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _incdttrigger() RETURNS "trigger" AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _r		RECORD;
@@ -318,7 +318,7 @@ CREATE TRIGGER incdttrigger
   EXECUTE PROCEDURE _incdttrigger();
 
 CREATE OR REPLACE FUNCTION _incdtAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 

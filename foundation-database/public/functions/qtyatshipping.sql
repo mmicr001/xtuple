@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION qtyAtShipping(plineitemid INTEGER) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN qtyAtShipping('SO', plineitemid);
@@ -8,7 +8,7 @@ $$ LANGUAGE plpgsql STABLE;
 
 CREATE OR REPLACE FUNCTION qtyAtShipping(pordertype TEXT,
                                          plineitemid INTEGER) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   RETURN qtyAtShipping(pordertype, plineitemid, 'U');
@@ -18,7 +18,7 @@ $$ LANGUAGE plpgsql STABLE;
 CREATE OR REPLACE FUNCTION qtyAtShipping(pordertype TEXT,
                                          plineitemid INTEGER,
                                          pstatus TEXT) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _qty         NUMERIC  := 0.0;

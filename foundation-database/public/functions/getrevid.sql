@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION getRevId(pType       text,
                                     pItemNumber text,
                                     pRevision   text) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;

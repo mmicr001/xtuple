@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION getOpenShipment(pOrderType TEXT,
                                            pOrderId INTEGER,
                                            pWarehousId INTEGER) RETURNS TEXT AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _result TEXT := '';
@@ -40,7 +40,7 @@ $$ LANGUAGE 'plpgsql' STABLE;
 CREATE OR REPLACE FUNCTION getOpenShipmentId(pOrderType TEXT,
                                              pOrderId INTEGER,
                                              pWarehousId INTEGER) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _result INTEGER := -1;
