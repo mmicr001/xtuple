@@ -147,7 +147,7 @@ BEGIN
   _numlines := COALESCE(array_length(pLines, 1), 0);
   _includemisc := pMiscTaxtypeId IS NOT NULL;
 
-  _taxtypes := pTaxTypes || pFreightTaxtypeId;
+  _taxtypes := pTaxTypes || COALESCE(pFreightTaxtypeId, getfreighttaxtypeid());
   IF _includemisc THEN
     _taxtypes := _taxtypes || pMiscTaxtypeId;
   END IF;
