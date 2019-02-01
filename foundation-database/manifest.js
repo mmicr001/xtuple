@@ -1437,7 +1437,7 @@
     "api/views/quotelinechar.sql",
     "api/views/quotelinecomment.sql",
     "api/views/salescredit.sql",
-    "api/views/saleshistory.sql",
+    "api/views/api_saleshistory.sql",
     "api/views/salesline.sql",
     "api/views/saleslinechar.sql",
     "api/views/saleslinecomment.sql",

@@ -9,7 +9,9 @@ SELECT *,
   'curr' AS qty_xtnumericrole,
   'curr' AS value_xtnumericrole,
   CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'error' END AS hrs_balance_qtforegroundrole,
-  CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'error' END AS exp_balance_qtforegroundrole
+  CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'error' END AS exp_balance_qtforegroundrole,
+  0 AS hrs_budget_xttotalrole, 0 AS hrs_actual_xttotalrole, 0 AS hrs_balance_xttotalrole,
+  0 AS exp_budget_xttotalrole, 0 AS exp_actual_xttotalrole, 0 AS exp_balance_xttotalrole
 FROM (
 SELECT prj_id AS id,
        1 AS type,
@@ -17,10 +19,10 @@ SELECT prj_id AS id,
        0 AS section,
        NULL  AS section_qtdisplayrole,
        prj_number AS name,
-       CASE
-           WHEN prj_status = 'C' THEN <? value('complete') ?>
-           WHEN prj_status = 'O' THEN <? value('inprocess') ?>
-           WHEN prj_status = 'P' THEN <? value('planning') ?>
+       CASE prj_status WHEN 'C' THEN <? value('complete') ?>
+                       WHEN 'O' THEN <? value('inprocess') ?>
+                       WHEN 'P' THEN <? value('planning') ?>
+                       ELSE prj_status
        END AS status,
        prjtype_code AS project_type,
        prj_name AS item,
@@ -42,8 +44,8 @@ SELECT prj_id AS id,
        NULL::numeric AS exp_budget,
        NULL::numeric AS exp_actual,
        NULL::numeric AS exp_balance,
-       CASE WHEN (prj_status = 'O' AND prj_due_date < current_date) THEN 'error'
-         WHEN (prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning'
+       CASE WHEN prj_status = 'O' AND prj_due_date < current_date THEN 'error'
+            WHEN prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval THEN 'warning'
          END AS due_qtforegroundrole,
        0 AS xtindentrole
   FROM prj
@@ -115,7 +117,7 @@ SELECT task_id AS id,
        NULL::text AS uom,
        NULL::numeric AS value,
        task_due_date AS due,
-       (SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id=task_id) AS assigned,
+       MIN(taskass_assigned_date) AS assigned,
        task_start_date AS started,
        task_completed_date AS completed,
        task_hours_budget AS hrs_budget,
@@ -124,15 +126,16 @@ SELECT task_id AS id,
        task_exp_budget AS exp_budget,
        task_exp_actual AS exp_actual,
        (task_exp_budget-task_exp_actual) AS exp_balance,
-       CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'error' 
-         WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning' 
+       CASE WHEN task_status = 'O' AND task_due_date < current_date THEN 'error'
+            WHEN task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval THEN 'warning'
          END AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM task
-  LEFT OUTER JOIN te.teprjtask ON (task_id = teprjtask_prjtask_id)
-  LEFT OUTER JOIN custinfo ON (teprjtask_cust_id=cust_id)
-  LEFT OUTER JOIN cntct ON (cust_corrcntct_id=cntct_id)
-  LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id)
+  LEFT OUTER JOIN taskass      ON task_id = taskass_task_id
+  LEFT OUTER JOIN te.teprjtask ON task_id = teprjtask_prjtask_id
+  LEFT OUTER JOIN custinfo     ON teprjtask_cust_id = cust_id
+  LEFT OUTER JOIN cntct        ON cust_corrcntct_id = cntct_id
+  LEFT OUTER JOIN addr         ON cntct_addr_id     = addr_id
 
  WHERE (task_parent_id = <? value("prj_id") ?> AND task_parent_type='J')
    <? if not exists("showCompleted") ?>

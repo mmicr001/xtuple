@@ -70,10 +70,10 @@ formatExtPrice(round((noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturn
                      WHERE (groupsitem_groups_id=&lt;? value("custgrp_id") ?>)))
   &lt;? endif ?>
   &lt;? if exists("custgrp_pattern") ?>
-    AND (cust_id IN (SELECT DISTINCT groupsitem_reference_id
-                     FROM custgrp, custgrpitem
-                     WHERE ( (groupsitem_groups_id=custgrp_id)
-                       AND   (groups_name ~ &lt;? value("custgrp_pattern") ?>) )) )
+    AND cust_id IN (SELECT DISTINCT groupsitem_reference_id
+                      FROM custgrp
+                      JOIN custgrpitem ON groupsitem_groups_id = groups_id
+                     WHERE groups_name ~ &lt;? value("custgrp_pattern") ?>)
   &lt;? endif ?>
 
   &lt;? if exists("item_id") ?>

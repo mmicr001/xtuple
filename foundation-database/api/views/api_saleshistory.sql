@@ -1,7 +1,8 @@
   --Sales History View
 
   SELECT dropIfExists('VIEW', 'saleshistory', 'api');
-  CREATE OR REPLACE VIEW api.saleshistory AS
+  SELECT dropIfExists('VIEW', 'api_saleshistory', 'api');
+  CREATE OR REPLACE VIEW api.api_saleshistory AS
 
   SELECT
     cust_number AS customer_number,
@@ -95,13 +96,13 @@
     LEFT OUTER JOIN whsinfo ON (itemsite_warehous_id=warehous_id)
     LEFT OUTER JOIN curr_symbol ON (cohist_curr_id=curr_id);
 
-GRANT ALL ON TABLE api.saleshistory TO xtrole;
-COMMENT ON VIEW api.saleshistory IS 'Sales History';
+GRANT ALL ON TABLE api.api_saleshistory TO xtrole;
+COMMENT ON VIEW api.api_saleshistory IS 'Sales History';
 
   --Rules
 
   CREATE OR REPLACE RULE "_INSERT" AS
-    ON INSERT TO api.saleshistory DO INSTEAD
+    ON INSERT TO api.api_saleshistory DO INSTEAD
 
   INSERT INTO cohist (
     cohist_cust_id,
@@ -206,11 +207,11 @@ COMMENT ON VIEW api.saleshistory IS 'Sales History';
     getTaxtypeId(NEW.tax_type) );
  
   CREATE OR REPLACE RULE "_UPDATE" AS
-  ON UPDATE TO api.saleshistory DO INSTEAD
+  ON UPDATE TO api.api_saleshistory DO INSTEAD
 
   NOTHING;
 
   CREATE OR REPLACE RULE "_DELETE" AS
-  ON DELETE TO api.saleshistory DO INSTEAD
+  ON DELETE TO api.api_saleshistory DO INSTEAD
 
   NOTHING;

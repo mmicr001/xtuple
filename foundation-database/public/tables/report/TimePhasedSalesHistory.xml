@@ -67,13 +67,13 @@ FROM
        findPeriodEnd(calitem_id) AS pend,
        (formatDate(findPeriodStart(calitem_id)) || '-' || formatDate(findPeriodEnd(calitem_id))) AS period,
 &lt;? if exists("byCust") ?>
-         cust_id, cust_number AS f_number, cust_name AS f_description
+         cust_id, cust_number AS f_number, cust_name AS f_description,
 &lt;? elseif exists("byProdcat") ?>
-         prodcat_id, prodcat_code AS f_number, prodcat_descrip AS f_description
+         prodcat_id, prodcat_code AS f_number, prodcat_descrip AS f_description,
 &lt;? elseif exists("byItem") ?>
-         item_id, item_number AS f_number, item_descrip1 AS f_description
+         item_id, item_number AS f_number, item_descrip1 AS f_description,
 &lt;? endif ?>
-       , warehous_id, warehous_code
+       warehous_id, warehous_code
 &lt;? if exists("salesDollars") ?>
        , &lt;? value("baseCurrAbbr") ?>::text AS f_uom
 &lt;? else ?>
@@ -218,8 +218,8 @@ FROM cohist JOIN itemsite ON (itemsite_id=cohist_itemsite_id)
    JOIN prodcat ON (item_prodcat_id=prodcat_id)
 &lt;? endif ?>
 &lt;? if reExists("custgrp") ?>
- JOIN custgrpitem ON (groupsitem_reference_id=cohist_cust_id)
- JOIN custgrp ON (groupsitem_groups_id=custgrp_id)
+ JOIN custgrpitem ON groupsitem_reference_id = cohist_cust_id
+ JOIN custgrp     ON groupsitem_groups_id    = groups_id
 &lt;? endif ?>
   WHERE ((cohist_invcdate BETWEEN findPeriodStart(&lt;? value("period_id_list") ?>) AND findPeriodEnd(&lt;? value("period_id_list") ?>))
 &lt;? if exists("item_id") ?> 
@@ -307,6 +307,7 @@ UNION
    <hcenter/>
    <vcenter/>
    <string>Period</string>
+   <buddy></buddy>
   </label>
   <line>
    <xstart>5</xstart>
@@ -330,6 +331,7 @@ UNION
    <right/>
    <vcenter/>
    <string>Time Phased Sales History</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -384,6 +386,7 @@ UNION
    <hcenter/>
    <vcenter/>
    <string>Site</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -472,6 +475,7 @@ UNION
    <hcenter/>
    <vcenter/>
    <string>Site</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -488,6 +492,7 @@ UNION
    <hcenter/>
    <vcenter/>
    <string>Period</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -638,6 +643,7 @@ UNION
      <right/>
      <vcenter/>
      <string>Total:</string>
+     <buddy></buddy>
     </label>
    </foot>
   </group>
@@ -760,6 +766,7 @@ UNION
    <right/>
    <vcenter/>
    <string>Report Date:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -814,6 +821,7 @@ UNION
    <right/>
    <vcenter/>
    <string>Page:</string>
+   <buddy></buddy>
   </label>
  </pgfoot>
 </report>
