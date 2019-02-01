@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION public.savecntct(
     pCompany text DEFAULT NULL)
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _cntctId      INTEGER;
@@ -182,7 +182,7 @@ CREATE OR REPLACE FUNCTION saveCntct( pCntctId         INTEGER,
                                       pWebAddr         TEXT,
                                       pTitle           TEXT,
                                       pFlag            TEXT ) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _returnVal INTEGER;

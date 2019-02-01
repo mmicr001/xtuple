@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION shipShipment(pshipheadid INTEGER,
                                         ptimestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _timestamp		TIMESTAMP WITH TIME ZONE;

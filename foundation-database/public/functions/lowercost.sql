@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION lowerCost(pItemid   INTEGER,
                                      pCosttype TEXT,
                                      pActual   BOOLEAN DEFAULT TRUE)
   RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _type CHAR(1);
@@ -44,7 +44,23 @@ BEGIN
                   SUM(round(currToBase(itemcost_curr_id, itemcost_actcost, CURRENT_DATE),6) *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   END AS subsum
-      FROM bomitem(pItemid)
+      FROM (
+            WITH RECURSIVE _bomitem AS
+            (
+             SELECT bomitem_id AS id, bomitem_item_id, item_type
+               FROM bomitem(pItemid)
+               JOIN item ON bomitem_item_id = item_id
+             UNION ALL
+             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type
+               FROM _bomitem, bomitem(bomitem_item_id)
+               JOIN item ON bomitem.bomitem_item_id = item_id
+              WHERE _bomitem.item_type = 'F'
+             )
+             SELECT id
+               FROM _bomitem
+              WHERE item_type != 'F'
+           ) bomitems
+      JOIN bomitem ON bomitems.id = bomitem_id
         JOIN item ON (item_id=bomitem_item_id AND item_type <> 'T')
         LEFT OUTER JOIN itemcost ON (itemcost_item_id=bomitem_item_id)
         LEFT OUTER JOIN costelem ic ON (ic.costelem_id=itemcost_costelem_id)
@@ -63,7 +79,23 @@ BEGIN
                   SUM(itemcost_stdcost *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   END AS subsum
-      FROM bomitem(pItemid)
+      FROM (
+            WITH RECURSIVE _bomitem AS
+            (
+             SELECT bomitem_id AS id, bomitem_item_id, item_type
+               FROM bomitem(pItemid)
+               JOIN item ON bomitem_item_id = item_id
+             UNION ALL
+             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type
+               FROM _bomitem, bomitem(bomitem_item_id)
+               JOIN item ON bomitem.bomitem_item_id = item_id
+              WHERE _bomitem.item_type = 'F'
+             )
+             SELECT id
+               FROM _bomitem
+              WHERE item_type != 'F'
+           ) bomitems
+      JOIN bomitem ON bomitems.id = bomitem_id
         JOIN item ON (item_id=bomitem_item_id AND item_type <> 'T')
         LEFT OUTER JOIN itemcost ON (itemcost_item_id=bomitem_item_id)
         LEFT OUTER JOIN costelem ic ON (ic.costelem_id=itemcost_costelem_id)

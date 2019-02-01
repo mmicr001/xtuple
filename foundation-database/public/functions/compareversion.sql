@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION public.compareversion(pLeft text, pRight text DEFAULT split_part(version(), ' '::text, 2))
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 -- Returns 1 if the left version is greater than the right version
 -- -1 if the right is greater than the left

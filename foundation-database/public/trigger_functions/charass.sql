@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _charassTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
@@ -40,7 +40,7 @@ select dropIfExists('TRIGGER', 'charassTrigger');
 CREATE TRIGGER charassTrigger AFTER INSERT OR UPDATE ON charass FOR EACH ROW EXECUTE PROCEDURE _charassTrigger();
 
 CREATE OR REPLACE FUNCTION _charassHistoryTrigger () RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF(TG_OP = 'DELETE') THEN
@@ -97,7 +97,7 @@ CREATE TRIGGER charassHistoryTrigger BEFORE INSERT OR UPDATE OR DELETE ON charas
 
 CREATE OR REPLACE FUNCTION _charassuniquetrigger()
   RETURNS trigger AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 

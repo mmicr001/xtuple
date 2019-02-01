@@ -10,7 +10,7 @@ create or replace function createDoctype(pDocAssNum integer, pType text, pDocAss
                                          pPriv    text = '', pModule text = 'System',
                                          pActive  text = '')
   returns integer as $$
-/* Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+/* Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
    See www.xtuple.com/CPAL for the full text of the software license.
 
    Create a record in the "source" table corresponding to this document type

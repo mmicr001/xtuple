@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _soitemTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _changelog BOOLEAN := FALSE;
@@ -256,7 +256,7 @@ CREATE TRIGGER soitemTrigger
   EXECUTE PROCEDURE _soitemTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemBeforeTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _check NUMERIC;
@@ -404,7 +404,7 @@ CREATE TRIGGER soitemBeforeTrigger
 
 
 CREATE OR REPLACE FUNCTION _soitemAfterTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 -- 20160211:rks added new.coitem_memo to explodekit call when UPDATE
 
@@ -729,7 +729,7 @@ CREATE TRIGGER soitemAfterTrigger
   EXECUTE PROCEDURE _soitemAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -818,7 +818,7 @@ CREATE TRIGGER soitemBeforeDeleteTrigger
   EXECUTE PROCEDURE _soitemBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _soitemAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
 
@@ -858,7 +858,7 @@ CREATE TRIGGER soitemAfterDeleteTrigger
   EXECUTE PROCEDURE _soitemAfterDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _coitemBeforeImpTaxTypeDefTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemid INTEGER := 0;
@@ -898,7 +898,7 @@ CREATE TRIGGER coitemBeforeImpTaxTypeDef
 CREATE OR REPLACE FUNCTION _coitemImportedPOPRbeforetrigger()
   RETURNS trigger AS
 $BODY$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _isImported BOOLEAN;

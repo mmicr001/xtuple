@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION postSoItemProduction(pSoitemId INTEGER,
                                                 pGlDistTS TIMESTAMP WITH TIME ZONE,
                                                 pItemlocSeries INTEGER DEFAULT NULL,
                                                 pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _qty NUMERIC;
@@ -31,7 +31,7 @@ CREATE OR REPLACE FUNCTION postSoItemProduction(pSoitemId INTEGER,
                                                 pItemlocSeries INTEGER DEFAULT NULL,
                                                 pPreDistributed BOOLEAN DEFAULT FALSE) 
 RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _itemlocSeries INTEGER := COALESCE(pItemlocSeries, NEXTVAL('itemloc_series_seq'));

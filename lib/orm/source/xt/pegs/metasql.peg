@@ -178,7 +178,7 @@
  */
 Start
   = start:__ metasql:MetaSQL end:__ {
-      return start.join('') + metasql + end.join('');
+      return start + metasql + end;
     }
 
 /**
@@ -335,7 +335,7 @@ MQLControlStatement
     }
   / ifcond:MQLIf ifbody:(!(MQLElse / MQLElseIf / MQLEndIf) SourceElement)*
     elseifwraper:(MQLElseIf (!(MQLElseIf / MQLElse / MQLEndIf) SourceElement)*)*
-    MQLElse elsebody:(!(MQLEndIf) SourceElement)* MQLEndIf {
+    MQLElse* elsebody:(!(MQLEndIf) SourceElement)* MQLEndIf {
       if (ifcond) {
         return (ifbody ? extractList(ifbody, 1).join('') : '');
       }
@@ -383,11 +383,12 @@ MQLControlStatement
         if (Object.prototype.toString.call(params[foreachcond]) === '[object Array]') {
           for (var i = 0; i < params[foreachcond].length; i++) {
             var recurseOptions = {
-                  loopstack: loopstack
+                  loopstack: loopstack,
+                  params: params
                 };
 
             // Call the parser recursively on the body.
-            result += parser.parse(extractedbody, recurseOptions);
+            result += parse(extractedbody, recurseOptions);
 
             loopstack[stackidx].count++;
           }
@@ -543,7 +544,7 @@ MQLClose   = '?>'
 Value      = [Vv] [Aa] [Ll] [Uu] [Ee]
 Literal    = [Ll] [Ii] [Tt] [Ee] [Rr] [Aa] [Ll]
 If         = [Ii] [Ff]
-ElseIf     = [Ee] [Ll] [Ss] [Ee] [Ii] [Ff]
+ElseIf     = [Ee] [Ll] [Ss] [Ee]* [ ]* [Ii] [Ff]
 Else       = [Ee] [Ll] [Ss] [Ee]
 EndIf      = [Ee] [Nn] [Dd] [Ii] [Ff]
 Not        = [Nn] [Oo] [Tt]
@@ -735,8 +736,11 @@ UnicodeEscapeSequence
   = "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
       return String.fromCharCode(parseInt(digits, 16));
     }
+
 __
-  = (WhiteSpace / LineTerminatorSequence / Comment)*
+  = (WhiteSpace / LineTerminatorSequence / Comment)* {
+    return text();
+  }
 
 _
   = (WhiteSpace / MultiLineCommentNoLineTerminator)*

@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION _prospectTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _custid       INTEGER;
@@ -161,7 +161,7 @@ CREATE TRIGGER prospectAfterTrigger AFTER INSERT OR UPDATE ON prospect
        FOR EACH ROW EXECUTE PROCEDURE _prospectAfterTrigger();
 
 CREATE OR REPLACE FUNCTION _prospectBeforeDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainProspectMasters')) THEN
@@ -177,7 +177,7 @@ CREATE TRIGGER prospectBeforeDeleteTrigger BEFORE DELETE ON prospect
        FOR EACH ROW EXECUTE PROCEDURE _prospectBeforeDeleteTrigger();
 
 CREATE OR REPLACE FUNCTION _prospectAfterDeleteTrigger() RETURNS TRIGGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
   IF EXISTS(SELECT 1 FROM quhead WHERE quhead_cust_id = OLD.prospect_id) AND

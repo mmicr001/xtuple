@@ -85,22 +85,12 @@ BEGIN
   END LOOP;  
 
   IF (_r.arapply_source_doctype = 'K') THEN
-    INSERT INTO aropen(
-            aropen_docdate, aropen_duedate,  aropen_cust_id,
-            aropen_doctype, aropen_docnumber,
-            aropen_amount, aropen_curr_rate, aropen_curr_id,
-            aropen_notes,
-             aropen_ponumber,
-             aropen_paid, aropen_open, aropen_username,
-            aropen_discount, aropen_accnt_id,
-            aropen_distdate
-            )
-    VALUES (_r.arapply_postdate, current_date, _r.arapply_cust_id,
-            'C', _newDocNum,
-            _r.aamt, currrate(_r.arapply_curr_id, _r.arapply_postdate), _r.arapply_curr_id,
-             'Payment ' || _r.arapply_source_docnumber || _r.arapply_refnumber || ' to be re-applied; original date: ' || _r.arapply_postdate,
-            '', 0, true, geteffectivextuser(), false, -1,
-            current_date);
+    PERFORM createARCreditMemo(NULL, _r.arapply_cust_id, _newDocNum, NULL, _r.arapply_postdate,
+                               _r.aamt,
+                               'Payment ' || _r.arapply_source_docnumber || _r.arapply_refnumber ||
+                               ' to be re-applied; original date: ' || _r.arapply_postdate,
+                               NULL, NULL, -1, CURRENT_DATE, NULL, NULL, 0, NULL,
+                               _r.arapply_curr_id);
   END IF;
 
   UPDATE arapply SET arapply_reversed = true

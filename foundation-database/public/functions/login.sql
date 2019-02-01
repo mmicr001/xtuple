@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION public.login() RETURNS integer AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE 
   _p RECORD;
@@ -15,7 +15,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION login(boolean)
   RETURNS integer AS
 $BODY$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE 
   _setSearchPath ALIAS FOR $1;

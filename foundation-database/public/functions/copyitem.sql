@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION copyItem(INTEGER, TEXT) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSItemid ALIAS FOR $1;
@@ -113,7 +113,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION copyItem(INTEGER, TEXT, BOOLEAN, BOOLEAN, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSItemid ALIAS FOR $1;
@@ -128,7 +128,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION copyItem(INTEGER, TEXT, BOOLEAN, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSItemid      ALIAS FOR $1;
@@ -163,7 +163,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION copyItem(INTEGER, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN) RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pSItemid ALIAS FOR $1;

@@ -55,7 +55,7 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pTaxPaid          NUMERIC,
                                         pRecord           BOOLEAN) RETURNS JSONB AS
 $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _service TEXT;
