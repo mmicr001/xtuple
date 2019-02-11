@@ -98,7 +98,7 @@ SELECT task_id AS id,
        1 AS section,
        NULL AS section_qtdisplayrole,
        task_number AS name,
-       CASE                         
+       CASE
            WHEN task_status = 'C' THEN <? value('complete') ?>
            WHEN task_status = 'O' THEN <? value('inprocess') ?>
            WHEN task_status = 'P' THEN <? value('planning') ?>
@@ -117,7 +117,7 @@ SELECT task_id AS id,
        NULL::text AS uom,
        NULL::numeric AS value,
        task_due_date AS due,
-       MIN(taskass_assigned_date) AS assigned,
+       (SELECT MIN(taskass_assigned_date) FROM taskass WHERE taskass_task_id = task_id) AS assigned,
        task_start_date AS started,
        task_completed_date AS completed,
        task_hours_budget AS hrs_budget,
@@ -131,19 +131,18 @@ SELECT task_id AS id,
          END AS due_qtforegroundrole,
        2 AS xtindentrole
   FROM task
-  LEFT OUTER JOIN taskass      ON task_id = taskass_task_id
-  LEFT OUTER JOIN te.teprjtask ON task_id = teprjtask_prjtask_id
-  LEFT OUTER JOIN custinfo     ON teprjtask_cust_id = cust_id
-  LEFT OUTER JOIN cntct        ON cust_corrcntct_id = cntct_id
-  LEFT OUTER JOIN addr         ON cntct_addr_id     = addr_id
+  LEFT OUTER JOIN prj      ON task_prj_id       = prj_id
+  LEFT OUTER JOIN custinfo ON prj_crmacct_id    = cust_crmacct_id
+  LEFT OUTER JOIN cntct    ON cust_corrcntct_id = cntct_id
+  LEFT OUTER JOIN addr     ON cntct_addr_id     = addr_id
 
  WHERE (task_parent_id = <? value("prj_id") ?> AND task_parent_type='J')
    <? if not exists("showCompleted") ?>
    AND task_status <> 'C'
   <? endif ?>
- GROUP BY task_parent_id, custinfo.cust_name, task.task_id, addr.addr_city, addr.addr_state, cntct_name, 
-          task.task_number, task.task_status, task.task_owner_username, task_name, task_descrip, 
-          task_due_date, task_start_date, task_completed_date, task_hours_budget, 
+ GROUP BY task_parent_id, custinfo.cust_name, task.task_id, addr.addr_city, addr.addr_state, cntct_name,
+          task.task_number, task.task_status, task.task_owner_username, task_name, task_descrip,
+          task_due_date, task_start_date, task_completed_date, task_hours_budget,
           task_hours_actual, task_exp_budget, task_exp_actual
 
 <? if exists("showIn") ?>
