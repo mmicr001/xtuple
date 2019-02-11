@@ -66,7 +66,7 @@ var _ = require("underscore"),
 
     it("should allow creating a new invoice", function (done) {
       var invoice  = "ROW('"+inv+"', NULL, NULL, NULL, NULL,"
-               +      "NULL, NULL, 0,"
+               +      "NULL, NULL, NULL, 0,"
                +      "NULL, NULL, 'TTOYS',"
                +      "NULL, NULL, NULL, NULL, NULL, "
                +      "NULL, NULL, NULL, NULL, NULL, "

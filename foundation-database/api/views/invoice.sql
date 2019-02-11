@@ -7,6 +7,7 @@ AS
 		invchead_invcdate AS invoice_date,
 		invchead_shipdate AS ship_date,
 		invchead_orderdate AS order_date,
+                warehous_code AS site,
                 saletype_code AS sale_type,
 		salesrep_number as sales_rep,
 		invchead_commission AS commission,
@@ -57,11 +58,12 @@ AS
 		LEFT OUTER JOIN taxzone ON (taxzone_id=invchead_taxzone_id)
                 LEFT OUTER JOIN saletype ON (invchead_saletype_id=saletype_id)
                 LEFT OUTER JOIN shipzone ON (invchead_shipzone_id=shipzone_id)
+                LEFT OUTER JOIN whsinfo ON invchead_warehous_id=warehous_id
 ;
 
 GRANT ALL ON TABLE api.invoice TO xtrole;
 COMMENT ON VIEW api.invoice IS '
-This view can be used as an interface to import Invioce Header data directly
+This view can be used as an interface to import Invoice Header data directly
 into the system.  Required fields will be checked and default values will be
 populated';
 
@@ -71,7 +73,7 @@ $insertInvoice$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-	pNew ALIAS FOR $1;
+  pNew ALIAS FOR $1;
 BEGIN
 	-- NOTE: (SELECT getCustId(...)) seems redundant, but it actually produces
 	-- a HUGE performance increase because it makes the Postgres query planner
@@ -120,7 +122,8 @@ BEGIN
 		invchead_payment,
 		invchead_notes,
                 invchead_saletype_id,
-                invchead_shipzone_id
+                invchead_shipzone_id,
+                invchead_warehous_id
 	) SELECT
 		(CASE -- use a case here so we don't unnecessarily fetch a new invoice number
 			WHEN pNew.invoice_number IS NULL THEN CAST(fetchInvcNumber() AS TEXT)
@@ -185,7 +188,8 @@ BEGIN
 		COALESCE(pNew.payment,0),
 		COALESCE(pNew.notes,''),
                 getSaleTypeId(pNew.sale_type),
-                getShipZoneId(pNew.shipto_shipzone)
+                getShipZoneId(pNew.shipto_shipzone),
+                getWarehousId(pNew.site, 'ALL')
 	FROM custinfo
 		LEFT OUTER JOIN shiptoinfo ON (shipto_id=(SELECT CASE
 			WHEN getShiptoId(pNew.customer_number,pNew.shipto_number) IS NOT NULL
@@ -196,7 +200,7 @@ BEGIN
                LEFT OUTER JOIN cntct ON (cntct_id=cust_cntct_id)
                LEFT OUTER JOIN addr ON (addr_id=cntct_addr_id)
 	WHERE cust_id = (SELECT getCustId(pNew.customer_number));
-	RETURN TRUE;
+        RETURN TRUE;
 END;
 $insertInvoice$ LANGUAGE 'plpgsql';
 
@@ -253,7 +257,8 @@ CREATE OR REPLACE RULE "_UPDATE" AS
 		invchead_payment=NEW.payment,
 		invchead_notes=NEW.notes,
                 invchead_saletype_id=getSaleTypeId(NEW.sale_type),
-                invchead_shipzone_id=getShipZoneId(NEW.shipto_shipzone)
+                invchead_shipzone_id=getShipZoneId(NEW.shipto_shipzone),
+                invchead_warehous_id=getWarehousId(NEW.site, 'ALL')
 	WHERE (invchead_invcnumber=OLD.invoice_number)
 		AND (invchead_posted = FALSE);
 
