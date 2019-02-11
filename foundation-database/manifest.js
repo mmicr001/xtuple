@@ -1123,6 +1123,7 @@
     "public/indexes/crmacct.sql",
     "public/indexes/docass.sql",
     "public/indexes/evntlog.sql",
+    "public/indexes/invbal.sql",
     "public/indexes/invchead.sql",
     "public/indexes/invcheadtax.sql",
     "public/indexes/invcitem.sql",
