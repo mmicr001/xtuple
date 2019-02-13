@@ -129,7 +129,7 @@ BEGIN
 			ELSE 1
 		END,
 		getGlAccntId(pNew.alternate_rev_account),
-		COALESCE(pNew.invoice_subnumber,0)
+		COALESCE(pNew.invoice_subnumber,0),
                 COALESCE(pNew.tax_exemption_category,invchead_tax_exemption)
 	  FROM invchead
 		LEFT OUTER JOIN item ON (item_id=getItemId(pNew.item_number))
