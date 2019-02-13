@@ -73,7 +73,7 @@ var _ = require("underscore"),
                +      "NULL, NULL, NULL, NULL, NULL, "
                +      "NULL, NULL, NULL, NULL, NULL, "
                +      "NULL, NULL, NULL, NULL, NULL, "
-               +      "0, NULL, 0, 'USD' , 0, 'invoice notes')",
+               +      "0, NULL, 0, 'USD' , 0, 'invoice notes', NULL)",
           sql  = "select insertInvoice(%) as result;".replace(/%/g, invoice)
                  ;
 
