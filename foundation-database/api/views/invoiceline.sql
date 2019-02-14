@@ -21,7 +21,8 @@ AS
                 CASE WHEN (invcitem_rev_accnt_id IS NOT NULL) THEN formatglaccount(invcitem_rev_accnt_id)
                      ELSE NULL::text
                 END AS alternate_rev_account,
-		invcitem_subnumber AS invoice_subnumber
+		invcitem_subnumber AS invoice_subnumber,
+                invcitem_tax_exemption AS tax_exemption_category
 	FROM invcitem
 		LEFT OUTER JOIN invchead ON (invcitem_invchead_id=invchead_id)
 		LEFT OUTER JOIN item ON (item_id=invcitem_item_id)
@@ -75,7 +76,8 @@ BEGIN
 		invcitem_price_uom_id,
 		invcitem_price_invuomratio,
         invcitem_rev_accnt_id,
-		invcitem_subnumber
+		invcitem_subnumber,
+                invcitem_tax_exemption
 	) SELECT
 		invchead_id,
 		COALESCE(pNew.line_number,(
@@ -83,7 +85,7 @@ BEGIN
 			FROM invcitem WHERE (invcitem_invchead_id=invchead_id)
 		)),
 		COALESCE(item_id, -1),
-		COALESCE(getwarehousid(pNew.site,'ALL'),-1),
+		COALESCE(getwarehousid(pNew.site,'ALL'),invchead_warehous_id,-1),
 		pNew.customer_part_number,
 		(CASE WHEN item_id IS NULL THEN pNew.misc_item_number ELSE NULL END),
 		(CASE WHEN item_id IS NULL THEN pNew.misc_item_description ELSE NULL END),
@@ -127,7 +129,8 @@ BEGIN
 			ELSE 1
 		END,
 		getGlAccntId(pNew.alternate_rev_account),
-		COALESCE(pNew.invoice_subnumber,0)
+		COALESCE(pNew.invoice_subnumber,0),
+                COALESCE(pNew.tax_exemption_category,invchead_tax_exemption)
 	  FROM invchead
 		LEFT OUTER JOIN item ON (item_id=getItemId(pNew.item_number))
 		LEFT OUTER JOIN taxtype ON (taxtype_id=CASE
@@ -204,7 +207,8 @@ BEGIN
 			ELSE 1
 		END,
 		invcitem_rev_accnt_id=getGlAccntId(pNew.alternate_rev_account),
-		invcitem_subnumber = COALESCE(pNew.invoice_subnumber,0)
+		invcitem_subnumber = COALESCE(pNew.invoice_subnumber,0),
+                invcitem_tax_exemption = pNew.tax_exemption_category
 	FROM invchead
 		LEFT OUTER JOIN item ON (item_id=getItemId(pNew.item_number))
 		LEFT OUTER JOIN taxtype ON (taxtype_id=CASE

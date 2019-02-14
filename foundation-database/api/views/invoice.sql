@@ -47,7 +47,8 @@ AS
 		invchead_freight AS freight,
 		curr.curr_abbr AS currency,
 		invchead_payment AS payment,
-		invchead_notes AS notes
+		invchead_notes AS notes,
+                invchead_tax_exemption AS tax_exemption_category
 	FROM invchead
 		LEFT OUTER JOIN custinfo ON (cust_id=invchead_cust_id)
 		LEFT OUTER JOIN shiptoinfo ON (shipto_id=invchead_shipto_id)
@@ -123,7 +124,8 @@ BEGIN
 		invchead_notes,
                 invchead_saletype_id,
                 invchead_shipzone_id,
-                invchead_warehous_id
+                invchead_warehous_id,
+                invchead_tax_exemption
 	) SELECT
 		(CASE -- use a case here so we don't unnecessarily fetch a new invoice number
 			WHEN pNew.invoice_number IS NULL THEN CAST(fetchInvcNumber() AS TEXT)
@@ -189,7 +191,8 @@ BEGIN
 		COALESCE(pNew.notes,''),
                 getSaleTypeId(pNew.sale_type),
                 getShipZoneId(pNew.shipto_shipzone),
-                getWarehousId(pNew.site, 'ALL')
+                getWarehousId(pNew.site, 'ALL'),
+                COALESCE(pNew.tax_exemption_category, cust_tax_exemption)
 	FROM custinfo
 		LEFT OUTER JOIN shiptoinfo ON (shipto_id=(SELECT CASE
 			WHEN getShiptoId(pNew.customer_number,pNew.shipto_number) IS NOT NULL
@@ -258,7 +261,8 @@ CREATE OR REPLACE RULE "_UPDATE" AS
 		invchead_notes=NEW.notes,
                 invchead_saletype_id=getSaleTypeId(NEW.sale_type),
                 invchead_shipzone_id=getShipZoneId(NEW.shipto_shipzone),
-                invchead_warehous_id=getWarehousId(NEW.site, 'ALL')
+                invchead_warehous_id=getWarehousId(NEW.site, 'ALL'),
+                invchead_tax_exemption=NEW.tax_exemption_category
 	WHERE (invchead_invcnumber=OLD.invoice_number)
 		AND (invchead_posted = FALSE);
 

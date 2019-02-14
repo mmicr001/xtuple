@@ -31,7 +31,8 @@ var _ = require("underscore"),
                      + (obj.price_uom             ? "'" + obj.price_uom             + "'," : "NULL,")
                      + (obj.notes                 ? "'" + obj.notes                 + "'," : "NULL,")
                      + (obj.alternate_rev_account ? "'" + obj.alternate_rev_account + "'," : "NULL,")
-                     + (obj.invoice_subnumber     ? "'" + obj.invoice_subnumber     + "," : "0")
+                     + (obj.invoice_subnumber     ? "'" + obj.invoice_subnumber     + "," : "0,")
+                     + (obj.tax_exemption_code    ? "'" + obj.tax_exemption_code    + "'" : "NULL")
                      + ")"
                      ;
     }
@@ -73,7 +74,7 @@ var _ = require("underscore"),
                +      "NULL, NULL, NULL, NULL, NULL, "
                +      "NULL, NULL, NULL, NULL, NULL, "
                +      "NULL, NULL, NULL, NULL, NULL, "
-               +      "0, NULL, 0, 'USD' , 0, 'invoice notes')",
+               +      "0, NULL, 0, 'USD' , 0, 'invoice notes', NULL)",
           sql  = "select insertInvoice(%) as result;".replace(/%/g, invoice)
                  ;
 
