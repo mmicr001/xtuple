@@ -208,7 +208,7 @@ BEGIN
 		END,
 		invcitem_rev_accnt_id=getGlAccntId(pNew.alternate_rev_account),
 		invcitem_subnumber = COALESCE(pNew.invoice_subnumber,0),
-                invchead_tax_exemption = pNew.tax_exemption_category
+                invcitem_tax_exemption = pNew.tax_exemption_category
 	FROM invchead
 		LEFT OUTER JOIN item ON (item_id=getItemId(pNew.item_number))
 		LEFT OUTER JOIN taxtype ON (taxtype_id=CASE
