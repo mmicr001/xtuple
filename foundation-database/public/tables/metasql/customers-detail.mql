@@ -5,15 +5,13 @@
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
 WITH _customers AS (
-SELECT DISTINCT ON ( cust_number ) 
-  cust_id, cust_custtype_id, 
+SELECT DISTINCT ON ( cust_number )
+  cust_id, cust_custtype_id,
   cust_active, cust_number, cust_name,
   custtype_code,
   formatBoolYN(cust_active) as f_active,
   formatAddr(bill_addr.addr_id) AS f_bill_addr,
   formatAddr(corr_addr.addr_id) AS f_corr_addr,
-  bill_cntct.cntct_name AS bill_cntct_name,
-  corr_cntct.cntct_name AS corr_cntct_name,
   CASE cust_creditstatus WHEN 'W' THEN <? value('creditwarn')?>
 			WHEN 'H' THEN <? value('credithold')?>
 			WHEN 'G' THEN ''  -- Good Status
@@ -36,6 +34,7 @@ SELECT DISTINCT ON ( cust_number )
   corr_cntct.cntct_name AS corr_cntct_name,
   corr_cntct.cntct_first_name AS corr_first_name,
   corr_cntct.cntct_last_name AS corr_last_name,
+  corr_cntct.cntct_title AS corr_title,
   getcontactphone(corr_cntct.cntct_id, 'Office') AS corr_phone,
   getcontactphone(corr_cntct.cntct_id, 'Fax') AS corr_fax,
   corr_cntct.cntct_email AS corr_email,
@@ -55,33 +54,34 @@ SELECT DISTINCT ON ( cust_number )
 <? foreach("char_id_date_list") ?>
   , charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>
 <? endforeach ?>
-FROM custinfo
+
+  FROM custinfo
   JOIN custtype ON (cust_custtype_id=custtype_id)
-  LEFT OUTER JOIN cntct bill_cntct ON (cust_cntct_id=bill_cntct.cntct_id) 
+  LEFT OUTER JOIN cntct bill_cntct ON (cust_cntct_id=bill_cntct.cntct_id)
   LEFT OUTER JOIN addr bill_addr ON (bill_cntct.cntct_addr_id=bill_addr.addr_id)
-  LEFT OUTER JOIN cntct corr_cntct ON (cust_corrcntct_id=corr_cntct.cntct_id) 
+  LEFT OUTER JOIN cntct corr_cntct ON (cust_corrcntct_id=corr_cntct.cntct_id)
   LEFT OUTER JOIN addr corr_addr ON (corr_cntct.cntct_addr_id=corr_addr.addr_id)
 <? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='C') 
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='C')
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='C') 
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='C')
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='C') 
+  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='C')
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
 WHERE true
-<? if not exists("showInactive") ?> 
-  AND cust_active 
+<? if not exists("showInactive") ?>
+  AND cust_active
 <? endif ?>
 <? if exists("cust_number_pattern") ?>
   AND (cust_number ~* <? value("cust_number_pattern") ?>)
@@ -99,7 +99,7 @@ WHERE true
   AND cust_id IN (SELECT groupsitem_reference_id FROM custgrpitem WHERE groupsitem_groups_id = <? value("custgrp") ?>)
 <? endif ?>
 <? if exists("cntct_name_pattern") ?>
-  AND (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?> 
+  AND (COALESCE(bill_cntct.cntct_first_name,'') || ' ' || COALESCE(bill_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?>
    OR  COALESCE(corr_cntct.cntct_first_name,'') || ' ' || COALESCE(corr_cntct.cntct_last_name, '') ~* <? value("cntct_name_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_phone_pattern") ?>
@@ -147,5 +147,5 @@ SELECT * FROM _customers
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
 <? endif ?>
-ORDER BY cust_number; 
+ORDER BY cust_number;
 

@@ -3,16 +3,15 @@
 -- Notes:
 --        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
---
---        xTuple version 4.2.0 - Modified to significantly amend the display of this screen and its filters.
---        xTuple version 4.3.0 - Add Incidents to hierarchy display
+
 SELECT *,
        formatQty(qty) AS f_qty,
        formatMoney(value) AS f_value,
        'curr' AS qty_xtnumericrole,
        'curr' AS value_xtnumericrole,
-       CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'red' END AS hrs_balance_qtforegroundrole,
-       CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'red' END AS exp_balance_qtforegroundrole
+       '0' AS hrs_balance_xttotalrole,
+       CASE WHEN COALESCE(hrs_balance,0) < 0 THEN 'error' END AS hrs_balance_qtforegroundrole,
+       CASE WHEN COALESCE(exp_balance,0) < 0 THEN 'error' END AS exp_balance_qtforegroundrole
   FROM (
     SELECT prj_id AS id,
            1 AS type,
@@ -48,8 +47,8 @@ SELECT *,
            NULL::numeric AS exp_budget,
            NULL::numeric AS exp_actual,
            NULL::numeric AS exp_balance,
-           CASE WHEN (prj_status = 'O' AND prj_due_date < current_date) THEN 'red'
-                WHEN (prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange'
+           CASE WHEN (prj_status = 'O' AND prj_due_date < current_date) THEN 'error'
+                WHEN (prj_status = 'O' AND prj_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning'
            END AS due_qtforegroundrole,
            0 AS xtindentrole
       FROM prj()
@@ -133,8 +132,8 @@ SELECT *,
            task_exp_budget AS exp_budget,
            task_exp_actual AS exp_actual,
            (task_exp_budget-task_exp_actual) AS exp_balance,
-           CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'red'
-                WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'orange'
+           CASE WHEN (task_status = 'O' AND task_due_date < current_date) THEN 'error'
+                WHEN (task_status = 'O' AND task_due_date BETWEEN current_date AND current_date + (fetchmetricvalue('ProjectDueDateWarning')||' days')::interval) THEN 'warning'
            END AS due_qtforegroundrole,
            2 AS xtindentrole
       FROM task

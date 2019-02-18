@@ -8,8 +8,10 @@ SELECT task_id, task_number, task_name,
        COALESCE(task_hours_budget - task_hours_actual, 0.0) as taskhrbal,
        COALESCE(task_exp_budget - task_exp_actual, 0.0) as taskexpbal,
        firstLine(task_descrip) AS task_descrip,
-       totalhrbud, totalhract, totalhrbal,
-       totalexpbud, totalexpact, totalexpbal
+       totalhrbud, totalhract,
+       CASE WHEN task_status = 'C' THEN 0 ELSE totalhrbal END AS totalhrbal,
+       totalexpbud, totalexpact, totalexpbal,
+       0 AS totalhract_xttotalrole
 FROM (SELECT COALESCE(SUM(task_hours_budget), 0.0) AS totalhrbud,
              COALESCE(SUM(task_hours_actual), 0.0) AS totalhract,
              COALESCE(SUM(task_hours_budget - task_hours_actual), 0.0) AS totalhrbal,
