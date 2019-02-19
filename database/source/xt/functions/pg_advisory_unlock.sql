@@ -9,7 +9,8 @@ BEGIN
   DELETE FROM xt.lock
    WHERE lock_table_oid = pOid
      AND lock_record_id = pId
-     AND lock_username  = geteffectivextuser();
+     AND lock_username  = geteffectivextuser()
+     AND lock_pid       = pg_backend_pid();
   RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
