@@ -1,14 +1,19 @@
-create or replace function xt.pg_advisory_unlock(oid integer, id integer) returns boolean as $$
-  var pid = plv8.execute("select pg_backend_pid() as pid;")[0].pid,
-    username = plv8.execute("select geteffectivextuser() as username;")[0].username,
-    sql = "select * from xt.lock where lock_table_oid = $1 and lock_record_id = $2 and lock_username = $3 and lock_pid = $4;",
-    data = Object.create(XT.Data),
-    query = plv8.execute(sql, [oid, id, username, pid]);
-
-  if (query.length) {
-    data.releaseLock({key: query[0].lock_id});
-    return true;
-  }
-  return false;
-  
-$$ language plv8;
+DROP FUNCTION IF EXISTS xt.pg_advisory_unlock(integer, integer);
+CREATE OR REPLACE FUNCTION xt.pg_advisory_unlock(pOid INTEGER, pId INTEGER)
+  RETURNS BOOLEAN AS $$
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
+-- See www.xtuple.com/CPAL for the full text of the software license.
+-- simplified version of lib/orm/source/xt/javascript/data.sql::releaseLock()
+DECLARE
+  _rows INTEGER;
+  _unlocked BOOLEAN := pg_catalog.pg_advisory_unlock(pOid, pId);
+BEGIN
+  DELETE FROM xt.lock
+   WHERE lock_table_oid = pOid
+     AND lock_record_id = pId
+     AND lock_username  = geteffectivextuser()
+     AND lock_pid       = pg_backend_pid();
+  GET DIAGNOSTICS _rows = ROW_COUNT;
+  RETURN _rows > 0 OR _unlocked;
+END;
+$$ LANGUAGE plpgsql;
