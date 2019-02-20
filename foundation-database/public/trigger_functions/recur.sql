@@ -6,7 +6,7 @@ DECLARE
   _parenttype TEXT;
 BEGIN
   IF (TG_OP = 'DELETE') THEN
-    IF (UPPER(OLD.recur_parent_type) = 'TODO') THEN
+    IF (UPPER(OLD.recur_parent_type) = 'TASK') THEN
       UPDATE task SET task_recurring_task_id=NULL
        WHERE task_recurring_task_id=OLD.recur_parent_id;
     END IF;

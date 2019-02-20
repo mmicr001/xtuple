@@ -600,13 +600,13 @@ select createDoctype(34, --pDocAssNum
                      'TE' --pModule
 );
 select createDoctype(35, --pDocAssNum
-                     'TD', --pType
-                     'TODO', --pDocAss
-                     '', --pCharAss
+                     'TA', --pType
+                     'TASK', --pDocAss
+                     'TASK', --pCharAss
                      'Task', --pFull
                      'task', --pTable
                      'task_id', --pKey
-                     'task_id::text', --pNumber
+                     'task_number', --pNumber
                      'task_name', --pName
                      'firstline(task_descrip)', --pDesc
                      '', --pWidget
@@ -719,23 +719,6 @@ select createDoctype(41, --pDocAssNum
                      'workOrder', --pUi
                      '', --pPriv
                      'Manufacture' --pModule
-);
-select createDoctype(42, --pDocAssNum
-                     'TA', --pType
-                     'TASK', --pDocAss
-                     'TASK', --pCharAss
-                     'Project Task', --pFull
-                     'task', --pTable
-                     'task_id', --pKey
-                     'task_number', --pNumber
-                     'task_name', --pName
-                     'firstline(task_descrip)', --pDesc
-                     '', --pWidget
-                     '', --pJoin
-                     'task_id', --pParam
-                     'task', --pUi
-                     '', --pPriv
-                     'CRM' --pModule
 );
 select createDoctype(NULL, --pDocAssNum
                      'PSPCT', --pType

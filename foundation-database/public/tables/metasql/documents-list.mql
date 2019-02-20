@@ -59,14 +59,13 @@ SELECT
     WHEN (target_type='SI') THEN <? value("soitem") ?>
     WHEN (target_type='SHP') THEN <? value("shipto") ?>
     WHEN (target_type='TE') THEN <? value("timeexpense") ?>
-    WHEN (target_type='TODO') THEN <? value("todo") ?>
+    WHEN (target_type='TASK') THEN <? value("task") ?>
     WHEN (target_type='TO') THEN <? value("to") ?>
     WHEN (target_type='TI') THEN <? value("toitem") ?>
     WHEN (target_type='V') THEN <? value("vendor") ?>
     WHEN (target_type='VCH') THEN <? value("voucher") ?>
     WHEN (target_type='WH') THEN <? value("whse") ?>
     WHEN (target_type='W') THEN <? value("wo") ?>
-    WHEN (target_type='TASK') THEN <? value("projecttask") ?>
     WHEN (target_type='URL') THEN <? value("url") ?>
     WHEN (target_type='FILE' OR target_type='XFILE') THEN <? value("file") ?>
     WHEN (target_type='IMG') THEN <? value("image") ?>

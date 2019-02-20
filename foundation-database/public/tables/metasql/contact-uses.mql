@@ -176,7 +176,7 @@ FROM (
 <? endif ?>
 
   UNION ALL
-  SELECT task_id, 21 AS altId, <? value("todo") ?> AS type,
+  SELECT task_id, 21 AS altId, <? value("task") ?> AS type,
          task_number AS number,
          task_name AS name, '' AS role,
          (task_completed_date IS NULL) AS active, true AS active_role,

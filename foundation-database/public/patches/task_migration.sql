@@ -98,7 +98,8 @@ IF EXISTS (SELECT 1
                   NATURAL JOIN prjtaskmap
                  WHERE prjtask_username IS NOT NULL;
 
-  UPDATE alarm SET alarm_source_id = _nid
+  UPDATE alarm SET alarm_source = 'TASK',
+                   alarm_source_id = _nid
     FROM prjtaskmap
    WHERE alarm_source = 'J' AND alarm_source_id = prjtask_id;
 
@@ -235,15 +236,18 @@ IF EXISTS (SELECT 1
                   NATURAL JOIN todotaskmap
                  WHERE todoitem_username IS NOT NULL;
 
-  UPDATE alarm SET alarm_source_id = task_id
+  UPDATE alarm SET alarm_source = 'TASK',
+                   alarm_source_id = task_id
     FROM todotaskmap
    WHERE alarm_source = 'TODO' AND alarm_source_id = todoitem_id;
 
-  UPDATE comment SET comment_source_id = task_id
+  UPDATE comment SET comment_source = 'TA',
+                     comment_source_id = task_id
     FROM todotaskmap
    WHERE comment_source = 'TD' AND comment_source_id = todoitem_id;
 
-  UPDATE docass SET docass_source_id = task_id
+  UPDATE docass SET docass_source_type = 'TASK',
+                    docass_source_id = task_id
     FROM todotaskmap
    WHERE docass_source_type = 'TODO' AND docass_source_id = todoitem_id;
 
@@ -288,6 +292,11 @@ UPDATE recurtype SET recurtype_type = 'TASK',
                                         )$$
 WHERE recurtype_type = 'TODO';
 
+UPDATE evnttype
+   SET evnttype_name = 'TaskAlarm',
+       evnttype_descrip = 'Task Alarm'
+ WHERE evnttype_name = 'TodoAlarm';
+
 -- =====================================
 -- DROP deprecated objects
 -- =====================================
@@ -304,6 +313,27 @@ DROP FUNCTION IF EXISTS todoitem() CASCADE;
 DROP FUNCTION IF EXISTS todoItemMove(INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS todoItemMoveUp(INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS todoItemMoveDown(INTEGER, INTEGER) CASCADE;
+
+UPDATE cmnttypesource
+   SET cmnttypesource_source_id = source_id
+  FROM source
+ WHERE source_name = 'TA'
+   AND cmnttypesource_source_id = (SELECT source_id
+                                     FROM source
+                                    WHERE source_name = 'TD')
+   AND NOT EXISTS (SELECT 1
+                     FROM cmnttypesource other
+                     JOIN source ON other.cmnttypesource_source_id = source_id
+                    WHERE other.cmnttypesource_cmnttype_id = cmnttypesource.cmnttype_cmnttype_id
+                      AND source_name = 'TA');
+
+DELETE FROM cmnttypesource
+ WHERE cmnttypesource_source_id = (SELECT source_id
+                                     FROM source
+                                    WHERE source_name = 'TD')
+
+DELETE FROM source
+ WHERE source_name = 'TD';
 
 DELETE from report
 where report_name IN ('TodoItem', 'TodoList')
