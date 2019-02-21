@@ -16,9 +16,159 @@
   </prerequisite>
 
   <prerequisite type = "query"
+                name = "Checking for updatable countries" >
+    <query>SELECT fetchMetricBool('ISOCountries') OR COUNT(*) = 0
+             FROM ccard;</query>
+    <message>The Updater cannot automatically update some of your data. Please load the fixCountry extension v5.0.0 and fix any problems reported by CRM > Utilities > Fix Countries. Click the FINISH MIGRATION button there and try to upgrade again.
+    </message>
+  </prerequisite>
+
+  <prerequisite type = "query"
                 name = "Checking for valid countries" >
-    <query>SELECT fetchMetricBool('ISOCountries');</query>
-    <message>You must migrate countries using the fixcountry extension before upgrading to this version.
+    <query>DO $$
+           DECLARE
+             _found BOOLEAN;
+
+           BEGIN
+
+             SELECT COUNT(*) > 0 INTO _found
+               FROM (
+                        SELECT addr_country AS country
+                          FROM addr
+                        UNION ALL
+                        SELECT quhead_billtocountry
+                          FROM quhead
+                        UNION ALL
+                        SELECT quhead_shiptocountry
+                          FROM quhead
+                        UNION ALL
+                        SELECT cohead_billtocountry
+                          FROM cohead
+                        UNION ALL
+                        SELECT cohead_shiptocountry
+                          FROM cohead
+                        UNION ALL
+                        SELECT invchead_billto_country
+                          FROM invchead
+                        UNION ALL
+                        SELECT invchead_shipto_country
+                          FROM invchead
+                        UNION ALL
+                        SELECT cmhead_billtocountry
+                          FROM cmhead
+                        UNION ALL
+                        SELECT cmhead_shipto_country
+                          FROM cmhead
+                        UNION ALL
+                        SELECT pohead_vendcountry
+                          FROM pohead
+                        UNION ALL
+                        SELECT pohead_shiptocountry
+                          FROM pohead
+                        UNION ALL
+                        SELECT metric_value
+                          FROM metric
+                         WHERE metric_name IN ('DefaultAddressCountry', 'remitto_country')
+                       ) AS countries
+              WHERE COALESCE(trim(country), '') != ''
+                AND lower(country) NOT IN (SELECT COALESCE(lower(country_name), '')
+                                                FROM country
+                                              UNION ALL
+                                              SELECT COALESCE(lower(country_abbr), '')
+                                                FROM country);
+
+             IF (SELECT EXISTS(SELECT 1
+                                    FROM pg_attribute
+                                    JOIN pg_class ON attrelid = pg_class.oid
+                                   WHERE relname = 'cohist'
+                                     AND attname = 'cohist_billtocountry'
+                                     AND attnum > 0)) THEN
+               SELECT _found OR COUNT(*) > 0 INTO _found
+                 FROM (
+                          SELECT cohist_billtocountry AS country
+                            FROM cohist
+                          UNION ALL
+                          SELECT cohist_shiptocountry
+                            FROM cohist
+                         ) AS countries
+                WHERE COALESCE(trim(country), '') != ''
+                  AND lower(country) NOT IN (SELECT COALESCE(lower(country_name), '')
+                                                  FROM country
+                                                UNION ALL
+                                                SELECT COALESCE(lower(country_abbr), '')
+                                                  FROM country);
+             END IF;
+
+             IF (SELECT EXISTS(SELECT 1
+                                    FROM pg_attribute
+                                    JOIN pg_class ON attrelid = pg_class.oid
+                                   WHERE relname = 'asohist'
+                                     AND attname = 'asohist_billtocountry'
+                                     AND attnum > 0)) THEN
+               SELECT _found OR COUNT(*) > 0 INTO _found
+                 FROM (
+                          SELECT asohist_billtocountry AS country
+                            FROM asohist
+                          UNION ALL
+                          SELECT asohist_shiptocountry
+                            FROM asohist
+                         ) AS countries
+                WHERE COALESCE(trim(country), '') != ''
+                  AND lower(country) NOT IN (SELECT COALESCE(lower(country_name), '')
+                                                  FROM country
+                                                UNION ALL
+                                                SELECT COALESCE(lower(country_abbr), '')
+                                                  FROM country);
+             END IF;
+
+             IF (SELECT EXISTS(SELECT 1
+                                    FROM pg_class
+                                   WHERE relname = 'rahead'
+                                     AND relkind = 'r')) THEN
+               SELECT _found OR COUNT(*) > 0 INTO _found
+                 FROM (
+                      SELECT rahead_billtocountry AS country
+                        FROM rahead
+                      UNION ALL
+                      SELECT rahead_shipto_country
+                        FROM rahead
+                         ) AS countries
+                WHERE COALESCE(trim(country), '') != ''
+                  AND lower(country) NOT IN (SELECT COALESCE(lower(country_name), '')
+                                                  FROM country
+                                                UNION ALL
+                                                SELECT COALESCE(lower(country_abbr), '')
+                                                  FROM country);
+             END IF;
+
+             IF (SELECT EXISTS(SELECT 1
+                                    FROM pg_class
+                                   WHERE relname = 'tohead'
+                                     AND relkind = 'r')) THEN
+               SELECT _found OR COUNT(*) > 0 INTO _found
+                 FROM (
+                      SELECT tohead_srccountry AS country
+                        FROM tohead
+                      UNION ALL
+                      SELECT tohead_destcountry
+                        FROM tohead
+                         ) AS countries
+                WHERE COALESCE(trim(country), '') != ''
+                  AND lower(country) NOT IN (SELECT COALESCE(lower(country_name), '')
+                                                  FROM country
+                                                UNION ALL
+                                                SELECT COALESCE(lower(country_abbr), '')
+                                                  FROM country);
+             END IF;
+
+             IF _found THEN
+               RAISE EXCEPTION 'This database contains invalid countries in addresses. Please load the fixCountry extension v5.0.0 and fix these data with CRM > Utilities > Fix Countries.';
+             END IF;
+
+           END
+           $$ language plpgsql;
+           SELECT true;</query>
+    <message>This database contains invalid countries in addresses. Please load the fixCountry extension v5.0.0 and fix these data with CRM > Utilities > Fix Countries.
     </message>
   </prerequisite>
 
