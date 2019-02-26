@@ -23,3 +23,5 @@ SELECT
   xt.add_constraint('imageass', 'imageass_image_id_fk', 'FOREIGN KEY (imageass_image_id)
                                                          REFERENCES image (image_id) MATCH SIMPLE
                                                          ON UPDATE NO ACTION ON DELETE CASCADE', 'public');
+
+ALTER TABLE public.imageass ENABLE TRIGGER ALL;
