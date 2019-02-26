@@ -152,7 +152,7 @@ BEGIN
   END IF;
 
   DELETE FROM alarm
-   WHERE ((alarm_source='TODO')
+   WHERE ((alarm_source='TASK')
       AND (alarm_source_id=OLD.task_id));
 
   DELETE FROM docass WHERE docass_source_id = OLD.task_id AND docass_source_type = 'TA';

@@ -60,7 +60,7 @@ BEGIN
      UNION ALL SELECT 'TE',    'te',     'tehead',   'MaintainTimeExpenseOthers',    'ViewTimeExpenseHistory', 'tehead_username',         'MaintainTimeExpenseSelf',       NULL
      UNION ALL SELECT 'TI',    'public', 'tohead',   'MaintainTransferOrders',       'ViewTransferOrders',     NULL,                      NULL,                            NULL
      UNION ALL SELECT 'TO',    'public', 'tohead',   'MaintainTransferOrders',       'ViewTransferOrders',     NULL,                      NULL,                            NULL
-     UNION ALL SELECT 'TODO',  'public', 'todoitem', 'MaintainAllTaskItems',         'ViewAllTaskItems',       'todoitem_owner_username', 'MaintainPersonalTaskItems',     'ViewPersonalTaskItems'
+     UNION ALL SELECT 'TASK',  'public', 'task',     'MaintainAllTaskItems',         'ViewAllTaskItems',       'task_owner_username',     'MaintainPersonalTaskItems',     'ViewPersonalTaskItems'
      UNION ALL SELECT 'V',     'public', 'vendinfo', 'MaintainVendors',              'ViewVendors',            NULL,                      NULL,                            NULL
      UNION ALL SELECT 'W',     'public', 'wo',       'MaintainWorkOrders',           'ViewWorkOrders',         NULL,                      NULL,                            NULL
      UNION ALL SELECT 'WH',    'public', 'whsinfo',  'MaintainWarehouses',           'ViewWarehouses',         NULL,                      NULL,                            NULL)

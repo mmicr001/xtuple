@@ -26,14 +26,14 @@ BEGIN
                    AND (CURRENT_TIMESTAMP > alarm_trigger)) LOOP
     _returnVal := TRUE;
 
-    IF (_alarm.alarm_source = 'TODO') THEN
+    IF (_alarm.alarm_source = 'TASK') THEN
       SELECT (task_name || '-' || task_description),
-             'T', 'TodoAlarm', 'To-Do Item'
+             'T', 'TaskAlarm', 'Task'
       INTO _summary, _evntlogordtype, _evnttypename, _longsource
       FROM task
       WHERE (task_id = _alarm.alarm_source_id);
 
-      _alarmtype = 'To-Do: ';
+      _alarmtype = 'Task: ';
 
     ELSIF (_alarm.alarm_source = 'INCDT') THEN
       SELECT (incdt_number || '-' || incdt_summary),
@@ -43,15 +43,6 @@ BEGIN
       WHERE (incdt_id = _alarm.alarm_source_id);
 
       _alarmtype = 'Incident: ';
-
-    ELSIF (_alarm.alarm_source = 'J') THEN
-      SELECT (prj_number || ' ' || prj_name || '-' || task_name),
-              'J', 'TaskAlarm', 'Project Task'
-      INTO _summary, _evntlogordtype, _evnttypename, _longsource
-      FROM task JOIN prj ON (prj_id=task_parent_id AND task_parent_type = 'J')
-      WHERE (task_id = _alarm.alarm_source_id);
-
-      _alarmtype = 'Project: ';
 
     ELSE
       CONTINUE; -- there's nothing to do for this iteration of the loop

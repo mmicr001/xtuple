@@ -84,10 +84,10 @@ BEGIN
                    (alarm_event_recipient IS NOT NULL), alarm_event_recipient,
                    (alarm_email_recipient IS NOT NULL AND fetchMetricBool('EnableBatchManager')), alarm_email_recipient,
                    (alarm_sysmsg_recipient IS NOT NULL), alarm_sysmsg_recipient,
-                   'TODO', _taskid, 'CHANGEONE')
+                   'TASK', _taskid, 'CHANGEONE')
     INTO _alarmid
     FROM alarm
-   WHERE alarm_source='TODO'
+   WHERE alarm_source='TASK'
      AND alarm_source_id = pParentTaskId;
 
    IF (_alarmid < 0) THEN
