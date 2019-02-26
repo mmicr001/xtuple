@@ -293,8 +293,24 @@ UPDATE recurtype SET recurtype_type = 'TASK',
 WHERE recurtype_type = 'TODO';
 
 UPDATE evnttype
-   SET evnttype_name = 'TaskAlarm',
-       evnttype_descrip = 'Task Alarm'
+   SET evnttype_descrip = 'Task Alarm'
+ WHERE evnttype_name = 'TaskAlarm';
+
+UPDATE evntlog
+   SET evntlog_evnttype_id = new.evnttype_id
+  FROM evnttype old, evnttype new
+ WHERE evntlog_evnttype_id = old.evnttype_id
+   AND old.evnttype_name = 'TodoAlarm'
+   AND new.evnttype_name = 'TaskAlarm';
+
+UPDATE evntnot
+   SET evntnot_evnttype_id = new.evnttype_id
+  FROM evnttype old, evnttype new
+ WHERE evntnot_evnttype_id = old.evnttype_id
+   AND old.evnttype_name = 'TodoAlarm'
+   AND new.evnttype_name = 'TaskAlarm';
+
+DELETE FROM evnttype
  WHERE evnttype_name = 'TodoAlarm';
 
 -- =====================================
@@ -324,13 +340,13 @@ UPDATE cmnttypesource
    AND NOT EXISTS (SELECT 1
                      FROM cmnttypesource other
                      JOIN source ON other.cmnttypesource_source_id = source_id
-                    WHERE other.cmnttypesource_cmnttype_id = cmnttypesource.cmnttype_cmnttype_id
+                    WHERE other.cmnttypesource_cmnttype_id = cmnttypesource.cmnttypesource_cmnttype_id
                       AND source_name = 'TA');
 
 DELETE FROM cmnttypesource
  WHERE cmnttypesource_source_id = (SELECT source_id
                                      FROM source
-                                    WHERE source_name = 'TD')
+                                    WHERE source_name = 'TD');
 
 DELETE FROM source
  WHERE source_name = 'TD';
