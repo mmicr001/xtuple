@@ -2050,6 +2050,7 @@
     "public/patches/updatetrialbal.sql",
     "public/patches/deleteinvalidcntcteml.sql",
     "public/patches/cntctcreated.sql",
+    "public/patches/migrate_countries.sql",
 
     "../lib/orm/source/xt/javascript/parsemetasql.sql",
     "../lib/orm/source/xt/javascript/parseediprofile.sql",
