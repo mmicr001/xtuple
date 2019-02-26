@@ -70,7 +70,7 @@ BEGIN
                      WHERE lower(country_name) = lower(%I)
                        %s', _table, _column, _column, _metricstr);
 
-    EXECUTE format('ALTER TABLE %I DISABLE TRIGGER ALL', _table);
+    EXECUTE format('ALTER TABLE %I ENABLE TRIGGER ALL', _table);
   END LOOP;
 
   SELECT COUNT(*) INTO _count
