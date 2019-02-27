@@ -1242,7 +1242,6 @@
     "public/indexes/shiphead.sql",
     "public/indexes/shipitem.sql",
     "public/indexes/sltrans.sql",
-    "public/indexes/todoitem.sql",
     "public/indexes/usrpref.sql",
     "public/indexes/whsinfo.sql",
     "public/indexes/womatlpost.sql",
