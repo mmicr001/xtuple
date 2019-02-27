@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION crmaccttypes(pCrmAcctId INTEGER)
 RETURNS jsonb AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple.
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 -- Returns CRM entity relationship IDs as a jsonb structure

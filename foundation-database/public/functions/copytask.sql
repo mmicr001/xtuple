@@ -4,7 +4,7 @@ DROP FUNCTION IF EXISTS copyTodoitem(INTEGER, DATE, INTEGER);
 CREATE OR REPLACE FUNCTION copyTask(pParentTaskId INTEGER, pDate DATE, 
                                     pParentType TEXT DEFAULT 'TASK', pParentId INTEGER DEFAULT NULL) 
 RETURNS INTEGER AS $$
--- Copyright (c) 1999-2018 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   _duedate    DATE := COALESCE(pDate, CURRENT_DATE);
