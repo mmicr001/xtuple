@@ -1,3 +1,5 @@
+DROP VIEW api.armemo CASCADE;
+
 CREATE OR REPLACE VIEW api.armemo AS
   SELECT cust_number AS customer_number,
          aropen_docdate AS document_date,
@@ -13,6 +15,7 @@ CREATE OR REPLACE VIEW api.armemo AS
          salesrep_number AS sales_rep,
          curr.curr_abbr AS currency,
          aropen_amount AS amount,
+         taxzone_code AS taxzone,
          aropen_paid AS paid,
          (aropen_amount - aropen_paid) AS balance,
          aropen_commission_due AS commission_due,
@@ -29,22 +32,27 @@ CREATE OR REPLACE VIEW api.armemo AS
          LEFT OUTER JOIN terms ON (terms_id=aropen_terms_id)
          LEFT OUTER JOIN salescat ON (salescat_id=aropen_salescat_id)
          LEFT OUTER JOIN rsncode ON (rsncode_id=aropen_rsncode_id)
+         LEFT OUTER JOIN taxzone ON (taxzone_id=aropen_taxzone_id)
   WHERE (aropen_doctype IN ('C', 'D'));
-	
+
 GRANT ALL ON TABLE api.armemo TO xtrole;
 COMMENT ON VIEW api.armemo IS 'A/R Credit and Debit Memo';
 
 
 CREATE OR REPLACE FUNCTION insertARMemo(api.armemo) RETURNS boolean AS $$
--- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
   pNew ALIAS FOR $1;
   _result INTEGER;
 
 BEGIN
+  IF (pNew.paid > pNew.amount) THEN
+    RAISE EXCEPTION 'Cannot create A/R Memo with Paid greater than Amount';
+  END IF;
+
   IF (pNew.document_type = 'Credit Memo') THEN
-    SELECT createARCreditMemo( NULL,
+    SELECT createARCreditMemo( NULL::INT,
                                getCustId(pNew.customer_number),
                                pNew.document_number,
                                pNew.order_number,
@@ -60,13 +68,15 @@ BEGIN
                                pNew.commission_due,
                                pNew.journal_number,
                                COALESCE(getCurrId(pNew.currency), baseCurrId()),
+                               NULL::INT, NULL::INT,
+                               gettaxzoneid(pNew.taxzone),
                                pNew.paid ) INTO _result;
     IF (_result <= 0) THEN
       RAISE EXCEPTION 'Function createARCreditMemo failed with result = %', _result;
     END IF;
   ELSE
     IF (pNew.document_type = 'Debit Memo') THEN
-      SELECT createARDebitMemo( null, 
+      SELECT createARDebitMemo( NULL::INT,
                                 getCustId(pNew.customer_number),
                                 pNew.journal_number,
                                 pNew.document_number,
@@ -82,6 +92,7 @@ BEGIN
                                 getSalesrepId(pNew.sales_rep),
                                 pNew.commission_due,
                                 COALESCE(getCurrId(pNew.currency), baseCurrId()),
+                                gettaxzoneid(pNew.taxzone),
                                 pNew.paid ) INTO _result;
       IF (_result <= 0) THEN
         RAISE EXCEPTION 'Function createARDebitMemo failed with result = %', _result;
@@ -102,7 +113,7 @@ CREATE OR REPLACE RULE "_INSERT" AS
     SELECT insertARMemo(NEW);
 
 
-CREATE OR REPLACE RULE "_UPDATE" AS 
+CREATE OR REPLACE RULE "_UPDATE" AS
   ON UPDATE TO api.armemo DO INSTEAD
     UPDATE aropen SET aropen_duedate=NEW.due_date,
                       aropen_terms_id=getTermsId(NEW.terms),
@@ -118,7 +129,7 @@ CREATE OR REPLACE RULE "_UPDATE" AS
                               END) );
 
 
-CREATE OR REPLACE RULE "_DELETE" AS 
+CREATE OR REPLACE RULE "_DELETE" AS
   ON DELETE TO api.armemo DO INSTEAD
 
     NOTHING;
