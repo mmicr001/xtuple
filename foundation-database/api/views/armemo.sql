@@ -16,7 +16,6 @@ CREATE OR REPLACE VIEW api.armemo AS
          curr.curr_abbr AS currency,
          aropen_amount AS amount,
          taxzone_code AS taxzone,
-         aropen_paid AS paid,
          (aropen_amount - aropen_paid) AS balance,
          aropen_commission_due AS commission_due,
          aropen_commission_paid AS commission_paid,
@@ -70,7 +69,7 @@ BEGIN
                                COALESCE(getCurrId(pNew.currency), baseCurrId()),
                                NULL::INT, NULL::INT,
                                gettaxzoneid(pNew.taxzone),
-                               pNew.paid ) INTO _result;
+                               0.00 ) INTO _result;
     IF (_result <= 0) THEN
       RAISE EXCEPTION 'Function createARCreditMemo failed with result = %', _result;
     END IF;
@@ -93,7 +92,7 @@ BEGIN
                                 pNew.commission_due,
                                 COALESCE(getCurrId(pNew.currency), baseCurrId()),
                                 gettaxzoneid(pNew.taxzone),
-                                pNew.paid ) INTO _result;
+                                0.00 ) INTO _result;
       IF (_result <= 0) THEN
         RAISE EXCEPTION 'Function createARDebitMemo failed with result = %', _result;
       END IF;
