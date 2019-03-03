@@ -22,12 +22,6 @@ BEGIN
    FROM item
    WHERE (item_id=NEW.bomitem_parent_item_id);
 
-  IF (TG_OP = 'INSERT') THEN
-    --  Make sure that the parent and component are not the same
-    IF (NEW.bomitem_parent_item_id = NEW.bomitem_item_id) THEN
-      RAISE EXCEPTION 'BOM Item Parent and Component Item cannot be the same. [xtuple: createBOMItem, -1]';
-    END IF;
-
     --  Make sure that the parent is not used in the component at some level
     SELECT indentedWhereUsed(NEW.bomitem_parent_item_id) INTO _bomworksetid;
     SELECT bomwork_id INTO _bomworkid
@@ -38,6 +32,12 @@ BEGIN
     IF (FOUND) THEN
       PERFORM deleteBOMWorkset(_bomworksetid);
       RAISE EXCEPTION 'BOM Item Parent is used by Component, BOM is recursive. [xtuple: createBOMItem, -2]';
+    END IF;
+
+  IF (TG_OP = 'INSERT') THEN
+    --  Make sure that the parent and component are not the same
+    IF (NEW.bomitem_parent_item_id = NEW.bomitem_item_id) THEN
+      RAISE EXCEPTION 'BOM Item Parent and Component Item cannot be the same. [xtuple: createBOMItem, -1]';
     END IF;
 
     PERFORM deleteBOMWorkset(_bomworksetid);
