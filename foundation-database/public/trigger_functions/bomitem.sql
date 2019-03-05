@@ -43,7 +43,6 @@ BEGIN
     PERFORM deleteBOMWorkset(_bomworksetid);
 
     -- Create bomhead record if one does not exist
-
     SELECT bomhead_id INTO _bomheadid
     FROM bomhead
     WHERE (bomhead_item_id=NEW.bomitem_parent_item_id);
