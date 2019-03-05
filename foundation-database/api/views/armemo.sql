@@ -1,4 +1,4 @@
-DROP VIEW api.armemo CASCADE;
+DROP VIEW IF EXISTS api.armemo CASCADE;
 
 CREATE OR REPLACE VIEW api.armemo AS
   SELECT cust_number AS customer_number,
