@@ -33,6 +33,7 @@ BEGIN
                    cohead_shipchrg_id,
                    cohead_saletype_id,
                    cohead_shipzone_id,
+                   cohead_warehous_id,
                    cohead_freight_taxtype_id,
                    cohead_misc_taxtype_id,
                    cohead_misc_discount,
@@ -67,6 +68,7 @@ BEGIN
                    cohead_shipchrg_id,
                    cohead_saletype_id,
                    cohead_shipzone_id,
+                   cohead_warehous_id,
                    cohead_freight_taxtype_id,
                    cohead_misc_taxtype_id,
                    cohead_misc_discount,
@@ -104,7 +106,7 @@ BEGIN
         invchead_notes, invchead_prj_id, invchead_curr_id,
         invchead_taxzone_id,
         invchead_shipchrg_id,
-        invchead_saletype_id, invchead_shipzone_id,
+        invchead_saletype_id, invchead_shipzone_id, invchead_warehous_id,
         invchead_freight_taxtype_id, invchead_misc_taxtype_id, invchead_misc_discount,
         invchead_tax_exemption )
       VALUES(_invcheadid,
@@ -128,7 +130,7 @@ BEGIN
              'Multiple Sales Order # Invoice', _c.cohead_prj_id, _c.cobmisc_curr_id,
              _c.cobmisc_taxzone_id,
              _c.cohead_shipchrg_id,
-             _c.cohead_saletype_id, _c.cohead_shipzone_id,
+             _c.cohead_saletype_id, _c.cohead_shipzone_id, _c.cohead_warehous_id,
              _c.cohead_freight_taxtype_id, _c.cohead_misc_taxtype_id, _c.cohead_misc_discount,
              _c.cohead_tax_exemption
              );
