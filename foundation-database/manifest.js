@@ -1209,6 +1209,8 @@
     "public/indexes/cohist.sql",
     "public/indexes/coitem.sql",
     "public/indexes/comment.sql",
+    "public/indexes/crmacctaddrass.sql",
+    "public/indexes/crmacctrole.sql",
     "public/indexes/docass.sql",
     "public/indexes/evntlog.sql",
     "public/indexes/evntnot.sql",
