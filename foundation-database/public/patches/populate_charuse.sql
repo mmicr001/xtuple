@@ -51,7 +51,7 @@ declare
           FROM charuse couter,
                (SELECT unnest AS tgttype
                   FROM unnest(ARRAY['INVI', 'PI', 'RI',
-                                    'QI', 'SI', 'TI', 'WI'])) AS types
+                                    'QI', 'SI', 'TI', 'W'])) AS types
          WHERE NOT EXISTS(SELECT 1 FROM charuse cinner
                            WHERE cinner.charuse_char_id = couter.charuse_char_id
                              AND cinner.charuse_target_type = tgttype)
