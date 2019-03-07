@@ -556,7 +556,8 @@ SELECT DISTINCT -1 AS id,
     JOIN prj ON (prj_id=invchead_prj_id
             AND ((prj_owner_username=<? value("owner_username") ?>) OR (prj_username=<? value("owner_username") ?>)))
 <? endif ?>
- WHERE (invchead_prj_id = <? value("prj_id") ?>)
+ WHERE invchead_prj_id = <? value("prj_id") ?>
+   AND NOT invchead_void
 
 UNION ALL
 
@@ -601,7 +602,8 @@ SELECT invchead_id AS id,
             AND ((prj_owner_username=<? value("owner_username") ?>) OR (prj_username=<? value("owner_username") ?>)))
 <? endif ?>
     JOIN invcitem ON (invcitem_invchead_id = invchead_id)
- WHERE (invchead_prj_id = <? value("prj_id") ?>)
+ WHERE invchead_prj_id = <? value("prj_id") ?>
+   AND NOT invchead_void
 GROUP BY invchead_id, invchead_invcnumber, shipto_num, shipto_name, invchead_freight, invchead_misc_amount, invchead_posted, cust_name
 
 UNION ALL
@@ -647,7 +649,8 @@ SELECT invcitem_id AS id,
     JOIN invcitem ON (invcitem_invchead_id = invchead_id)
     LEFT OUTER JOIN item ON (invcitem_item_id = item_id)
     LEFT OUTER JOIN uom ON (invcitem_qty_uom_id = uom_id)
- WHERE (invchead_prj_id = <? value("prj_id") ?>)
+ WHERE invchead_prj_id = <? value("prj_id") ?>
+   AND NOT invchead_void
 
 UNION ALL
 
@@ -687,7 +690,8 @@ SELECT invchead_id AS id,
             AND ((prj_owner_username=<? value("owner_username") ?>) OR (prj_username=<? value("owner_username") ?>)))
 <? endif ?>
     JOIN invcitem ON (invcitem_invchead_id = invchead_id)
- WHERE (invchead_prj_id = <? value("prj_id") ?>)
+ WHERE invchead_prj_id = <? value("prj_id") ?>
+   AND NOT invchead_void
 GROUP BY invchead_id, invchead_invcnumber
 
 UNION ALL
@@ -728,7 +732,8 @@ SELECT -1 AS id,
             AND ((prj_owner_username=<? value("owner_username") ?>) OR (prj_username=<? value("owner_username") ?>)))
 <? endif ?>
     JOIN invcitem ON (invcitem_invchead_id = invchead_id)
- WHERE (invchead_prj_id = <? value("prj_id") ?>)
+ WHERE invchead_prj_id = <? value("prj_id") ?>
+   AND NOT invchead_void
 
 <? endif ?>
 
