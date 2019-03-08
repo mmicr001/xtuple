@@ -1,5 +1,5 @@
-<package id        = "postbooks-upgrade-5.0.0Beta"
-         version   = "5.0.0Beta"
+<package id        = "postbooks-upgrade-5.0.0RC"
+         version   = "5.0.0RC"
          developer = "xTuple"
          descrip   = "load PostBooks resources"
          updater   = "2.2.4" >
