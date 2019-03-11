@@ -125,7 +125,7 @@ SELECT 'Receivables' AS ledger, 0 AS vseq,  sum(trialbal_ending * -1) AS glamoun
 (SELECT 
 SUM( CASE WHEN aropen_doctype IN ('I', 'D') THEN ROUND((aropen_amount - aropen_paid)/aropen_curr_rate,2)
 ELSE ROUND((aropen_amount - aropen_paid)/aropen_curr_rate * -1,2) END) 
-  FROM aropen WHERE aropen_open AND aropen_docdate <= period_end) AS subledger
+  FROM aropen WHERE aropen_open AND aropen_docdate <= period_end AND aropen_closedate IS NULL) AS subledger
      FROM trialbal
 JOIN period ON current_date BETWEEN period_start AND period_end AND trialbal_period_id = period_id 
  WHERE  trialbal_accnt_id IN (SELECT araccnt_ar_accnt_id FROM araccnt 
