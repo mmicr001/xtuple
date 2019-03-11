@@ -1,6 +1,6 @@
 {
   "name": "xtuple",
-  "version": "5.0.0-beta",
+  "version": "5.0.0-rc",
   "lockfileVersion": 1,
   "requires": true,
   "dependencies": {
