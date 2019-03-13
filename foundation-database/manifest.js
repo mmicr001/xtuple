@@ -1774,6 +1774,7 @@
     "public/tables/report/DepartmentsMasterList.xml",
     "public/tables/report/DepositsRegister.xml",
     "public/tables/report/DetailedInventoryHistoryByLocation.xml",
+    "public/tables/report/Documents.xml",
     "public/tables/report/EarnedCommissions.xml",
     "public/tables/report/EmployeeList.xml",
     "public/tables/report/ExpenseCategoriesMasterList.xml",

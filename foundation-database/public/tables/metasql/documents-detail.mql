@@ -6,7 +6,8 @@
 
 WITH documents AS (
 
-SELECT docass_id AS id, file_id AS altid, 0 AS lvl, 'FILE' as doctype, file_title AS title,
+SELECT docass_id AS id, file_id AS altid, 0 AS lvl, 'FILE' as doctype,  'FILE' AS f_type, file_id::TEXT AS f_num,
+       file_title AS title,
        file_descrip as descrip, NULL::TEXT as username, NULL::DATE as assigned
        , false AS canview
        , false AS canedit
@@ -39,7 +40,8 @@ JOIN (SELECT DISTINCT ON (docass_target_type, docass_target_id) *
 ON file.file_id=filemin.docass_target_id
 
 UNION
-SELECT docass_id AS id, url_id AS altid, 0 AS lvl, 'URL' as doctype, url_title AS title,
+SELECT docass_id AS id, url_id AS altid, 0 AS lvl, 'URL' as doctype,  'URL' AS f_type, url_id::TEXT AS f_num,
+       url_title AS title,
        url_url as descrip, NULL::TEXT as username, NULL::DATE as assigned
        , false AS canview
        , false AS canedit
@@ -72,7 +74,8 @@ JOIN (SELECT DISTINCT ON (docass_target_type, docass_target_id) *
 ON urlinfo.url_id=urlmin.docass_target_id
 
 UNION
-SELECT docass_id, docass_target_id, 1 AS lvl, REPLACE(docass_target_type, 'X', '') AS doctype, formatdocumenttarget(docass_source_type, docass_source_id), 
+SELECT docass_id, docass_target_id, 1 AS lvl, REPLACE(docass_target_type, 'X', '') AS doctype, '>> LINK' AS f_type, NULL::TEXT AS f_num,
+       formatdocumenttarget(docass_source_type, docass_source_id), 
        docass_notes, docass_username, docass_created
        , hasPrivOnObject('view', docass_source_type, docass_source_id) AS canview
        , hasPrivOnObject('edit', docass_source_type, docass_source_id) AS canedit
@@ -141,4 +144,4 @@ WHERE (fetchmetricbool('UnprivilegedViewDocInList') OR checkfileprivs(altid))
       AND altid = <? value("file_id") ?>
      <? endif ?>
       <? literal("charClause") ?>
-ORDER BY altid, lvl ;
+ORDER BY altid, lvl;
