@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION _taxheadTrigger() RETURNS TRIGGER AS $$
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
 
-  IF (fetchMetricText('TaxService') = 'N' AND NEW.taxhead_valid AND NOT OLD.taxhead_valid) THEN
+  IF (fetchMetricText('TaxService') = 'N' AND NOT NEW.taxhead_valid AND OLD.taxhead_valid) THEN
     PERFORM saveTax(NEW.taxhead_doc_type, NEW.taxhead_doc_id,
                     calculateOrderTax(NEW.taxhead_doc_type, NEW.taxhead_doc_id));
   END IF;
