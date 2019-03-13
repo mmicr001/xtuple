@@ -174,6 +174,7 @@ BEGIN
 
   DELETE FROM docass WHERE docass_source_id = OLD.emp_id AND docass_source_type = 'EMP';
   DELETE FROM docass WHERE docass_target_id = OLD.emp_id AND docass_target_type = 'EMP';
+  DELETE FROM empgrpitem WHERE groupsitem_reference_id = OLD.emp_id;
 
   RETURN OLD;
 END;
