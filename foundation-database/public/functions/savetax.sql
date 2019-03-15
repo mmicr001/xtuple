@@ -139,7 +139,10 @@ BEGIN
   IF pOrderType = 'VCH' THEN
     _taxtotal := getOrderTax('VCH', pOrderId);
 
-    SELECT COALESCE(vohead_tax_charged, _taxtotal) INTO _taxcharged
+    SELECT COALESCE(vohead_tax_charged, CASE WHEN fetchMetricBool('AssumeCorrectTax')
+                                             THEN _taxtotal
+                                             ELSE 0.0
+                                         END) INTO _taxcharged
       FROM vohead
      WHERE vohead_id = pOrderId;
 

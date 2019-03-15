@@ -118,7 +118,10 @@ BEGIN
     FROM voitem
    WHERE (voitem_vohead_id=pVoheadid)
   UNION ALL
-  SELECT COALESCE(vohead_tax_charged, getOrderTax('VCH', pVoheadid))
+  SELECT COALESCE(vohead_tax_charged, CASE WHEN fetchMetricBool('AssumeCorrectTax')
+                                           THEN getOrderTax('VCH', pVoheadid)
+                                           ELSE 0.0
+                                       END)
     FROM vohead
    WHERE vohead_id = pVoheadid
   ) AS data;
@@ -157,7 +160,11 @@ BEGIN
 
 --  Start by handling taxes
   _taxTotal := getOrderTax('VCH', pVoheadid);
-  _p.vohead_tax_charged := COALESCE(_p.vohead_tax_charged, _taxTotal);
+  _p.vohead_tax_charged := COALESCE(_p.vohead_tax_charged,
+                                    CASE WHEN fetchMetricBool('AssumeCorrectTax')
+                                         THEN _taxTotal
+                                         ELSE 0.0
+                                     END);
 
   SELECT COALESCE(SUM(taxdetail_tax), 0.0) INTO _freightTax
     FROM taxhead

@@ -12,8 +12,8 @@ BEGIN
      AND taxhead_doc_id = pOrderId;
 
   IF pOrderType = 'VCH' THEN
-    IF (SELECT vohead_tax_charged IS NULL OR
-               getOrderTax('VCH', vohead_id) - vohead_tax_charged <= 0.0
+    IF (SELECT (fetchMetricBool('AssumeCorrectTax') AND vohead_tax_charged IS NULL) OR
+               getOrderTax('VCH', vohead_id) - COALESCE(vohead_tax_charged, 0.0) <= 0.0
           FROM vohead
          WHERE vohead_id = pOrderId) THEN
       RETURN NULL;
