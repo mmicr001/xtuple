@@ -124,7 +124,7 @@ SELECT cmhead_id, -1,
            cmhead_freight + cmhead_misc +
            (SELECT COALESCE(SUM(taxdetail_tax), 0.0) FROM taxhead JOIN taxline ON taxhead_id = taxline_taxhead_id 
                                                      JOIN taxdetail ON taxline_id = taxdetail_taxline_id
-                                    WHERE taxhead_doctype = 'CM' AND taxhead_doc_id=cmhead_id)
+                                    WHERE taxhead_doc_type = 'CM' AND taxhead_doc_id=cmhead_id)
             AS extprice,
        cmhead_curr_id AS curr_id,
        99999, 1 AS xtindentrole, 6 AS seq
