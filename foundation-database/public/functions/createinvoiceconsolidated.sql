@@ -283,7 +283,7 @@ BEGIN
         _count := (_count + 1);
       END LOOP;
 
-      EXECUTE format('NOTIFY calculatetax, %L', 'INV,' || _invcheadid);
+      EXECUTE format('NOTIFY calculatetax, %L', 'INV,' || _invcheadid || ',true');
     END IF;
   END LOOP;
   RETURN _count;
