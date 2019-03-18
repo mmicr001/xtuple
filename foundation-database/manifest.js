@@ -1059,6 +1059,7 @@
     "public/functions/releaseprnumber.sql",
     "public/functions/releasequnumber.sql",
     "public/functions/releasesonumber.sql",
+    "public/functions/releasetasknumber.sql",
     "public/functions/releasevonumber.sql",
     "public/functions/releasewonumber.sql",
     "public/functions/startoftime.sql",
