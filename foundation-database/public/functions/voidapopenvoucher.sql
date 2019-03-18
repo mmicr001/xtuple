@@ -102,7 +102,11 @@ BEGIN
 
 --  Start by handling taxes
   _taxTotal := getOrderTax('VCH', _p.vohead_id);
-  _p.vohead_tax_charged := COALESCE(_p.vohead_tax_charged, _taxTotal);
+  _p.vohead_tax_charged := COALESCE(_p.vohead_tax_charged,
+                                    CASE WHEN fetchMetricBool('AssumeCorrectTax')
+                                         THEN _taxTotal
+                                         ELSE 0.0
+                                     END);
 
   SELECT COALESCE(SUM(taxdetail_tax), 0.0) INTO _freightTax
     FROM taxhead

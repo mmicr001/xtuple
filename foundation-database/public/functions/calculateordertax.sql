@@ -66,9 +66,10 @@ BEGIN
          dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip, dochead_tocountry,
          COALESCE(cust_number, prospect_number, vend_number),
          CASE WHEN dochead_cust_id IS NOT NULL
-              THEN COALESCE(dochead_tax_exemption, cust_tax_exemption)
+              THEN COALESCE(dochead_tax_exemption, cust_tax_exemption,
+                            fetchMetricText('AvalaraSalesExemptionCode'))
               ELSE COALESCE(dochead_tax_exemption, vend_tax_exemption,
-                            fetchMetricText('AvalaraUserExemptionCode'))
+                            fetchMetricText('AvalaraPurchaseExemptionCode'))
           END,
          COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
          dochead_orignumber, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
@@ -206,10 +207,11 @@ BEGIN
          COALESCE(array_agg(ROUND(docitem_price, _precision)), ARRAY[]::NUMERIC[]),
          COALESCE(array_agg(CASE WHEN dochead_cust_id IS NOT NULL
                                  THEN COALESCE(docitem_tax_exemption, dochead_tax_exemption,
-                                               cust_tax_exemption)
+                                               cust_tax_exemption,
+                                               fetchMetricText('AvalaraSalesExemptionCode'))
                                  ELSE COALESCE(docitem_tax_exemption, dochead_tax_exemption,
                                                vend_tax_exemption,
-                                               fetchMetricText('AvalaraUserExemptionCode'))
+                                               fetchMetricText('AvalaraPurchaseExemptionCode'))
                              END), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_line1), ARRAY[]::TEXT[]),
          COALESCE(array_agg(addr_line2), ARRAY[]::TEXT[]),
