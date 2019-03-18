@@ -220,6 +220,10 @@ BEGIN
   SET cobmisc_posted=TRUE, cobmisc_invchead_id=_invcheadid
   WHERE (cobmisc_id=pCobmiscid);
 
+  IF fetchMetricText('TaxService') = 'A' THEN
+    EXECUTE format('NOTIFY calculatetax, %L', 'INV,' || _invcheadid || ',true');
+  END IF;
+
 --  All done
   RETURN _invcheadid;
 
