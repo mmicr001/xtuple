@@ -986,6 +986,7 @@
     "public/functions/usedefaultlocation.sql",
     "public/functions/usercanlogin.sql",
     "public/functions/userid.sql",
+    "public/functions/validateemailaddress.sql",
     "public/functions/validateitemsrcqty.sql",
     "public/functions/validateorderqty.sql",
     "public/functions/validlocation.sql",
