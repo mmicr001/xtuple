@@ -260,6 +260,10 @@ BEGIN
 --  calculate currency gain/loss
       SELECT currGain(_r.checkitem_amount, _r.curr_rate, _r.checkitem_curr_rate)
         INTO _exchGainTmp;
+
+      IF (_r.apopen_doctype = 'C') THEN
+        _exchGainTmp = _exchGainTmp * -1;
+      END IF;
       _exchGain := _exchGain + _exchGainTmp;
 
       PERFORM insertIntoGLSeries( _sequence, _p.checkrecip_gltrans_source,
