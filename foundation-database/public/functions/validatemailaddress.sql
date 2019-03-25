@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION validateEmailAddress(pEmail TEXT) 
+CREATE OR REPLACE FUNCTION validateemailaddress(pEmail TEXT)
 RETURNS BOOLEAN AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
