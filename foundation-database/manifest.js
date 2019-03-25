@@ -1335,6 +1335,7 @@
     "public/trigger_functions/poitem.sql",
     "public/trigger_functions/pr.sql",
     "public/trigger_functions/prj.sql",
+    "public/trigger_functions/prjtype.sql",
     "public/trigger_functions/prospect.sql",
     "public/trigger_functions/quhead.sql",
     "public/trigger_functions/quitem.sql",

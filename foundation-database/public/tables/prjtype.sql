@@ -7,7 +7,8 @@ SELECT
   xt.add_column('prjtype', 'prjtype_code',              'TEXT', 'NOT NULL', 'public'),
   xt.add_column('prjtype', 'prjtype_descr',             'TEXT', NULL      , 'public'),
   xt.add_column('prjtype', 'prjtype_active',         'BOOLEAN', 'NOT NULL DEFAULT TRUE', 'public'),
-  xt.add_column('prjtype', 'prjtype_tasktmpl_id',    'INTEGER', NULL, 'public');
+  xt.add_column('prjtype', 'prjtype_tasktmpl_id',    'INTEGER', NULL, 'public'),
+  xt.add_column('prjtype', 'prjtype_default',        'BOOLEAN', 'NOT NULL DEFAULT FALSE', 'public');
 
 SELECT
   xt.add_constraint('prjtype', 'pk_prjtype', 'PRIMARY KEY (prjtype_id)', 'public'),
