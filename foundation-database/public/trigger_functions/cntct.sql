@@ -12,6 +12,11 @@ BEGIN
   END IF;
   NEW.cntct_email := lower(NEW.cntct_email);
 
+  -- Validate Email Address
+  IF (NOT validateEmailAddress(NEW.cntct_email)) THEN
+    RAISE EXCEPTION 'An invalid email address was entered (%). Please check and correct. [xtuple: cntctEmailValid, -1, %]', NEW.cntct_email, NEW.cntct_email;
+  END IF;
+
   -- Unique Email check
   IF (fetchmetricbool('EnforceUniqueContactEmails') AND
       EXISTS(SELECT 1 FROM cntcteml WHERE cntcteml_email = NEW.cntct_email
