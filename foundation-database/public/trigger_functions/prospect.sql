@@ -190,6 +190,15 @@ BEGIN
                         'Deleted "' || OLD.prospect_number || '"');
   END IF;
 
+
+  DELETE FROM docass WHERE docass_source_id = OLD.prospect_id AND docass_source_type = 'PSPCT';
+  DELETE FROM docass WHERE docass_target_id = OLD.prospect_id AND docass_target_type = 'PSPCT';
+
+  DELETE
+  FROM charass
+  WHERE charass_target_type = 'PSPCT'
+    AND charass_target_id = OLD.prospect_id;
+
   RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
