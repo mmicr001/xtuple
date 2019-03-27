@@ -5,8 +5,8 @@
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 WITH _prospects AS (
-SELECT prospect_id, prospect_crmacct_id,
-  prospect.*, prospect_created::DATE AS created,
+SELECT prospect_id AS id, prospect_crmacct_id AS altid,
+  prospect.*, prospect_created::DATE AS create,
   opsource_name AS prospect_source,
   cntct.*, getcontactphone(cntct_id, 'Office') AS contact_phone,
   addr.*
@@ -103,11 +103,12 @@ WHERE true
 <? endif ?>
 <? literal("charClause") ?>
 )
-SELECT * FROM _prospects
+SELECT DISTINCT ON (id) * FROM _prospects
 <? if exists("search_pattern") ?>
   WHERE FALSE
   <? foreach("search_fields") ?>
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
 <? endif ?>
-ORDER BY prospect_number; 
+ORDER BY id;
+
