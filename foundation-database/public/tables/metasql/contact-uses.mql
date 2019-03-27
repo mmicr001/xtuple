@@ -18,7 +18,10 @@ FROM (
     FROM crmacct 
     JOIN crmacctcntctass ON (crmacct_id=crmacctcntctass_crmacct_id)
     JOIN crmrole ON (crmacctcntctass_crmrole_id=crmrole_id)
-    WHERE (crmacctcntctass_cntct_id=<? value("id") ?>)
+    WHERE crmacctcntctass_cntct_id=<? value("id") ?>
+    <? if not exists("showInactive") ?>
+      AND crmacctcntctass_active
+    <? endif ?>
 
   UNION ALL
   SELECT cust_id AS type_id, 3 AS type_code, <? value("cust") ?> AS type,
