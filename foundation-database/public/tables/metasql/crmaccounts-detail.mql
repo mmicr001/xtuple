@@ -4,8 +4,40 @@
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT DISTINCT ON (crmacct_number)
-  crmacct_id AS id, crmacct_number, crmacct_name, crmacct_owner_username,
+ WITH chartext AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM crmacct
+                     JOIN charass ON charass_target_type = 'CRMACCT'
+                                 AND crmacct_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_text_list") ?>
+                                                ,<? value("char_id_text_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      charlist AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM crmacct
+                     JOIN charass ON charass_target_type = 'CRMACCT'
+                                 AND crmacct_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_list_list") ?>
+                                                ,<? value("char_id_list_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      chardate AS (SELECT charass_target_id, charass_char_id,
+                          MIN(charass_value::DATE) AS charass_value
+                     FROM crmacct
+                     JOIN charass ON charass_target_type = 'CRMACCT'
+                                 AND crmacct_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_date_list") ?>
+                                                ,<? value("char_id_date_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id)
+SELECT crmacct_id AS id, crmacct_number, crmacct_name, crmacct_owner_username,
   crmacct_active, crmacct_created,
   cntct_first_name, cntct_last_name, cntct_phone, cntct_email,
   addr_id, addr_line1, addr_line2, addr_line3, addr_city, addr_state,
@@ -32,20 +64,17 @@ FROM crmacct() LEFT OUTER JOIN
   cntct ON (crmacct_cntct_id_1=cntct_id) LEFT OUTER JOIN
   addr ON (cntct_addr_id=addr_id) 
 <? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='CRMACCT') 
-                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=crmacct_id)
+  LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=crmacct_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='CRMACCT') 
-                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=crmacct_id)
+  LEFT OUTER JOIN charlist charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_id=crmacct_id)
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='CRMACCT') 
-                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=crmacct_id)
+  LEFT OUTER JOIN chardate charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_id=crmacct_id)
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>

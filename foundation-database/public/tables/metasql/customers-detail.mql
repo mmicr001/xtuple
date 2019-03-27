@@ -4,8 +4,40 @@
 --        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 --        See www.xtuple.com/CPAL for the full text of the software license.
 
-SELECT DISTINCT ON ( cust_number ) 
-  cust_id, cust_custtype_id, 
+ WITH chartext AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM custinfo
+                     JOIN charass ON charass_target_type = 'C'
+                                 AND cust_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_text_list") ?>
+                                                ,<? value("char_id_text_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      charlist AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM custinfo
+                     JOIN charass ON charass_target_type = 'C'
+                                 AND cust_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_list_list") ?>
+                                                ,<? value("char_id_list_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      chardate AS (SELECT charass_target_id, charass_char_id,
+                          MIN(charass_value::DATE) AS charass_value
+                     FROM custinfo
+                     JOIN charass ON charass_target_type = 'C'
+                                 AND cust_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_date_list") ?>
+                                                ,<? value("char_id_date_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id)
+SELECT cust_id, cust_custtype_id, 
   cust_active, cust_number, cust_name,
   custtype_code,
   formatBoolYN(cust_active) as f_active,
@@ -59,20 +91,17 @@ FROM custinfo
   LEFT OUTER JOIN cntct corr_cntct ON (cust_corrcntct_id=corr_cntct.cntct_id) 
   LEFT OUTER JOIN addr corr_addr ON (corr_cntct.cntct_addr_id=corr_addr.addr_id)
 <? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='C') 
-                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cust_id)
+  LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='C') 
-                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=cust_id)
+  LEFT OUTER JOIN charlist charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='C') 
-                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=cust_id)
+  LEFT OUTER JOIN chardate charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_id=cust_id)
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
