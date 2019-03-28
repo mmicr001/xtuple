@@ -23,9 +23,9 @@
                            JOIN charass ON charass_target_type = 'I'
                                        AND item_id = charass_target_id
                           WHERE charass_char_id IN (-1
-                                                    <? foreach("char_id_text_list") ?>
-                                                      ,<? value("char_id_text_list") ?>
-                                                    <? endforeach ?>
+                                                    &lt;? foreach("char_id_text_list") ?>
+                                                      ,&lt;? value("char_id_text_list") ?>
+                                                    &lt;? endforeach ?>
                                                    )
                           GROUP BY charass_target_id, charass_char_id),
             charlist AS (SELECT charass_target_id, charass_char_id,
@@ -34,9 +34,9 @@
                            JOIN charass ON charass_target_type = 'I'
                                        AND item_id = charass_target_id
                           WHERE charass_char_id IN (-1
-                                                    <? foreach("char_id_list_list") ?>
-                                                      ,<? value("char_id_list_list") ?>
-                                                    <? endforeach ?>
+                                                    &lt;? foreach("char_id_list_list") ?>
+                                                      ,&lt;? value("char_id_list_list") ?>
+                                                    &lt;? endforeach ?>
                                                    )
                           GROUP BY charass_target_id, charass_char_id),
             chardate AS (SELECT charass_target_id, charass_char_id,
@@ -45,9 +45,9 @@
                            JOIN charass ON charass_target_type = 'I'
                                        AND item_id = charass_target_id
                           WHERE charass_char_id IN (-1
-                                                    <? foreach("char_id_date_list") ?>
-                                                      ,<? value("char_id_date_list") ?>
-                                                    <? endforeach ?>
+                                                    &lt;? foreach("char_id_date_list") ?>
+                                                      ,&lt;? value("char_id_date_list") ?>
+                                                    &lt;? endforeach ?>
                                                    )
                           GROUP BY charass_target_id, charass_char_id)
        SELECT
