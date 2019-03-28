@@ -135,5 +135,5 @@ FROM _prospects
     OR <? literal("search_fields") ?>::TEXT ~* <? value("search_pattern") ?>
   <? endforeach ?>
 <? endif ?>
-ORDER BY id;
+ORDER BY prospect_number;
 
