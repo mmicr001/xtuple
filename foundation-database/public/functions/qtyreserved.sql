@@ -1,15 +1,10 @@
 CREATE OR REPLACE FUNCTION qtyReserved(pItemsiteid INTEGER) RETURNS NUMERIC AS $$
--- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/EULA for the full text of the software license.
-DECLARE
-  _qty NUMERIC;
 
-BEGIN
-
-  SELECT COALESCE(SUM(coitem_qtyreserved),0) INTO _qty
+  SELECT COALESCE(SUM(coitem_qtyreserved),0)
     FROM coitem
-   WHERE(coitem_itemsite_id=pItemsiteid);
+   WHERE coitem_itemsite_id = pItemsiteid
+     AND coitem_status <> ALL ('{X,C}'::bpchar[]);
 
-  RETURN _qty;
-END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE sql STABLE;
