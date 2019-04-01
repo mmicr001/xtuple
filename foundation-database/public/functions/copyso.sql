@@ -98,9 +98,9 @@ BEGIN
     -- insert characteristics first so they can be copied to associated supply order
     INSERT INTO charass
           (charass_target_type, charass_target_id,
-           charass_char_id, charass_value)
+           charass_char_id, charass_value, charass_price)
     SELECT charass_target_type, _soitemid,
-           charass_char_id, charass_value
+           charass_char_id, charass_value, charass_price
       FROM charass
      WHERE ((charass_target_type='SI')
        AND  (charass_target_id=_soitem.coitem_id));
