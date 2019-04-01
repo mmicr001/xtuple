@@ -14,7 +14,7 @@ BEGIN
   _soheadid := copysoheader(pSoheadid, pcustomer, pSchedDate);
 
   FOR _soitem IN
-    SELECT coitem.*, itemsite_item_id
+    SELECT coitem.*, itemsite_item_id, (itemsite_costmethod = 'J') AS jobcosted
     FROM coitem JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
     WHERE ( (coitem_cohead_id=pSoheadid)
       AND   (coitem_status <> 'X')
@@ -63,8 +63,9 @@ BEGIN
       COALESCE(pSchedDate, _soitem.coitem_scheddate),
       _soitem.coitem_promdate,
       _soitem.coitem_qtyord,
-      CASE WHEN fetchMetricBool('WholesalePriceCosting') THEN (SELECT item_listcost FROM item
-                                                               WHERE item_id=_soitem.itemsite_item_id)
+      CASE WHEN _soitem.jobcosted THEN 0.00
+           WHEN fetchMetricBool('WholesalePriceCosting') THEN (SELECT item_listcost FROM item
+                                                                WHERE item_id=_soitem.itemsite_item_id)
            ELSE stdCost(_soitem.itemsite_item_id)
       END,
       _soitem.coitem_price,
