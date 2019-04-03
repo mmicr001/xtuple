@@ -18,7 +18,40 @@ SELECT *,
                   AND itemloc_warrpurc <= CURRENT_DATE) THEN 'error'
        END AS qtforegroundrole,
        'qty' AS qoh_xtnumericrole
-FROM (SELECT itemloc_id, 1 AS type, warehous_code,
+FROM (WITH chartext AS (SELECT charass_target_id, charass_char_id,
+                               string_agg(charass_value, ',') AS charass_value
+                          FROM itemloc
+                          JOIN charass ON charass_target_type = 'LS'
+                                      AND itemloc_ls_id = charass_target_id
+                         WHERE charass_char_id IN (-1
+                                                   <? foreach("char_id_text_list") ?>
+                                                     ,<? value("char_id_text_list") ?>
+                                                   <? endforeach ?>
+                                                  )
+                         GROUP BY charass_target_id, charass_char_id),
+           charlist AS (SELECT charass_target_id, charass_char_id,
+                               string_agg(charass_value, ',') AS charass_value
+                          FROM itemloc
+                          JOIN charass ON charass_target_type = 'LS'
+                                      AND itemloc_ls_id = charass_target_id
+                         WHERE charass_char_id IN (-1
+                                                   <? foreach("char_id_list_list") ?>
+                                                     ,<? value("char_id_list_list") ?>
+                                                   <? endforeach ?>
+                                                  )
+                         GROUP BY charass_target_id, charass_char_id),
+           chardate AS (SELECT charass_target_id, charass_char_id,
+                               MIN(charass_value::DATE) AS charass_value
+                          FROM itemloc
+                          JOIN charass ON charass_target_type = 'LS'
+                                      AND itemloc_ls_id = charass_target_id
+                         WHERE charass_char_id IN (-1
+                                                   <? foreach("char_id_date_list") ?>
+                                                     ,<? value("char_id_date_list") ?>
+                                                   <? endforeach ?>
+                                                  )
+                         GROUP BY charass_target_id, charass_char_id)
+      SELECT itemloc_id, 1 AS type, warehous_code,
              itemsite_perishable, itemloc_expiration,
              itemsite_warrpurc, itemloc_warrpurc,
              CASE WHEN (location_id IS NOT NULL) THEN
@@ -50,20 +83,17 @@ FROM (SELECT itemloc_id, 1 AS type, warehous_code,
       FROM itemsite, whsinfo,
            itemloc LEFT OUTER JOIN location ON (itemloc_location_id=location_id)
 <? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='LS')
-                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=itemloc_ls_id)
+  LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=itemloc_ls_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='LS')
-                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=itemloc_ls_id)
+  LEFT OUTER JOIN charlist charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_id=itemloc_ls_id)
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='LS')
-                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=itemloc_ls_id)
+  LEFT OUTER JOIN chardate charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_id=itemloc_ls_id)
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>
