@@ -8,6 +8,7 @@ BEGIN
                          WHEN 'P' THEN 'SalesOrder'
                          WHEN 'VCH' THEN 'PurchaseInvoice'
                          WHEN 'CM' THEN 'ReturnInvoice'
+                         WHEN 'EX' THEN 'PurchaseInvoice'
                          ELSE 'SalesOrder'
           END;
 

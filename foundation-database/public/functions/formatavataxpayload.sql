@@ -149,7 +149,7 @@ BEGIN
     "customerCode": %s,
     "entityUseCode": %s,
     "businessIdentificationNo": %s,
-    "commit": false,
+    "commit": %s,
     "currencyCode": %s,
     "description": %s,
     "discount": %s,',
@@ -160,6 +160,7 @@ BEGIN
     to_jsonb(pCust),
     to_jsonb(COALESCE(pUsage, '')),
     to_jsonb(COALESCE(pTaxReg, '')),
+    to_jsonb(pOrderType = 'EX'),
     to_jsonb((SELECT curr_abbr FROM curr_symbol WHERE curr_id=pcurrid)),
     to_jsonb('xTuple-' || _transactionType),
     to_jsonb(CASE WHEN pMiscDiscount AND pMisc < 0

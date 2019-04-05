@@ -50,7 +50,7 @@ SELECT taxauth,
        0 AS nettaxbase_xttotalrole
   FROM (
         SELECT taxhead_doc_type IN ('INV', 'CM', 'AR', 'CR') AS sales,
-               taxhead_doc_type IN ('VCH', 'AP', 'CK') AS purchase,
+               taxhead_doc_type IN ('VCH', 'EX', 'AP', 'CK') AS purchase,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) < 0 AS reverse,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) = 0 AS exempt,
                taxauth_code AS taxauth, taxauth_name AS description,

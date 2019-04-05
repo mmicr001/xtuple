@@ -6,7 +6,7 @@
 
 SELECT taxhead_date, dochead_number,
        CASE WHEN taxhead_doc_type IN ('INV', 'CM', 'AR', 'CR') THEN <? value("sales") ?>
-            WHEN taxhead_doc_type IN ('VCH', 'AP', 'CK') THEN <? value("purchase") ?>
+            WHEN taxhead_doc_type IN ('VCH', 'EX', 'AP', 'CK') THEN <? value("purchase") ?>
             ELSE <? value("other") ?>
         END AS source,
        CASE WHEN taxhead_doc_type = 'INV' THEN <? value("invoice") ?>
@@ -15,6 +15,7 @@ SELECT taxhead_date, dochead_number,
             WHEN taxhead_doc_type = 'AR' AND aropen_doctype = 'D' THEN <? value("ardebitmemo") ?>
             WHEN taxhead_doc_type = 'CR' THEN <? value("cashreceipt") ?>
             WHEN taxhead_doc_type = 'VCH' THEN <? value("voucher") ?>
+            WHEN taxhead_doc_type = 'EX' THEN <? value("expense") ?>
             WHEN taxhead_doc_type = 'AP' AND apopen_doctype = 'C' THEN <? value("apcreditmemo") ?>
             WHEN taxhead_doc_type = 'AP' AND apopen_doctype = 'D' THEN <? value("apdebitmemo") ?>
             WHEN taxhead_doc_type = 'CK' THEN <? value("check") ?>
@@ -70,13 +71,25 @@ SELECT taxhead_date, dochead_number,
        NULL AS flatlocal,
        NULL AS flatbase,
        NULL AS percent,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS salestaxlocal,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
-       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
-       SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
-       SUM(taxdetail_tax_owed) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS usetaxbase,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxlocal,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxbase,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN SUM(taxdetail_tax)
+            ELSE SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxlocal,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN SUM(taxdetail_tax) / taxhead_curr_rate
+            ELSE SUM(taxdetail_tax_owed) / taxhead_curr_rate *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxbase,
        formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
                    docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
        formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
@@ -147,7 +160,7 @@ SELECT taxhead_date, dochead_number,
 <? endif ?>
 <? endif ?>
 <? if exists("showPurchases") ?>
-        'VCH', 'AP', 'CK'
+        'VCH', 'EX', 'AP', 'CK'
 <? endif ?>
        )
 <? if exists("distDate") ?>
@@ -253,13 +266,25 @@ SELECT taxhead_date, dochead_number,
        SUM(taxdetail_amount) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
        AS flatbase,
        SUM(taxdetail_percent) AS percent,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS salestaxlocal,
-       SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
-       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
-       SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
-       SUM(taxdetail_tax_owed) / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS usetaxbase,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxlocal,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxbase,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN SUM(taxdetail_tax)
+            ELSE SUM(taxdetail_tax_owed) * docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxlocal,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN SUM(taxdetail_tax) / taxhead_curr_rate
+            ELSE SUM(taxdetail_tax_owed) / taxhead_curr_rate *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxbase,
        formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) *
                    docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
        formatMoney(SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax)) / taxhead_curr_rate *
@@ -322,7 +347,7 @@ SELECT taxhead_date, dochead_number,
 <? endif ?>
 <? endif ?>
 <? if exists("showPurchases") ?>
-        'VCH', 'AP', 'CK'
+        'VCH', 'EX', 'AP', 'CK'
 <? endif ?>
        )
 <? if exists("distDate") ?>
@@ -412,13 +437,24 @@ SELECT taxhead_date, dochead_number,
        taxdetail_amount / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
        AS flatbase,
        taxdetail_percent AS percent,
-       COALESCE(taxdetail_tax_paid, taxdetail_tax) * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS salestaxlocal,
-       COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate *
-       docSense(taxhead_doc_type, taxhead_doc_id) AS salestaxbase,
-       taxdetail_tax_owed * docSense(taxhead_doc_type, taxhead_doc_id) AS usetaxlocal,
-       taxdetail_tax_owed / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
-       AS usetaxbase,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN COALESCE(taxdetail_tax_paid, taxdetail_tax) *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxlocal,
+       CASE WHEN taxhead_doc_type != 'EX'
+            THEN COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate *
+                 docSense(taxhead_doc_type, taxhead_doc_id)
+            ELSE 0.0
+        END AS salestaxbase,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN taxdetail_tax
+            ELSE taxdetail_tax_owed * docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxlocal,
+       CASE WHEN taxhead_doc_type = 'EX'
+            THEN taxdetail_tax / taxhead_curr_rate
+            ELSE taxdetail_tax_owed / taxhead_curr_rate * docSense(taxhead_doc_type, taxhead_doc_id)
+        END AS usetaxbase,
        formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax) *
                    docSense(taxhead_doc_type, taxhead_doc_id)) AS f_salestaxlocal,
        formatMoney(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate *
@@ -484,7 +520,7 @@ SELECT taxhead_date, dochead_number,
 <? endif ?>
 <? endif ?>
 <? if exists("showPurchases") ?>
-        'VCH', 'AP', 'CK'
+        'VCH', 'EX', 'AP', 'CK'
 <? endif ?>
        )
 <? if exists("distDate") ?>

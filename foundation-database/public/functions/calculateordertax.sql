@@ -64,12 +64,14 @@ BEGIN
   SELECT dochead_number, dochead_taxzone_id, addr_line1, addr_line2, addr_line3, addr_city,
          addr_state, addr_postalcode, addr_country, dochead_toaddr1, dochead_toaddr2,
          dochead_toaddr3, dochead_tocity, dochead_tostate, dochead_tozip, dochead_tocountry,
-         COALESCE(cust_number, prospect_number, vend_number),
+         COALESCE(cust_number, prospect_number, vend_number, fetchMetricText('remitto_name')),
          CASE WHEN dochead_cust_id IS NOT NULL
               THEN COALESCE(dochead_tax_exemption, cust_tax_exemption,
                             fetchMetricText('AvalaraSalesExemptionCode'))
-              ELSE COALESCE(dochead_tax_exemption, vend_tax_exemption,
+              WHEN dochead_vend_id IS NOT NULL
+              THEN COALESCE(dochead_tax_exemption, vend_tax_exemption,
                             fetchMetricText('AvalaraPurchaseExemptionCode'))
+              ELSE ''
           END,
          COALESCE(taxreg_number, ' '), dochead_curr_id, dochead_date, dochead_origdate,
          dochead_orignumber, dochead_freight + COALESCE(SUM(docitem_freight), 0.0), dochead_misc,
@@ -130,9 +132,10 @@ BEGIN
     _tocountry := _tmp;
   END IF;
 
-  IF pOrderType = 'VCH' AND (SELECT COALESCE(vohead_pohead_id, -1) = -1
-                               FROM vohead
-                              WHERE vohead_id = pOrderId) THEN
+  IF pOrderType = 'EX' OR
+     (pOrderType = 'VCH' AND (SELECT COALESCE(vohead_pohead_id, -1) = -1
+                                FROM vohead
+                               WHERE vohead_id = pOrderId)) THEN
     _singlelocation := TRUE;
   END IF;
 
@@ -160,7 +163,7 @@ BEGIN
        FROM
        (
         SELECT docitem_warehous_id,
-               CASE WHEN pOrderType NOT IN ('P', 'VCH')
+               CASE WHEN pOrderType NOT IN ('P', 'VCH', 'EX')
                     THEN (SELECT freightdata_total
                             FROM calculateFreightDetail(cust_id, custtype_id, custtype_code,
                                                         COALESCE(shipto_id, -1), shipto_shipzone_id,
