@@ -235,6 +235,42 @@ SELECT 'CM',
   FROM cmhead
   LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber
 UNION ALL
+SELECT 'EX',
+       invhist_id,
+       invhist_ordnumber,
+       NULL,
+       NULL,
+       NULL,
+       baseCurrId(),
+       invhist_transdate::DATE,
+       NULL,
+       NULL,
+       NULL,
+       NULL,
+       NULL,
+       warehous_id,
+       NULL,
+       NULL,
+       addr_line1,
+       addr_line2,
+       addr_line3,
+       addr_city,
+       addr_state,
+       addr_postalcode,
+       addr_country,
+       0.0,
+       0.0,
+       NULL,
+       NULL,
+       NULL,
+       FALSE,
+       NULL
+  FROM invhist
+  JOIN itemsite ON invhist_itemsite_id = itemsite_id
+  JOIN whsinfo ON itemsite_warehous_id = warehous_id
+  JOIN addr ON warehous_addr_id = addr_id
+ WHERE invhist_transtype = 'EX'
+UNION ALL
 SELECT 'AR',
        aropen_id,
        aropen_docnumber,

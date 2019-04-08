@@ -31,7 +31,7 @@ SELECT <? literal("groupBy") ?>,
        0 AS nettaxbase_xttotalrole
   FROM (
         SELECT taxhead_doc_type IN ('INV', 'CM', 'AR', 'CR') AS sales,
-               taxhead_doc_type IN ('VCH', 'AP', 'CK') AS purchase,
+               taxhead_doc_type IN ('VCH', 'EX', 'AP', 'CK') AS purchase,
                <? literal("groupBy") ?>, <? literal("groupBy") ?>_descrip AS description,
                taxline_extended / taxhead_curr_rate * sense AS extended,
                SUM(COALESCE(taxdetail_tax_paid, taxdetail_tax) / taxhead_curr_rate) * sense
@@ -68,7 +68,7 @@ SELECT <? literal("groupBy") ?>,
         <? endif ?>
         <? endif ?>
         <? if exists("showPurchases") ?>
-                'VCH', 'AP', 'CK'
+                'VCH', 'EX', 'AP', 'CK'
         <? endif ?>
                )
         <? if exists("distDate") ?>

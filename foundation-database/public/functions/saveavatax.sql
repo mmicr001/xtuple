@@ -16,7 +16,7 @@ DECLARE
 
 BEGIN
 
-  _return := CASE WHEN pOrderType NOT IN ('Q', 'S', 'COB', 'INV', 'P', 'VCH') THEN -1 ELSE 1 END;
+  _return := CASE WHEN pOrderType IN ('Q', 'S', 'COB', 'INV', 'P', 'VCH', 'EX') THEN 1 ELSE -1 END;
 
   SELECT curr_id
     INTO _currid
@@ -32,18 +32,19 @@ BEGIN
    WHERE taxhead_doc_type = pOrderType
      AND taxhead_doc_id = pOrderId;
 
-  INSERT INTO taxhead (taxhead_service, taxhead_doc_type, taxhead_doc_id, taxhead_cust_id,
-                       taxhead_exemption_code, taxhead_date, taxhead_orig_doc_type,
-                       taxhead_orig_doc_id, taxhead_orig_date, taxhead_curr_id, taxhead_curr_rate,
-                       taxhead_shiptoaddr_line1, taxhead_shiptoaddr_line2,
-                       taxhead_shiptoaddr_line3, taxhead_shiptoaddr_city,
+  INSERT INTO taxhead (taxhead_service, taxhead_status, taxhead_doc_type, taxhead_doc_id,
+                       taxhead_cust_id, taxhead_exemption_code, taxhead_date,
+                       taxhead_orig_doc_type, taxhead_orig_doc_id, taxhead_orig_date,
+                       taxhead_curr_id, taxhead_curr_rate, taxhead_shiptoaddr_line1,
+                       taxhead_shiptoaddr_line2, taxhead_shiptoaddr_line3, taxhead_shiptoaddr_city,
                        taxhead_shiptoaddr_region, taxhead_shiptoaddr_postalcode,
                        taxhead_shiptoaddr_country, taxhead_discount)
-  SELECT 'A', pOrderType, pOrderId, dochead_cust_id,
-         (pResult->>'entityUseCode')::TEXT, (pResult->>'date')::DATE, dochead_origtype,
-         dochead_origid, dochead_origdate, _currid, (pResult->>'exchangeRate')::NUMERIC,
-         dochead_toaddr1, dochead_toaddr2,
-         dochead_toaddr3, dochead_tocity,
+  SELECT 'A', CASE WHEN pOrderType = 'EX' THEN 'P' ELSE 'O' END, pOrderType, pOrderId,
+         dochead_cust_id, (pResult->>'entityUseCode')::TEXT, (pResult->>'date')::DATE,
+         dochead_origtype,
+         dochead_origid, dochead_origdate,
+         _currid, (pResult->>'exchangeRate')::NUMERIC, dochead_toaddr1,
+         dochead_toaddr2, dochead_toaddr3, dochead_tocity,
          dochead_tostate, dochead_tozip,
          dochead_tocountry, (pResult->>'totalDiscount')::NUMERIC
     FROM dochead

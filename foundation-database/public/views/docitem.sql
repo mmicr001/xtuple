@@ -227,6 +227,27 @@ SELECT 'CM',
                                                OR items.cmitem_number = cmitem.cmitem_number)) items
                                 WHERE items.cmitem_id = cmitem.cmitem_id)
 UNION ALL
+SELECT 'EX',
+       invhist_id,
+       invhist_id,
+       1,
+       0,
+       '1',
+       itemsite_item_id,
+       itemsite_warehous_id,
+       item_number,
+       item_descrip1,
+       invhist_invqty,
+       invhist_unitcost,
+       invhist_invqty * invhist_unitcost,
+       getItemTaxType(itemsite_item_id, NULL),
+       0.0,
+       NULL
+  FROM invhist
+  JOIN itemsite ON invhist_itemsite_id = itemsite_id
+  JOIN item ON itemsite_item_id = item_id
+ WHERE invhist_transtype = 'EX'
+UNION ALL
 SELECT 'AR',
        aropen_id,
        aropen_id,
