@@ -51,6 +51,8 @@ DECLARE
   _shipitemid           INTEGER;
   _freight              NUMERIC;
   _controlled           BOOLEAN := FALSE;
+  _jobcosted            BOOLEAN = FALSE;
+  _jobcost              NUMERIC = NULL;
   _ordheadid            INTEGER;
   _orditemid            INTEGER;
 
@@ -63,9 +65,10 @@ BEGIN
 
   IF (pordertype = 'SO') THEN
 
-    -- Check site security
-    SELECT warehous_id, isControlledItemsite(itemsite_id) AS controlled, coitem_cohead_id, coitem_id
-      INTO _warehouseid, _controlled, _ordheadid, _orditemid
+    -- Check site security and get item site details
+    SELECT warehous_id, isControlledItemsite(itemsite_id) AS controlled, coitem_cohead_id, coitem_id,
+           (itemsite_costmethod = 'J')
+      INTO _warehouseid, _controlled, _ordheadid, _orditemid, _jobcosted
     FROM coitem, itemsite, site()
     WHERE coitem_id = pitemid
       AND itemsite_id = coitem_itemsite_id
@@ -190,13 +193,20 @@ BEGIN
       WHERE(coitem_id=pitemid);
     END IF;
 
+    -- Get Job Costed Value from Received manufacturing
+    IF (_jobcosted AND pinvhistid IS NOT NULL) THEN
+        _jobcost := (SELECT (invhist_invqty * invhist_unitcost)
+                       FROM invhist
+                      WHERE invhist_id = pinvhistid );
+    END IF;
+
     -- Handle g/l transaction
     SELECT postInvTrans( itemsite_id, 'SH', (pQty * coitem_qty_invuomratio),
 			   'S/R', porderType,
 			   formatSoNumber(coitem_id), shiphead_number,
                            ('Issue ' || item_number || ' to Shipping for customer ' || cohead_billtoname),
 			   getPrjAccntId(cohead_prj_id, costcat_shipasset_accnt_id), costcat_asset_accnt_id,
-			   _itemlocSeries, _timestamp, NULL, pinvhistid, NULL, pPreDistributed, _ordheadid, _orditemid ) INTO _invhistid
+			   _itemlocSeries, _timestamp, _jobcost, pinvhistid, NULL, pPreDistributed, _ordheadid, _orditemid ) INTO _invhistid
     FROM coitem, cohead, itemsite, item, costcat, shiphead
     WHERE ( (coitem_cohead_id=cohead_id)
      AND (coitem_itemsite_id=itemsite_id)
@@ -211,11 +221,11 @@ BEGIN
 
     SELECT (invhist_unitcost * invhist_invqty) INTO _value
     FROM invhist
-    WHERE (invhist_id=_invhistid);
+    WHERE invhist_id=COALESCE(pinvhistid, _invhistid);
 
     -- Due to Reservation interdependencies we have to create the shipitem, post inventory,
     -- then update the shipitem with the invhist value
-    UPDATE shipitem SET shipitem_value = _value
+    UPDATE shipitem SET shipitem_value = _value, shipitem_invhist_id = _invhistid
     WHERE shipitem_id = _shipitemid;
 
     -- Calculate shipment freight
