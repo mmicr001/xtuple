@@ -2,7 +2,7 @@
 <report>
  <title>Documents</title>
  <name>Documents</name>
- <description>List of documents saved/stroed in the system</description>
+ <description>List of documents saved/stored in the system</description>
  <grid>
   <snap/>
   <show/>
