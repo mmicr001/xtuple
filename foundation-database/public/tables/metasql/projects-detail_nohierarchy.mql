@@ -5,6 +5,40 @@
 --
 --        Non-hierarchical view to support CSV export from Project List screen
 
+ WITH chartext AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM prj
+                     JOIN charass ON charass_target_type = 'PROJ'
+                                 AND prj_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_text_list") ?>
+                                                ,<? value("char_id_text_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      charlist AS (SELECT charass_target_id, charass_char_id,
+                          string_agg(charass_value, ',') AS charass_value
+                     FROM prj
+                     JOIN charass ON charass_target_type = 'PROJ'
+                                 AND prj_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_list_list") ?>
+                                                ,<? value("char_id_list_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id),
+      chardate AS (SELECT charass_target_id, charass_char_id,
+                          MIN(charass_value::DATE) AS charass_value
+                     FROM prj
+                     JOIN charass ON charass_target_type = 'PROJ'
+                                 AND prj_id = charass_target_id
+                    WHERE charass_char_id IN (-1
+                                              <? foreach("char_id_date_list") ?>
+                                                ,<? value("char_id_date_list") ?>
+                                              <? endforeach ?>
+                                             )
+                    GROUP BY charass_target_id, charass_char_id)
+
 SELECT prj_id AS id, 1 AS altId,
   prj.*, crmacct_name, cntct_name,
   addr_city, addr_state,
@@ -31,20 +65,17 @@ SELECT prj_id AS id, 1 AS altId,
   LEFT OUTER JOIN cntct ON (crmacctcntctass_cntct_id=cntct_id)
   LEFT JOIN addr ON (cntct_addr_id=addr_id)
 <? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='PROJ')
-                                                                    AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=prj_id)
+  LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=prj_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='PROJ')
-                                                                    AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=prj_id)
+  LEFT OUTER JOIN charlist charass_alias<? literal("char_id_list_list") ?> ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_id=prj_id)
                                                                     AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
 <? endforeach ?>
 <? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='PROJ')
-                                                                    AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=prj_id)
+  LEFT OUTER JOIN chardate charass_alias<? literal("char_id_date_list") ?> ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_id=prj_id)
                                                                     AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
 <? endforeach ?>

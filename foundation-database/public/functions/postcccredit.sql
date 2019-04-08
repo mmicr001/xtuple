@@ -42,7 +42,7 @@ BEGIN
                     pCCpay, preftype, prefid;
   END IF;
 
-  IF (preftype = 'cohead') THEN
+  IF (preftype = 'cohead' OR preftype = 'cashrcpt') THEN
     _dglaccnt := findPrepaidAccount(_c.ccpay_cust_id);
   ELSE
     _dglaccnt := findARAccount(_c.ccpay_cust_id);

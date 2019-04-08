@@ -17,7 +17,40 @@
  <leftmargin>50</leftmargin>
  <querysource>
   <name>detail</name>
-  <sql>SELECT * 
+  <sql>WITH chartext AS (SELECT charass_target_id, charass_char_id,
+                                string_agg(charass_value, ',') AS charass_value
+                           FROM addr
+                           JOIN charass ON charass_target_type = 'ADDR'
+                                       AND addr_id = charass_target_id
+                          WHERE charass_char_id IN (-1
+                                                    &lt;? foreach("char_id_text_list") ?>
+                                                      ,&lt;? value("char_id_text_list") ?>
+                                                    &lt;? endforeach ?>
+                                                   )
+                          GROUP BY charass_target_id, charass_char_id),
+            charlist AS (SELECT charass_target_id, charass_char_id,
+                                string_agg(charass_value, ',') AS charass_value
+                           FROM addr
+                           JOIN charass ON charass_target_type = 'ADDR'
+                                       AND addr_id = charass_target_id
+                          WHERE charass_char_id IN (-1
+                                                    &lt;? foreach("char_id_list_list") ?>
+                                                      ,&lt;? value("char_id_list_list") ?>
+                                                    &lt;? endforeach ?>
+                                                   )
+                          GROUP BY charass_target_id, charass_char_id),
+            chardate AS (SELECT charass_target_id, charass_char_id,
+                                MIN(charass_value::DATE) AS charass_value
+                           FROM addr
+                           JOIN charass ON charass_target_type = 'ADDR'
+                                       AND addr_id = charass_target_id
+                          WHERE charass_char_id IN (-1
+                                                    &lt;? foreach("char_id_date_list") ?>
+                                                      ,&lt;? value("char_id_date_list") ?>
+                                                    &lt;? endforeach ?>
+                                                   )
+                          GROUP BY charass_target_id, charass_char_id)
+SELECT * 
 FROM (
 SELECT 'Contact' AS type, cntct_first_name AS first,
        cntct_last_name AS last, crmacct_number, getcontactphone(cntct_id, 'Office') AS phone,
@@ -69,20 +102,17 @@ WHERE addr_id NOT IN (
             UNION SELECT warehous_addr_id FROM whsinfo WHERE (warehous_addr_id IS NOT NULL))
 ) data
 &lt;? foreach("char_id_text_list") ?>
-  LEFT OUTER JOIN charass charass_alias&lt;? literal("char_id_text_list") ?> ON ((charass_alias&lt;? literal("char_id_text_list") ?>.charass_target_type='ADDR') 
-                                                                    AND  (charass_alias&lt;? literal("char_id_text_list") ?>.charass_target_id=addr_id)
+  LEFT OUTER JOIN chartext charass_alias&lt;? literal("char_id_text_list") ?> ON ((charass_alias&lt;? literal("char_id_text_list") ?>.charass_target_id=addr_id)
                                                                     AND  (charass_alias&lt;? literal("char_id_text_list") ?>.charass_char_id=&lt;? value("char_id_text_list") ?>))
   LEFT OUTER JOIN char char_alias&lt;? literal("char_id_text_list") ?> ON (charass_alias&lt;? literal("char_id_text_list") ?>.charass_char_id=char_alias&lt;? literal("char_id_text_list") ?>.char_id)
 &lt;? endforeach ?>
 &lt;? foreach("char_id_list_list") ?>
-  LEFT OUTER JOIN charass charass_alias&lt;? literal("char_id_list_list") ?> ON ((charass_alias&lt;? literal("char_id_list_list") ?>.charass_target_type='ADDR') 
-                                                                    AND  (charass_alias&lt;? literal("char_id_list_list") ?>.charass_target_id=addr_id)
+  LEFT OUTER JOIN charlist charass_alias&lt;? literal("char_id_list_list") ?> ON ((charass_alias&lt;? literal("char_id_list_list") ?>.charass_target_id=addr_id)
                                                                     AND  (charass_alias&lt;? literal("char_id_list_list") ?>.charass_char_id=&lt;? value("char_id_list_list") ?>))
   LEFT OUTER JOIN char char_alias&lt;? literal("char_id_list_list") ?> ON (charass_alias&lt;? literal("char_id_list_list") ?>.charass_char_id=char_alias&lt;? literal("char_id_list_list") ?>.char_id)
 &lt;? endforeach ?>
 &lt;? foreach("char_id_date_list") ?>
-  LEFT OUTER JOIN charass charass_alias&lt;? literal("char_id_date_list") ?> ON ((charass_alias&lt;? literal("char_id_date_list") ?>.charass_target_type='ADDR') 
-                                                                    AND  (charass_alias&lt;? literal("char_id_date_list") ?>.charass_target_id=addr_id)
+  LEFT OUTER JOIN chardate charass_alias&lt;? literal("char_id_date_list") ?> ON ((charass_alias&lt;? literal("char_id_date_list") ?>.charass_target_id=addr_id)
                                                                     AND  (charass_alias&lt;? literal("char_id_date_list") ?>.charass_char_id=&lt;? value("char_id_date_list") ?>))
   LEFT OUTER JOIN char char_alias&lt;? literal("char_id_date_list") ?> ON (charass_alias&lt;? literal("char_id_date_list") ?>.charass_char_id=char_alias&lt;? literal("char_id_date_list") ?>.char_id)
 &lt;? endforeach ?>
