@@ -35,7 +35,7 @@ BEGIN
      SELECT vodist_taxtype_id, SUM(vodist_amount) as vodist_amount
      FROM vodist
      WHERE ((vodist_vohead_id = pVoHeadid)
-       AND (vodist_taxtype_id > 0))
+       AND (vodist_tax_id < 0))
      GROUP BY vodist_taxtype_id
    LOOP  
      -- Determine the Tax details for the Voucher Tax Zone/Types returned
