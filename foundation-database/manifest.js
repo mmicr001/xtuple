@@ -1600,6 +1600,7 @@
     "public/tables/metasql/employees-detail.mql",
     "public/tables/metasql/events-detail.mql",
     "public/tables/metasql/expiredInventory-detail.mql",
+    "public/tables/metasql/forwardUpdate-invbal.mql",
     "public/tables/metasql/freightPrices-detail.mql",
     "public/tables/metasql/frozenItemSites-detail.mql",
     "public/tables/metasql/glseries-checkeditable.mql",

@@ -1,0 +1,62 @@
+-- Group: forwardUpdate
+-- Name: invbal
+-- Notes:
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT forwardUpdateInvbalance(invbal_id)
+  FROM
+  (SELECT (SELECT invbal_id
+             FROM invbal
+             JOIN period ON invbal_period_id=period_id
+            WHERE invbal_itemsite_id=itemsite_id
+            ORDER BY period_start DESC
+            LIMIT 1)
+     FROM itemsite
+     JOIN item ON itemsite_item_id=item_id
+     JOIN site() ON itemsite_warehous_id=warehous_id
+     JOIN costcat ON itemsite_costcat_id=costcat_id
+     JOIN classcode ON item_classcode_id=classcode_id
+     JOIN uom ON item_inv_uom_id=uom_id
+    WHERE (itemsite_active AND itemStockable(item_id)
+    <? if exists("item_id") ?>
+      AND item_id=<? value("item_id") ?>
+    <? endif ?>
+    <? if exists("warehous_id") ?>
+      AND warehous_id=<? value("warehous_id") ?>
+    <? endif ?>
+    <? if exists("costcat_id") ?>
+      AND costcat_id=<? value("costcat_id") ?>
+    <? endif ?>
+    <? if exists("costcat_pattern") ?>
+      AND costcat_code ~ <? value("costcat_pattern") ?>
+    <? endif ?>
+    <? if exists("classcode_id") ?>
+      AND classcode_id=<? value("classcode_id") ?>
+    <? endif ?>
+    <? if exists("classcode_pattern") ?>
+      AND classcode_code ~ <? value("classcode_pattern") ?>
+    <? endif ?>
+    <? if exists("itemgrp_id") ?>
+      AND item_id IN (SELECT itemgrpitem_item_id
+                        FROM itemgrpitem
+                       WHERE itemgrpitem_itemgrp_id=<? value("itemgrp_id") ?>)
+    <? endif ?>
+    <? if exists("itemgrp_pattern") ?>
+      AND item_id IN (SELECT itemgrpitem_item_id
+                        FROM itemgrpitem, itemgrp
+                       WHERE itemgrpitem_itemgrp_id=itemgrp_id
+                         AND itemgrp_name ~ <? value("itemgrp_pattern") ?>)
+    <? endif ?>
+    <? if exists("abc_class") ?>
+     <? foreach("abc_class") ?>
+      <? if isfirst("abc_class") ?>
+      AND (itemsite_abcclass=<? value("abc_class") ?>
+      <? else ?>
+       OR itemsite_abcclass=<? value("abc_class") ?>
+      <? endif ?>
+      <? if islast("abc_class") ?>
+        )
+      <? endif ?>
+     <? endforeach ?>
+    <? endif ?>)) invbal;
