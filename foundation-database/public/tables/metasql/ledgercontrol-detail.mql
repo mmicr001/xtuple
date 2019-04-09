@@ -3,8 +3,6 @@
 -- Notes: query to log ledger control values
 --        adds the child accounts
 
-SELECT forwardUpdateAccount(accnt_id)
-  FROM accnt;
 WITH subledgers AS
 (
   WITH trialbal AS
