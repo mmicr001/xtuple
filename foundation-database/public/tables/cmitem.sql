@@ -46,7 +46,9 @@ SELECT
   xt.add_constraint('cmitem', 'cmitem_cmitem_qty_uom_id_fkey',
                     'FOREIGN KEY (cmitem_qty_uom_id) REFERENCES uom(uom_id)', 'public'),
   xt.add_constraint('cmitem', 'cmitem_cmitem_taxtype_id_fkey',
-                    'FOREIGN KEY (cmitem_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+                    'FOREIGN KEY (cmitem_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
+  xt.add_constraint('cmitem', 'cmitem_misc_check',
+                    $$CHECK ((cmitem_itemsite_id IS NOT NULL AND COALESCE(cmitem_number, '') = '' AND COALESCE(cmitem_descrip, '') = '' AND cmitem_salescat_id IS NULL) OR (cmitem_itemsite_id IS NULL AND COALESCE(cmitem_number, '') != '' AND COALESCE(cmitem_descrip, '') != '' AND cmitem_salescat_id IS NOT NULL))$$, 'public');
 
 -- drop legacy constraints
 ALTER TABLE cmitem ALTER COLUMN cmitem_qty_uom_id DROP NOT NULL;
