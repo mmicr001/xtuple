@@ -1,5 +1,6 @@
 DO $$
 DECLARE
+  _fixcm      BOOLEAN;
   _badinvc    BOOLEAN;
   _badcm      BOOLEAN;
   _badtext    TEXT;
@@ -7,13 +8,28 @@ DECLARE
 
 BEGIN
 
+  _fixcm :=  EXISTS(SELECT 1
+                      FROM pg_attribute
+                      JOIN pg_class ON attrelid = pg_class.oid
+                      JOIN pg_namespace ON relnamespace = pg_namespace.oid
+                     WHERE nspname = 'public'
+                       AND relname = 'cmitem'
+                       AND attname = 'cmitem_expcat_id'
+                       AND relkind = 'r'
+                       AND attnum > 0);
+
+
   _badinvc := EXISTS(SELECT 1
                        FROM invcitem
                       WHERE COALESCE(invcitem_item_id, -1) < 0 AND COALESCE(invcitem_salescat_id, -1) < 0);
 
-  _badcm := EXISTS(SELECT 1
-                     FROM cmitem
-                    WHERE cmitem_itemsite_id IS NULL AND cmitem_salescat_id IS NULL);
+  IF _fixcm THEN
+    _badcm := EXISTS(SELECT 1
+                       FROM cmitem
+                      WHERE cmitem_itemsite_id IS NULL AND cmitem_salescat_id IS NULL);
+  ELSE
+    _badcm := FALSE;
+  END IF;
 
   IF _badinvc AND _badcm THEN
     _badtext := 'invoice/sales credit';
@@ -52,17 +68,19 @@ BEGIN
    WHERE COALESCE(invcitem_item_id, -1) < 0
      AND (COALESCE(invcitem_salescat_id, -1) < 0 OR COALESCE(invcitem_number, '') = '' OR COALESCE(invcitem_descrip, '') = '');
 
-  UPDATE cmitem
-     SET cmitem_number = COALESCE(NULLIF(COALESCE(cmitem_number, cmitem_descrip, ''), ''), 'BAD DATA'),
-         cmitem_descrip = COALESCE(NULLIF(COALESCE(cmitem_descrip, cmitem_number, ''), ''),
-                                   'This is an invalid sales credit item with no item or ' || 
-                                   CASE WHEN cmitem_salescat_id IS NULL 
-                                        THEN 'sales category'
-                                        ELSE 'misc number'
-                                    END),
-         cmitem_salescat_id = COALESCE(cmitem_salescat_id, _salescatid)
-   WHERE cmitem_itemsite_id IS NULL 
-     AND (cmitem_salescat_id IS NULL OR COALESCE(cmitem_number, '') = '' OR COALESCE(cmitem_descrip, '') = '');
+  IF _fixcm THEN
+    UPDATE cmitem
+       SET cmitem_number = COALESCE(NULLIF(COALESCE(cmitem_number, cmitem_descrip, ''), ''), 'BAD DATA'),
+           cmitem_descrip = COALESCE(NULLIF(COALESCE(cmitem_descrip, cmitem_number, ''), ''),
+                                     'This is an invalid sales credit item with no item or ' || 
+                                     CASE WHEN cmitem_salescat_id IS NULL 
+                                          THEN 'sales category'
+                                          ELSE 'misc number'
+                                      END),
+           cmitem_salescat_id = COALESCE(cmitem_salescat_id, _salescatid)
+     WHERE cmitem_itemsite_id IS NULL 
+       AND (cmitem_salescat_id IS NULL OR COALESCE(cmitem_number, '') = '' OR COALESCE(cmitem_descrip, '') = '');
+  END IF;
 
 END
 $$ language plpgsql;
