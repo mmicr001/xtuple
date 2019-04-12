@@ -640,6 +640,14 @@
           "type": "OpportunityRelation",
           "column": "cohead_ophead_id"
         }
+      },
+      {
+        "name": "project",
+        "toOne": {
+          "isNested": true,
+          "type": "ProjectRelation",
+          "column": "cohead_prj_id"
+        }
       }
     ],
     "isSystem": true

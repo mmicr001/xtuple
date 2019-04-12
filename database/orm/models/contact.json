@@ -246,6 +246,14 @@
           "column": "cntct_number",
           "inverse": "contact"
         }
+      },
+      {
+        "name": "projectRelations",
+        "toMany": {
+          "type": "ProjectRelation",
+          "column": "cntct_number",
+          "inverse": "contact"
+        }
       }
     ],
     "isSystem": true

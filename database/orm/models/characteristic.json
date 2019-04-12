@@ -156,6 +156,20 @@
           "type": "Boolean",
           "column": "char_opportunity"
         }
+      },
+      {
+        "name": "isProjects",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_projects"
+        }
+      },
+      {
+        "name": "isTasks",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_tasks"
+        }
       }
     ],
     "isSystem": true,

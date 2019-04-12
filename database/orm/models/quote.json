@@ -532,6 +532,13 @@
           "inverse": "source",
           "required": true
         }
+      },
+      {
+        "name": "project",
+        "attr": {
+          "type": "Number",
+          "column": "quhead_prj_id"
+        }
       }
     ],
     "isSystem": true
