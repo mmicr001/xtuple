@@ -150,7 +150,6 @@
     "xt/tables/pkguiform.sql",
     "xt/tables/printer.sql",
     "xt/tables/prjext.sql",
-    "xt/tables/rptdef.sql",
     "xt/tables/objtype.sql",
     "xt/tables/ordtype.sql",
     "xt/tables/userpref.sql",
@@ -253,6 +252,7 @@
     "share_users/tables/sharetype.sql",
 
     "xt/patches/remove_dashboard_anything.sql",
-    "xt/patches/rm_workflow.sql"
+    "xt/patches/rm_workflow.sql",
+    "xt/patches/remove_mobile_client.sql"
   ]
 }

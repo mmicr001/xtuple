@@ -80,10 +80,6 @@ white:true*/
 
   });
 
-  SYS.ReportDefinition = XM.SimpleModel.extend({
-    recordType: 'SYS.ReportDefinition'
-  });
-
   /**
     @class
 
@@ -325,9 +321,4 @@ white:true*/
 
   });
 
-  SYS.ReportDefinitionCollection = XM.Collection.extend({
-
-    model: SYS.ReportDefinition
-
-  });
 }());

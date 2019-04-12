@@ -11,7 +11,6 @@
     "xt/functions/po_tax_total.sql",
     "xt/functions/po_total.sql",
     "xt/tables/poemlprofile.sql",
-    "xt/tables/rptdef.sql",
     "xt/views/itemsrcmfg.sql",
     "xt/views/poheadinfo.sql",
     "xt/views/poiteminfo.sql",
