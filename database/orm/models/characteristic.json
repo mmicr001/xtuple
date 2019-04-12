@@ -170,6 +170,13 @@
           "type": "Boolean",
           "column": "char_tasks"
         }
+      },
+      {
+        "name": "isPurchaseOrders",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_purchaseorders"
+        }
       }
     ],
     "isSystem": true,
