@@ -6,7 +6,6 @@ var _ = require('underscore'),
   async = require('async'),
   buildDatabase = require("./build_database"),
   buildDictionary = require("./build_dictionary"),
-  buildClient = require("./build_client").buildClient,
   defaultExtensions = require("./util/default_extensions").extensions,
   initDatabase = require("./util/init_database").initDatabase,
   inspectDatabaseExtensions = require("./util/inspect_database").inspectDatabaseExtensions,
@@ -68,11 +67,7 @@ var _ = require('underscore'),
         return;
       },
       function (done) {
-        // step 2: build the client
-        buildClient(specs, done);
-      },
-      function (done) {
-        // step 3: build the database
+        // step 2: build the database
         buildDatabase.buildDatabase(specs, creds, function (databaseErr, databaseRes) {
           if (databaseErr) {
             buildAllCallback(databaseErr);
@@ -89,7 +84,7 @@ var _ = require('underscore'),
         });
       },
       function (done) {
-        // step 4: import all dictionary files
+        // step 3: import all dictionary files
         if (specs[0].clientOnly || specs[0].databaseOnly) {
           // don't build dictionaries if the user doesn't want us to
           console.log("Not importing the dictionaries");

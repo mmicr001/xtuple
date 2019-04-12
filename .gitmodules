@@ -1,21 +1,3 @@
-[submodule "enyo-client/application/enyo"]
-  path = enyo-client/application/enyo
-  url = https://github.com/xtuple/enyo.git
-[submodule "lib/onyx"]
-  path = lib/onyx
-  url = https://github.com/enyojs/onyx.git
-[submodule "lib/layout"]
-  path = lib/layout
-  url = https://github.com/enyojs/layout.git
-[submodule "lib/enyo-x/enyo"]
-  path = lib/enyo-x/enyo
-  url = https://github.com/xtuple/enyo.git
-[submodule "lib/enyo-x/lib/onyx"]
-  path = lib/enyo-x/lib/onyx
-  url = https://github.com/enyojs/onyx.git
-[submodule "lib/enyo-x/lib/layout"]
-  path = lib/enyo-x/lib/layout
-  url = https://github.com/enyojs/layout.git
 [submodule "lib/backbone-x/lib/backbone"]
   path = lib/backbone-x/lib/backbone
   url = https://github.com/documentcloud/backbone.git
@@ -28,9 +10,6 @@
 [submodule "lib/backbone-x/lib/JSON-Patch"]
   path = lib/backbone-x/lib/JSON-Patch
   url = https://github.com/xtuple/JSON-Patch.git
-[submodule "lib/enyo-x/lib/font-onyx"]
-	path = lib/enyo-x/lib/font-onyx
-	url = https://github.com/xtuple/font-onyx.git
 [submodule "lib/tools/lib/async"]
 	path = lib/tools/lib/async
 	url = https://github.com/caolan/async.git
