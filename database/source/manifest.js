@@ -236,6 +236,7 @@
     "public/tables/schemaord.sql",
     "grant_roles.sql",
     "update_version.sql",
+    "priv.sql",
 
     "xt/trigger_functions/refresh_obj_share_cache.sql",
     "xt/trigger_functions/sharetype_did_change.sql",
