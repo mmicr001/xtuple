@@ -1475,6 +1475,27 @@
         }
       }
     ],
+    "extensions": [
+      {
+        "table": "xt.prjtypeext",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "prjtypeext_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "emailProfile",
+            "toOne": {
+              "type": "ProjectEmailProfile",
+              "column": "prjtypeext_emlprofile_id"
+            }
+          }
+        ]
+      }
+    ],
     "isSystem": true
   },
   {

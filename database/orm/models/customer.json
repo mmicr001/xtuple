@@ -345,27 +345,97 @@
           "column": "obj_uuid",
           "inverse": "uuid"
         }
+      },
+      {
+        "name": "quoteRelations",
+        "toMany": {
+          "type": "QuoteRelation",
+          "column": "cust_number",
+          "inverse": "customer"
+        }
+      },
+      {
+        "name": "salesOrderRelations",
+        "toMany": {
+          "type": "SalesOrderRelation",
+          "column": "cust_number",
+          "inverse": "customer"
+        }
       }
     ],
-    "extensions": [{
-      "table": "xt.custcustemlprofile",
-      "isExtension": true,
-      "relations": [
-        {
-          "column": "custcustemlprofile_cust_id",
-          "inverse": "id"
-        }
-      ],
-      "properties": [
-        {
-          "name": "emailProfile",
-          "toOne": {
-            "type": "CustomerEmailProfile",
-            "column": "custcustemlprofile_custemlprofile_id"
+    "extensions": [
+      {
+        "table": "crmacct",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "crmacct_cust_id",
+            "inverse": "id"
           }
-        }
-      ]
-    }],
+        ],
+        "properties": [
+          {
+            "name": "account",
+            "toOne": {
+              "isNested": true,
+              "type": "AccountRelation",
+              "column": "crmacct_id"
+            }
+          },
+          {
+            "name": "contactRelations",
+            "toMany": {
+              "type": "CustomerContactRelation",
+              "column": "crmacct_number",
+              "inverse": "account"
+            }
+          },
+          {
+            "name": "incidentRelations",
+            "toMany": {
+              "type": "CustomerIncidentRelation",
+              "column": "crmacct_number",
+              "inverse": "account"
+            }
+          },
+          {
+            "name": "opportunityRelations",
+            "toMany": {
+              "type": "CustomerOpportunityRelation",
+              "column": "crmacct_number",
+              "inverse": "account"
+            }
+          },
+          {
+            "name": "toDoRelations",
+            "toMany": {
+              "type": "CustomerToDoRelation",
+              "column": "crmacct_number",
+              "inverse": "account"
+            }
+          }
+        ]
+      },
+      {
+        "table": "xt.custcustemlprofile",
+        "isExtension": true,
+        "relations": [
+          {
+            "column": "custcustemlprofile_cust_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "emailProfile",
+            "toOne": {
+              "type": "CustomerEmailProfile",
+              "column": "custcustemlprofile_custemlprofile_id"
+            }
+          }
+        ]
+      }
+    ],
     "isSystem": true
   },
   {
@@ -1777,6 +1847,25 @@
       }
     ],
     "extensions": [
+      {
+        "table": "crmacct",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "crmacct_cust_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "account",
+            "attr": {
+             "type": "String",
+             "column": "crmacct_number"
+            }
+          }
+        ]
+      },
       {
         "table": "shiptoinfo",
         "relations": [

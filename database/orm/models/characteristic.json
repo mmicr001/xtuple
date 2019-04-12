@@ -177,6 +177,13 @@
           "type": "Boolean",
           "column": "char_purchaseorders"
         }
+      },
+      {
+        "name": "isSalesOrders",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_salesorders"
+        }
       }
     ],
     "isSystem": true,
