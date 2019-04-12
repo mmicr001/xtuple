@@ -216,6 +216,14 @@
           "column": "ophead_id",
           "inverse": "opportunity"
         }
+      },
+      {
+        "name": "toDoRelations",
+        "toMany": {
+          "type": "ToDoRelation",
+          "column": "ophead_number",
+          "inverse": "opportunity"
+        }
       }
     ],
     "isSystem": true

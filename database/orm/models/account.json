@@ -199,6 +199,30 @@
           "column":"crmacct_id",
           "inverse":"account"
         }
+      },
+      {
+        "name": "incidentRelations",
+        "toMany": {
+          "type": "IncidentRelation",
+          "column": "crmacct_number",
+          "inverse": "account"
+        }
+      },
+      {
+        "name": "opportunityRelations",
+        "toMany": {
+          "type": "OpportunityRelation",
+          "column": "crmacct_number",
+          "inverse": "account"
+        }
+      },
+      {
+        "name": "toDoRelations",
+        "toMany": {
+          "type": "ToDoRelation",
+          "column": "crmacct_number",
+          "inverse": "account"
+        }
       }
     ],
     "isSystem":true

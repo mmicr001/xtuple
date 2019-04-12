@@ -231,6 +231,14 @@
           "type": "String",
           "column": "obj_uuid"
         }
+      },
+      {
+        "name": "toDoRelations",
+        "toMany": {
+          "type": "ToDoRelation",
+          "column": "incdt_number",
+          "inverse": "incident"
+        }
       }
     ],
     "isSystem": true

@@ -142,6 +142,20 @@
           "column": "char_employees",
           "required": true
         }
+      },
+      {
+        "name": "isIncidents",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_incidents"
+        }
+      },
+      {
+        "name": "isOpportunities",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_opportunity"
+        }
       }
     ],
     "isSystem": true,

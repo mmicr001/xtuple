@@ -632,6 +632,14 @@
           "column": "obj_uuid",
           "inverse": "uuid"
         }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "cohead_ophead_id"
+        }
       }
     ],
     "isSystem": true
@@ -1442,6 +1450,14 @@
           "type": "ShareUsers",
           "column": "obj_uuid",
           "inverse": "uuid"
+        }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "cohead_ophead_id"
         }
       }
     ],
