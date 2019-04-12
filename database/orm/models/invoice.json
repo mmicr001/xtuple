@@ -1136,6 +1136,13 @@
           "column": "invcitem_id",
           "inverse": "parent"
         }
+      },
+      {
+        "name": "salesCategory",
+        "toOne": {
+          "type": "SalesCategory",
+          "column": "invcitem_salescat_id"
+        }
       }
     ],
     "isNestedOnly": true,
