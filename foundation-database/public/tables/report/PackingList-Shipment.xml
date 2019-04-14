@@ -3,7 +3,8 @@
  <title>Packing List (Shipment)</title>
  <name>PackingList-Shipment</name>
  <description>Non-Hybrid version - driven only by shiphead_id parameter - Packing List showing the contents of a particular shipment - Shows RA# if SO is a replacement order for and RA</description>
- <parameter default="324" active="true" listtype="static" type="string" name="shiphead_id">
+ <defaultFont family="Ubuntu" size="11"/>
+ <parameter active="true" default="324" listtype="static" type="string" name="shiphead_id">
   <description></description>
  </parameter>
  <grid>
@@ -101,9 +102,6 @@ SELECT shiphead_number, 'T/O #:' AS ordertype,
        END AS item_number,
        formatitemsitebarcode(itemsite_id) AS item_barcode,
        formatsoitembarcode(coitem_id) AS orderitem_barcode,
---     In 2.3 replaced the next line:
---     uom_name,
---     with:
        (select uom_name from uom where uom_id = coitem_qty_uom_id) AS uom_name,
        itemsellinguom(item_id) AS shipuom,
        CASE WHEN (coitem_custpn != '' AND itemalias_usedescrip=TRUE) THEN itemalias_descrip1
@@ -157,14 +155,15 @@ SELECT shiphead_number, 'T/O #:' AS ordertype,
        getPacklistCharName(shipitem_shiphead_id, coitem_id) AS char_name,
        getPacklistCharValue(shipitem_shiphead_id, coitem_id) AS char_value
   FROM shipitem
-       JOIN coitem ON (coitem_id=shipitem_orderitem_id)
-       JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
-       JOIN item ON (item_id=itemsite_item_id)
-       JOIN uom ON (uom_id=item_inv_uom_id)
-       LEFT OUTER JOIN itemalias ON (itemalias_item_id=item_id AND itemalias_number=coitem_custpn) 
- WHERE ( (coitem_status &lt;> 'X')
-   AND (shipitem_shiphead_id=&lt;? value("shiphead_id") ?>)
-)
+       JOIN shiphead ON shipitem_shiphead_id = shiphead_id AND shiphead_order_type = 'SO'
+       JOIN coitem ON coitem_id=shipitem_orderitem_id
+       JOIN itemsite ON itemsite_id=coitem_itemsite_id
+       JOIN item ON item_id=itemsite_item_id
+       JOIN uom ON uom_id=item_inv_uom_id
+       LEFT OUTER JOIN itemalias ON itemalias_item_id=item_id AND itemalias_number=coitem_custpn
+ WHERE coitem_status &lt;> 'X'
+   AND shipitem_shiphead_id=&lt;? value("shiphead_id") ?>
+
 &lt;? if exists("MultiWhs") ?>
 UNION
 SELECT 2 AS groupby,
@@ -199,17 +198,17 @@ SELECT 2 AS groupby,
        '' AS char_name,
        '' AS char_value
   FROM itemsite, item, toitem, tohead, shipitem, shiphead, uom
- WHERE ((toitem_item_id=item_id)
-   AND  (item_inv_uom_id=uom_id)
-   AND  (item_id=itemsite_item_id)
-   AND  (toitem_tohead_id=tohead_id)
-   AND  (toitem_status &lt;> 'X')
-   AND  (tohead_src_warehous_id=itemsite_warehous_id)
-   AND  (toitem_id=shipitem_orderitem_id)
-   AND  (shipitem_shiphead_id=shiphead_id)
-   AND  (shiphead_order_type='TO')
-   AND  (shiphead_id=&lt;? value("shiphead_id") ?>)
-)
+ WHERE toitem_item_id=item_id
+   AND item_inv_uom_id=uom_id
+   AND item_id=itemsite_item_id
+   AND toitem_tohead_id=tohead_id
+   AND toitem_status &lt;> 'X'
+   AND tohead_src_warehous_id=itemsite_warehous_id
+   AND toitem_id=shipitem_orderitem_id
+   AND shipitem_shiphead_id=shiphead_id
+   AND shiphead_order_type='TO'
+   AND shiphead_id=&lt;? value("shiphead_id") ?>
+
 &lt;? endif ?>
 ORDER BY sortline, sortsubline;</sql>
  </querysource>
@@ -288,6 +287,7 @@ select
    <left/>
    <vcenter/>
    <string>Shipment Packing List</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -304,6 +304,7 @@ select
    <left/>
    <vcenter/>
    <string>Item Description</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -320,6 +321,7 @@ select
    <left/>
    <vcenter/>
    <string>Shipment #:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -336,6 +338,7 @@ select
    <hcenter/>
    <vcenter/>
    <string>Verified</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -387,6 +390,7 @@ select
    <left/>
    <vcenter/>
    <string>Terms:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -429,6 +433,7 @@ select
    <left/>
    <vcenter/>
    <string>Customer P/O #:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -445,6 +450,7 @@ select
    <left/>
    <vcenter/>
    <string>Sched. Date:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -461,6 +467,7 @@ select
    <left/>
    <vcenter/>
    <string>Order Date:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -477,6 +484,7 @@ select
    <left/>
    <top/>
    <string>Attention:</string>
+   <buddy></buddy>
   </label>
   <barcode>
    <rect>
@@ -566,6 +574,7 @@ select
    <hcenter/>
    <vcenter/>
    <string>UOM</string>
+   <buddy></buddy>
   </label>
   <text>
    <rect>
@@ -602,6 +611,7 @@ select
    <left/>
    <vcenter/>
    <string>Bill To:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -701,6 +711,7 @@ select
    <left/>
    <vcenter/>
    <string>Ship Via:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -717,6 +728,7 @@ select
    <left/>
    <vcenter/>
    <string>Order Line</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -733,6 +745,7 @@ select
    <right/>
    <vcenter/>
    <string>Ordered</string>
+   <buddy></buddy>
   </label>
   <barcode>
    <rect>
@@ -803,6 +816,7 @@ select
    <right/>
    <vcenter/>
    <string>Shipped</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -819,6 +833,7 @@ select
    <left/>
    <vcenter/>
    <string>Item Number</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -854,6 +869,7 @@ select
    <left/>
    <vcenter/>
    <string>Ship To:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -909,6 +925,7 @@ select
    <left/>
    <vcenter/>
    <string>Customer #:</string>
+   <buddy></buddy>
   </label>
  </rpthead>
  <section>
@@ -1047,6 +1064,7 @@ select
      <left/>
      <vcenter/>
      <string>Status:</string>
+     <buddy></buddy>
     </label>
     <field>
      <rect>
@@ -1258,6 +1276,7 @@ select
      <left/>
      <vcenter/>
      <string>Notes:</string>
+     <buddy></buddy>
     </label>
    </foot>
   </group>
@@ -1340,6 +1359,7 @@ select
    <right/>
    <top/>
    <string>Page:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -1356,6 +1376,7 @@ select
    <right/>
    <top/>
    <string>Print Date: </string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -1432,6 +1453,7 @@ select
    <left/>
    <vcenter/>
    <string>Completed By:</string>
+   <buddy></buddy>
   </label>
   <line>
    <xstart>540</xstart>
@@ -1455,6 +1477,7 @@ select
    <left/>
    <vcenter/>
    <string>Checked By:</string>
+   <buddy></buddy>
   </label>
   <line>
    <xstart>160</xstart>
