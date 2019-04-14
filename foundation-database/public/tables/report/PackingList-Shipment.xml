@@ -3,7 +3,6 @@
  <title>Packing List (Shipment)</title>
  <name>PackingList-Shipment</name>
  <description>Non-Hybrid version - driven only by shiphead_id parameter - Packing List showing the contents of a particular shipment - Shows RA# if SO is a replacement order for and RA</description>
- <defaultFont family="Ubuntu" size="11"/>
  <parameter active="true" default="324" listtype="static" type="string" name="shiphead_id">
   <description></description>
  </parameter>
@@ -287,7 +286,6 @@ select
    <left/>
    <vcenter/>
    <string>Shipment Packing List</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -304,7 +302,6 @@ select
    <left/>
    <vcenter/>
    <string>Item Description</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -321,7 +318,6 @@ select
    <left/>
    <vcenter/>
    <string>Shipment #:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -338,7 +334,6 @@ select
    <hcenter/>
    <vcenter/>
    <string>Verified</string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -390,7 +385,6 @@ select
    <left/>
    <vcenter/>
    <string>Terms:</string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -433,7 +427,6 @@ select
    <left/>
    <vcenter/>
    <string>Customer P/O #:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -450,7 +443,6 @@ select
    <left/>
    <vcenter/>
    <string>Sched. Date:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -467,7 +459,6 @@ select
    <left/>
    <vcenter/>
    <string>Order Date:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -484,7 +475,6 @@ select
    <left/>
    <top/>
    <string>Attention:</string>
-   <buddy></buddy>
   </label>
   <barcode>
    <rect>
@@ -574,7 +564,6 @@ select
    <hcenter/>
    <vcenter/>
    <string>UOM</string>
-   <buddy></buddy>
   </label>
   <text>
    <rect>
@@ -611,7 +600,6 @@ select
    <left/>
    <vcenter/>
    <string>Bill To:</string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -711,7 +699,6 @@ select
    <left/>
    <vcenter/>
    <string>Ship Via:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -728,7 +715,6 @@ select
    <left/>
    <vcenter/>
    <string>Order Line</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -745,7 +731,6 @@ select
    <right/>
    <vcenter/>
    <string>Ordered</string>
-   <buddy></buddy>
   </label>
   <barcode>
    <rect>
@@ -816,7 +801,6 @@ select
    <right/>
    <vcenter/>
    <string>Shipped</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -833,7 +817,6 @@ select
    <left/>
    <vcenter/>
    <string>Item Number</string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -869,7 +852,6 @@ select
    <left/>
    <vcenter/>
    <string>Ship To:</string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -925,7 +907,6 @@ select
    <left/>
    <vcenter/>
    <string>Customer #:</string>
-   <buddy></buddy>
   </label>
  </rpthead>
  <section>
@@ -1064,7 +1045,6 @@ select
      <left/>
      <vcenter/>
      <string>Status:</string>
-     <buddy></buddy>
     </label>
     <field>
      <rect>
@@ -1276,7 +1256,6 @@ select
      <left/>
      <vcenter/>
      <string>Notes:</string>
-     <buddy></buddy>
     </label>
    </foot>
   </group>
@@ -1359,7 +1338,6 @@ select
    <right/>
    <top/>
    <string>Page:</string>
-   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -1376,7 +1354,6 @@ select
    <right/>
    <top/>
    <string>Print Date: </string>
-   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -1453,7 +1430,6 @@ select
    <left/>
    <vcenter/>
    <string>Completed By:</string>
-   <buddy></buddy>
   </label>
   <line>
    <xstart>540</xstart>
@@ -1477,7 +1453,6 @@ select
    <left/>
    <vcenter/>
    <string>Checked By:</string>
-   <buddy></buddy>
   </label>
   <line>
    <xstart>160</xstart>
