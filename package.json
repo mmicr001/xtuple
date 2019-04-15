@@ -18,8 +18,6 @@
     "ejs": "^2.5.8",
     "express": "3.1.x",
     "json-patch": "git://github.com/xtuple/JSON-Patch.git",
-    "less": "1.5.0",
-    "node-forge": "^0.7.5",
     "nodemailer": "0.3.x",
     "oauth2orize": "0.1.x",
     "oauth2orize-jwt-bearer": "0.1.x",
@@ -29,15 +27,10 @@
     "passport-local": "0.1.x",
     "passport-oauth2-client-password": "0.1.x",
     "passport-oauth2-jwt-bearer": "0.1.x",
-    "paynode": "0.3.6",
     "pegjs": "0.8.x",
     "pg": "^4.5.7",
-    "request": "^2.85.0",
-    "rimraf": "^2.6.2",
     "rjson": "~0.2.4",
-    "socket.io": "^2.1.0",
-    "underscore": "^1.8.3",
-    "xtuple-linguist": "0.1.x"
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "chai": "^4.1.0",
