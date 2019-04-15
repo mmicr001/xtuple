@@ -41,6 +41,7 @@
 
     "public/patches/drop_share_users_triggers.sql",
     "public/patches/fixreportgrade.sql",
+    "public/patches/fixlines.sql",
 
     "public/types/_docinfo.sql",
     "public/types/_targetdoc.sql",
