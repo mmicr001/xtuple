@@ -44,7 +44,9 @@ SELECT
   xt.add_constraint('invcitem', 'invcitem_invcitem_rev_accnt_id_fkey',
                     'FOREIGN KEY (invcitem_rev_accnt_id) REFERENCES accnt(accnt_id)', 'public'),
   xt.add_constraint('invcitem', 'invcitem_invcitem_taxtype_id_fkey',
-                    'FOREIGN KEY (invcitem_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public');
+                    'FOREIGN KEY (invcitem_taxtype_id) REFERENCES taxtype(taxtype_id)', 'public'),
+  xt.add_constraint('invcitem', 'invcitem_misc_check',
+                    $$CHECK ((COALESCE(invcitem_item_id, -1) > 0 AND COALESCE(invcitem_number, '') = '' AND COALESCE(invcitem_descrip, '') = '' AND COALESCE(invcitem_salescat_id, -1) < 0) OR (COALESCE(invcitem_item_id, -1) < 0 AND COALESCE(invcitem_number, '') != '' AND COALESCE(invcitem_descrip, '') != '' AND COALESCE(invcitem_salescat_id, -1) > 0))$$, 'public');
 
 ALTER TABLE public.invcitem ENABLE TRIGGER ALL;
 
