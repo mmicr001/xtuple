@@ -729,7 +729,7 @@
     "isNestedOnly": true,
     "isSystem": true
   },{
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseVendorRelation",
     "table": "vendinfo",
@@ -844,7 +844,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseVendorAddress",
     "table": "xt.vendaddrxt",

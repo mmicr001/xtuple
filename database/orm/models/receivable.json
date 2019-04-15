@@ -1,6 +1,6 @@
 [
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "Receivable",
     "table": "xt.aropeninfo",
@@ -181,7 +181,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ReceivableTax",
     "table": "aropentax",
@@ -273,7 +273,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ReceivableListItem",
     "table": "xt.receivable_invoice_return",
@@ -414,7 +414,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ReceivableApplication",
     "table": "xt.receivable_applications",
@@ -506,7 +506,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ReceivableRelation",
     "table": "aropen",

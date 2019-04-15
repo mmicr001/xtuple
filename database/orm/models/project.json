@@ -1,6 +1,6 @@
 [
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "Project",
     "table": "prj",
@@ -375,7 +375,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectComment",
     "table": "comment",
@@ -469,7 +469,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectTaskRelation",
     "table": "prjtask",
@@ -532,7 +532,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskProjectRelation",
     "table": "xt.prjinfo",
@@ -575,7 +575,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskRelation",
     "table": "prjtask",
@@ -630,7 +630,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectRecurrence",
     "table": "recur",
@@ -716,7 +716,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectTask",
     "table": "prjtask",
@@ -978,7 +978,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectTaskAlarm",
     "table": "alarm",
@@ -1093,7 +1093,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectTaskComment",
     "table": "comment",
@@ -1187,7 +1187,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectCharacteristic",
     "table": "charass",
@@ -1245,7 +1245,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "ProjectTaskCharacteristic",
     "table": "charass",
@@ -1303,7 +1303,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskCharacteristic",
     "table": "charass",
@@ -1361,7 +1361,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskListItemCharacteristic",
     "table": "charass",

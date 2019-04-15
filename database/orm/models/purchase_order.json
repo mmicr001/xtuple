@@ -1,6 +1,6 @@
 [
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseEmailProfile",
     "table": "xt.poemlprofile",
@@ -92,7 +92,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseType",
      "table": "potype",
@@ -145,12 +145,12 @@
           "type": "PurchaseEmailProfile",
           "column": "potype_emlprofile_id"
         }
-      }      
+      }
     ],
     "isSystem": true
-  }, 
+  },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrder",
     "table": "xt.poheadinfo",
@@ -577,21 +577,21 @@
           "type": "Money",
           "column": "subtotal"
         }
-      }, 
+      },
       {
         "name": "freightSubtotal",
         "attr": {
           "type": "Money",
           "column": "freight_subtotal"
         }
-      }, 
+      },
       {
         "name": "taxTotal",
         "attr": {
           "type": "Money",
           "column": "tax_total"
         }
-      }, 
+      },
       {
         "name": "total",
         "attr": {
@@ -630,7 +630,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderComment",
     "table": "comment",
@@ -716,7 +716,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderCharacteristic",
     "table": "charass",
@@ -774,7 +774,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderRelation",
     "table": "pohead",
@@ -824,7 +824,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderLine",
     "table": "xt.poiteminfo",
@@ -1091,7 +1091,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderLineCharacteristic",
     "table": "charass",
@@ -1149,7 +1149,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderLineComment",
     "table": "comment",
@@ -1235,7 +1235,7 @@
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderListItem",
     "table": "xt.poheadinfo",
@@ -1290,7 +1290,7 @@
       },
       {
         "name": "site",
-        "toOne": { 
+        "toOne": {
           "type": "SiteRelation",
           "column": "pohead_warehous_id"
          }
@@ -1311,25 +1311,25 @@
       },
       {
         "name": "status",
-        "attr": { 
+        "attr": {
           "type": "String",
           "column": "pohead_status"
          }
       },
       {
         "name": "total",
-        "attr": { 
+        "attr": {
           "type": "Money",
           "column": "total"
          }
       },
       {
         "name": "currency",
-        "toOne": { 
+        "toOne": {
           "type": "Currency",
           "column": "pohead_curr_id"
          }
-      },      
+      },
       {
         "name": "characteristics",
         "toMany": {
@@ -1341,17 +1341,17 @@
       },
       {
         "name": "saved",
-        "attr": { 
+        "attr": {
           "type": "Boolean",
           "column": "pohead_saved",
           "value": true
         }
-      } 
+      }
     ],
     "isSystem": true
   },
   {
-    "context": "purchasing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "PurchaseOrderListItemCharacteristic",
     "table": "charass",

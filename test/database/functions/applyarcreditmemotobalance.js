@@ -9,7 +9,6 @@ var _      = require('underscore'),
 
     var adminCred  = dblib.adminCred,
         datasource = dblib.datasource,
-        aropenfail,
         aropensucceed
         ;
 
@@ -25,7 +24,6 @@ var _      = require('underscore'),
                 " RETURNING aropen_id;";
       datasource.query(sql, adminCred, function (err, res) {
         dblib.assertErrorCode(err, res, "_aropenTrigger", -5);
-        aropenfail = res.rows[0].aropen_id;
         done();
       });
     });
@@ -39,26 +37,7 @@ var _      = require('underscore'),
         done();
       });
     });
-  });
 
-  /*
-    it("should fail with a negative balance", function(done) {
-      var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
-          cred = _.extend({}, adminCred,
-                          { parameters: [ aropenfail ] });
-
-      datasource.query(sql, cred, function (err, res) {
-        dblib.assertErrorCode(err, res, "applyARCreditMemoToBalance", -1);
-        done();
-      });
-    
-    after(function () {
-      var sql = "DELETE FROM aropen WHERE aropen_id=$1;",
-      cred = _.extend({}, adminCred, { parameters: [aropenfail ] });
-
-      datasource.query(sql, cred);
-    });
-*/
     it("should run without error", function (done) {
       var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
           cred = _.extend({}, adminCred,

@@ -87,14 +87,6 @@
           "column": "prospect_number",
           "inverse": "customer"
         }
-      },
-      {
-        "name": "quoteRelations",
-        "toMany": {
-          "type": "QuoteRelation",
-          "column": "prospect_number",
-          "inverse": "customer"
-        }
       }
     ],
     "extensions": [

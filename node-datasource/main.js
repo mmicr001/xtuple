@@ -19,7 +19,6 @@ var express = require('express'),
   "use strict";
 
   var options = require("./lib/options"),
-    authorizeNet,
     fs = require('fs'),
     schemaSessionOptions = {},
     privSessionOptions = {};
@@ -101,7 +100,6 @@ var express = require('express'),
     var dirMap = {
       "/private-extensions": X.path.join(__dirname, "../..", extension.location, "source", extension.name),
       "/xtuple-extensions": X.path.join(__dirname, "../..", extension.location, "source", extension.name),
-      "/core-extensions": X.path.join(__dirname, "../enyo-client/extensions/source", extension.name),
       "npm": X.path.join(__dirname, "../node_modules", extension.name)
     };
 
@@ -113,19 +111,6 @@ var express = require('express'),
       X.err("Cannot get a path for extension: " + extension.name + " Invalid location: " + extension.location);
       return;
     }
-  };
-  var useClientDir = X.useClientDir = function (path, dir) {
-    path = path.indexOf("npm") === 0 ? "/" + path : path;
-    _.each(X.options.datasource.databases, function (orgValue, orgKey, orgList) {
-      app.use("/" + orgValue + path, express.static(dir, { maxAge: 86400000 }));
-    });
-  };
-  var loadExtensionClientside = function (extension) {
-    var extensionLocation = extension.location === "npm" ? extension.location : extension.location + "/source";
-    // add static assets in client folder
-    useClientDir(extensionLocation + "/" + extension.name + "/client", X.path.join(getExtensionDir(extension), "client"));
-    // add static assets in public folder
-    useClientDir(extensionLocation + "/" + extension.name + "/public", X.path.join(getExtensionDir(extension), "public"));
   };
   var loadExtensionServerside = function (extension) {
     var packagePath = X.path.join(getExtensionDir(extension), "package.json");
@@ -175,9 +160,7 @@ var express = require('express'),
           process.exit(1);
           return;
         }
-        useClientDir("/client", "../enyo-client/application");
         _.each(results, loadExtensionServerside);
-        _.each(results, loadExtensionClientside);
       }
     });
   };
@@ -233,8 +216,6 @@ X.versions = {
 var passport = require('passport'),
   oauth2 = require('./oauth2/oauth2'),
   routes = require('./routes/routes'),
-  socketio = require('socket.io'),
-  url = require('url'),
   utils = require('./oauth2/utils'),
   user = require('./oauth2/user'),
   destroySession;
@@ -326,7 +307,6 @@ var server = X.https.createServer(sslOptions, app),
   parseSignedCookie = require('express/node_modules/connect').utils.parseSignedCookie,
   //MemoryStore = express.session.MemoryStore,
   XTPGStore = require('./oauth2/db/connect-xt-pg')(express),
-  io,
   //sessionStore = new MemoryStore(),
   sessionStore = new XTPGStore({ hybridCache: X.options.datasource.requireCache || false }),
   Session = require('express/node_modules/connect/lib/middleware/session').Session,
@@ -478,11 +458,6 @@ app.all('/:org/api/v1alpha1/resources/:model/:id', routes.restRouter);
 app.all('/:org/api/v1alpha1/resources/:model', routes.restRouter);
 app.all('/:org/api/v1alpha1/resources/*', routes.restRouter);
 
-app.post('/:org/browser-api/v1/services/:service/:id', routes.restBrowserRouter);
-app.all('/:org/browser-api/v1/resources/:model/:id', routes.restBrowserRouter);
-app.all('/:org/browser-api/v1/resources/:model', routes.restBrowserRouter);
-app.all('/:org/browser-api/v1/resources/*', routes.restBrowserRouter);
-
 app.get('/', routes.loginForm);
 app.post('/login', routes.login);
 app.get('/forgot-password', routes.forgotPassword);
@@ -493,22 +468,11 @@ app.get('/login/scope', routes.scopeForm);
 app.post('/login/scopeSubmit', routes.scope);
 app.get('/logout', routes.logout);
 app.get('/:org/logout', routes.logout);
-app.get('/:org/app', routes.app);
-app.get('/:org/debug', routes.debug);
 
-app.all('/:org/credit-card', routes.creditCard);
 app.all('/:org/change-password', routes.changePassword);
-app.all('/:org/client/build/client-code', routes.clientCode);
 app.all('/:org/email', routes.email);
-app.all('/:org/export', routes.exxport);
-app.get('/:org/file', routes.file);
-app.get('/:org/generate-report', routes.generateReport);
-app.all('/:org/install-extension', routes.installExtension);
-app.get('/:org/locale', routes.locale);
-app.all('/:org/oauth/generate-key', routes.generateOauthKey);
 app.get('/:org/reset-password', routes.resetPassword);
 app.post('/:org/oauth/revoke-token', routes.revokeOauthToken);
-app.all('/:org/vcfExport', routes.vcfExport);
 
 // Set up the other servers we run on different ports.
 var redirectServer = express();
@@ -549,173 +513,6 @@ destroySession = function (key, val) {
     //X.debug("Session destroied: ", key, " error: ", err);
   });
 };
-
-/**
- * Setup socket.io routes and handlers.
- *
- * Socket.io authorization modeled off of:
- * https://github.com/LearnBoost/socket.io/wiki/Authorizing
- * http://stackoverflow.com/questions/13095418/how-to-use-passport-with-express-and-socket-io
- * https://github.com/jfromaniello/passport.socketio
- */
-io = socketio(server, {
-  serveClient: true,
-  transports: ['polling', 'websocket']
-});
-
-io.of('/clientsock').use(function(socket, callback) {
-  "use strict";
-
-  var handshakeData = socket.request;
-  var key;
-
-  if (handshakeData.headers.cookie) {
-    handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
-
-    if (handshakeData.headers.referer && url.parse(handshakeData.headers.referer).path.split("/")[1]) {
-      key = url.parse(handshakeData.headers.referer).path.split("/")[1];
-    } else if (X.options.datasource.testDatabase) {
-      // for some reason zombie doesn't send the referrer in the socketio call
-      // https://groups.google.com/forum/#!msg/socket_io/MPpXrP5N9k8/xAyk1l8Iw8YJ
-      key = X.options.datasource.testDatabase;
-    } else {
-      return callback(null, false);
-    }
-
-
-    if (!handshakeData.cookie[key + '.sid']) {
-      return callback(null, false);
-    }
-
-    // Add sessionID so we can use it to check for valid sessions on each request below.
-    handshakeData.sessionID = parseSignedCookie(handshakeData.cookie[key + '.sid'], privateSalt);
-
-    sessionStore.get(handshakeData.sessionID, function (err, session) {
-      if (err) {
-        return callback(err);
-      }
-
-      // All requests get a session. Make sure the session is authenticated.
-      if (!session || !session.passport || !session.passport.user ||
-        !session.passport.user.id ||
-        !session.passport.user.organization ||
-        !session.passport.user.username ||
-        !session.cookie || !session.cookie.expires) {
-
-        destroySession(handshakeData.sessionID, session);
-
-        // Not an error exactly, but the cookie is invalid. The user probably logged off.
-        return callback(null, false);
-      }
-
-      // Prep the cookie and create a session object so we can touch() it on each request below.
-      session.cookie.expires = new Date(session.cookie.expires);
-      session.cookie = new Cookie(session.cookie);
-      handshakeData.session = new Session(handshakeData, session);
-
-      // Add sessionStore here so it can be used to lookup valid session on each request below.
-      handshakeData.sessionStore = sessionStore;
-
-      // Move along.
-      callback(null, true);
-    });
-  } else {
-    callback(null, false);
-  }
-}).on('connection', function (socket) {
-  "use strict";
-
-  var ensureLoggedIn = function (callback, payload) {
-        socket.request.sessionStore.get(socket.request.sessionID, function (err, session) {
-          var expires,
-              current;
-
-          // All requests get a session. Make sure the session is authenticated.
-          if (err || !session || !session.passport || !session.passport.user ||
-              !session.passport.user.id ||
-              !session.passport.user.organization ||
-              !session.passport.user.username ||
-              !session.cookie || !session.cookie.expires) {
-
-            return destroySession(socket.request.sessionID, session);
-          }
-
-          // Make sure the sesion hasn't expired yet.
-          expires = new Date(session.cookie.expires);
-          current = new Date();
-          if (expires <= current) {
-            return destroySession(socket.request.sessionID, session);
-          } else {
-            // User is still valid
-
-            // Update session expiration timeout, unless this is an automated call of
-            // some sort (e.g. lock refresh)
-            if (!payload || !payload.automatedRefresh) {
-              socket.request.session.touch().save();
-            }
-
-            // Move along.
-            callback(session);
-          }
-        });
-      };
-
-  // Save socket.id to the session store so we can disconnect that socket server side
-  // when a session is timed out. That should notify the client imediately they have timed out.
-  socket.request.session.socket = {id: socket.id};
-  socket.request.session.save();
-
-  // To run this from the client:
-  // ???
-  socket.on('session', function (data, callback) {
-    ensureLoggedIn(function (session) {
-      var callbackObj = X.options.client || {};
-      callbackObj = _.extend(callbackObj,
-        {
-          data: session.passport.user,
-          code: 1,
-          debugging: X.options.datasource.debugging,
-          emailAvailable: _.isString(X.options.datasource.smtpHost) && X.options.datasource.smtpHost !== "",
-          // TODO - printAvailable is deprecated after issues #1806 & #1807 are pulled in.
-          printAvailable: _.isString(X.options.datasource.printer) && X.options.datasource.printer !== "",
-          versions: X.versions
-        });
-      callback(callbackObj);
-    }, data && data.payload);
-  });
-
-  // To run this from the client:
-  socket.on('delete', function (data, callback) {
-    ensureLoggedIn(function (session) {
-      routes.queryDatabase("delete", data.payload, session, callback);
-    }, data && data.payload);
-  });
-
-  // To run this from the client:
-  // XT.dataSource.request(m = new XM.Contact(), "get", {nameSpace: "XM", type: "Contact", id: "1"}, {propagate: true, parse: true, success: function () {console.log("success", arguments)}, error: function () {console.log("error", arguments);}});
-  socket.on('get', function (data, callback) {
-    ensureLoggedIn(function (session) {
-      routes.queryDatabase("get", data.payload, session, callback);
-    }, data && data.payload);
-  });
-
-  // To run this from the client:
-  socket.on('patch', function (data, callback) {
-    ensureLoggedIn(function (session) {
-      routes.queryDatabase("patch", data.payload, session, callback);
-    }, data && data.payload);
-  });
-
-  // To run this from the client:
-  socket.on('post', function (data, callback) {
-    ensureLoggedIn(function (session) {
-      routes.queryDatabase("post", data.payload, session, callback);
-    }, data && data.payload);
-  });
-
-  // Tell the client it's connected.
-  socket.emit("ok");
-});
 
 /**
  * Job loading section.

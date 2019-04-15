@@ -1,6 +1,6 @@
 [
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "Resource",
     "table": "xt.resource",
@@ -41,7 +41,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskResource",
     "table": "xt.tskresource",
@@ -99,7 +99,7 @@
     "isSystem": true
   },
   {
-    "context": "project",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "TaskResourceAnalysis",
     "table": "xt.tskresourceanalysis",

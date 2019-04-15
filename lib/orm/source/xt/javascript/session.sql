@@ -36,20 +36,7 @@ select xt.install_js('XT','Session','xtuple', $$
             + 'left join lang on locale_lang_id = lang_id '
             + 'left join country on locale_country_id = country_id '
             + 'where usr_username = $1 ',
-      rec = plv8.execute(sql, [ XT.username ])[0],
-      /* only serve the translations for pertinent extensions */
-      dictionarySql = "select dict_strings from xt.dictobsolete where dict_id in ( " +
-        "select dict_id " +
-        "from xt.dictobsolete " +
-        "left join xt.ext on dict_ext_id = ext_id " +
-        "left join xt.usrext on ext_id = usrext_ext_id " +
-        "left join xt.grpext on ext_id = grpext_ext_id " +
-        "left join usrgrp on grpext_grp_id = usrgrp_grp_id " +
-        "where dict_language_name = $1 " +
-        "and dict_is_database = false " +
-        "and (ext_id is null or usrgrp_username = $2 or usrext_usr_username = $2) " +
-        ");",
-      strings;
+      rec = plv8.execute(sql, [ XT.username ])[0];
 
     /* determine culture */
     var culture = 'en';
@@ -63,16 +50,6 @@ select xt.install_js('XT','Session','xtuple', $$
       culture = "en_US";
     }
     rec.culture = culture;
-
-    /* might as well request the translations in here too */
-    strings = plv8.execute(dictionarySql, [culture, XT.username]);
-    if(strings.length === 0) {
-      /* Sensible default if locale is fully set but no dictionary exists */
-      strings = plv8.execute(dictionarySql, ["en_US"]);
-    }
-    rec.strings = strings.map(function (row) {
-      return JSON.parse(row.dict_strings);
-    });
 
     return rec;
   }

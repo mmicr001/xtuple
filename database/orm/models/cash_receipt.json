@@ -1,6 +1,6 @@
 [
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceipt",
     "table": "cashrcpt",
@@ -165,7 +165,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptLineListItem",
     "table": "cashrcptitem",
@@ -232,7 +232,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptLine",
     "table": "cashrcptitem",
@@ -299,7 +299,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptLinePending",
     "table": "xt.cashrcptitem_pending",
@@ -367,7 +367,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptRelation",
     "table": "cashrcpt",
@@ -429,7 +429,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptReceivable",
     "table": "aropen",
@@ -499,7 +499,7 @@
     "isSystem": true
   },
   {
-    "context": "billing",
+    "context": "xtuple",
     "nameSpace": "XM",
     "type": "CashReceiptListItem",
     "table": "cashrcpt",

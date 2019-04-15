@@ -5,7 +5,6 @@ regexp:true, undef:true, strict:true, trailing:true, white:true */
 var _ = require('underscore'),
   async = require('async'),
   buildDatabase = require("./build_database"),
-  buildDictionary = require("./build_dictionary"),
   defaultExtensions = require("./util/default_extensions").extensions,
   initDatabase = require("./util/init_database").initDatabase,
   inspectDatabaseExtensions = require("./util/inspect_database").inspectDatabaseExtensions,
@@ -19,8 +18,7 @@ var _ = require('underscore'),
   user does not specify an extension, we install the core and all registered
   extensions, which requires a call to xt.ext.
 
-  We delegate the work of actually building the database and building the
-  client to build_database.js and build_client.js.
+  We delegate the work of actually building the database to build_database.js.
 */
 
 (function () {
@@ -82,26 +80,6 @@ var _ = require('underscore'),
           });
           done(null, "Build succeeded." + returnMessage);
         });
-      },
-      function (done) {
-        // step 3: import all dictionary files
-        if (specs[0].clientOnly || specs[0].databaseOnly) {
-          // don't build dictionaries if the user doesn't want us to
-          console.log("Not importing the dictionaries");
-          return done();
-        }
-        if (specs[0].extensions.length === 1 && specs[0].extensions[0].indexOf("foundation-database") >= 0) {
-          // don't build dictionaries if we're just building the foundation
-          console.log("Not importing the dictionaries");
-          return done();
-        }
-        var dictionaryOptionsArray = _.map(specs, function (spec) {
-          return {
-            configPath: spec.configPath,
-            database: spec.database
-          };
-        });
-        async.map(dictionaryOptionsArray, buildDictionary.importAllDictionaries, done);
       }
     ], function (err, results) {
       buildAllCallback(err, results && results[results.length - 2]);
