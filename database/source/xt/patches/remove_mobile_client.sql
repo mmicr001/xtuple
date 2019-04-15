@@ -3,6 +3,7 @@ DROP FUNCTION IF EXISTS xt.add_report_definition(text, integer, text);
 DROP TABLE IF EXISTS xt.clientcode;
 DROP FUNCTION IF EXISTS xt.insert_client(text, text, text, text);
 DROP FUNCTION IF EXISTS xt.set_dictionary(text, text, text);
+DROP TABLE IF EXISTS xt.dictobsolete;
 
 DELETE FROM xt.grpext
  WHERE grpext_ext_id IN (
