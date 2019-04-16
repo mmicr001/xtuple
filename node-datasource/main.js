@@ -489,23 +489,6 @@ destroySession = function (key, val) {
 
   var sessionID;
 
-  // Timeout socket.
-  if (val && val.socket && val.socket.id) {
-    _.each(io.sockets.sockets, function (sockVal, sockKey, sockList) {
-      if (val.socket.id === sockKey) {
-        _.each(sockVal.manager.namespaces, function (spaceVal, spaceKey, spaceList) {
-          sockVal.flags.endpoint = spaceVal.name;
-          // Tell the client it timed out. This will redirect the client to /logout
-          // which will destroy the session, but we can't rely on the client for that.
-          sockVal.emit("timeout");
-        });
-
-        // Disconnect socket.
-        sockVal.disconnect();
-      }
-    });
-  }
-
   sessionID = key.replace(sessionStore.prefix, '');
 
   // Destroy session here incase the client never hits /logout.
