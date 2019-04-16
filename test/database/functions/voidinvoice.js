@@ -28,6 +28,9 @@ var _      = require("underscore"),
                 "             and cohist_invcnumber = invchead_invcnumber" +
                 "  left outer join arapply on"                             +
                 "                  aropen_id = arapply_target_aropen_id"   +
+                " WHERE invchead_orderdate BETWEEN"                        +
+                "         (SELECT MIN(period_start) FROM period WHERE NOT period_closed)" +
+                "         AND CURRENT_DATE"                                +
                 " group by invchead_posted, arapplyexists, hasinv;";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);

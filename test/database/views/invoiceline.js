@@ -87,6 +87,7 @@ var _ = require("underscore"),
      it("should accept insert for existing invoice", function (done) {
       var line = invoiceline({invoice_number: inv,
                                  line_number: 1,
+                                 item_number: 'YTRUCK1',
                                  qty_ordered: 10,
                                  qty_billed: 5,
                                  notes: 'invoice notes'}),
@@ -130,6 +131,7 @@ var _ = require("underscore"),
     it("should accept update of existent invoice line", function (done) {
       var line = invoiceline({invoice_number: inv,
                                  line_number: 1,
+                                 item_number: 'YTRUCK1',
                                  qty_ordered: 10,
                                  qty_billed: 5,
                                  notes: 'invoice notes'

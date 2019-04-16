@@ -51,7 +51,7 @@ var _      = require("underscore"),
           tmpCred = _.extend({}, creds, { parameters: [ yp.current_id ] });
       datasource.query(sql, tmpCred, function (err, res) {
         if (err) {
-          assert.match(err, /-4/, "can't test NULL/'M' - periods are in use:-(");
+          assert.match(err, /(-5)|(-4)/, "can't test NULL/'M' - periods are in use:-(");
         } else {
           assert.equal(res.rowCount, 1);
           assert.operator(res.rows[0].result, ">=", 0);
