@@ -1,7 +1,10 @@
 DO $$
 BEGIN
 
-  IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0-alpha') = -1 THEN
+  IF compareVersion(fetchMetricText('ServerVersion'), '5.0.0-alpha') = -1 AND
+     EXISTS(SELECT 1
+              FROM curr_symbol
+             WHERE curr_base) THEN
     PERFORM setMetric('TaxService', 'N');
 
     RAISE NOTICE 'Fixing old cobill data to prevent recalculation errors';
