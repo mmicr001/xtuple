@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION saveTax(pOrderType TEXT, pOrderId INTEGER, pResult JS
 DECLARE
   _taxheadid INTEGER;
   _taxlineid INTEGER;
+  _dochead RECORD;
   _r RECORD;
   _adjustment NUMERIC;
   _taxcharged NUMERIC;
@@ -44,20 +45,23 @@ BEGIN
        AND dochead_id = pOrderId
     RETURNING taxhead_id INTO _taxheadid;
   ELSE
+    SELECT dochead_cust_id, dochead_origtype, dochead_origid, dochead_origdate INTO _dochead
+      FROM taxhead
+      JOIN dochead ON taxhead_doc_type = dochead_type
+                  AND taxhead_doc_id = dochead_id
+     WHERE taxhead_id = _taxheadid;
+
     UPDATE taxhead
-       SET taxhead_cust_id = dochead_cust_id,
+       SET taxhead_cust_id = _dochead.dochead_cust_id,
            taxhead_date = (pResult->>'date')::DATE,
-           taxhead_orig_doc_type = dochead_origtype,
-           taxhead_orig_doc_id = dochead_origid,
-           taxhead_orig_date = dochead_origdate,
+           taxhead_orig_doc_type = _dochead.dochead_origtype,
+           taxhead_orig_doc_id = _dochead.dochead_origid,
+           taxhead_orig_date = _dochead.dochead_origdate,
            taxhead_curr_id = (pResult->>'currid')::INTEGER,
            taxhead_curr_rate = (pResult->>'currrate')::NUMERIC,
            taxhead_taxzone_id = (pResult->>'taxzoneid')::INTEGER,
            taxhead_discount = (pResult->>'discount')::NUMERIC
-     FROM dochead
-    WHERE taxhead_doc_type = dochead_type
-      AND taxhead_doc_id = dochead_id
-      AND taxhead_id = _taxheadid;
+     WHERE taxhead_id = _taxheadid;
   END IF;
 
   DELETE FROM taxline
