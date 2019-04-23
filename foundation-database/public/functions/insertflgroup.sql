@@ -175,10 +175,50 @@ BEGIN
                         flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,
                         accnt_id,accnt_type,trialbal_id,trialbal_debits,
                         trialbal_credits,budget_amount,
-                        first_value(trialbal_id) OVER w AS first_trialbal_id,
-                        last_value(trialbal_id) OVER w AS last_trialbal_id,
-                        last_value(flitem_period_id) OVER w AS last_flitem_period_id,
-                        last_value(budget_amount) OVER w AS last_budget_amount
+                        first_value(trialbal_id) OVER
+                        (PARTITION BY flhead_type, flitem_id, flitem_order, flitem_subtract,
+                                      flitem_showstart, flitem_showend, flitem_showdelta,
+                                      flitem_showbudget, flitem_showdiff, flitem_showcustom,
+                                      flitem_custom_source, flitem_showstartprcnt,
+                                      flitem_showendprcnt, flitem_showdeltaprcnt,
+                                      flitem_showbudgetprcnt, flitem_showdiffprcnt,
+                                      flitem_showcustomprcnt, accnt_id, accnt_type
+                         ORDER BY trialbal_id IS NULL, period_start
+                         RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                        AS first_trialbal_id,
+                        last_value(trialbal_id) OVER
+                        (PARTITION BY flhead_type, flitem_id, flitem_order, flitem_subtract,
+                                      flitem_showstart, flitem_showend, flitem_showdelta,
+                                      flitem_showbudget, flitem_showdiff, flitem_showcustom,
+                                      flitem_custom_source, flitem_showstartprcnt,
+                                      flitem_showendprcnt, flitem_showdeltaprcnt,
+                                      flitem_showbudgetprcnt, flitem_showdiffprcnt,
+                                      flitem_showcustomprcnt, accnt_id, accnt_type
+                         ORDER BY trialbal_id IS NOT NULL, period_start
+                         RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                        AS last_trialbal_id,
+                        last_value(flitem_period_id) OVER
+                        (PARTITION BY flhead_type, flitem_id, flitem_order, flitem_subtract,
+                                      flitem_showstart, flitem_showend, flitem_showdelta,
+                                      flitem_showbudget, flitem_showdiff, flitem_showcustom,
+                                      flitem_custom_source, flitem_showstartprcnt,
+                                      flitem_showendprcnt, flitem_showdeltaprcnt,
+                                      flitem_showbudgetprcnt, flitem_showdiffprcnt,
+                                      flitem_showcustomprcnt, accnt_id, accnt_type
+                         ORDER BY flitem_period_id IS NOT NULL, period_start
+                         RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                        AS last_flitem_period_id,
+                        last_value(budget_amount) OVER
+                        (PARTITION BY flhead_type, flitem_id, flitem_order, flitem_subtract,
+                                      flitem_showstart, flitem_showend, flitem_showdelta,
+                                      flitem_showbudget, flitem_showdiff, flitem_showcustom,
+                                      flitem_custom_source, flitem_showstartprcnt,
+                                      flitem_showendprcnt, flitem_showdeltaprcnt,
+                                      flitem_showbudgetprcnt, flitem_showdiffprcnt,
+                                      flitem_showcustomprcnt, accnt_id, accnt_type
+                         ORDER BY budget_amount IS NOT NULL, period_start
+                         RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+                        AS last_budget_amount
                   FROM
                 (SELECT period_id AS flitem_period_id, period_start,flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
                         flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
@@ -203,11 +243,7 @@ BEGIN
                    LEFT OUTER JOIN budget
                      ON ((budget_accnt_id=accnt_id)
                      AND (budget_period_id=period_id))
-             ORDER BY accnt_id, period_start) AS data
-             WINDOW w AS (PARTITION BY flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
-                flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
-                flitem_custom_source,flitem_showstartprcnt,flitem_showendprcnt,flitem_showdeltaprcnt,
-                flitem_showbudgetprcnt,flitem_showdiffprcnt,flitem_showcustomprcnt,accnt_id,accnt_type ORDER BY period_start RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)) AS ord
+             ORDER BY accnt_id, period_start) AS data) AS ord
              GROUP BY first_trialbal_id, last_trialbal_id, last_flitem_period_id, last_budget_amount,
                 flhead_type,flitem_id,flitem_order,flitem_subtract,flitem_showstart,flitem_showend,
                 flitem_showdelta,flitem_showbudget,flitem_showdiff,flitem_showcustom,
