@@ -27,7 +27,7 @@ BEGIN
     _returnVal := TRUE;
 
     IF (_alarm.alarm_source = 'TASK') THEN
-      SELECT (task_name || '-' || task_description),
+      SELECT (task_name || '-' || task_descrip),
              'T', 'TaskAlarm', 'Task'
       INTO _summary, _evntlogordtype, _evnttypename, _longsource
       FROM task
