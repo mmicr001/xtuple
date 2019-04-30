@@ -431,6 +431,8 @@ BEGIN
           -- Get the shipto address
           IF (COALESCE(NEW.cohead_shipto_id,-1) <> COALESCE(_shiptoid,-1)) THEN
             SELECT cntct.*, shipto_name,
+               getcontactphone(cntct_id, 'Office') AS contact_phone,
+               getcontactphone(cntct_id, 'Fax') AS contact_fax,
                addr.addr_line1, addr.addr_line2, addr.addr_line3, addr.addr_city,
                addr.addr_state, addr.addr_postalcode, addr.addr_country
             INTO _a
