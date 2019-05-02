@@ -5,13 +5,13 @@ var _      = require('underscore'),
 (function () {
   'use strict';
 
-  describe('applyARCreditMemoToBalance()', function () {
+  var adminCred  = dblib.adminCred,
+      datasource = dblib.datasource,
+      aropenfail = -1,
+      aropensucceed
+      ;
 
-    var adminCred  = dblib.adminCred,
-        datasource = dblib.datasource,
-        aropenfail,
-        aropensucceed
-        ;
+  describe('applyARCreditMemoToBalance()', function () {
 
     it("needs a failing aropen record", function(done) {
       var sql = "INSERT INTO aropen (" +
@@ -25,7 +25,6 @@ var _      = require('underscore'),
                 " RETURNING aropen_id;";
       datasource.query(sql, adminCred, function (err, res) {
         dblib.assertErrorCode(err, res, "_aropenTrigger", -5);
-        aropenfail = res.rows[0].aropen_id;
         done();
       });
     });
@@ -41,34 +40,33 @@ var _      = require('underscore'),
     });
   });
 
-  /*
-    it("should fail with a negative balance", function(done) {
-      var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
-          cred = _.extend({}, adminCred,
-                          { parameters: [ aropenfail ] });
+  it.skip("should fail with a negative balance", function(done) {
+  var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
+    cred = _.extend({}, adminCred,
+		    { parameters: [ aropenfail ] });
 
-      datasource.query(sql, cred, function (err, res) {
-        dblib.assertErrorCode(err, res, "applyARCreditMemoToBalance", -1);
-        done();
-      });
-    
-    after(function () {
-      var sql = "DELETE FROM aropen WHERE aropen_id=$1;",
-      cred = _.extend({}, adminCred, { parameters: [aropenfail ] });
-
-      datasource.query(sql, cred);
+    datasource.query(sql, cred, function (err, res) {
+    dblib.assertErrorCode(err, res, "applyARCreditMemoToBalance", -1);
+    done();
     });
-*/
-    it("should run without error", function (done) {
-      var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
-          cred = _.extend({}, adminCred,
-                          { parameters: [ aropensucceed ] });
+  });
+    
+  after(function () {
+    var sql = "DELETE FROM aropen WHERE aropen_id=$1;",
+    cred = _.extend({}, adminCred, { parameters: [aropenfail ] });
 
-      datasource.query(sql, cred, function (err, res) {
-        assert.isNull(err);
-        assert.equal(res.rows[0].result, 1);
-        done();
-      });
+    datasource.query(sql, cred);
+  });
+
+  it("should run without error", function (done) {
+    var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
+	cred = _.extend({}, adminCred,
+			{ parameters: [ aropensucceed ] });
+
+    datasource.query(sql, cred, function (err, res) {
+      assert.isNull(err);
+      assert.equal(res.rows[0].result, 1);
+      done();
     });
   });
 })();
