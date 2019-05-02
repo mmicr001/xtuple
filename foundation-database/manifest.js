@@ -2006,6 +2006,7 @@
     "public/patches/fixinvhist.sql",
     "public/patches/migrate_wo_source.sql",
     "public/patches/migratemd5settings.sql",
+    "public/patches/migratecountries.sql",
     "public/patches/movedict.sql",
     "public/patches/pkgdict.sql",
     "public/patches/populate_ccpay_card_type.sql",
