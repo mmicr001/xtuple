@@ -92,7 +92,7 @@ BEGIN
 		pNew.qty_ordered,
 		COALESCE(pNew.qty_billed, 0),
                 COALESCE(pNew.update_inventory,FALSE),
-		0, -- invcitem_custprice 
+		0, -- invcitem_custprice
 		COALESCE(pNew.net_unit_price,itemPrice(item_id,invchead_cust_id,
 			invchead_shipto_id,pNew.qty_ordered,invchead_curr_id,invchead_orderdate)),
 		COALESCE(pNew.notes,''),
@@ -156,7 +156,7 @@ DECLARE
 BEGIN
   SELECT invcitem_id INTO _check
   FROM invcitem
-  WHERE ( (invcitem_id=getInvcheadId(pOld.invoice_number)) AND (invcitem_linenumber=pOld.line_number) );
+  WHERE ( (invcitem_invchead_id=getInvcheadId(pOld.invoice_number)) AND (invcitem_linenumber=pOld.line_number) );
   IF (NOT FOUND) THEN
     RAISE EXCEPTION 'Invoice % Line % not found [xtuple: updateInvoiceLineItem, -1, %, %]',
                      pOld.invoice_number, pOld.line_number, pOld.invoice_number, pOld.line_number;

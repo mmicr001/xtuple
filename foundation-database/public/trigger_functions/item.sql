@@ -73,7 +73,7 @@ BEGIN
     END IF;
 
     IF ((OLD.item_type <> NEW.item_type) AND
-       (NEW.item_type IN ('R','S','T'))) THEN
+       (NEW.item_type IN ('R','S'))) THEN
       IF (SELECT COUNT(*) != 0
         FROM itemsite
         WHERE ((itemsite_item_id=OLD.item_id)

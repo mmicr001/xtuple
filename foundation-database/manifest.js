@@ -48,6 +48,7 @@
     "public/functions/dropifexists.sql",
     "public/patches/drop_share_users_triggers.sql",
     "public/patches/fixreportgrade.sql",
+    "public/patches/fixlines.sql",
 
     "public/types/_docinfo.sql",
     "public/types/_targetdoc.sql",
@@ -2094,6 +2095,7 @@
     "public/patches/migrate_wo_source.sql",
     "public/patches/migrate_tax.sql",
     "public/patches/migratemd5settings.sql",
+    "public/patches/migratecountries.sql",
     "public/patches/movedict.sql",
     "public/patches/pkgdict.sql",
     "public/patches/populate_ccpay_card_type.sql",

@@ -41,22 +41,26 @@ BEGIN
                   SUM(round(currToBase(bomitemcost_curr_id, bomitemcost_actcost, CURRENT_DATE),6) *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   ELSE
-                  SUM(round(currToBase(itemcost_curr_id, itemcost_actcost, CURRENT_DATE),6) *
+                  SUM(round(currToBase(itemcost_curr_id, itemcost_actcost, CURRENT_DATE),6) * qty *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   END AS subsum
       FROM (
             WITH RECURSIVE _bomitem AS
             (
-             SELECT bomitem_id AS id, bomitem_item_id, item_type
+             SELECT bomitem_id AS id, bomitem_item_id, item_type,
+                    bomitem_uom_id, bomitem_qtyfxd, bomitem_qtyper, bomitem_scrap,
+                    1.0 AS qty
                FROM bomitem(pItemid)
                JOIN item ON bomitem_item_id = item_id
              UNION ALL
-             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type
+             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type,
+                    bomitem.bomitem_uom_id, bomitem.bomitem_qtyfxd, bomitem.bomitem_qtyper, bomitem.bomitem_scrap,
+                    _bomitem.qty * itemuomtouom(_bomitem.bomitem_item_id, _bomitem.bomitem_uom_id, NULL, (_bomitem.bomitem_qtyfxd/_batchsize + _bomitem.bomitem_qtyper) * (1 + _bomitem.bomitem_scrap), 'qtyper')
                FROM _bomitem, bomitem(bomitem_item_id)
                JOIN item ON bomitem.bomitem_item_id = item_id
               WHERE _bomitem.item_type = 'F'
              )
-             SELECT id
+             SELECT id, qty
                FROM _bomitem
               WHERE item_type != 'F'
            ) bomitems
@@ -76,22 +80,27 @@ BEGIN
                   SUM(bomitemcost_stdcost *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   ELSE
-                  SUM(itemcost_stdcost *
+                  SUM(itemcost_stdcost * qty *
                     itemuomtouom(bomitem_item_id, bomitem_uom_id, NULL, (bomitem_qtyfxd/_batchsize + bomitem_qtyper) * (1 + bomitem_scrap), 'qtyper'))
                   END AS subsum
       FROM (
             WITH RECURSIVE _bomitem AS
             (
-             SELECT bomitem_id AS id, bomitem_item_id, item_type
+             SELECT bomitem_id AS id, bomitem_item_id, item_type,
+                    bomitem_uom_id, bomitem_qtyfxd, bomitem_qtyper, bomitem_scrap,
+                    1.0 AS qty
                FROM bomitem(pItemid)
                JOIN item ON bomitem_item_id = item_id
              UNION ALL
-             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type
+             SELECT bomitem.bomitem_id, bomitem.bomitem_item_id, item.item_type,
+                    bomitem.bomitem_uom_id, bomitem.bomitem_qtyfxd, bomitem.bomitem_qtyper, bomitem.
+bomitem_scrap,
+                    _bomitem.qty * itemuomtouom(_bomitem.bomitem_item_id, _bomitem.bomitem_uom_id, NULL, (_bomitem.bomitem_qtyfxd/_batchsize + _bomitem.bomitem_qtyper) * (1 + _bomitem.bomitem_scrap), 'qtyper')
                FROM _bomitem, bomitem(bomitem_item_id)
                JOIN item ON bomitem.bomitem_item_id = item_id
               WHERE _bomitem.item_type = 'F'
              )
-             SELECT id
+             SELECT id, qty
                FROM _bomitem
               WHERE item_type != 'F'
            ) bomitems
