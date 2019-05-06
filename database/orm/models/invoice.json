@@ -453,6 +453,34 @@
           "column": "obj_uuid",
           "inverse": "uuid"
         }
+      },
+      {
+        "name": "project",
+        "toOne": {
+          "type": "ProjectRelation",
+          "column": "invchead_prj_id"
+        }
+      },
+      {
+        "name": "authorizedCredit",
+        "attr": {
+          "type": "Number",
+          "column": "authorized_credit"
+        }
+      },
+      {
+        "name": "orderNumber",
+        "attr": {
+          "type": "String",
+          "column": "invchead_ordernumber"
+        }
+      },
+      {
+        "name": "orderDate",
+        "attr": {
+          "type": "Date",
+          "column": "invchead_orderdate"
+        }
       }
     ],
     "isSystem": true
@@ -631,6 +659,13 @@
         "attr": {
           "type": "String",
           "column": "obj_uuid"
+        }
+      },
+      {
+        "name": "orderNumber",
+        "attr": {
+          "type": "String",
+          "column": "invchead_ordernumber"
         }
       }
     ],
@@ -1135,6 +1170,13 @@
           "type": "InvoiceLineTax",
           "column": "invcitem_id",
           "inverse": "parent"
+        }
+      },
+      {
+        "name": "salesCategory",
+        "toOne": {
+          "type": "SalesCategory",
+          "column": "invcitem_salescat_id"
         }
       }
     ],

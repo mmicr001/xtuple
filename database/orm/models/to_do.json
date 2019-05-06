@@ -193,6 +193,22 @@
           "column": "todoitem_id",
           "inverse": "toDo"
         }
+      },
+      {
+        "name": "incident",
+        "toOne": {
+          "isNested": true,
+          "type": "IncidentRelation",
+          "column": "todoitem_incdt_id"
+        }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "todoitem_ophead_id"
+        }
       }
     ],
     "isSystem": true
@@ -528,6 +544,20 @@
           "type": "Number",
           "column": "priority_order"
         }
+      },
+      {
+        "name": "incident",
+        "attr": {
+          "type": "String",
+          "column": "incdt_number"
+        }
+      },
+      {
+        "name": "opportunity",
+        "attr": {
+          "type": "String",
+          "column": "ophead_number"
+        }
       }
     ],
     "isSystem": true,
@@ -663,6 +693,20 @@
         "attr": {
           "type": "Number",
           "column": "priority_order"
+        }
+      },
+      {
+        "name": "incident",
+        "attr": {
+          "type": "Number",
+          "column": "todoitem_incdt_id"
+        }
+      },
+      {
+        "name": "opportunity",
+        "attr": {
+          "type": "Number",
+          "column": "todoitem_ophead_id"
         }
       }
     ],

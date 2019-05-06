@@ -28,7 +28,6 @@ regexp:true, undef:true, strict:true, trailing:true, white:true */
     .option('-q, --quick', 'Quicken install by not dropping the views pre-emptively.')
     .option('-s, --source [/path/to/source_data.sql]', 'Location of source data. Must be used with the -i flag.')
     .option('-u, --unregister', 'Unregister an extension.')
-    .option('-y, --clientonly', 'Only rebuild the client.')
     .option('-z, --databaseonly', 'Only rebuild the database.')
     .parse(process.argv);
 
@@ -45,7 +44,6 @@ regexp:true, undef:true, strict:true, trailing:true, white:true */
     source: program.source,
     unregister: program.unregister,
     wipeViews: !program.quick && !program.extension,
-    clientOnly: program.clientonly,
     databaseOnly: program.databaseonly
   }, function (err, res) {
     console.log(err || res || "Success!");

@@ -231,6 +231,22 @@
           "type": "String",
           "column": "obj_uuid"
         }
+      },
+      {
+        "name": "toDoRelations",
+        "toMany": {
+          "type": "ToDoRelation",
+          "column": "incdt_number",
+          "inverse": "incident"
+        }
+      },
+      {
+        "name": "project",
+        "toOne": {
+          "isNested": true,
+          "type": "ProjectRelation",
+          "column": "incdt_prj_id"
+        }
       }
     ],
     "isSystem": true
@@ -795,6 +811,13 @@
           "type": "String",
           "column": "cntct_number"
         }
+      },
+      {
+        "name": "project",
+        "attr": {
+          "type": "Number",
+          "column": "incdt_prj_id"
+        }
       }
     ],
     "isSystem": true
@@ -953,6 +976,13 @@
           "type": "IncidentListItemCharacteristic",
           "column": "incdt_id",
           "inverse": "incident"
+        }
+      },
+      {
+        "name": "project",
+        "toOne": {
+          "type": "ProjectRelation",
+          "column": "incdt_prj_id"
         }
       }
     ],

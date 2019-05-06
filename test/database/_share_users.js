@@ -206,38 +206,6 @@ var _ = require('underscore'),
       });
     });
 
-    // Grant Rep User extension crm.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.rep.username + "', 'crm');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
-
-        done();
-      });
-    });
-
-    // Grant Rep User extension sales.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.rep.username + "', 'sales');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
-
-        done();
-      });
-    });
-
 /**
  * Owner with CRM Account and User Account.
  */
@@ -342,38 +310,6 @@ var _ = require('underscore'),
         assert.equal(1, res.rowCount, JSON.stringify(res.rows));
         results = res.rows[0];
         assert.isTrue(results.grant_user_priv);
-
-        done();
-      });
-    });
-
-    // Grant Owner User extension crm.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.owner.username + "', 'crm');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
-
-        done();
-      });
-    });
-
-    // Grant Owner User extension sales.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.owner.username + "', 'sales');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
 
         done();
       });
@@ -685,38 +621,6 @@ var _ = require('underscore'),
         assert.equal(1, res.rowCount, JSON.stringify(res.rows));
         results = res.rows[0];
         assert.isTrue(results.grant_user_priv);
-
-        done();
-      });
-    });
-
-    // Grant user extension crm.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.share.username + "', 'crm');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
-
-        done();
-      });
-    });
-
-    // Grant user extension sales.
-    before(function (done) {
-      var grantUserExtSql =  "select xt.grant_user_ext('" + records.share.username + "', 'sales');";
-
-      datasource.query(grantUserExtSql, creds, function (err, res) {
-        var results;
-
-        assert.isNull(err);
-        assert.equal(1, res.rowCount, JSON.stringify(res.rows));
-        results = res.rows[0];
-        assert.isTrue(results.grant_user_ext);
 
         done();
       });

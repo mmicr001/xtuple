@@ -632,6 +632,22 @@
           "column": "obj_uuid",
           "inverse": "uuid"
         }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "cohead_ophead_id"
+        }
+      },
+      {
+        "name": "project",
+        "toOne": {
+          "isNested": true,
+          "type": "ProjectRelation",
+          "column": "cohead_prj_id"
+        }
       }
     ],
     "isSystem": true
@@ -1442,6 +1458,14 @@
           "type": "ShareUsers",
           "column": "obj_uuid",
           "inverse": "uuid"
+        }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "cohead_ophead_id"
         }
       }
     ],

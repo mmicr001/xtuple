@@ -1,11 +1,11 @@
 CREATE OR REPLACE FUNCTION copysoheader(psoheadid integer, pcustomer integer, pscheddate date)
   RETURNS integer AS
 $$
--- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
+-- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 
 --This procedure will ONLY copy the information in the cohead table.
---It will NOT copy any associated order items. 
+--It will NOT copy any associated order items.
 --Sales Orders must have at least 1 associated item to be valid.
 --If you call this procedure, you must associate at least 1 item afterwards.
 DECLARE
@@ -180,7 +180,7 @@ BEGIN
   WHERE (cohead_id=pSoheadid)
   RETURNING cohead_id INTO _soheadid;
 
-  ELSE -- Copy SO to New Customer 
+  ELSE -- Copy SO to New Customer
     -- Get Customer details
     SELECT cust_id, cust_name, cust_salesrep_id, cust_terms_id, cust_shipvia, cust_shipchrg_id,
       cust_shipform_id, cust_commprcnt, cust_partialship, cust_taxzone_id, cust_curr_id,
@@ -190,14 +190,14 @@ BEGIN
       shipto_id, shipto_name, sc.cntct_id AS shipto_contact_id, sc.cntct_honorific AS shipto_honorific, sc.cntct_phone AS shipto_phone, sc.cntct_first_name AS shipto_first_name, sc.cntct_middle AS shipto_middle, sc.cntct_last_name AS shipto_last_name,
       sc.cntct_suffix AS shipto_suffix, sc.cntct_phone AS shipto_phone, sc.cntct_title AS shipto_title, sc.cntct_fax AS shipto_fax, sc.cntct_email AS shipto_email,
       sa.addr_line1 AS shipto1, sa.addr_line2 AS shipto2, sa.addr_line3 AS shipto3, sa.addr_city AS shipto_city, sa.addr_state AS shipto_state, sa.addr_postalcode AS shipto_postalcode, sa.addr_country AS shipto_country
-    INTO _customer  
-    FROM custinfo 
+    INTO _customer
+    FROM custinfo
     LEFT OUTER join cntct bc ON (cust_cntct_id=bc.cntct_id)
     LEFT OUTER JOIN addr ba ON (cntct_addr_id=ba.addr_id)
     LEFT OUTER JOIN shiptoinfo ON ((shipto_cust_id=cust_id)
-                                         AND (shipto_default)) 
+                                         AND (shipto_default))
     LEFT OUTER join cntct sc ON (shipto_cntct_id=sc.cntct_id)
-    LEFT OUTER JOIN addr sa ON (shipto_addr_id=sa.addr_id)                                         
+    LEFT OUTER JOIN addr sa ON (shipto_addr_id=sa.addr_id)
     WHERE cust_id=pCustomer;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Could not find customer details [xtuple: copysoheader, -2, %]', pCustomer;
@@ -290,7 +290,7 @@ BEGIN
     _customer.shipto_name,
     _customer.shipto1,
     _customer.shipto2,
-    _customer.shipto3,  
+    _customer.shipto3,
     _customer.cust_salesrep_id,
     _customer.cust_terms_id,
     cohead_fob,
@@ -339,7 +339,7 @@ BEGIN
     _customer.shipto_phone,
     _customer.shipto_title,
     _customer.shipto_fax,
-    _customer.shipto_email,    
+    _customer.shipto_email,
     _customer.billing_contact_id,
     _customer.billing_honorific,
     _customer.billing_first_name,
