@@ -35,7 +35,7 @@ BEGIN
     AND conrelid=con.oid
     AND f.relname = 'cntct'
     AND con.relnamespace=pg_namespace.oid
-    AND con.relname NOT IN ('cntctsel', 'cntctmrgd', 'mrghist','trgthist', 'crmacctcntctass')
+    AND con.relname NOT IN ('cntctsel', 'cntctmrgd', 'mrghist','trgthist', 'crmacctcntctass', 'cntctphone')
   LOOP
     -- Validate
     IF (ARRAY_UPPER(_fk.seq,1) > 1) THEN
