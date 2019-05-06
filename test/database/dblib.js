@@ -326,6 +326,7 @@
   };
 
   exports.createInvoiceLineItem = function (params, callback) {
+
     var sql = "INSERT INTO invcitem ( " +
               " invcitem_invchead_id, invcitem_item_id, invcitem_warehous_id, " +
               " invcitem_number, invcitem_descrip, invcitem_salescat_id, invcitem_custpn, " +
@@ -334,7 +335,7 @@
               " invcitem_price_uom_id, invcitem_price_invuomratio, invcitem_notes, " +
               " invcitem_taxtype_id, invcitem_rev_accnt_id) " +
               "SELECT $1::integer, item_id, itemsite_warehous_id, " +
-              " '', '', -1, '', " +
+              " '', '', NULL, '', " +
               " $2::numeric, $2::numeric, true, item_inv_uom_id, " +
               " 1, 1.99, 1.99, 1.99, " +
               " item_price_uom_id, 1, 'TEST invoice', " +
