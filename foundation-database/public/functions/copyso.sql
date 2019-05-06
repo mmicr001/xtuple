@@ -14,7 +14,7 @@ BEGIN
   _soheadid := copysoheader(pSoheadid, pcustomer, pSchedDate);
 
   FOR _soitem IN
-    SELECT coitem.*, itemsite_item_id
+    SELECT coitem.*, itemsite_item_id, (itemsite_costmethod = 'J') AS jobcosted
     FROM coitem JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
     WHERE ( (coitem_cohead_id=pSoheadid)
       AND   (coitem_status <> 'X')
@@ -64,8 +64,9 @@ BEGIN
       COALESCE(pSchedDate, _soitem.coitem_scheddate),
       _soitem.coitem_promdate,
       _soitem.coitem_qtyord,
-      CASE WHEN fetchMetricBool('WholesalePriceCosting') THEN (SELECT item_listcost FROM item
-                                                               WHERE item_id=_soitem.itemsite_item_id)
+      CASE WHEN _soitem.jobcosted THEN 0.00
+           WHEN fetchMetricBool('WholesalePriceCosting') THEN (SELECT item_listcost FROM item
+                                                                WHERE item_id=_soitem.itemsite_item_id)
            ELSE stdCost(_soitem.itemsite_item_id)
       END,
       _soitem.coitem_price,
@@ -102,9 +103,9 @@ BEGIN
     -- insert characteristics first so they can be copied to associated supply order
     INSERT INTO charass
           (charass_target_type, charass_target_id,
-           charass_char_id, charass_value)
+           charass_char_id, charass_value, charass_price)
     SELECT charass_target_type, _soitemid,
-           charass_char_id, charass_value
+           charass_char_id, charass_value, charass_price
       FROM charass
      WHERE ((charass_target_type='SI')
        AND  (charass_target_id=_soitem.coitem_id));
