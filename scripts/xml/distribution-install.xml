@@ -1,5 +1,5 @@
-<package id        = "distribution-install-4.12.0"
-         version   = "4.12.0"
+<package id        = "distribution-install-4.12.1"
+         version   = "4.12.1"
          developer = "xTuple"
          descrip   = "load PostBooks resources"
          updater   = "2.2.4" >
