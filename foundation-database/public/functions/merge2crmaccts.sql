@@ -25,6 +25,7 @@ DECLARE
 
   _crmtbls    TEXT[] := ARRAY['prospect', 'custinfo', 'vendinfo', 'salesrep', 'taxauth', 'emp'];  -- Prospect must exist before Customer
   _crmtbl     TEXT;
+  _crmtype    TEXT;
   _debug      BOOLEAN := FALSE;
 BEGIN
   -- Human Readable error values;
@@ -122,8 +123,53 @@ BEGIN
       IF (_debug) THEN
         RAISE NOTICE 'Updating CRM relation %,  src: %,  tgt: %,  keepSrc: %', _crmtbl, _srcid, _tgtid, _keepSrc;
       END IF;
+      _crmtype := CASE _crmtbl WHEN 'prospect' THEN 'PSPCT'
+                               WHEN 'custinfo' THEN 'C'
+                               WHEN 'vendinfo' THEN 'V'
+                               WHEN 'salesrep' THEN ''
+                               WHEN 'taxauth' THEN 'T'
+                               WHEN 'emp' THEN 'EMP'
+                  END;
       _result:= _result + changeFkeyPointers('public', _crmtbl, _srcid, _tgtid,
-                ARRAY['wotc']::TEXT[], true);
+                ARRAY['wotc']::TEXT[], true)
+              + changePseudoFKeyPointers('public', 'alarm', 'alarm_source_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'alarm_source', _crmtype, true)
+              + changePseudoFKeyPointers('public', 'charass', 'charass_target_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'charass_target_type', _crmtype, true)
+              + changePseudoFKeyPointers('public', 'comment', 'comment_source_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'comment_source', _crmtype, true)
+              + changePseudoFKeyPointers('public', 'docass', 'docass_source_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'docass_source_type', _crmtype, true)
+              + changePseudoFKeyPointers('public', 'docass', 'docass_target_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'docass_target_type', _crmtype, true)
+              + changePseudoFKeyPointers('public', 'imageass', 'imageass_source_id',
+                                         _srcid, 'public', _crmtbl, _tgtid,
+                                         'imageass_source', _crmtype, true)
+              ;
+
+      IF (fetchMetricBool('EnableBatchManager') AND packageIsEnabled('xtbatch')) THEN
+        _result:= _result
+                + changePseudoFKeyPointers('xtbatch', 'emlassc', 'emlassc_assc_id',
+                                           _srcid, 'public', _crmtbl, _tgtid,
+                                           'emlassc_type', _crmtype, TRUE);
+      END IF;
+
+      IF (_crmtbl IN ('custinfo', 'vendinfo', 'taxauth')) THEN
+        EXECUTE format('UPDATE checkhead SET checkhead_recip_id = %L
+                        WHERE checkhead_recip_id = %L
+                        AND checkhead_recip_type = %L;', _tgtid, _srcid, _crmtype);
+      END IF;
+      IF (_crmtbl IN ('custinfo', 'vendinfo')) THEN
+        EXECUTE format('UPDATE taxreg SET taxreg_rel_id = %L
+                        WHERE taxreg_rel_id = %L
+                        AND taxreg_rel_type = %L;', _tgtid, _srcid, _crmtype);
+      END IF;
+
       IF (_keepSrc And _crmtbl = 'prospect') THEN
         EXECUTE format('UPDATE custinfo SET cust_crmacct_id = %L
                         WHERE cust_crmacct_id = %L;', pTargetId, pSourceId);
