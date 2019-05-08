@@ -13,7 +13,7 @@ RETURNS jsonb AS $$
           UNION ALL SELECT 'taxauth',         taxauth_id::text       FROM taxauth  WHERE taxauth_crmacct_id = pCrmAcctId
           UNION ALL SELECT 'prospect',        prospect_id::text      FROM prospect WHERE prospect_crmacct_id = pCrmAcctId
           UNION ALL SELECT 'employee',        emp_id::text           FROM emp      WHERE emp_crmacct_id = pCrmAcctId
-          UNION ALL SELECT 'user',            crmacct_usr_username   FROM crmacct  WHERE crmacct_usr_username IS NOT NULL AND crmacct_id = pCrmAcctId
+          UNION ALL SELECT 'user',            usr_id::text           FROM crmacct JOIN usr ON usr_username = crmacct_usr_username  WHERE crmacct_usr_username IS NOT NULL AND crmacct_id = pCrmAcctId
     ) data;
 
 $$ LANGUAGE SQL;
