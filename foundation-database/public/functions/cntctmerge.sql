@@ -108,6 +108,16 @@ BEGIN
 
   -- Merge cases with no foreign key
   IF (NOT pPurge) THEN
+    INSERT INTO mrghist
+    SELECT pSourceCntctId,
+      'charass',
+      'charass_id',
+      charass_id,
+      'charass_target_id'
+    FROM charass
+    WHERE ((charass_target_id= pSourceCntctId)
+    AND (charass_target_type='CNTCT'));
+
     INSERT INTO mrghist 
     SELECT pSourceCntctId,
       'comment',
@@ -168,6 +178,11 @@ BEGIN
       AND (emlassc_type='T'));
     END IF;
   END IF;
+
+  UPDATE charass
+  SET charass_target_id = pTargetCntctId
+  WHERE ((charass_target_type = 'CNTCT')
+   AND (charass_target_id = pSourceCntctId));
 
   UPDATE comment
   SET comment_source_id = pTargetCntctId
