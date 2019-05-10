@@ -25,7 +25,7 @@ DECLARE
 
   _crmtbls    TEXT[] := ARRAY['prospect', 'custinfo', 'vendinfo', 'salesrep', 'taxauth', 'emp'];  -- Prospect must exist before Customer
   _crmtbl     TEXT;
-  _crmtype    TEXT;
+  _source     RECORD;
   _debug      BOOLEAN := FALSE;
 BEGIN
   -- Human Readable error values;
@@ -123,33 +123,31 @@ BEGIN
       IF (_debug) THEN
         RAISE NOTICE 'Updating CRM relation %,  src: %,  tgt: %,  keepSrc: %', _crmtbl, _srcid, _tgtid, _keepSrc;
       END IF;
-      _crmtype := CASE _crmtbl WHEN 'prospect' THEN 'PSPCT'
-                               WHEN 'custinfo' THEN 'C'
-                               WHEN 'vendinfo' THEN 'V'
-                               WHEN 'salesrep' THEN ''
-                               WHEN 'taxauth' THEN 'T'
-                               WHEN 'emp' THEN 'EMP'
-                  END;
+
+      SELECT source_name, source_charass, source_docass INTO _source
+        FROM source
+       WHERE source_table = _crmtbl;
+
       _result:= _result + changeFkeyPointers('public', _crmtbl, _srcid, _tgtid,
                 ARRAY['wotc']::TEXT[], true)
               + changePseudoFKeyPointers('public', 'alarm', 'alarm_source_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'alarm_source', _crmtype, true)
+                                         'alarm_source', _source.source_name, true)
               + changePseudoFKeyPointers('public', 'charass', 'charass_target_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'charass_target_type', _crmtype, true)
+                                         'charass_target_type', _source.source_charass, true)
               + changePseudoFKeyPointers('public', 'comment', 'comment_source_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'comment_source', _crmtype, true)
+                                         'comment_source', _source.source_name, true)
               + changePseudoFKeyPointers('public', 'docass', 'docass_source_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'docass_source_type', _crmtype, true)
+                                         'docass_source_type', _source.source_docass, true)
               + changePseudoFKeyPointers('public', 'docass', 'docass_target_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'docass_target_type', _crmtype, true)
+                                         'docass_target_type', _source.source_docass, true)
               + changePseudoFKeyPointers('public', 'imageass', 'imageass_source_id',
                                          _srcid, 'public', _crmtbl, _tgtid,
-                                         'imageass_source', _crmtype, true)
+                                         'imageass_source', _source.source_docass, true)
               ;
 
       IF (fetchMetricBool('EnableBatchManager') AND packageIsEnabled('xtbatch')) THEN
@@ -162,12 +160,16 @@ BEGIN
       IF (_crmtbl IN ('custinfo', 'vendinfo', 'taxauth')) THEN
         EXECUTE format('UPDATE checkhead SET checkhead_recip_id = %L
                         WHERE checkhead_recip_id = %L
-                        AND checkhead_recip_type = %L;', _tgtid, _srcid, _crmtype);
+                        AND checkhead_recip_type = %L;', _tgtid, _srcid,
+                                                         CASE _crmtbl WHEN 'custinfo' THEN 'C'
+                                                                      WHEN 'vendinfo' THEN 'V'
+                                                                      WHEN 'taxauth' THEN 'T'
+                                                          END);
       END IF;
       IF (_crmtbl IN ('custinfo', 'vendinfo')) THEN
         EXECUTE format('UPDATE taxreg SET taxreg_rel_id = %L
                         WHERE taxreg_rel_id = %L
-                        AND taxreg_rel_type = %L;', _tgtid, _srcid, _crmtype);
+                        AND taxreg_rel_type = %L;', _tgtid, _srcid, _source.source_name);
       END IF;
 
       IF (_keepSrc And _crmtbl = 'prospect') THEN
