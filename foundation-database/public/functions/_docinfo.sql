@@ -97,7 +97,9 @@ BEGIN
                 WHERE NULLIF(value::TEXT, 'null') IS NOT NULL
       LOOP
         _s := '{'||_r.key||'}';
-        RETURN QUERY SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE);
+        IF (_s <> '{user}') THEN  -- Cannot run this for type USER as they have no ID
+          RETURN QUERY SELECT * FROM _docinfo((_crmacct#>>_s)::INTEGER, _crmtypesrc#>>_s, TRUE);
+        END IF;
       END LOOP;
     END IF;
 
