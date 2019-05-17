@@ -1,10 +1,13 @@
-CREATE OR REPLACE FUNCTION cntctmerge(integer, integer, boolean) RETURNS boolean AS $$
+DROP FUNCTION IF EXISTS public.cntctmerge(integer,integer,boolean);
+
+CREATE OR REPLACE FUNCTION public.cntctmerge(
+    pSourceCntctId integer,
+    pTargetCntctId integer,
+    pPurge         boolean)
+  RETURNS boolean AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
 DECLARE
-  pSourceCntctId ALIAS FOR $1;
-  pTargetCntctId ALIAS FOR $2;
-  pPurge ALIAS FOR $3;
   _fk		RECORD;
   _pk   	RECORD;
   _coldesc      RECORD;
@@ -16,7 +19,9 @@ DECLARE
   _colname      TEXT;
   _multi	BOOLEAN;
   _created      TIMESTAMP WITH TIME ZONE;
-
+  _c1rec        RECORD;
+  _c2rec        RECORD;
+  _comment      TEXT;
 BEGIN
   -- Validate
   IF (pSourceCntctId IS NULL) THEN
@@ -315,6 +320,24 @@ BEGIN
   
   -- Clean up
   DELETE FROM cntctsel WHERE (cntctsel_cntct_id=pSourceCntctId);
+
+  -- Record merge in Comments for both contacts
+  SELECT cntct_number, CONCAT(cntct_first_name, ' ', cntct_last_name) AS cname
+    INTO _c1rec
+    FROM cntct
+   WHERE cntct_id = pSourceCntctId;
+
+  SELECT cntct_number, CONCAT(cntct_first_name, ' ', cntct_last_name) AS cname
+    INTO _c2rec
+    FROM cntct
+   WHERE cntct_id = pTargetCntctId;
+
+  IF (fetchMetricBool('ContactChangeLog')) THEN
+    _comment := format('Contact %s (#%s) was merged into contact %s (#%s)',
+           _c1rec.cname, _c1rec.cntct_number, _c2rec.cname, _c2rec.cntct_number);
+    PERFORM postComment('ChangeLog', 'T', pSourceCntctId, _comment);
+    PERFORM postComment('ChangeLog', 'T', pTargetCntctId, _comment);
+  END IF;
 
   RETURN true;
 END;
