@@ -99,19 +99,19 @@ IF EXISTS (SELECT 1
                  WHERE prjtask_username IS NOT NULL;
 
   UPDATE alarm SET alarm_source = 'TASK',
-                   alarm_source_id = _nid
+                   alarm_source_id = task_id
     FROM prjtaskmap
    WHERE alarm_source = 'J' AND alarm_source_id = prjtask_id;
 
-  UPDATE comment SET comment_source_id = _nid
+  UPDATE comment SET comment_source_id = task_id
     FROM prjtaskmap
    WHERE comment_source = 'TA' AND comment_source_id = prjtask_id;
 
-  UPDATE docass SET docass_source_id = _nid
+  UPDATE docass SET docass_source_id = task_id
     FROM prjtaskmap
    WHERE docass_source_type = 'TASK' AND docass_source_id = prjtask_id;
 
-  UPDATE charass SET charass_target_id = _nid
+  UPDATE charass SET charass_target_id = task_id
     FROM prjtaskmap
    WHERE charass_target_type = 'TASK' AND charass_target_id = prjtask_id;
 
