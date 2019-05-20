@@ -154,7 +154,7 @@ BEGIN
         _result:= _result
                 + changePseudoFKeyPointers('xtbatch', 'emlassc', 'emlassc_assc_id',
                                            _srcid, 'public', _crmtbl, _tgtid,
-                                           'emlassc_type', _crmtype, TRUE);
+                                           'emlassc_type', _source.source_name, TRUE);
       END IF;
 
       IF (_crmtbl IN ('custinfo', 'vendinfo', 'taxauth')) THEN
