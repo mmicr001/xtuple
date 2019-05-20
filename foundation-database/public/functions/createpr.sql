@@ -6,7 +6,8 @@ CREATE OR REPLACE FUNCTION createPr(
   pDueDate DATE,
   pNotes TEXT,
   pOrderType CHARACTER(1),
-  pOrderId INTEGER
+  pOrderId INTEGER,
+  pProjId INTEGER DEFAULT NULL::INTEGER
 ) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -29,11 +30,11 @@ BEGIN
   SELECT NEXTVAL('pr_pr_id_seq') INTO _prid;
   INSERT INTO pr
   ( pr_id, pr_number, pr_subnumber, pr_status,
-    pr_order_type, pr_order_id,
+    pr_order_type, pr_order_id, pr_prj_id,
     pr_itemsite_id, pr_qtyreq, pr_duedate, pr_releasenote )
   VALUES
   ( _prid, pOrderNumber, nextPrSubnumber(pOrderNumber), 'O',
-    pOrderType, pOrderId,
+    pOrderType, pOrderId, pProjId
     pItemsiteid, pQty, pDuedate, pNotes );
 
   RETURN _prid;
@@ -179,7 +180,8 @@ BEGIN
     _parent.duedate,
     COALESCE(pParentNotes, _parent.notes),
     pParentType,
-    pParentId
+    pParentId,
+    _parent.prjid
   );
 
   RETURN _prid;
