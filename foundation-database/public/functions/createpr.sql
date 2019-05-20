@@ -34,7 +34,7 @@ BEGIN
     pr_itemsite_id, pr_qtyreq, pr_duedate, pr_releasenote )
   VALUES
   ( _prid, pOrderNumber, nextPrSubnumber(pOrderNumber), 'O',
-    pOrderType, pOrderId, pProjId
+    pOrderType, pOrderId, pProjId,
     pItemsiteid, pQty, pDuedate, pNotes );
 
   RETURN _prid;
