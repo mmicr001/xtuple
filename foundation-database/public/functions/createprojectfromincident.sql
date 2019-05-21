@@ -12,7 +12,11 @@ BEGIN
   SELECT 'INCIDENT'||incdt_number, incdt_summary, incdt_descrip, 'N',
          incdt_crmacct_id, incdt_cntct_id,   
          incdt_owner_username,  incdt_assigned_username, CURRENT_DATE,
-         COALESCE((SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_default),1)
+         COALESCE(incdt_incdtpriority_id,
+                  (SELECT incdtpriority_id
+                     FROM incdtpriority
+                    ORDER BY incdtpriority_default DESC, incdtpriority_order
+                    LIMIT 1))
   FROM incdt 
   WHERE incdt_id = pIncdtId
   ON CONFLICT DO NOTHING

@@ -14,7 +14,11 @@ BEGIN
          ophead_crmacct_id, ophead_cntct_id,
          ophead_owner_username,  ophead_username,
          ophead_start_date, ophead_target_date, CURRENT_DATE,
-         COALESCE((SELECT incdtpriority_id FROM incdtpriority WHERE incdtpriority_default),1)
+         COALESCE(ophead_priority_id,
+                  (SELECT incdtpriority_id
+                     FROM incdtpriority
+                    ORDER BY incdtpriority_default DESC, incdtpriority_order
+                    LIMIT 1))
   FROM ophead
   WHERE ophead_id = pOpHeadId
   ON CONFLICT DO NOTHING
