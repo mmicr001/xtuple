@@ -1,17 +1,9 @@
-DROP FUNCTION IF EXISTS public.calcinvoiceamt(integer, text);
-
-CREATE OR REPLACE FUNCTION calcInvoiceAmt(pInvcheadid INTEGER) RETURNS NUMERIC STABLE AS $$
--- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
-BEGIN
-
-  RETURN calcInvoiceAmt(pInvcheadid, 'T');
-
-END;
-$$ LANGUAGE 'plpgsql';
+DROP FUNCTION IF EXISTS public.calcinvoiceamt(INTEGER);
+DROP FUNCTION IF EXISTS public.calcinvoiceamt(INTEGER, TEXT);
+DROP FUNCTION IF EXISTS public.calcinvoiceamt(INTEGER, TEXT, INTEGER);
 
 CREATE OR REPLACE FUNCTION calcInvoiceAmt(pInvcheadid INTEGER,
-                                          pType TEXT,
+                                          pType       TEXT    DEFAULT 'T',
                                           pInvcitemid INTEGER DEFAULT NULL) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- See www.xtuple.com/CPAL for the full text of the software license.
@@ -29,6 +21,12 @@ BEGIN
   --        T = total
   --        X = tax
   --        M = margin
+
+  -- force consistent results regardless of pType
+  -- there's probably a better way to get this than a separate query
+  IF NOT EXISTS(SELECT 1 FROM invchead WHERE invchead_id = pInvcheadid) THEN
+    RETURN NULL;
+  END IF;
 
   SELECT COALESCE(SUM(ROUND((invcitem_billed * invcitem_qty_invuomratio) *
                             (invcitem_price / COALESCE(invcitem_price_invuomratio, 1.0)), 2)), 0.0),
@@ -66,4 +64,4 @@ BEGIN
   RETURN _amount;
 
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;

@@ -1,15 +1,8 @@
-CREATE OR REPLACE FUNCTION calcSalesOrderAmt(pCoheadid INTEGER) RETURNS NUMERIC STABLE AS $$
--- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
-BEGIN
-
-  RETURN calcSalesOrderAmt(pCoheadid, 'T');
-
-END;
-$$ LANGUAGE 'plpgsql';
+DROP FUNCTION IF EXISTS public.calcSalesOrderAmt(INTEGER);
+DROP FUNCTION IF EXISTS public.calcSalesOrderAmt(INTEGER, TEXT);
 
 CREATE OR REPLACE FUNCTION calcSalesOrderAmt(pCoheadid INTEGER,
-                                             pType TEXT) RETURNS NUMERIC STABLE AS $$
+                                             pType TEXT DEFAULT 'T') RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
 -- See www.xtuple.com/CPAL for the full text of the software license.
 BEGIN
@@ -27,7 +20,7 @@ BEGIN
   RETURN calcSalesOrderAmt(pCoheadid, 'T', pTaxzoneId, pOrderDate, pCurrId, pFreight, pMisc);
 
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION calcSalesOrderAmt(pCoheadid INTEGER,
                                              pType TEXT, pTaxzoneId INTEGER, pOrderDate DATE, pCurrId INTEGER, pFreight NUMERIC, pMisc NUMERIC, pQuick BOOLEAN DEFAULT TRUE) RETURNS NUMERIC STABLE AS $$
@@ -51,6 +44,12 @@ BEGIN
   --        X = tax
   --        M = margin
   --        P = margin percent
+
+  -- force consistent results regardless of pType
+  -- there's probably a better way to get this than a separate query
+  IF NOT EXISTS(SELECT 1 FROM cohead WHERE cohead_id = pCoheadid) THEN
+    RETURN NULL;
+  END IF;
 
   SELECT COALESCE(SUM(ROUND((coitem_qtyord * coitem_qty_invuomratio) *
                             (coitem_price / coitem_price_invuomratio), 2)), 0.0),
