@@ -15,7 +15,7 @@ BEGIN
     JOIN pg_namespace ON child.relnamespace=pg_namespace.oid
     JOIN pg_class parent ON confrelid=parent.oid
    WHERE parent.relname='cntct'
-     AND child.relname NOT IN ('cntcteml',  'cntctphone',
+     AND child.relname NOT IN ('cntcteml',  'cntctphone', 'crmacctcntctass',
                                'cohead',    'pohead',    'quhead',   'tohead',
                                'cntctsel',  'cntctmrgd', 'mrghist',  'trgthist')
   LOOP
@@ -42,6 +42,9 @@ BEGIN
     END IF;
 
   END LOOP;
+
+  DELETE FROM crmacctcntctass
+    WHERE crmacctcntctass_cntct_id=pCntctId;
 
   DELETE FROM cntct
    WHERE cntct_id=pCntctId;
