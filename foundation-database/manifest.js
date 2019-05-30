@@ -1127,6 +1127,7 @@
     "public/tables/empgrp.sql",
     "public/tables/empgrpitem.sql",
     "public/tables/expcat.sql",
+    "public/tables/exptransaddr.sql",
     "public/tables/filter.sql",
     "public/tables/grp.sql",
     "public/tables/grppriv.sql",
