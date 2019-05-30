@@ -84,7 +84,8 @@ BEGIN
       SELECT ccpay_id, ccpay_type INTO _ccpayid, _cctype
       FROM ccpay
       WHERE ((ccpay_r_ordernum IN (CAST(pCashrcptid AS TEXT), _p.cashrcpt_docnumber))
-        AND (ccpay_status IN ('C', 'A')));
+        AND (ccpay_status IN ('C', 'A'))
+        AND ccpay_type NOT IN ('R', 'V'));
 
       IF NOT FOUND THEN
       -- the following select seems to work except for xikar - bug 8848. why?
@@ -92,7 +93,8 @@ BEGIN
         SELECT ccpay_id, ccpay_type INTO _ccpayid, _cctype
         FROM ccpay
         WHERE ((ccpay_order_number IN (CAST(pCashrcptid AS TEXT), _p.cashrcpt_docnumber))
-           AND (ccpay_status IN ('C', 'A')));
+           AND (ccpay_status IN ('C', 'A'))
+           AND ccpay_type NOT IN ('R', 'V'));
         IF (NOT FOUND) THEN
           RETURN -8;
         ELSE
