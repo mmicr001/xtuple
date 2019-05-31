@@ -251,13 +251,13 @@ SELECT 'EX',
        warehous_id,
        NULL,
        NULL,
-       addr_line1,
-       addr_line2,
-       addr_line3,
-       addr_city,
-       addr_state,
-       addr_postalcode,
-       addr_country,
+       COALESCE(exptransaddr_line1, addr_line1),
+       COALESCE(exptransaddr_line2, addr_line2),
+       COALESCE(exptransaddr_line3, addr_line3),
+       COALESCE(exptransaddr_city, addr_city),
+       COALESCE(exptransaddr_state, addr_state),
+       COALESCE(exptransaddr_postalcode, addr_postalcode),
+       COALESCE(exptransaddr_country, addr_country),
        0.0,
        0.0,
        NULL,
@@ -269,6 +269,7 @@ SELECT 'EX',
   JOIN itemsite ON invhist_itemsite_id = itemsite_id
   JOIN whsinfo ON itemsite_warehous_id = warehous_id
   JOIN addr ON warehous_addr_id = addr_id
+  LEFT OUTER JOIN exptransaddr ON invhist_id = exptransaddr_invhist_id
  WHERE invhist_transtype = 'EX'
 UNION ALL
 SELECT 'AR',
