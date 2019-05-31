@@ -10,7 +10,7 @@ DECLARE
   _crmacct      JSON;
   _src          TEXT[];
   _crmtypesrc jsonb := '{"customer": "C","prospect": "PSPCT","vendor": "V","taxauth": "TAXAUTH", 
-                         "employee": "EMP","salesrep": "SR", "user": "USR"}';
+                         "employee": "EMP","salesrep": "SR"}';
   _crmtypesrc_rev jsonb := '{}';
   _r RECORD;
   _i RECORD;
