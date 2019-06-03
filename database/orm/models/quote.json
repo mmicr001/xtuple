@@ -532,6 +532,21 @@
           "inverse": "source",
           "required": true
         }
+      },
+      {
+        "name": "project",
+        "attr": {
+          "type": "Number",
+          "column": "quhead_prj_id"
+        }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "quhead_ophead_id"
+        }
       }
     ],
     "isSystem": true
@@ -1204,6 +1219,14 @@
         "attr": {
           "type": "String",
           "column": "quhead_shiptocountry"
+        }
+      },
+      {
+        "name": "opportunity",
+        "toOne": {
+          "isNested": true,
+          "type": "OpportunityRelation",
+          "column": "quhead_ophead_id"
         }
       }
     ],

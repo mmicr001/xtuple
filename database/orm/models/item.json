@@ -319,6 +319,13 @@
           "inverse": "item",
           "isNested": true
         }
+      },
+      {
+        "name": "maximumDesiredCost",
+        "attr": {
+          "type": "Cost",
+          "column": "item_maxcost"
+        }
       }
     ],
     "isSystem": true,
@@ -1254,6 +1261,13 @@
           "column": "item_id",
           "inverse": "item",
           "isNested": true
+        }
+      },
+      {
+        "name": "maximumDesiredCost",
+        "attr": {
+          "type": "Cost",
+          "column": "item_maxcost"
         }
       }
     ],

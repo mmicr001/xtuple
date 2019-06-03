@@ -77,6 +77,14 @@
           "type": "Number",
           "column": "prospect_warehous_id"
         }
+      },
+      {
+        "name": "quoteRelations",
+        "toMany": {
+          "type": "QuoteRelation",
+          "column": "prospect_number",
+          "inverse": "customer"
+        }
       }
     ],
     "extensions": [
@@ -97,6 +105,13 @@
               "column": "crmacct_active",
               "required": true
             }
+          },
+          {
+             "name": "account",
+             "attr": {
+              "type": "String",
+              "column": "crmacct_number"
+             }
           }
         ]
       }

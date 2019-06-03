@@ -142,6 +142,48 @@
           "column": "char_employees",
           "required": true
         }
+      },
+      {
+        "name": "isIncidents",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_incidents"
+        }
+      },
+      {
+        "name": "isOpportunities",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_opportunity"
+        }
+      },
+      {
+        "name": "isProjects",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_projects"
+        }
+      },
+      {
+        "name": "isTasks",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_tasks"
+        }
+      },
+      {
+        "name": "isPurchaseOrders",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_purchaseorders"
+        }
+      },
+      {
+        "name": "isSalesOrders",
+        "attr": {
+          "type": "Boolean",
+          "column": "char_salesorders"
+        }
       }
     ],
     "isSystem": true,

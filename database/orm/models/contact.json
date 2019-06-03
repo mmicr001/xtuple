@@ -221,6 +221,30 @@
           "column": "obj_uuid",
           "inverse": "uuid"
         }
+      },
+      {
+        "name": "incidentRelations",
+        "toMany": {
+          "type": "IncidentRelation",
+          "column": "cntct_number",
+          "inverse": "contact"
+        }
+      },
+      {
+        "name": "opportunityRelations",
+        "toMany": {
+          "type": "OpportunityRelation",
+          "column": "cntct_number",
+          "inverse": "contact"
+        }
+      },
+      {
+        "name": "projectRelations",
+        "toMany": {
+          "type": "ProjectRelation",
+          "column": "cntct_number",
+          "inverse": "contact"
+        }
       }
     ],
     "isSystem": true

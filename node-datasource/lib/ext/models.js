@@ -13,17 +13,6 @@ white:true*/
 
     @extends XM.SimpleModel
   */
-  SYS.ClientCodeRelation = XM.SimpleModel.extend({
-
-    recordType: 'SYS.ClientCodeRelation'
-
-  });
-
-  /**
-    @class
-
-    @extends XM.SimpleModel
-  */
   SYS.ClientCode = XM.SimpleModel.extend({
 
     recordType: 'SYS.ClientCode'
@@ -78,10 +67,6 @@ white:true*/
 
     recordType: 'SYS.Oauth2token'
 
-  });
-
-  SYS.ReportDefinition = XM.SimpleModel.extend({
-    recordType: 'SYS.ReportDefinition'
   });
 
   /**
@@ -255,17 +240,6 @@ white:true*/
 
     @extends XM.Collection
   */
-  SYS.ClientCodeRelationCollection = XM.Collection.extend({
-
-    model: SYS.ClientCodeRelation
-
-  });
-
-  /**
-    @class
-
-    @extends XM.Collection
-  */
   SYS.Oauth2clientCollection = XM.Collection.extend({
 
     model: SYS.Oauth2client
@@ -325,9 +299,4 @@ white:true*/
 
   });
 
-  SYS.ReportDefinitionCollection = XM.Collection.extend({
-
-    model: SYS.ReportDefinition
-
-  });
 }());

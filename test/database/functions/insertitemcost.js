@@ -92,6 +92,7 @@ var _ = require("underscore"),
               + "   and item_id not in (select itemcost_item_id from itemcost);";
       datasource.query(sql, creds, function (err, res) {
         assert.isNull(err);
+        assert.isNotNull(res);
         assert(res.rowCount > 0);
         mfgItemId = res.rows[0].item_id;
         done();
@@ -140,6 +141,18 @@ var _ = require("underscore"),
         }
         done();
       });
+    });
+
+    after(function (done) {
+      var sql = "DELETE FROM itemcost WHERE itemcost_item_id = $1;";
+      var options = _.extend({}, creds, { parameters: [ mfgItemId ] });
+      datasource.query(sql, options, done);
+    });
+
+    after(function (done) {
+      var sql = "DELETE FROM itemcost WHERE itemcost_item_id = $1;";
+      var options = _.extend({}, creds, { parameters: [ purItemId ] });
+      datasource.query(sql, options, done);
     });
 
   });

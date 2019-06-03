@@ -106,21 +106,27 @@ var _      = require("underscore"),
     });
 
     it("should return diff results when converting to cust currency", function (done) {
-      var sql = "SELECT * from araging(CURRENT_DATE, false, false);";
+      var sql = "SELECT *,"
+              + "  (SELECT cust_curr_id = basecurrid() FROM custinfo WHERE cust_id = araging_cust_id) AS base"
+              + "  from araging(CURRENT_DATE, false, false);";
       datasource.query(sql, adminCred, function (err, res) {
         var bool_and = true;
+        var wasNonBaseCust = false;
         assert.isNull(err);
         assert.equal(res.rowCount, agingData.length);
         _.each(res.rows, function (row, i) {
           _.each(row, function (field, name) {
             if (name.indexOf('_val') >=0)
               bool_and = bool_and && (field == agingData[i][name]);
+
+            if (name === 'base' && !field)
+              wasNonBaseCust = true;
           });
           assert.equal(row.araging_cur_val   + row.araging_thirty_val +
                        row.araging_sixty_val + row.araging_ninety_val +
                        row.araging_plus_val, row.araging_total_val);
         });
-        if (nonbaseCust)
+        if (wasNonBaseCust)
           assert.isFalse(bool_and);
         else
           assert.isTrue(bool_and);
