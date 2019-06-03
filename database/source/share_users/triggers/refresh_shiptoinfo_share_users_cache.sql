@@ -5,10 +5,11 @@ create or replace function xt.refresh_shiptoinfo_share_users_cache() returns tri
 return (function () {
   var addrUuidSql = 'select obj_uuid from addr where addr_id = $1',
     childUserSql =  'select crmacct_usr_username as username ' +
-                    'from cntct ' +
-                    'left join crmacct on crmacct.crmacct_id = cntct.cntct_crmacct_id ' +
-                    'where cntct_id = $1 ' +
-                    '  and crmacct_usr_username is not null;',
+                    '  from cntct' +
+                    '  left outer join crmacctcntctass ON cntct_id = crmacctcntctass_cntct_id'
+                    '  left join crmacct on crmacctcntctass_crmacct_id = crmacct_id' +
+                    ' where cntct_id = $1 ' +
+                    '   and crmacct_usr_username is not null;',
     cntctUuidSql = 'select obj_uuid from cntct where cntct_id = $1',
     custUuidSql = 'select obj_uuid from custinfo where cust_id = $1',
     refreshAddr = false,

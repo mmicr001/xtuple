@@ -97,61 +97,6 @@
       }
     ],
     "isSystem": true
-  },
-  {
-    "context": "xtuple",
-    "nameSpace": "XM",
-    "type": "TaskResourceAnalysis",
-    "table": "xt.tskresourceanalysis",
-    "comment": "Task Resources for Analysis Map",
-    "privileges": {
-      "all": {
-        "create": false,
-        "read": true,
-        "update": false,
-        "delete": false
-      }
-    },
-    "properties": [
-      {
-        "name": "id",
-        "attr": {
-          "type": "Number",
-          "column": "row_number",
-          "isPrimaryKey": true,
-          "isNaturalKey": true
-        }
-      },
-      {
-        "name": "name",
-        "attr": {
-          "type": "String",
-          "column": "resource_name"
-        }
-      },
-      {
-        "name": "budgetedHours",
-        "attr": {
-          "type": "Number",
-          "column": "budgeted_hours"
-        }
-      },
-      {
-        "name": "actualHours",
-        "attr": {
-          "type": "Number",
-          "column": "actual_hours"
-        }
-      },
-      {
-        "name": "balanceHours",
-        "attr": {
-          "type": "Number",
-          "column": "balance_hours"
-        }
-      }
-    ],
-    "isSystem": true
   }
 ]
 

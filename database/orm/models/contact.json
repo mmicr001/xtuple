@@ -239,14 +239,6 @@
         }
       },
       {
-        "name": "toDoRelations",
-        "toMany": {
-          "type": "ToDoRelation",
-          "column": "cntct_number",
-          "inverse": "contact"
-        }
-      },
-      {
         "name": "projectRelations",
         "toMany": {
           "type": "ProjectRelation",

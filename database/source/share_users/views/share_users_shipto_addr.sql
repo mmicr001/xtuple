@@ -18,14 +18,13 @@ select xt.create_view('xt.share_users_shipto_addr', $$
   FROM (
     SELECT
       xt.crmacctaddr.obj_uuid::uuid AS obj_uuid,
-      crmacct.crmacct_id
+      cust_crmacct_id AS crmacct_id
     FROM shiptoinfo
-    LEFT JOIN crmacct ON crmacct_cust_id = shipto_cust_id
+    LEFT JOIN custinfo ON shipto_cust_id = cust_id
     LEFT JOIN xt.crmacctaddr ON shipto_addr_id = addr_id
   ) shipto_addr_crmacct_ids
   LEFT JOIN xt.crmacct_users USING (crmacct_id)
-  WHERE 1=1
-    AND username IS NOT NULL
+  WHERE username IS NOT NULL
     AND obj_uuid IS NOT NULL;
 
 $$, false);

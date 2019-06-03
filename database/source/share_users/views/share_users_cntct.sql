@@ -17,11 +17,11 @@ select xt.create_view('xt.share_users_cntct', $$
   FROM (
     SELECT
       cntct.obj_uuid,
-      cntct_crmacct_id
+      crmacctcntctass_crmacct_id AS cntct_crmacct_id
     FROM cntct
+    JOIN crmacctcntctass ON cntct_id = crmacctcntctass_cntct_id
   ) cntct_crmacct_ids
   LEFT JOIN xt.crmacct_users ON cntct_crmacct_id = crmacct_id
-  WHERE 1=1
-    AND username IS NOT NULL;
+  WHERE username IS NOT NULL;
 
 $$, false);

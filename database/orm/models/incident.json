@@ -233,14 +233,6 @@
         }
       },
       {
-        "name": "toDoRelations",
-        "toMany": {
-          "type": "ToDoRelation",
-          "column": "incdt_number",
-          "inverse": "incident"
-        }
-      },
-      {
         "name": "project",
         "toOne": {
           "isNested": true,

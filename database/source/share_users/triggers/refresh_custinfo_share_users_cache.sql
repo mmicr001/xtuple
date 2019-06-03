@@ -24,7 +24,7 @@ return (function () {
      * Because the Ship To's Contact is used to provide limited Child CRM Account
      * Share Access to Billing and Correspondence Contacts, if the Contact changes,
      * we need to refresh them and their address. Standard CRM Account Share
-     * Access would already have access through the cntct_crmacct_id column.
+     * Access would already have access through the crmacctcntctass.
      */
     if (OLD.cust_cntct_id !== NEW.cust_cntct_id) {
       XT.ShareUsers.refreshRelationCacheObj(addrUuidSql, [OLD.cust_cntct_id]);
