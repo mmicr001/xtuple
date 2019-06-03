@@ -221,8 +221,6 @@
     "xt/views/shipheadinfo.sql",
     "xt/views/shipmentline.sql",
     "xt/views/site.sql",
-    "xt/views/tskresourceanalysis.sql",
-    "xt/views/todoiteminfo.sql",
     "xt/views/usrinfo.sql",
     "xt/tables/usrlite.sql",
     "xm/javascript/account.sql",
