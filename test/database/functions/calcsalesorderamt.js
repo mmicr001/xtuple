@@ -76,11 +76,22 @@ var _      = require("underscore"),
                   assert.isNull(err);
                   assert.equal(res.rowCount, 1);
                   switch (e) {
+                    case 'B':
+                      // if (! so.hasCredit)
+                      //  assert.notEqual(res.rows[0].result, 0.0);
+                      // else if credit != total then assert.notEqual(res.rows[0].result, 0.0);
+                      // else if credit == total then assert.equal(0.0);
+                      break;
                     case 'C':
+                      /*
                       if (so.hasCredit)
                         assert.notEqual(res.rows[0].result, 0.0);
                       else
                         assert.equal(res.rows[0].result, 0.0);
+                      */
+                      break;
+                    case 'X':
+                      // TODO: check if this order is fully taxable
                       break;
                     case '[unknown]':
                       assert.equal(res.rows[0].result, 0.0);
