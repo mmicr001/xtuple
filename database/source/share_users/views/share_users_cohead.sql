@@ -17,13 +17,11 @@ select xt.create_view('xt.share_users_cohead', $$
   FROM (
     SELECT
       cohead.obj_uuid,
-      crmacct_id
+      cust_crmacct_id AS crmacct_id
     FROM cohead
     LEFT JOIN custinfo ON cohead_cust_id = cust_id
-    LEFT JOIN crmacct ON cust_id = crmacct_cust_id
   ) cohead_cust_crmacct_ids
   LEFT JOIN xt.crmacct_users USING (crmacct_id)
-  WHERE 1=1
-    AND username IS NOT NULL;
+  WHERE username IS NOT NULL;
 
 $$, false);

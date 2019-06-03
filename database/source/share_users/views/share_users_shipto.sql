@@ -15,9 +15,8 @@ select xt.create_view('xt.share_users_shipto', $$
     shiptoinfo.obj_uuid::uuid AS obj_uuid,
     username::text AS username
   FROM shiptoinfo
-  JOIN crmacct ON shipto_cust_id = crmacct_cust_id
-  LEFT JOIN xt.crmacct_users USING (crmacct_id)
-  WHERE 1=1
-    AND username IS NOT NULL;
+  JOIN custinfo ON shipto_cust_id = cust_id
+  LEFT JOIN xt.crmacct_users ON cust_crmacct_id = crmacct_id
+  WHERE username IS NOT NULL;
 
 $$, false);

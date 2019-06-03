@@ -13,11 +13,9 @@ return (function () {
     /* Refresh this Contact's Address's share access. */
     XT.ShareUsers.refreshRelationCacheObj(addrUuidSql, [NEW.cntct_addr_id]);
   } else if (TG_OP === 'UPDATE') {
-    /* If the Contact's CRM Account changed, refresh the Contact and Address's share access. */
-    if (OLD.cntct_crmacct_id !== NEW.cntct_crmacct_id) {
-      XT.ShareUsers.refreshCacheObj(NEW.obj_uuid);
-      refreshAddr = true;
-    }
+    /* TODO: refresh the Contact and Address's share access only when the crmacctcntctass changes */
+    XT.ShareUsers.refreshCacheObj(NEW.obj_uuid);
+    refreshAddr = true;
 
     /* If the Contact's Address changed, refresh the old Address and new Address's share access. */
     if (OLD.cntct_addr_id !== NEW.cntct_addr_id) {

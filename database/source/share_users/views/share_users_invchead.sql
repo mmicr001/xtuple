@@ -20,10 +20,9 @@ select xt.create_view('xt.share_users_invchead', $$
       crmacct_id
     FROM invchead
     LEFT JOIN custinfo ON invchead_cust_id = cust_id
-    LEFT JOIN crmacct ON cust_id = crmacct_cust_id
+    LEFT JOIN crmacct  ON cust_crmacct_id = crmacct_id
   ) invchead_cust_crmacct_ids
   LEFT JOIN xt.crmacct_users USING (crmacct_id)
-  WHERE 1=1
-    AND username IS NOT NULL;
+  WHERE username IS NOT NULL;
 
 $$, false);
