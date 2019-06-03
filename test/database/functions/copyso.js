@@ -15,10 +15,12 @@ var _    = require("underscore"),
         ;
 
     it("should find an order to copy", function (done) {
-      var sql = "select *,"                                             +
-                 "      (select count(*) from coitem"                   +
-                 "        where coitem_cohead_id = cohead_id) as lines" +
-                "  from cohead limit 1;";
+      var sql = "SELECT *,"
+              + "  (SELECT count(*) FROM coitem"
+              + "    WHERE coitem_cohead_id = cohead_id) AS lines"
+              + "  FROM cohead"
+              + " ORDER BY cohead_orderdate DESC"
+              + " LIMIT 1;";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);
         assert.equal(res.rowCount, 1);

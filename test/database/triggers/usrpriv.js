@@ -18,8 +18,16 @@ var _      = require("underscore"),
     ;
 
     it('needs manager group', function (done) {
-      var result;
-      dblib.createGroup('manager', 'managers group', result, done);
+      dblib.createGroup('manager', 'managers group', function (err, result) {
+        assert.isNull(err, "expect no error creating a group");
+        groupid = result;
+        done();
+      });
+    });
+
+    it('needs to set groupid', function (done) {
+      assert.isNotNull(groupid, "expect groupid to not be null");
+      done();
     });
 
     it("needs group members to maintain privileges", function (done) {
@@ -63,7 +71,7 @@ var _      = require("underscore"),
       });
     });
 
-    it("should prevent the unprivileged user from granting privs", function (done) {
+    it("should prevent the unprivileged user from granting privs again", function (done) {
       var other = _.extend({}, otherCred,
                            { parameters: [ otherCred.user, testPriv ] });
       datasource.query(addPrivSql, other, function (err, res) {
@@ -107,6 +115,12 @@ var _      = require("underscore"),
     after(function (done) {
       var sql = "select revokePrivGroup($1, priv_id)" +
 		"  from priv where priv_name = 'MaintainUsers';",
+          admin = _.extend({}, adminCred, { parameters: [ groupid ] });
+      datasource.query(sql, admin, done);
+    });
+
+    after(function (done) {
+      var sql = "delete from usrgrp where usrgrp_grp_id = $1;",
           admin = _.extend({}, adminCred, { parameters: [ groupid ] });
       datasource.query(sql, admin, done);
     });

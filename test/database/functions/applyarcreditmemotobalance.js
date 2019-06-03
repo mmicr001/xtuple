@@ -49,14 +49,14 @@ var _      = require('underscore'),
     done();
     });
   });
-    
+/*
   after(function () {
     var sql = "DELETE FROM aropen WHERE aropen_id=$1;",
     cred = _.extend({}, adminCred, { parameters: [aropenfail ] });
 
     datasource.query(sql, cred);
   });
-
+*/
   it("should run without error", function (done) {
     var sql = "SELECT applyARCreditMemoToBalance($1) AS result;",
 	cred = _.extend({}, adminCred,
@@ -67,5 +67,6 @@ var _      = require('underscore'),
       assert.equal(res.rows[0].result, 1);
       done();
     });
+  });
   });
 })();

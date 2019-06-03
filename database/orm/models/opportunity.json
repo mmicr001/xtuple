@@ -216,6 +216,30 @@
           "column": "ophead_id",
           "inverse": "opportunity"
         }
+      },
+      {
+        "name": "toDoRelations",
+        "toMany": {
+          "type": "ToDoRelation",
+          "column": "ophead_number",
+          "inverse": "opportunity"
+        }
+      },
+      {
+        "name": "quoteRelations",
+        "toMany": {
+          "type": "QuoteRelation",
+          "column": "ophead_number",
+          "inverse": "opportunity"
+        }
+      },
+      {
+        "name": "salesOrderRelations",
+        "toMany": {
+          "type": "SalesOrderRelation",
+          "column": "ophead_number",
+          "inverse": "opportunity"
+        }
       }
     ],
     "isSystem": true

@@ -46,11 +46,12 @@
   };
 
   /** create an application group and return its id in the result */
-  exports.createGroup = function (name, descrip, result, done) {
+  exports.createGroup = function (name, descrip, done) {
     var context = _.extend({}, adminCred,
                            { parameters: [ name, descrip || name ] }),
         sql     = 'insert into grp (grp_name, grp_descrip' +
-                  ') values ($1, $2) returning grp_id;';
+                  ') values ($1, $2) returning grp_id;',
+        result = '-1';
     datasource.query(sql, context, function (err, res) {
       if (err) {
         assert.match(err.code, /23505/);
@@ -60,7 +61,7 @@
         result = res.rows[0].grp_id;
         assert.isTrue(result >= 0, 'expected a real group id');
       }
-      if (_.isFunction(done)) { done(); }
+      if (_.isFunction(done)) { done(err, result); }
     });
   };
 

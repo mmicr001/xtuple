@@ -13,10 +13,10 @@ var _      = require('underscore'),
         ;
 
     it('needs a checking account to work with', function (done) {
-      var sql = "INSERT INTO bankaccnt ("                                      +
-                "  bankaccnt_name, bankaccnt_nextchknum"                       +
-                ") VALUES ("                                                   +
-                "  'nextCheckNumber' || (random() * 10 - 1)::INTEGER, 10000"   +
+      var sql = "INSERT INTO bankaccnt ("                                        +
+                "  bankaccnt_name, bankaccnt_nextchknum"                         +
+                ") VALUES ("                                                     +
+                "  'nextCheckNumber' || (random() * 100000 - 1)::INTEGER, 10000" +
                 ") RETURNING *;";
       datasource.query(sql, adminCred, function (err, res) {
         assert.isNull(err);

@@ -9,8 +9,6 @@ var async = require('async'),
   explodeManifest = require("./util/process_manifest").explodeManifest,
   fs = require('fs'),
   ormInstaller = require('./orm'),
-  dictionaryBuilder = require('./build_dictionary'),
-  clientBuilder = require('./build_client'),
   path = require('path'),
   sendToDatabase = require("./util/send_to_database").sendToDatabase;
 
@@ -21,15 +19,11 @@ var async = require('async'),
     @param {Object} specs Specification for the build process, in the form:
       [ { extensions:
            [ '/home/user/git/xtuple',
-             '/home/user/git/xtuple/enyo-client/extensions/source/crm',
-             '/home/user/git/xtuple/enyo-client/extensions/source/sales',
              '/home/user/git/private-extensions/source/incident_plus' ],
           database: 'dev',
           orms: [] },
         { extensions:
-           [ '/home/user/git/xtuple',
-             '/home/user/git/xtuple/enyo-client/extensions/source/sales',
-             '/home/user/git/xtuple/enyo-client/extensions/source/project' ],
+           [ '/home/user/git/xtuple' ],
           database: 'dev2',
           orms: [] }]
 
@@ -70,11 +64,6 @@ var async = require('async'),
       // The function to install all the scripts for an extension
       //
       var getExtensionSql = function (extension, extensionCallback) {
-        if (spec.clientOnly) {
-          extensionCallback(null, "");
-          return;
-        }
-
         // deal with directory structure quirks. There is a lot of business logic
         // baked in here to deal with a lot of legacy baggage. This allows
         // process_manifest to just deal with a bunch of instructions as far as what
@@ -117,10 +106,6 @@ var async = require('async'),
       // which has been retooled to return the queryString instead of running
       // it itself.
       var getOrmSql = function (extension, callback) {
-        if (spec.clientOnly) {
-          callback(null, "");
-          return;
-        }
         var ormDir = path.join(extension, "database/orm");
 
         if (fs.existsSync(ormDir)) {
@@ -142,16 +127,6 @@ var async = require('async'),
         }
       };
 
-      // We also need to get the sql that represents the queries to put the
-      // client source in the database.
-      var getClientSql = function (extension, callback) {
-        if (spec.databaseOnly) {
-          callback(null, "");
-          return;
-        }
-        clientBuilder.getClientSql(extension, callback);
-      };
-
       /**
         The sql for each extension comprises the sql in the the source directory
         with the orm sql tacked on to the end. Note that an alternate methodology
@@ -165,17 +140,7 @@ var async = require('async'),
             getExtensionSql(extension, callback);
           },
           function (callback) {
-            if (spec.clientOnly) {
-              callback(null, "");
-              return;
-            }
-            dictionaryBuilder.getDictionarySql(extension, callback);
-          },
-          function (callback) {
             getOrmSql(extension, callback);
-          },
-          function (callback) {
-            getClientSql(extension, callback);
           }
         ], function (err, results) {
           masterCallback(err, _.reduce(results, function (memo, sql) {
@@ -338,12 +303,10 @@ var async = require('async'),
         return;
       }
       console.log("Success installing all scripts.");
-      console.log("Cleaning up.");
-      clientBuilder.cleanup(specs, function (err) {
-        if (masterCallback) {
-          masterCallback(err, res);
-        }
-      });
+
+      if (masterCallback) {
+        masterCallback(err, res);
+      }
     });
   };
 

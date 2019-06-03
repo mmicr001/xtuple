@@ -1,7 +1,0 @@
-*.DS_Store
-build
-*.swp
-tmp
-npm-debug.log
-build
-deploy

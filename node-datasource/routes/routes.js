@@ -25,32 +25,20 @@ regexp:true, undef:true, strict:true, trailing:true, white:true */
     // is a function that returns another function, and express allows routes to
     // be defined in such a way as to chain these types of functions together in an array.
     ensureLogin = require('connect-ensure-login').ensureLoggedIn(logoutPath),
-    app = require('./app'),
     auth = require('./auth'),
-    authorizeNet = require('./authorize-net'),
     changePassword = require('./change_password'),
-    clientCode = require('./client_code'),
     email = require('./email'),
-    exxport = require('./export'),
     data = require('./data'),
-    file = require('./file'),
-    generateReport = require('./generate_report'),
-    generateOauthKey = require('./generate_oauth_key'),
-    installExtension = require('./install_extension'),
-    locale = require('./locale'),
     passport = require('passport'),
     redirector = require('./redirector'),
     recover = require('./recover'),
     restDiscovery = require('./restDiscovery'),
     restRouter = require('./restRouter'),
-    revokeOauthToken = require('./revoke_oauth_token'),
-    vcfExport = require('./vcfExport');
+    revokeOauthToken = require('./revoke_oauth_token');
 
   //
   // Authentication-related routes
   //
-  exports.app = [ensureLogin, app.serveApp];
-  exports.debug = [ensureLogin, app.serveDebug];
   exports.login = auth.login;
   exports.loginForm = auth.loginForm;
   exports.logout = auth.logout;
@@ -90,19 +78,10 @@ regexp:true, undef:true, strict:true, trailing:true, white:true */
   //
   // Custom routes
   //
-  exports.creditCard = [ensureLogin, authorizeNet.transact];
   exports.changePassword = [ensureLogin, changePassword.changePassword];
-  exports.clientCode = [ensureLogin, clientCode.clientCode];
   exports.email = [ensureLogin, email.email];
-  exports.exxport = [ensureLogin, exxport.exxport];
-  exports.file = [ensureLogin, file.file];
-  exports.generateOauthKey = [ensureLogin, generateOauthKey.generateKey];
-  exports.generateReport = [ensureLogin, generateReport.generateReport];
-  exports.installExtension = [ensureLogin, installExtension.installExtension];
-  exports.locale = [ensureLogin, locale.locale];
   exports.redirect = redirector.redirect;
   exports.resetPassword = [ensureLogin, changePassword.resetPassword];
   exports.revokeOauthToken = [ensureLogin, revokeOauthToken.revokeToken];
-  exports.vcfExport = [ensureLogin, vcfExport.vcfExport];
 
 }());
