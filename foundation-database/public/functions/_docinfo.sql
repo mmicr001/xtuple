@@ -56,7 +56,12 @@ BEGIN
                     AND docass_source_id = pRefId
                     AND docass_source_type = pRefType
 
-           UNION SELECT docass_id,        docass_purpose,
+           UNION SELECT docass_id,
+                        CASE docass_purpose
+                          WHEN 'C' THEN 'A'
+                          WHEN 'A' THEN 'C'
+                          ELSE docass_purpose
+                        END AS docass_purpose,
                         docass_source_id, docass_source_type,
                         source_id, docass_notes
                    FROM docass
