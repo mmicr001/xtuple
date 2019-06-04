@@ -52,7 +52,7 @@ BEGIN
   FROM shiptoinfo
   WHERE (shipto_id=pShiptoid);
 
-  _listprice := listPrice(pItemid, pCustid, pShiptoid, pSiteid);
+  _listprice := listPrice(pItemid, pCustid, pShiptoid, pSiteid, pEffective);
 
 -- Price Schedule Assignment Order of Precedence
 -- 1. Specific Customer Shipto Id
