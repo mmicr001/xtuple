@@ -74,7 +74,7 @@ BEGIN
                                _r.apapply_postdate, _r.aamt,
                                'Check ' || _r.apapply_source_docnumber ||
                                ' to be re-applied; original date: ' || _r.apapply_postdate,
-                               -1, CURRENT_DATE, NULL, _r.arapply_curr_id);
+                               -1, CURRENT_DATE, NULL, _r.apapply_curr_id);
   END IF;
 
   UPDATE apapply SET apapply_reversed = true
