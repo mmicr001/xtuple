@@ -13,6 +13,7 @@ DECLARE
   pCurrId ALIAS FOR $7;
 
   _row freightData%ROWTYPE;
+  _cohead RECORD;
   _order RECORD;
   _weights RECORD;
   _includepkgweight BOOLEAN := FALSE;
@@ -73,25 +74,39 @@ BEGIN
     WHERE (quhead_id=pOrderId);
 
   ELSIF (pOrderType = 'CM') THEN
+    IF EXISTS(SELECT 1
+                FROM pg_class
+                JOIN pg_namespace on relnamespace = pg_namespace.oid
+               WHERE nspname = 'public'
+                 AND relname = 'rahead') THEN
+      SELECT cohead_orderdate, cohead_shipvia, cohead_curr_id
+        INTO _cohead
+        FROM cmhead
+        JOIN rahead ON cmhead_rahead_id = rahead_id
+        JOIN cohead ON rahead_orig_cohead_id = cohead_id
+       WHERE cmhead_id = pOrderId;
+    ELSE
+      SELECT NULL::DATE AS cohead_orderdate, NULL::TEXT AS cohead_shipvia, NULL::INTEGER AS cohead_curr_id
+        INTO _cohead;
+    END IF;
+
     SELECT
       cust_id AS cust_id,
       custtype_id,
       custtype_code,
       COALESCE(shipto_id, -1) AS shipto_id,
       COALESCE(shipto_num, '') AS shipto_num,
-      COALESCE(pOrderDate, invchead_orderdate, cohead_orderdate, cmhead_docdate) AS orderdate,
-      COALESCE(pShipVia, invchead_shipvia, cohead_shipvia, cmhead_shipvia) AS shipvia,
+      COALESCE(pOrderDate, invchead_orderdate, _cohead.cohead_orderdate, cmhead_docdate) AS orderdate,
+      COALESCE(pShipVia, invchead_shipvia, _cohead.cohead_shipvia, cmhead_shipvia) AS shipvia,
       shipto_shipzone_id AS shipzone_id,
-      COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id) AS curr_id,
-      currConcat(COALESCE(pCurrId, invchead_curr_id, cohead_curr_id, cmhead_curr_id)) AS currAbbr
+      COALESCE(pCurrId, invchead_curr_id, _cohead.cohead_curr_id, cmhead_curr_id) AS curr_id,
+      currConcat(COALESCE(pCurrId, invchead_curr_id, _cohead.cohead_curr_id, cmhead_curr_id)) AS currAbbr
     INTO _order
       FROM cmhead
       JOIN custinfo ON (cust_id=COALESCE(pCustId, cmhead_cust_id))
       JOIN custtype ON (custtype_id=cust_custtype_id)
       LEFT OUTER JOIN shiptoinfo ON (shipto_id=COALESCE(pShiptoId, cmhead_shipto_id))
       LEFT OUTER JOIN invchead ON cmhead_invcnumber = invchead_invcnumber
-      LEFT OUTER JOIN rahead ON cmhead_rahead_id = rahead_id
-      LEFT OUTER JOIN cohead ON rahead_orig_cohead_id = cohead_id
     WHERE (cmhead_id=pOrderId);
 
   ELSIF (pOrderType = 'RA') THEN
