@@ -64,10 +64,6 @@ FROM pohead
 <? if exists("pohead_agent_usr_id") ?>
      JOIN usr ON (pohead_agent_username=usr_username)
 <? endif ?> 
-<? if exists("warehous_id") ?>
-     JOIN poitem ON (poitem_pohead_id=pohead_id) 
-     JOIN itemsite ON (poitem_itemsite_id=itemsite_id)
-<? endif ?> 
 <? foreach("char_id_text_list") ?>
      LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> 
           ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=pohead_id)
@@ -142,7 +138,10 @@ WHERE ( true
   AND (usr_id  = <? value("pohead_agent_usr_id") ?>)
 <? endif ?> 
 <? if exists("warehous_id") ?>
-  AND (itemsite_warehous_id = <? value("warehous_id") ?>)
+  AND <? value("warehous_id") ?> IN (SELECT itemsite_warehous_id
+                                       FROM poitem
+                                       JOIN itemsite ON poitem_itemsite_id = itemsite_id
+                                      WHERE poitem_pohead_id = pohead_id)
 <? endif ?> 
 <? literal("charClause") ?>
  ) 
