@@ -100,7 +100,9 @@ BEGIN
                     _glseriesres;
   END IF;
 
-  IF (preftype = 'aropen') THEN
+  IF (preftype = 'cashrcpt') THEN
+    RETURN 0;
+  ELSIF (preftype = 'aropen') THEN
     SELECT * INTO _r
     FROM aropen
     WHERE (aropen_id=prefid);
