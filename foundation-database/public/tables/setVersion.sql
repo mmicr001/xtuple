@@ -1,1 +1,1 @@
-SELECT setMetric('ServerVersion', '5.0.0-rc');
+SELECT setMetric('ServerVersion', '5.0.0');
