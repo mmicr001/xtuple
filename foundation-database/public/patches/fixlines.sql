@@ -53,7 +53,7 @@ BEGIN
     RETURNING salescat_id INTO _salescatid;
   END IF;
 
-  ALTER TABLE public.invcitem DISABLE TRIGGER invcitembeforetrigger;
+  ALTER TABLE public.invcitem DISABLE TRIGGER ALL;
 
   UPDATE invcitem
      SET invcitem_number = COALESCE(NULLIF(COALESCE(invcitem_number, invcitem_descrip, ''), ''), 'BAD DATA'),
@@ -70,7 +70,7 @@ BEGIN
    WHERE COALESCE(invcitem_item_id, -1) < 0
      AND (COALESCE(invcitem_salescat_id, -1) < 0 OR COALESCE(invcitem_number, '') = '' OR COALESCE(invcitem_descrip, '') = '');
 
-  ALTER TABLE public.invcitem ENABLE TRIGGER invcitembeforetrigger;
+  ALTER TABLE public.invcitem ENABLE TRIGGER ALL;
 
   IF _fixcm THEN
     UPDATE cmitem
