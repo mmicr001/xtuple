@@ -122,10 +122,9 @@ WHERE true
   AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
-  AND (SELECT BOOL_OR(cntcteml_email) 
+  AND (SELECT BOOL_OR(cntcteml_email ~* <? value("search_pattern") ?>) 
          FROM cntcteml
-        WHERE cntcteml_cntct_id=cntct_id
-          AND cntcteml_email ~* <? value("search_pattern") ?>)
+        WHERE cntcteml_cntct_id=cntct_id)
 <? endif ?>
 <? if exists("addr_street_pattern") ?>
   AND (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("addr_street_pattern") ?>)
