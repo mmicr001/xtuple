@@ -67,7 +67,6 @@ FROM cntct()
 <? endif ?>
   LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id) 
   LEFT OUTER JOIN addr ON (cntct_addr_id=addr_id) 
-  LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
   LEFT OUTER JOIN mrkd ON (mrkd_target_type='T' AND mrkd_target_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cntct_id)
@@ -99,7 +98,10 @@ WHERE true
   OR (crmacct_name ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
-  OR (COALESCE(cntcteml_email,'') ~* <? value("search_pattern") ?>)
+  OR (SELECT BOOL_OR(cntcteml_email) 
+        FROM cntcteml
+       WHERE cntcteml_cntct_id=cntct_id
+         AND cntcteml_email ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_city,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(addr_state,'') ~* <? value("search_pattern") ?>)
@@ -120,7 +122,10 @@ WHERE true
   AND (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
-  AND (COALESCE(cntcteml_email,'') ~* <? value("cntct_email_pattern") ?>)
+  AND (SELECT BOOL_OR(cntcteml_email) 
+         FROM cntcteml
+        WHERE cntcteml_cntct_id=cntct_id
+          AND cntcteml_email ~* <? value("search_pattern") ?>)
 <? endif ?>
 <? if exists("addr_street_pattern") ?>
   AND (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("addr_street_pattern") ?>)
@@ -159,4 +164,4 @@ WHERE true
   AND cntct_lastupdated::DATE <= <? value("updateEndDate") ?>
 <? endif ?>
 <? literal("charClause") ?>
-ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number, cntcteml_primary desc;
+ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0, cntct_last_name, cntct_first_name, cntct_number desc;
