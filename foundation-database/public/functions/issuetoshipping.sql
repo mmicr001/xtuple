@@ -228,7 +228,7 @@ BEGIN
 
     -- Due to Reservation interdependencies we have to create the shipitem, post inventory,
     -- then update the shipitem with the invhist value
-    UPDATE shipitem SET shipitem_value = _value, shipitem_invhist_id = _invhistid
+    UPDATE shipitem SET shipitem_value = _value, shipitem_invhist_id = CASE WHEN _invhistid = -1 THEN NULL ELSE _invhistid END
     WHERE shipitem_id = _shipitemid;
 
     -- Calculate shipment freight
