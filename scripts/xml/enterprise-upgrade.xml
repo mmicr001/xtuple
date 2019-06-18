@@ -1,5 +1,5 @@
-<package id        = "enterprise-upgrade-4.12.1"
-         version   = "4.12.1"
+<package id        = "enterprise-upgrade-4.12.2"
+         version   = "4.12.2"
          developer = "xTuple"
          descrip   = "load PostBooks resources"
          updater   = "2.2.4" >
