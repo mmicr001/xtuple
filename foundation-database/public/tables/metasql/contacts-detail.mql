@@ -98,7 +98,7 @@ WHERE true
   OR (crmacct_name ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_first_name,'') || ' ' || COALESCE(cntct_last_name,'') ~* <? value("search_pattern") ?>)
   OR (COALESCE(cntct_phone,'') || ' ' || COALESCE(cntct_phone2,'') || ' ' || COALESCE(cntct_fax,'') ~* <? value("search_pattern") ?>)
-  OR ((SELECT BOOL_OR(cntcteml_email ~* <? value("search_pattern") ?>) 
+  OR (SELECT BOOL_OR(cntcteml_email ~* <? value("search_pattern") ?>) 
          FROM cntcteml
         WHERE cntcteml_cntct_id=cntct_id)
   OR (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("search_pattern") ?>)
