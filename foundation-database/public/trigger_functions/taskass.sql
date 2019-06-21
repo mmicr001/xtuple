@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _taskassAfterUpdateTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (OLD.taskass_assigned_date <> NEW.taskass_assigned_date) THEN
     PERFORM postComment('ChangeLog', 'TA', NEW.task_id, 'Assigned Date',

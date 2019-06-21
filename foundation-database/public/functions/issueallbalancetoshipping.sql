@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION issueAllBalanceToShipping(INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN issueAllBalanceToShipping('SO', $1, 0, NULL);
 END;
@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION issueAllBalanceToShipping(pordertype TEXT,
                                                      pitemlocseries INTEGER,
                                                      ptimestamp TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemlocSeries	INTEGER;
   _s			RECORD;

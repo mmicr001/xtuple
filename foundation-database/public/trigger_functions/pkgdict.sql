@@ -3,7 +3,7 @@
 SELECT dropIfExists('TRIGGER', 'pkgdictbeforetrigger');
 CREATE OR REPLACE FUNCTION _pkgdictbeforetrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _dictid       INTEGER;
   _debug        BOOL := false;
@@ -25,7 +25,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION _pkgdictalterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (pkgMayBeModified(TG_TABLE_SCHEMA) OR isDba()) THEN
     IF (TG_OP = 'DELETE') THEN
@@ -53,7 +53,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION _pkgdictaftertrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     RETURN OLD;

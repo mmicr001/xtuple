@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION postComment(pCmnttypename TEXT,
                                        pFrom TEXT,
                                        pTo TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cmnttypeid INTEGER;
   _text TEXT;
@@ -30,7 +30,7 @@ CREATE OR REPLACE FUNCTION postComment(pCmnttypename TEXT,
                                        pSourceid INTEGER,
                                        pText TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cmnttypeid INTEGER;
 
@@ -51,7 +51,7 @@ CREATE OR REPLACE FUNCTION postComment(pCmnttypeid INTEGER,
                                        pSourceid INTEGER,
                                        pText TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -65,7 +65,7 @@ CREATE OR REPLACE FUNCTION postComment(pCmnttypeid INTEGER,
                                        pText TEXT,
                                        pPublic BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _commentid INTEGER;
   _public BOOLEAN;

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION bankReconciliation(pBankrecid INTEGER, pTask TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 -- posting and reopening bank reconciliations are nearly identical.
 -- the main differences revolve around what cleanup is done before starting.
 -- other than that, posting and reopening touch the same g/l accounts but with

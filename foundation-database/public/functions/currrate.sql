@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION currRate(INTEGER, DATE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN currRate($1, NULL, $2);
 
@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION currRate(pFromCurr INTEGER,
                                     pToCurr INTEGER,
                                     pDate DATE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _fromRate NUMERIC := 1.0;
   _toRate NUMERIC := 1.0;

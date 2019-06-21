@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION formatExternalTaxCodes(pRequest JSON)
    RETURNS TABLE(id INTEGER, taxcode TEXT, description TEXT, parent TEXT, type TEXT, path TEXT[],
                  level INTEGER) AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license
+-- See www.xtuple.com/EULA for the full text of the software license
 DECLARE
   _r   RECORD;
 

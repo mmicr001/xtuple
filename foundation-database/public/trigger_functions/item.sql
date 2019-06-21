@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _itemTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
 -- Override values to avoid invalid data combinations
@@ -44,7 +44,7 @@ CREATE TRIGGER itemTrigger
 
 CREATE OR REPLACE FUNCTION _itemAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 BEGIN
 -- Privilege Checks
@@ -245,7 +245,7 @@ CREATE TRIGGER itemAfterTrigger
 
 CREATE OR REPLACE FUNCTION _itemAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -269,7 +269,7 @@ CREATE TRIGGER itemAfterDeleteTrigger
 CREATE OR REPLACE FUNCTION public._item_uom_check()
   RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 -- This trigger checks the all item uom_id columns have valid conversion ratios.
 BEGIN

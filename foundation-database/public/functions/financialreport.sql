@@ -5,7 +5,7 @@ SELECT dropIfExists('FUNCTION','financialreport(INTEGER,_int4,bpchar,bool)');
 
 CREATE OR REPLACE FUNCTION financialreport(INTEGER, INTEGER, INTEGER) RETURNS bool AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pFlheadid ALIAS FOR $1;
   pPeriodid ALIAS FOR $2;
@@ -23,7 +23,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION financialreport(INTEGER, INTEGER, bpchar, INTEGER)
   RETURNS bool AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 /* performance vs. history:
    versions prior to xTuple ERP 4.5.x (x ?= 1) used public.flrpt
@@ -247,7 +247,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION financialreport(INTEGER, INTEGER, bool, bool, INTEGER)
   RETURNS SETOF flstmtitem AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 -- see "performance vs. history" in financialreport(integer,integer,bpchar,integer)
 DECLARE
   pFlcolid ALIAS FOR $1;
@@ -1261,7 +1261,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION financialreport(INTEGER,_int4,bpchar,bool,INTEGER)
   RETURNS SETOF fltrenditem AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pFlheadId ALIAS FOR $1;
   pPeriodIds ALIAS FOR $2;

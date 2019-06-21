@@ -2,7 +2,7 @@
 -- Name: receipts
 -- Notes: used by voucherItem
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT recv_id AS item_id, 1 AS item_type, 'REC' AS action,
        recv_date AS item_date,

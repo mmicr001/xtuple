@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _prospectTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _custid       INTEGER;
   _prospectid   INTEGER;
@@ -67,7 +67,7 @@ CREATE TRIGGER prospectTrigger BEFORE INSERT OR UPDATE ON prospect
 
 CREATE OR REPLACE FUNCTION _prospectAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'INSERT') THEN
@@ -162,7 +162,7 @@ CREATE TRIGGER prospectAfterTrigger AFTER INSERT OR UPDATE ON prospect
 
 CREATE OR REPLACE FUNCTION _prospectBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainProspectMasters')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Prospects.';
@@ -178,7 +178,7 @@ CREATE TRIGGER prospectBeforeDeleteTrigger BEFORE DELETE ON prospect
 
 CREATE OR REPLACE FUNCTION _prospectAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF EXISTS(SELECT 1 FROM quhead WHERE quhead_cust_id = OLD.prospect_id) AND
      NOT EXISTS (SELECT 1 FROM custinfo WHERE cust_id = OLD.prospect_id) THEN

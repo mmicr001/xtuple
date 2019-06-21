@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION updateCost(pItemcostid INTEGER,
                                       pCost NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN updateCost(pItemcostid, pCost, baseCurrId());
 END;
@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION updateCost(pItemcostid INTEGER,
                                       pCost NUMERIC,
                                       pCurrId INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   UPDATE itemcost
      SET itemcost_actcost=pCost,
@@ -27,7 +27,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION updateCost(INTEGER, TEXT, BOOLEAN, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN updateCost($1, $2, $3, $4, baseCurrId());
 END;
@@ -36,7 +36,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION updateCost(INTEGER, INTEGER, BOOLEAN, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN updateCost($1, $2, $3, $4, baseCurrId());
 END;
@@ -48,7 +48,7 @@ CREATE OR REPLACE FUNCTION updateCost(pItemid INTEGER,
                                       pCost NUMERIC,
                                       pCurrid INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cost NUMERIC;
   _currId INTEGER;
@@ -115,7 +115,7 @@ CREATE OR REPLACE FUNCTION updateCost(pItemid INTEGER,
                                       pCost NUMERIC,
                                       pCurrid INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cost NUMERIC;
   _currId INTEGER;

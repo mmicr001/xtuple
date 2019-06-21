@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION findSpecialFinancial(TEXT, TEXT, INTEGER) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pUnit ALIAS FOR $1;
   pType ALIAS FOR $2;
@@ -45,7 +45,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION copyFinancialLayout(INTEGER, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSourceFlheadid ALIAS FOR $1;
   pDestName ALIAS FOR $2;

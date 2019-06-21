@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _cobmiscBeforeTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -25,7 +25,7 @@ CREATE TRIGGER cobmiscBeforeTrigger
 
 CREATE OR REPLACE FUNCTION _cobmiscTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     -- Something can go here

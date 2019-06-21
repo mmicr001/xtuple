@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _salesrepBeforeTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF NOT (checkPrivilege('MaintainSalesReps')) THEN
@@ -65,7 +65,7 @@ CREATE TRIGGER salesrepBeforeTrigger BEFORE INSERT OR UPDATE OR DELETE ON salesr
 
 CREATE OR REPLACE FUNCTION _salesrepAfterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'UPDATE' AND OLD.salesrep_crmacct_id=NEW.salesrep_crmacct_id) THEN

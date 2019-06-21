@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION itemuomtouom(INTEGER, INTEGER, INTEGER, NUMERIC) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN itemuomtouom($1, $2, $3, $4, 'qty');
 END;
@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION itemuomtouom(pItemid INTEGER,
                                         pQtyFrom NUMERIC,
                                         pLocale TEXT) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _uomidFrom INTEGER;
   _uomidTo   INTEGER;

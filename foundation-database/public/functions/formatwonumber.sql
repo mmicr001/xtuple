@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION formatWoNumber(pWoid INTEGER) RETURNS TEXT IMMUTABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 BEGIN
 
@@ -13,7 +13,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION formatWoNumber(pId INTEGER,
                                           pType TEXT) RETURNS TEXT IMMUTABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 BEGIN
 

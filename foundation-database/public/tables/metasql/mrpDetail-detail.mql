@@ -2,7 +2,7 @@
 -- Name: detail
 -- Notes: used by dspMRPDetail
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT qtyNetable(itemsite_id) AS qoh, formatQty(qtyNetable(itemsite_id)) AS f_qoh,
        qtyAllocated(itemsite_id, findPeriodStart(<? value("cursorId") ?>),

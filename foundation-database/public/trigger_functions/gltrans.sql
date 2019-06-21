@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _gltransInsertTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _reqNotes BOOLEAN;
   _externalCompany      BOOLEAN := false;
@@ -39,7 +39,7 @@ CREATE TRIGGER gltransInsertTrigger BEFORE INSERT ON gltrans FOR EACH ROW EXECUT
 
 CREATE OR REPLACE FUNCTION _gltransAlterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _externalCompany      BOOLEAN := false;
   _updated BOOLEAN := false;

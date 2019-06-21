@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION customerCanPurchase(INTEGER, INTEGER) RETURNS BOOL AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pitemid ALIAS FOR $1;
   pCustid ALIAS FOR $2;
@@ -12,7 +12,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION customerCanPurchase(INTEGER, INTEGER, INTEGER) RETURNS BOOL AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pitemid ALIAS FOR $1;
   pCustid ALIAS FOR $2;
@@ -27,7 +27,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION customerCanPurchase(INTEGER, INTEGER, INTEGER, DATE) RETURNS BOOL AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pitemid ALIAS FOR $1;
   pCustid ALIAS FOR $2;

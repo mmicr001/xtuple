@@ -2,7 +2,7 @@
 -- Name: sourceItemSite
 -- Notes: used by enterPoitemReceipt
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 <? if exists("poitem_id") ?>			-- this should never be called
   SELECT -1 AS itemsite_id, -1 AS warehous_id;

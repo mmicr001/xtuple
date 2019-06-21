@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION orderedByWo(INTEGER, INTEGER) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemsiteid ALIAS FOR $1;
   pLookAheadDays ALIAS FOR $2;
@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION orderedByWo(pItemsiteid INTEGER,
                                        pStartDate  DATE,
                                        pEndDate    DATE) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemType CHARACTER(1);
   _qty NUMERIC := 0;

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _shiptoinfoBeforeTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _SalesRepId INTEGER;
   _SalesRepComm NUMERIC;
@@ -70,7 +70,7 @@ CREATE TRIGGER shiptoinfoBeforeTrigger BEFORE INSERT OR UPDATE ON shiptoinfo FOR
 
 CREATE OR REPLACE FUNCTION _shiptoinfoAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   -- Timestamps
@@ -90,7 +90,7 @@ CREATE TRIGGER shiptoinfoBeforeTrigger BEFORE INSERT OR UPDATE ON shiptoinfo
 
 CREATE OR REPLACE FUNCTION _shiptoinfoAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (NEW.shipto_default) THEN

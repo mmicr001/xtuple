@@ -5,7 +5,7 @@ DROP FUNCTION IF EXISTS _crmacctBeforeTrigger();
 
 CREATE OR REPLACE FUNCTION _crmacctBeforeUpsertTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _matchingUsrNew BOOLEAN := false;
   _matchingUsrOld BOOLEAN := false;
@@ -58,7 +58,7 @@ CREATE TRIGGER crmacctBeforeUpsertTrigger BEFORE INSERT OR UPDATE ON crmacct
 
 CREATE OR REPLACE FUNCTION _crmacctBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   DELETE FROM crmacctcntctass 
    WHERE crmacctcntctass_crmacct_id = OLD.crmacct_id;
@@ -76,7 +76,7 @@ CREATE TRIGGER crmacctBeforeDeleteTrigger BEFORE DELETE ON crmacct
 
 CREATE OR REPLACE FUNCTION _crmacctAfterUpsertTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   /* update _number and _name separately to propagate just what changed.
      the priv manipulation allows targeted updates of crmaccount-maintained data
@@ -191,7 +191,7 @@ CREATE TRIGGER crmacctAfterUpsertTrigger AFTER INSERT OR UPDATE ON crmacct
 
 CREATE OR REPLACE FUNCTION _crmacctAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full te`xt of the software license.
+-- See www.xtuple.com/EULA for the full te`xt of the software license.
 BEGIN
 
   IF (EXISTS(SELECT usename

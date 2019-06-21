@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _cmheadBeforeTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check BOOLEAN;
   _id INTEGER;
@@ -119,7 +119,7 @@ CREATE TRIGGER cmheadbeforetrigger
 
 CREATE OR REPLACE FUNCTION _cmheadTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     -- If this was created by a return, then reset the return

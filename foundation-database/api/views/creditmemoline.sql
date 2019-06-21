@@ -28,7 +28,7 @@ COMMENT ON VIEW api.creditmemoline IS 'Credit Memo Line';
 CREATE OR REPLACE FUNCTION insertcreditmemoline(api.creditmemoline) RETURNS boolean AS
 $insertcreditmemoline$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pNew ALIAS FOR $1;
   _check INTEGER;
@@ -93,7 +93,7 @@ $insertcreditmemoline$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION updatecreditmemoline(api.creditmemoline, api.creditmemoline) RETURNS boolean AS
 $updatecreditmemoline$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pNew ALIAS FOR $1;
   pOld ALIAS FOR $2;

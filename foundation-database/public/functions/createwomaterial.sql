@@ -5,7 +5,7 @@ DROP FUNCTION IF EXISTS createWoMaterial(INTEGER, INTEGER, CHAR, INTEGER, NUMERI
 
 CREATE OR REPLACE FUNCTION createWoMaterial(INTEGER, INTEGER, char(1), NUMERIC, NUMERIC, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWoid ALIAS FOR $1;
   pItemsiteid ALIAS FOR $2;
@@ -25,7 +25,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createWoMaterial(INTEGER, INTEGER, char(1), INTEGER, NUMERIC, NUMERIC, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWoid ALIAS FOR $1;
   pItemsiteid ALIAS FOR $2;
@@ -46,7 +46,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createWoMaterial(INTEGER, INTEGER, char(1), INTEGER, NUMERIC, NUMERIC, NUMERIC, INTEGER, TEXT, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWoid ALIAS FOR $1;
   pItemsiteid ALIAS FOR $2;
@@ -81,7 +81,7 @@ CREATE OR REPLACE FUNCTION createWoMaterial(pWoid INTEGER,
                                             pWooperId INTEGER,
                                             pPickList BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _womatlid INTEGER;
 
@@ -119,7 +119,7 @@ CREATE OR REPLACE FUNCTION createWoMaterial(pWoid INTEGER,
                                             pPickList BOOLEAN,
                                             pPrice NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _womatlid INTEGER;
   _p RECORD;

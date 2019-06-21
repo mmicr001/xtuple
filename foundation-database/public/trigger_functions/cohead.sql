@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION _soheadTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _p RECORD;
   _a RECORD;
@@ -607,7 +607,7 @@ CREATE TRIGGER soheadTrigger
 
 CREATE OR REPLACE FUNCTION _soheadTriggerAfter() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.cohead_taxzone_id,-1) <> COALESCE(OLD.cohead_taxzone_id,-1)) THEN
     UPDATE coitem SET coitem_taxtype_id=getItemTaxType(itemsite_item_id,NEW.cohead_taxzone_id)
@@ -660,7 +660,7 @@ CREATE TRIGGER soheadTriggerAfter
 
 CREATE OR REPLACE FUNCTION _coheadBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -690,7 +690,7 @@ CREATE TRIGGER coheadBeforeDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _coheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 _recurid     INTEGER;
 _newparentid INTEGER;

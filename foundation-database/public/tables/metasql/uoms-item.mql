@@ -3,7 +3,7 @@
 -- Notes: used by item, bomItem, salesOrderItem, invoiceItem, creditMemoItem, woMaterialItem,
 --                returnAuthorizationItem, itemPricingScheduleItem
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 <? if exists("uom_id") ?>
 SELECT uom_id, uom_name, 'I' as code, 1 as seq

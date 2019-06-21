@@ -5,7 +5,7 @@ SELECT dropIfExists('FUNCTION', 'createPurchaseToSale(integer, integer, boolean,
 
 CREATE OR REPLACE FUNCTION createPurchaseToSale(INTEGER, INTEGER, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pCoitemId ALIAS FOR $1;
   pItemSourceId ALIAS FOR $2;
@@ -21,7 +21,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION createPurchaseToSale(INTEGER, INTEGER, BOOLEAN, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pCoitemId ALIAS FOR $1;
   pItemSourceId ALIAS FOR $2;
@@ -38,7 +38,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION createPurchaseToSale(INTEGER, INTEGER, BOOLEAN, NUMERIC, DATE, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pCoitemId ALIAS FOR $1;
   pItemSourceId ALIAS FOR $2;
@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION createPurchaseToSale(pCoitemId INTEGER,
                                                 pPrice NUMERIC,
                                                 pPoheadId INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _s RECORD;
   _w RECORD;

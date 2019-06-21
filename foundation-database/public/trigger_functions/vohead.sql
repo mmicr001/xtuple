@@ -3,7 +3,7 @@ DROP TRIGGER IF EXISTS voheadAfterTrigger  ON public.vohead;
 
 CREATE OR REPLACE FUNCTION _voheadBeforeTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
   _newparentid INTEGER;
@@ -68,7 +68,7 @@ CREATE TRIGGER voheadBeforeTrigger
 
 CREATE OR REPLACE FUNCTION _voheadAfterTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (TG_OP = 'DELETE') THEN
     PERFORM releaseVoNumber(CAST(OLD.vohead_number AS INTEGER));
@@ -117,7 +117,7 @@ CREATE TRIGGER voheadAfterTrigger
 
 CREATE OR REPLACE FUNCTION _voheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN

@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION copysoheader(psoheadid integer, pcustomer integer, ps
   RETURNS integer AS
 $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 --This procedure will ONLY copy the information in the cohead table.
 --It will NOT copy any associated order items.

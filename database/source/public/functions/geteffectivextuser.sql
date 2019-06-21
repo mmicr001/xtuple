@@ -1,6 +1,6 @@
 create or replace function public.getEffectiveXtUser() returns text as $$
 /* Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
-   See www.xtuple.com/CPAL for the full text of the software license. */
+   See www.xtuple.com/EULA for the full text of the software license. */
 
   /* When a connection is made and query sent without calling seteffectivextuser() */
   /* default to current_user if XT.username is undefined. */

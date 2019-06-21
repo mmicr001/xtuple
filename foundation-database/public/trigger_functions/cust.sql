@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _custTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters') OR
           checkPrivilege('PostMiscInvoices')) THEN
@@ -81,7 +81,7 @@ CREATE TRIGGER custTrigger
 
 CREATE OR REPLACE FUNCTION _custAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _whsId      INTEGER := -1;
   _crmacctid  INTEGER;
@@ -198,7 +198,7 @@ CREATE TRIGGER custAfterTrigger
 
 CREATE OR REPLACE FUNCTION _custinfoBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainCustomerMasters')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Customers.';
@@ -217,7 +217,7 @@ CREATE TRIGGER custinfoBeforeDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _custinfoAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   -- handle transitory state when converting customer to prospect
   IF EXISTS(SELECT quhead_id

@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS cntctselectcol(integer, integer);
 
 CREATE OR REPLACE FUNCTION cntctselectcol(pCntctId integer, pCol text) RETURNS boolean AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   if (pCntctid IS NOT NULL AND pCol IS NOT NULL) THEN

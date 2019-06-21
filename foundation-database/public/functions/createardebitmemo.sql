@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION createARDebitMemo( pId            INTEGER,
                                               pTaxZoneid     INTEGER = NULL,
                                               pPaid          NUMERIC = 0) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _custName TEXT;
   _journalNumber INTEGER;

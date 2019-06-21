@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION postStandardJournal(pStdjrnlid INTEGER,
                                                pDate DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN postStandardJournal(pStdjrnlid, pDate, FALSE, fetchGLSequence());
@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION postStandardJournal(pStdjrnlid INTEGER,
                                                pDate DATE,
                                                pReverse BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN postStandardJournal(pStdjrnlid, pDate, pReverse, fetchGLSequence());
@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION postStandardJournal(pStdjrnlid INTEGER,
                                                pDate DATE,
                                                pGlSequence INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN postStandardJournal(pStdjrnlid, pDate, FALSE, pGlSequence);
@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION postStandardJournal(pStdjrnlid INTEGER,
                                                pReverse BOOLEAN,
                                                pGlSequence INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   INSERT INTO glseries

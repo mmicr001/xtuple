@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _shipformAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (fetchMetricValue('DefaultShipFormId') = OLD.shipform_id) THEN
     RAISE EXCEPTION 'Cannot delete the default Shipping Form [xtuple: shipform, -1, %, %]',

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION deleteInvoice(INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pInvcheadid ALIAS FOR $1;
   _cobmiscid INTEGER := -1;

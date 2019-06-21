@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION woplancost(pwoid integer)
   RETURNS numeric AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _pwocost NUMERIC;
   _pwocostmfg NUMERIC := 0.0;

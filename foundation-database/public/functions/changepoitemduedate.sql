@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION changePoitemDueDate(pPoitemid INTEGER,
                                                pDate DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN changePoitemDueDate(pPoitemid, pDate, false);
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION changePoitemDueDate(pPoitemid INTEGER,
                                                pDate DATE,
                                                pBySO BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF ( ( SELECT (poitem_status IN ('C'))

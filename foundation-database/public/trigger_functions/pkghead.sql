@@ -4,7 +4,7 @@ DROP TRIGGER IF EXISTS pkgheadbeforeupserttrigger ON pkghead;
 
 CREATE OR REPLACE FUNCTION _pkgheadbeforeupserttrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
   BEGIN
     IF (TG_OP = 'UPDATE') THEN
       NEW.pkghead_created := OLD.pkghead_created;
@@ -36,7 +36,7 @@ CREATE TRIGGER pkgheadbeforeupserttrigger BEFORE INSERT OR UPDATE ON pkghead
 
 CREATE OR REPLACE FUNCTION _pkgheadbeforedeletetrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
   BEGIN
     DELETE FROM pkgdep WHERE pkgdep_pkghead_id=OLD.pkghead_id;
     EXECUTE format('DROP SCHEMA %I CASCADE;', OLD.pkghead_name);

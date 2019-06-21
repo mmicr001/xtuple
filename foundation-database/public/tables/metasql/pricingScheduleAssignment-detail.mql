@@ -2,7 +2,7 @@
 -- Name:  detail
 -- Notes: used by pricing Schedule Assignments
 --        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
---        See www.xtuple.com/CPAL for the full text of the software license.
+--        See www.xtuple.com/EULA for the full text of the software license.
 SELECT ipsass_id,
        CASE WHEN (ipsass_shipto_id != -1) THEN (SELECT shipto_num FROM shiptoinfo WHERE (shipto_id=ipsass_shipto_id))
             WHEN (COALESCE(LENGTH(ipsass_shipto_pattern), 0) > 0) THEN ipsass_shipto_pattern

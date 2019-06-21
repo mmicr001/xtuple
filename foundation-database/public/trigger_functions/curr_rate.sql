@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION currExchangeCheckOverlap () RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
     numberOfOverlaps INTEGER NOT NULL := 0;
     curr_string VARCHAR(16);
@@ -58,7 +58,7 @@ SELECT dropifexists('FUNCTION', '_currexchangeaftertrigger()');
 CREATE OR REPLACE FUNCTION _currexchangeaftertrigger()
   RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _currid     INTEGER;
   _curr       TEXT;

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _invcitemBeforeTrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemfractional BOOLEAN;
 
@@ -56,7 +56,7 @@ CREATE TRIGGER invcitemBeforeTrigger
 
 CREATE OR REPLACE FUNCTION _invcitemTrigger() RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 -- Insert new row
   IF (TG_OP = 'INSERT') THEN
@@ -114,7 +114,7 @@ CREATE TRIGGER invcitemtrigger
 
 CREATE OR REPLACE FUNCTION _invcitemDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   UPDATE taxhead

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _saletypeBeforeDeleteTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check TEXT;
 
@@ -62,7 +62,7 @@ CREATE TRIGGER saletypeBeforeDeleteTrigger BEFORE DELETE ON saletype FOR EACH RO
 
 CREATE OR REPLACE FUNCTION _saletypeaftertrigger() RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 --  If this Sale Type is marked "default" set all others to not default
   IF (NEW.saletype_default) THEN

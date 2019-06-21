@@ -4,7 +4,7 @@ DROP FUNCTION IF EXISTS dropIfExists(TEXT, TEXT, TEXT, BOOLEAN);
 
 CREATE OR REPLACE FUNCTION dropIfExists(pType TEXT, pObject TEXT, pSchema TEXT DEFAULT 'public', pCascade BOOLEAN DEFAULT false) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _table	TEXT;
   _query	TEXT;
@@ -142,7 +142,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION dropIfExists(TEXT, TEXT, TEXT, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pType         ALIAS FOR $1;
   pObject       ALIAS FOR $2;

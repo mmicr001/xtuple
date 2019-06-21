@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _poheadTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check	BOOLEAN;
   _maint        BOOLEAN := TRUE;
@@ -116,7 +116,7 @@ CREATE TRIGGER poheadTrigger
 
 CREATE OR REPLACE FUNCTION _poheadTriggerAfter() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (fetchMetricText('TaxService') = 'N' AND COALESCE(NEW.pohead_taxzone_id,-1) <> COALESCE(OLD.pohead_taxzone_id,-1)) THEN
     UPDATE poitem SET poitem_taxtype_id=getItemTaxType(itemsite_item_id,NEW.pohead_taxzone_id)
@@ -148,7 +148,7 @@ CREATE TRIGGER poheadTriggerAfter
 
 CREATE OR REPLACE FUNCTION _poheadAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN

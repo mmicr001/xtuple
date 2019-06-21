@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION toggleBankrecCleared(pBankrecid INTEGER,
                                                 pCurrrate NUMERIC,
                                                 pBaseAmount NUMERIC) RETURNS BOOLEAN AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN toggleBankrecCleared(pBankrecid, pSource, pSourceid, pCurrrate, pBaseAmount, NULL);
 END;
@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION toggleBankrecCleared(pBankrecid INTEGER,
                                                 pBaseAmount NUMERIC,
                                                 pDate DATE) RETURNS BOOLEAN AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cleared BOOLEAN;
   _r RECORD;
