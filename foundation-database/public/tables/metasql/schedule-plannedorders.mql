@@ -2,7 +2,7 @@
 -- Name:  plannedorders
 -- Notes: used by dpsPlannedOrdersByItem, dspPlannedOrdersByPlannerCode, dspPlannedRevenueExpensesByPlannerCode
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
  SELECT *,
         plorevenue - plocost AS profit,
         formatMoney(plorevenue - plocost) AS f_profit,

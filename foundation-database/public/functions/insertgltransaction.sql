@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSource ALIAS FOR $1;
   pDocType ALIAS FOR $2;
@@ -27,7 +27,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSource ALIAS FOR $1;
   pDocType ALIAS FOR $2;
@@ -55,7 +55,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
   pSource ALIAS FOR $2;
@@ -81,7 +81,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
   pSource ALIAS FOR $2;
@@ -109,7 +109,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION insertGLTransaction(INTEGER, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, NUMERIC(12,2), DATE, BOOLEAN, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pJournalNumber ALIAS FOR $1;
   pSource ALIAS FOR $2;

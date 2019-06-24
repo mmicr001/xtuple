@@ -5,7 +5,7 @@
 --        1) Legacy mode which uses A/R Application information
 --        2) Version 3.3.0 upgrade mode which uses Cash Receipt information
 --        Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
---        See www.xtuple.com/CPAL for the full text of the software license.
+--        See www.xtuple.com/EULA for the full text of the software license.
 --        Cash Receipts by Customer Group package - modifies display to include receipts by Customer Group.
 
 <? if exists("LegacyDisplayMode") ?>

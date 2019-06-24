@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION postreceipt(precvId INTEGER,
                                        pPreDistributed BOOLEAN DEFAULT FALSE)
   RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemlocSeries	INTEGER := COALESCE(pItemlocSeries, NEXTVAL('itemloc_series_seq'));
   _glDate	TIMESTAMP WITH TIME ZONE;

@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION calculateTax(pOrderType        TEXT,
                                         pRecord           BOOLEAN) RETURNS JSONB AS
 $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _service TEXT;
   _taxtypeid INTEGER;
@@ -119,7 +119,7 @@ CREATE OR REPLACE FUNCTION calculateTax(pTaxZoneId INTEGER,
                                         pAmounts NUMERIC[]) RETURNS JSONB AS
 $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _precision INTEGER := 2;
   _includemisc BOOLEAN;

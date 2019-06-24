@@ -8,7 +8,7 @@
 --        item vs product category.
 --        TODO: possible improvements include removing OUTER JOINs with uom table
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT sourcecode + CASE WHEN source='P' THEN 10 ELSE 0 END AS source, method,
        sourceid, schedulename, type,

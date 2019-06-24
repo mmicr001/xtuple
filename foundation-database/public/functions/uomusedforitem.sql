@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION uomusedforitem(INTEGER) RETURNS SETOF uom AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pitemid       ALIAS FOR $1;
   _row          uom%ROWTYPE;

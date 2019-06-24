@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION itemPrice(pItemid INTEGER,
                                      pCurrid INTEGER,
                                      pEffective DATE) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _item RECORD;
 
@@ -31,7 +31,7 @@ CREATE OR REPLACE FUNCTION itemPrice(pItemid INTEGER,
                                      pCurrid INTEGER,
                                      pEffective DATE) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -49,7 +49,7 @@ CREATE OR REPLACE FUNCTION itemPrice(pItemid INTEGER,
                                      pEffective DATE,
                                      pAsOf DATE) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -68,7 +68,7 @@ CREATE OR REPLACE FUNCTION itemPrice(pItemid INTEGER,
                                      pAsOf DATE,
                                      pSiteid INTEGER) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -89,7 +89,7 @@ CREATE OR REPLACE FUNCTION itemPrice(pItemid INTEGER,
                                      pShipzoneid INTEGER,
                                      pSaletypeid INTEGER) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _r RECORD;
 

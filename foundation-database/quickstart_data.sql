@@ -4778,7 +4778,7 @@ INSERT INTO script (script_id, script_name, script_order, script_enabled, script
  * Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including xTuple-specific Exhibits)
- * is available at www.xtuple.com/CPAL.  By using this software, you agree
+ * is available at www.xtuple.com/EULA.  By using this software, you agree
  * to be bound by its terms.
  */
 

@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS _prjtasktrigger() CASCADE;
 
 CREATE OR REPLACE FUNCTION public._taskTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   --  Checks
@@ -63,7 +63,7 @@ DROP FUNCTION IF EXISTS _prjtaskAfterTrigger() CASCADE;
 
 CREATE OR REPLACE FUNCTION _taskAfterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'INSERT') THEN
@@ -108,7 +108,7 @@ CREATE TRIGGER taskAfterTrigger
 
 CREATE OR REPLACE FUNCTION _taskAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
   _newparentid INTEGER;

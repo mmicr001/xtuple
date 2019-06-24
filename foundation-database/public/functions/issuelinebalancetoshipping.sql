@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION issueLineBalanceToShipping(INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN issueLineBalanceToShipping('SO', $1, NULL);
 END;
@@ -8,7 +8,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION issueLineBalanceToShipping(TEXT, INTEGER, TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN issueLineBalanceToShipping($1, $2, $3, 0, NULL);
 END;
@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION issueLineBalanceToShipping(pordertype TEXT,
                                                       pinvhistid INTEGER,
                                                       pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemlocSeries	INTEGER := 0;
   _qty			NUMERIC;

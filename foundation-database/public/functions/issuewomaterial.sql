@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC, INTEGER, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWomatlid ALIAS FOR $1;
   pQty ALIAS FOR $2;
@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION issueWoMaterial(pWomatlid INTEGER,
                                            pGlDistTS TIMESTAMP WITH TIME ZONE, 
                                            pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemlocSeries INTEGER;
 
@@ -43,7 +43,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWomatlid ALIAS FOR $1;
   pQty ALIAS FOR $2;
@@ -59,7 +59,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWomatlid ALIAS FOR $1;
   pQty ALIAS FOR $2;
@@ -76,7 +76,7 @@ $$ LANGUAGE 'plpgsql';
 DROP FUNCTION IF EXISTS issueWoMaterial(INTEGER, NUMERIC, INTEGER, TIMESTAMP WITH TIME ZONE);
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC, INTEGER, TIMESTAMP WITH TIME ZONE, NUMERIC DEFAULT NULL) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN issueWoMaterial($1, $2, $3, $4, NULL, $5);
 END;
@@ -94,7 +94,7 @@ CREATE OR REPLACE FUNCTION issueWoMaterial(pWomatlid INTEGER,
                                            pPostDistDetail BOOLEAN DEFAULT TRUE)
 RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _p RECORD;
   _invhistid INTEGER;
@@ -188,7 +188,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC, BOOLEAN) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWomatlid ALIAS FOR $1;
   pQty ALIAS FOR $2;
@@ -202,7 +202,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION issueWoMaterial(INTEGER, NUMERIC, BOOLEAN, TIMESTAMP WITH TIME ZONE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWomatlid ALIAS FOR $1;
   pQty ALIAS FOR $2;

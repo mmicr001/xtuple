@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _empBeforeTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF NOT (checkPrivilege('MaintainEmployees')) THEN
@@ -90,7 +90,7 @@ CREATE TRIGGER empBeforeTrigger
 
 CREATE OR REPLACE FUNCTION _empAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _newcrmacctname TEXT;
   _crmacctid  INTEGER;
@@ -161,7 +161,7 @@ CREATE TRIGGER empAfterTrigger
 
 CREATE OR REPLACE FUNCTION _empBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF NOT (checkPrivilege('MaintainEmployees')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Employees.';
@@ -184,7 +184,7 @@ CREATE TRIGGER empBeforeDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _empAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (fetchMetricBool('EmployeeChangeLog')) THEN
     PERFORM postComment('ChangeLog', 'EMP', OLD.emp_id,

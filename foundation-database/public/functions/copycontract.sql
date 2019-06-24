@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION copyContract(pContrctid INTEGER,
                                         pEffective DATE,
                                         pExpires DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _contrctid INTEGER;
   _itemsrcid INTEGER;

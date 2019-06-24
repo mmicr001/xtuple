@@ -2,7 +2,7 @@
 -- Name: uses
 -- Notes: used by address
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT cntct_id, 1, <? value("contact") ?> AS type, cntct_first_name,
        cntct_last_name, crmacct_number, 

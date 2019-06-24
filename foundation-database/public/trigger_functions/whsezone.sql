@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _whseZoneTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check      BOOLEAN;
   _checkId    INTEGER;
@@ -42,7 +42,7 @@ CREATE TRIGGER whseZoneTrigger BEFORE INSERT OR UPDATE ON whsezone FOR EACH ROW 
 
 CREATE OR REPLACE FUNCTION _whseZoneDeleteTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   -- Check no locations are assigned to this Zone

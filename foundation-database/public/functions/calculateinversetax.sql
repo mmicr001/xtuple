@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION calculateinversetax(
     pAmount numeric)
   RETURNS numeric AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license
+-- See www.xtuple.com/EULA for the full text of the software license
 BEGIN
 
   IF (pTaxZoneid < 0 OR pTaxTypeid < 0) THEN

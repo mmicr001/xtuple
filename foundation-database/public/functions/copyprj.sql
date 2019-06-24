@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION copyPrj(INTEGER, DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pparentid   ALIAS FOR $1;
   _counter    INTEGER;

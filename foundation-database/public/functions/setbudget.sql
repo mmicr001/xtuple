@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION setBudget(INTEGER, INTEGER, NUMERIC) RETURNS INTEGER AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pPeriodid ALIAS FOR $1;
   pAccntid ALIAS FOR $2;
@@ -14,7 +14,7 @@ END;
 
 CREATE OR REPLACE FUNCTION setBudget(INTEGER, INTEGER, INTEGER, NUMERIC) RETURNS INTEGER AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pBudgheadid ALIAS FOR $1;
   pPeriodid ALIAS FOR $2;

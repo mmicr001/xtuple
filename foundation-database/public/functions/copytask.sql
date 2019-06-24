@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION copyTask(pParentTaskId INTEGER, pDate DATE,
                                     pParentType TEXT DEFAULT 'TASK', pParentId INTEGER DEFAULT NULL) 
 RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _duedate    DATE := COALESCE(pDate, CURRENT_DATE);
   _alarmid    INTEGER;

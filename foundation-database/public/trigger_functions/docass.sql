@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _docassTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (NEW.docass_source_type = 'INCDT') THEN
     UPDATE incdt SET incdt_updated = now() WHERE incdt_id = NEW.docass_source_id;
@@ -17,7 +17,7 @@ CREATE TRIGGER docassTrigger AFTER INSERT OR UPDATE ON docass FOR EACH ROW EXECU
 CREATE OR REPLACE FUNCTION _docassbeforetrigger()
   RETURNS trigger AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   NEW.docass_username := geteffectivextuser();

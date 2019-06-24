@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION currConcat(VARCHAR(3), VARCHAR(9))
 	RETURNS VARCHAR(15) AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   curr_abbr   ALIAS FOR $1;
   curr_symbol ALIAS FOR $2;
@@ -23,7 +23,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION currConcat(INTEGER) RETURNS VARCHAR(15) AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   id ALIAS FOR $1;
   returnVal   VARCHAR(15) := '';

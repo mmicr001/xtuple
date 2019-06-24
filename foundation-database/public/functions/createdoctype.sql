@@ -11,7 +11,7 @@ create or replace function createDoctype(pDocAssNum integer, pType text, pDocAss
                                          pActive  text = '')
   returns integer as $$
 /* Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
-   See www.xtuple.com/CPAL for the full text of the software license.
+   See www.xtuple.com/EULA for the full text of the software license.
 
    Create a record in the "source" table corresponding to this document type
    or update existing records. The pDocAssNum MUST match the corresponding

@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION phoneJson(pContactId INTEGER)
 RETURNS json AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 -- Takes Contact Phone data and builds correctly formatted Json string
   SELECT row_to_json(p)

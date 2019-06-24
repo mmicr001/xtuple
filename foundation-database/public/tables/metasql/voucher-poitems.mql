@@ -2,7 +2,7 @@
 -- Name:  poitems
 -- Notes: used by voucher
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 SELECT poitem_id, poitem_linenumber,
        CASE WHEN(poitem_status='C') THEN <? value('closed') ?>
             WHEN(poitem_status='U') THEN <? value('unposted') ?>

@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION createcyclecountsbywarehousebyplannercode(integer, integer, integer, text, boolean, boolean, integer, boolean)
   RETURNS integer AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWarehousid ALIAS FOR $1;
   pPlancodeid ALIAS FOR $2;
@@ -74,7 +74,7 @@ END;
 CREATE OR REPLACE FUNCTION createcyclecountsbywarehousebyplannercode(integer, text, integer, text, boolean, boolean, integer, boolean)
   RETURNS integer AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pWarehousid ALIAS FOR $1;
   pPlancodePattern ALIAS FOR $2;

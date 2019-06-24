@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION averagesalesprice(pItemsiteid integer,
                                              pEndDate    timestamp with time zone)
   RETURNS numeric AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
   SELECT averageSalesPrice($1, $2::DATE, $3::DATE);
 $$ LANGUAGE sql;
 
@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION averagesalesprice(pItemsiteid INTEGER,
                                              pEndDate    DATE)
   RETURNS numeric AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _p RECORD;
 

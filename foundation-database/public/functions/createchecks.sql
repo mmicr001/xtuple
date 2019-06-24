@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION createChecks(pBankaccntid INTEGER,
                                         pCheckDate DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _v RECORD;
   _r RECORD;

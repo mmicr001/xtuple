@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _poitemTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cmnttypeid 	INTEGER;
   _status      	CHAR(1);
@@ -195,7 +195,7 @@ CREATE TRIGGER poitemTrigger
 
 CREATE OR REPLACE FUNCTION _poitemAfterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'UPDATE') THEN
@@ -273,7 +273,7 @@ CREATE TRIGGER poitemAfterTrigger
 
 CREATE OR REPLACE FUNCTION _poitemDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 BEGIN
 
@@ -311,7 +311,7 @@ CREATE TRIGGER poitemDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _poitemAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (OLD.poitem_status = 'O') THEN

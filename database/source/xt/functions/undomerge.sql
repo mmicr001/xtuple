@@ -1,6 +1,6 @@
 create or replace function xt.undomerge(schema_name text, table_name text, id integer) returns integer as $$
 /* Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
-   See www.xtuple.com/CPAL for the full text of the software license. */
+   See www.xtuple.com/EULA for the full text of the software license. */
 
   var result;
   XT.allowEditComments = true;

@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION calculateFreightDetail(integer,integer,text,integer,integer,text,date,text,integer,character varying,integer,integer,numeric)
   RETURNS SETOF freightData AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pCustId ALIAS FOR $1;
   pCustTypeId ALIAS FOR $2;

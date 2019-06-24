@@ -2,7 +2,7 @@ SELECT dropIfExists('FUNCTION', 'voidApopenVoucher(integer, integer)', 'public')
 
 CREATE OR REPLACE FUNCTION voidApopenVoucher(pApopenid INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN voidApopenVoucher(pApopenid, fetchJournalNumber('AP-VO'), NULL::DATE);
 END;
@@ -11,7 +11,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION voidApopenVoucher(pApopenid INTEGER,
                                              pVoidDate DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN voidApopenVoucher(pApopenid, fetchJournalNumber('AP-VO'), pVoidDate);
 END;
@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION voidApopenVoucher(pApopenid INTEGER,
                                              pJournalNumber INTEGER,
                                              pVoidDate DATE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _apopenid INTEGER;
   _apcreditapplyid INTEGER;

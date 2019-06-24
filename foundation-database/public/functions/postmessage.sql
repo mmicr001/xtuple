@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION postMessage(TIMESTAMP, TIMESTAMP, TEXT, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pScheduled ALIAS FOR $1;
   pExpires ALIAS FOR $2;
@@ -31,7 +31,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION postMessage(TIMESTAMP, TIMESTAMP, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pScheduled ALIAS FOR $1;
   pExpires ALIAS FOR $2;
@@ -62,7 +62,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION postMessage(TEXT, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pUsername ALIAS FOR $1;
   pText ALIAS FOR $2;

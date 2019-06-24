@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _metasqlTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   NEW.metasql_lastuser 		:= getEffectiveXtUser();
@@ -16,7 +16,7 @@ CREATE TRIGGER metasqlTrigger BEFORE INSERT OR UPDATE ON metasql FOR EACH ROW EX
 
 CREATE OR REPLACE FUNCTION _metasqlalterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (NOT (isDBA() OR checkPrivilege('MaintainMetaSQL'))) THEN
     RAISE EXCEPTION '% does not have privileges to maintain MetaSQL statements in %.%',

@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION itemCost(pItemid INTEGER,
                                     pAsOf DATE,
                                     pSiteid INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 --
 -- Overload for future costing enhancements
 --
@@ -40,7 +40,7 @@ CREATE OR REPLACE FUNCTION itemCost(pItemid INTEGER,
                                     pSiteid INTEGER,
                                     pDropShip BOOLEAN) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 --
 -- Overload for future costing enhancements
 --
@@ -76,7 +76,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION itemCost(pItemsiteid INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cost NUMERIC;
 BEGIN

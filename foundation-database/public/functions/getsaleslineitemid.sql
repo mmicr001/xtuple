@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION getSalesLineItemId(TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSalesOrderItem ALIAS FOR $1;
   _delpos INTEGER = 0;
@@ -32,7 +32,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION getSalesLineItemId(TEXT, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN getSalesLineItemId($1, $2, 0);
 END
@@ -40,7 +40,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION getSalesLineItemId(TEXT, INTEGER, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSalesOrderNumber ALIAS FOR $1;
   pLineNumber ALIAS FOR $2;

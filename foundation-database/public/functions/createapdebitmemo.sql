@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pDocNumber ALIAS FOR $2;
@@ -23,7 +23,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pDocNumber ALIAS FOR $2;
@@ -47,7 +47,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT, INTEGER, DATE, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pDocNumber ALIAS FOR $2;
@@ -73,7 +73,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pJournalNumber ALIAS FOR $2;
@@ -93,7 +93,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pJournalNumber ALIAS FOR $2;
@@ -112,7 +112,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT, INTEGER, DATE, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pJournalNumber ALIAS FOR $2;
@@ -132,7 +132,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION createAPDebitMemo(INTEGER, INTEGER, TEXT, TEXT, DATE, NUMERIC, TEXT, INTEGER, DATE, INTEGER, INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pVendid ALIAS FOR $1;
   pJournalNumber ALIAS FOR $2;
@@ -157,7 +157,7 @@ SELECT dropifexists('FUNCTION', 'createapdebitmemo(integer, integer, integer, te
 CREATE OR REPLACE FUNCTION createapdebitmemo(integer, integer, integer, text, text, date, numeric, text, integer, date, integer, integer, integer DEFAULT NULL)
   RETURNS integer AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pId ALIAS FOR $1;
   pVendid ALIAS FOR $2;

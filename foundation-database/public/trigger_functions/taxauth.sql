@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _taxauthBeforeTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Tax Authorities.';
@@ -55,7 +55,7 @@ CREATE TRIGGER taxauthBeforeTrigger BEFORE INSERT OR UPDATE ON taxauth
 
 CREATE OR REPLACE FUNCTION _taxauthAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'UPDATE' AND OLD.taxauth_crmacct_id=NEW.taxauth_crmacct_id) THEN
@@ -121,7 +121,7 @@ CREATE TRIGGER taxauthAfterTrigger AFTER INSERT OR UPDATE ON taxauth
 
 CREATE OR REPLACE FUNCTION _taxauthBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (NOT checkPrivilege('MaintainTaxAuthorities')) THEN
     RAISE EXCEPTION 'You do not have privileges to maintain Tax Authorities.';
@@ -137,7 +137,7 @@ CREATE TRIGGER taxauthBeforeDeleteTrigger BEFORE DELETE ON taxauth
 
 CREATE OR REPLACE FUNCTION _taxauthAfterDeleteTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (EXISTS(SELECT 1
                FROM checkhead

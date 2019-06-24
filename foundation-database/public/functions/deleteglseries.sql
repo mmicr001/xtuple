@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION deleteGlSeries(INTEGER, TEXT) RETURNS BOOLEAN AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pSequence ALIAS FOR $1;
   pNotes ALIAS FOR $2;
@@ -98,7 +98,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION deleteglseries(pSequence INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   DELETE FROM glseries

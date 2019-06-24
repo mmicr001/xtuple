@@ -3,7 +3,7 @@
 -- Notes: This query totals checks and the accounts their corresponding voucher posts to and
 --        provides a summary figure based on the date range.
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT vend_id, sum(checkamount) as checkamount, sum(miscamt) as miscamt, sum(rentamt) as rentamt, 
        vaddr, csz, street, vend_name, taxreg_number, vend_number, v1099, 

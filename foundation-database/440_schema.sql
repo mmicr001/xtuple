@@ -287,7 +287,7 @@ CREATE FUNCTION basecurrid() RETURNS integer
     LANGUAGE plpgsql IMMUTABLE
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   returnVal INTEGER;
 BEGIN
@@ -315,7 +315,7 @@ CREATE FUNCTION geteffectivextuser() RETURNS text
     LANGUAGE plpgsql STABLE
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 /*
   The default return value of this function is simply
@@ -773,7 +773,7 @@ CREATE FUNCTION createpriv(text, text, text) RETURNS integer
     LANGUAGE plpgsql
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pModule ALIAS FOR $1;
   pName   ALIAS FOR $2;
@@ -852,7 +852,7 @@ CREATE FUNCTION endoftime() RETURNS date
     LANGUAGE sql IMMUTABLE
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 SELECT DATE('2100-01-01') as result;
 $$;
 
@@ -870,7 +870,7 @@ CREATE FUNCTION fetchmetricbool(text) RETURNS boolean
     LANGUAGE plpgsql STABLE
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _pMetricName ALIAS FOR $1;
   _returnVal BOOLEAN;
@@ -900,7 +900,7 @@ CREATE FUNCTION fetchnextnumber(text) RETURNS text
     LANGUAGE plpgsql
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   psequence	ALIAS FOR $1;
   _number	TEXT;
@@ -984,7 +984,7 @@ CREATE FUNCTION fixacl() RETURNS integer
     LANGUAGE plpgsql
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _r        RECORD;
   _count    INTEGER := 0;
@@ -1057,7 +1057,7 @@ CREATE FUNCTION grantgroup(text, integer) RETURNS boolean
     LANGUAGE plpgsql
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pUsername ALIAS FOR $1;
   pGrpid ALIAS FOR $2;
@@ -1097,7 +1097,7 @@ CREATE FUNCTION grantprivgroup(integer, integer) RETURNS boolean
     LANGUAGE plpgsql
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pGrpid ALIAS FOR $1;
   pPrivid ALIAS FOR $2;
@@ -1964,7 +1964,7 @@ CREATE FUNCTION saveaddr(integer, text, text, text, text, text, text, text, text
     LANGUAGE plpgsql
     AS $_$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pAddrId ALIAS FOR $1;
   pNumber ALIAS FOR $2;
@@ -2126,7 +2126,7 @@ CREATE FUNCTION savecntct(pcntctid integer, pcontactnumber text, pcrmacctid inte
     LANGUAGE plpgsql
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cntctId INTEGER;
   _cntctNumber TEXT;
@@ -2263,7 +2263,7 @@ CREATE FUNCTION startoftime() RETURNS date
     LANGUAGE sql IMMUTABLE
     AS $$
 -- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 SELECT DATE('1970-01-01') AS return;
 $$;
 

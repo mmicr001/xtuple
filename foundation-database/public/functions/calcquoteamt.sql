@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION calcQuoteAmt(pQuheadid INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN calcQuoteAmt(pQuheadid, 'T');
@@ -11,7 +11,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION calcQuoteAmt(pQuheadid INTEGER,
                                         pType TEXT) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN calcQuoteAmt(pQuheadid, 'T', NULL, NULL, NULL, NULL, NULL, FALSE);
@@ -21,7 +21,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION calcQuoteAmt(pQuheadid INTEGER, pTaxzoneId INTEGER, pOrderDate DATE, pCurrId INTEGER, pFreight NUMERIC, pMisc NUMERIC) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN calcQuoteAmt(pQuheadid, 'T', pTaxzoneId, pOrderDate, pCurrId, pFreight, pMisc);
@@ -32,7 +32,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION calcQuoteAmt(pQuheadid INTEGER,
                                         pType TEXT, pTaxzoneId INTEGER, pOrderDate DATE, pCurrId INTEGER, pFreight NUMERIC, pMisc NUMERIC, pQuick BOOLEAN DEFAULT TRUE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _subtotal NUMERIC := 0.0;
   _cost NUMERIC := 0.0;

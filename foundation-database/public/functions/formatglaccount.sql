@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION formatGLAccount(pAccntid INTEGER) RETURNS TEXT IMMUTABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   RETURN formatGlAccount(accnt_company, accnt_profit, accnt_number, accnt_sub)
@@ -16,7 +16,7 @@ CREATE OR REPLACE FUNCTION formatGLAccount(pCompany TEXT,
                                            pNumber TEXT,
                                            pSub TEXT) RETURNS TEXT IMMUTABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _number TEXT := '';
 

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION itemCharPrice(INTEGER, INTEGER, TEXT, INTEGER, NUMERIC) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemid ALIAS FOR $1;
   pCharid ALIAS FOR $2;
@@ -15,7 +15,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION itemCharPrice(INTEGER, INTEGER, TEXT, INTEGER, INTEGER, NUMERIC) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemid ALIAS FOR $1;
   pCharid ALIAS FOR $2;
@@ -31,7 +31,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION itemCharPrice(INTEGER, INTEGER, TEXT, INTEGER, INTEGER, NUMERIC, INTEGER) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemid ALIAS FOR $1;
   pCharid ALIAS FOR $2;
@@ -48,7 +48,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION itemCharPrice(INTEGER, INTEGER, TEXT, INTEGER, INTEGER, NUMERIC, INTEGER, DATE) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemid ALIAS FOR $1;
   pCharid ALIAS FOR $2;
@@ -81,7 +81,7 @@ CREATE OR REPLACE FUNCTION itemCharPrice(
   RETURNS numeric AS
 $BODY$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _cust RECORD;
   _item RECORD;

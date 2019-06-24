@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION allocatedForSo(INTEGER, INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemsiteid ALIAS FOR $1;
   pDate ALIAS FOR $2;
@@ -15,7 +15,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION allocatedForSo(INTEGER, DATE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemsiteid ALIAS FOR $1;
   pDate ALIAS FOR $2;
@@ -30,7 +30,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION allocatedForSo(INTEGER, DATE, DATE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pItemsiteid ALIAS FOR $1;
   pStartDate ALIAS FOR $2;

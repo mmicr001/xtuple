@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION qtyAvailable(pItemsiteId INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _qty         NUMERIC = 0.0;
 
@@ -16,7 +16,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION qtyAvailable(pItemsiteId INTEGER,
                                         pUsable BOOLEAN) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _qty         NUMERIC = 0.0;
 
@@ -46,7 +46,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION qtyAvailable(pItemsiteid INTEGER,
                                         pLookAheadDays INTEGER) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -63,7 +63,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION qtyAvailable(pItemsiteid INTEGER,
                                         pDate DATE) RETURNS NUMERIC STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN

@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION addTaxToGLSeries(pSequence   INTEGER,
                                             pParentId   INTEGER,
                                             pNotes      TEXT) RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _baseTax	NUMERIC := 0;
   _returnVal	NUMERIC := 0;

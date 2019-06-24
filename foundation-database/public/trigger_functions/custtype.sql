@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _custtypeTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check      BOOLEAN;
   _code       TEXT;
@@ -37,7 +37,7 @@ CREATE TRIGGER custtypeTrigger
 
 CREATE OR REPLACE FUNCTION _custtypeAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   IF (SELECT fetchMetricValue('DefaultCustType') = OLD.custtype_id) THEN
     RAISE EXCEPTION 'Cannot delete the default Customer Type [xtuple: custtype, -1, %]',

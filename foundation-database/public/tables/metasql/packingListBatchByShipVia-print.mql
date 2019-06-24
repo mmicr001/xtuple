@@ -2,7 +2,7 @@
 -- Name: print
 -- Notes: used by printPackingListBatchByShipVia
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT DISTINCT pack_head_id, pack_head_type, pack_shiphead_id, cohead_status AS orderhead_status,
        COALESCE(shipform_report_name, findCustomerForm(cohead_cust_id, 'P')) AS packform,

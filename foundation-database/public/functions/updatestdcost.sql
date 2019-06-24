@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION updateStdCost(pItemcostid INTEGER,
                                          pDocNumber TEXT,
                                          pNotes TEXT) RETURNS BOOLEAN AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
     _itemcostid	INTEGER;
     _r		RECORD;
@@ -86,7 +86,7 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION updateStdCost(INTEGER, TEXT, BOOLEAN, NUMERIC) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
     pItemid	ALIAS FOR $1;
     pCostType	ALIAS FOR $2;

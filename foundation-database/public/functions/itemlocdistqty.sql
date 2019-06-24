@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION itemlocdistQty(TEXT, INTEGER, INTEGER) RETURNS NUMERIC AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pTypes ALIAS FOR $1;
   pLocationid ALIAS FOR $2;
@@ -39,7 +39,7 @@ END;
 
 CREATE OR REPLACE FUNCTION itemlocdistQty(INTEGER, INTEGER) RETURNS NUMERIC AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pLocationid ALIAS FOR $1;
   pParentid ALIAS FOR $2;

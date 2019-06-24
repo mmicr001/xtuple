@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION postvoucher(pVoheadid integer, pPostCosts boolean)
   RETURNS integer AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN postVoucher(pVoheadid, fetchJournalNumber('AP-VO'), pPostCosts);
 END;
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION postvoucher(
     ppostcosts boolean)
   RETURNS integer AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _sequence INTEGER;
   _totalAmount_base NUMERIC;

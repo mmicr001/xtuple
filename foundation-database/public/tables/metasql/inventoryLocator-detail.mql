@@ -3,7 +3,7 @@
 -- Notes: used by dspInventoryLocator
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
 -- Lot/Serial Characteristics additions by Specter Vision Solutions, Inc.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT *,
        <? value("na") ?> AS locationname_xtnullrole,

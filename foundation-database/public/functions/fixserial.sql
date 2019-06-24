@@ -6,7 +6,7 @@
  */
 CREATE OR REPLACE FUNCTION fixSerial(pTablename TEXT, pSchema TEXT) RETURNS BOOL AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _a    RECORD;
   _max  BIGINT;
@@ -60,7 +60,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION fixSerial() RETURNS BOOL AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
   SELECT BOOL_AND(fixSerial(relname, nspname))
     FROM pg_class c
     JOIN pg_namespace n ON relnamespace = n.oid

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _prjBeforeDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _recurid     INTEGER;
   _newparentid INTEGER;
@@ -59,7 +59,7 @@ CREATE TRIGGER prjbeforedeletetrigger
 
 CREATE OR REPLACE FUNCTION _prjAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -82,7 +82,7 @@ CREATE TRIGGER prjAfterDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _prjBeforeTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   -- Timestamps
@@ -105,7 +105,7 @@ CREATE TRIGGER prjbeforetrigger
 
 CREATE OR REPLACE FUNCTION _prjAfterTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (TG_OP = 'INSERT') THEN

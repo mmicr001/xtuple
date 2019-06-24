@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION xt._crmacctUsrliteAfterUpdateTrigger()
   RETURNS trigger AS
 $BODY$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF NEW.crmacct_usr_username IS NOT NULL

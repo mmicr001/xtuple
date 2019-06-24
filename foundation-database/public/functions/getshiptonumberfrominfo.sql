@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION getShipToNumberFromInfo(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN) RETURNS TEXT AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _custname TEXT := COALESCE(TRIM(UPPER( $1)), '');
   _email TEXT 	 := COALESCE(TRIM(UPPER( $2)), '');

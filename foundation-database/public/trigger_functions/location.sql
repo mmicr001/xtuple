@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _locationTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _check      BOOLEAN;
   _checkId    INTEGER;
@@ -76,7 +76,7 @@ CREATE TRIGGER locationTrigger BEFORE INSERT OR UPDATE ON location FOR EACH ROW 
 
 CREATE OR REPLACE FUNCTION _locationAfterTrigger () RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _itemloc    RECORD;
 

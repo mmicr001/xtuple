@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION lowerCost(pItemid   INTEGER,
                                      pActual   BOOLEAN DEFAULT TRUE)
   RETURNS NUMERIC AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _type CHAR(1);
   _actCost	NUMERIC;

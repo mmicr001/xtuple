@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION deleteUserPreference(TEXT) RETURNS BOOLEAN AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pPrefname ALIAS FOR $1;
   _return BOOLEAN;
@@ -16,7 +16,7 @@ END;
 
 CREATE OR REPLACE FUNCTION deleteUserPreference(TEXT, TEXT) RETURNS BOOLEAN AS '
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pUsername ALIAS FOR $1;
   pPrefname ALIAS FOR $2;

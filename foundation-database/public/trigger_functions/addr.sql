@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION _addrtrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
   DECLARE
     _uses	INTEGER	:= 0;
 
@@ -49,7 +49,7 @@ CREATE TRIGGER addrtrigger
 
 CREATE OR REPLACE FUNCTION _addrAfterDeleteTrigger() RETURNS TRIGGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
 
 BEGIN
@@ -73,7 +73,7 @@ CREATE TRIGGER addrAfterDeleteTrigger
 
 CREATE OR REPLACE FUNCTION _addraftertrigger() RETURNS "trigger" AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
 
   IF (fetchMetricBool('AddressChangeLog')) THEN

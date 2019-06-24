@@ -2,7 +2,7 @@
 -- Name: clearedbalance
 -- Notes: used by reconcileBankaccount
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT (COALESCE(SUM(amount),0.0) + <? value("begBal") ?>) AS cleared_amount,
        <? value("endBal") ?> AS end_amount,

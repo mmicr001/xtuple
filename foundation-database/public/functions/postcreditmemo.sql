@@ -1,7 +1,7 @@
 
 CREATE OR REPLACE FUNCTION postCreditMemo(pCmheadid INTEGER, pItemlocSeries INTEGER) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 BEGIN
   RETURN postCreditMemo(pCmheadid, fetchJournalNumber('AR-CM'), pItemlocSeries);
 END;
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION postCreditMemo(pCmheadid INTEGER,
                                           pItemlocSeries INTEGER,
                                           pPreDistributed BOOLEAN DEFAULT FALSE) RETURNS INTEGER AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _r RECORD;
   _p RECORD;

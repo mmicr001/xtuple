@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION getCustId(pCustNumber text) RETURNS INTEGER STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
 BEGIN
@@ -14,7 +14,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION getCustId(pCustNumber text,
                                      pInclProspects boolean) RETURNS INTEGER STABLE AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple. 
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   _returnVal INTEGER;
 BEGIN

@@ -6,7 +6,7 @@
 --        to 'new' (un-posted/replaced/deleted) checks for viewing check runs.
 --        fills in the check item detail if showDetail is passed.
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 
 SELECT checkhead_id AS checkid,
        CASE WHEN(checkhead_void) THEN -1

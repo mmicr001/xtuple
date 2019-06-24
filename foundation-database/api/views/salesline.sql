@@ -69,7 +69,7 @@ DROP FUNCTION IF EXISTS public.insertsalesline(api.salesline) CASCADE;
 
 CREATE OR REPLACE FUNCTION api.insertSalesLine(api.salesline) RETURNS boolean AS $$
 -- Copyright (c) 1999-2019 by OpenMFG LLC, d/b/a xTuple.
--- See www.xtuple.com/CPAL for the full text of the software license.
+-- See www.xtuple.com/EULA for the full text of the software license.
 DECLARE
   pNEW ALIAS FOR $1;
   _r RECORD;
