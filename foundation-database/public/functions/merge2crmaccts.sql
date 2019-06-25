@@ -56,7 +56,7 @@ BEGIN
 
   -- Update CRM account foreign keys (except for CRM relation tables which are specifically handled)
   _result:= changeFkeyPointers('public', 'crmacct', pSourceId, pTargetId,
-                 array_cat(ARRAY[ 'crmacctsel', 'crmacctmrgd'], _crmtbls), true)
+                 array_cat(ARRAY[ 'crmacctsel', 'crmacctmrgd', 'crmacctcntctass'], _crmtbls), true)
           + changePseudoFKeyPointers('public', 'alarm', 'alarm_source_id',
                                      pSourceId, 'public', 'crmacct', pTargetId,
                                      'alarm_source', 'CRMA', true)
@@ -84,6 +84,15 @@ BEGIN
                                        pSourceId, 'public', 'crmacct', pTargetId,
                                        'emlassc_type', 'CRMA', TRUE);
   END IF;
+
+  UPDATE crmacctcntctass
+     SET crmacctcntctass_crmacct_id = pTargetId
+   WHERE crmacctcntctass_crmacct_id = pSourceId
+     AND NOT EXISTS(SELECT 1
+                      FROM crmacctcntctass dup
+                     WHERE dup.crmacctcntctass_crmacct_id = pTargetId
+                       AND dup.crmacctcntctass_cntct_id = crmacctcntctass_cntct_id
+                       AND dup.crmacctcntctass_crmrole_id = crmacctcntctass_crmrole_id);
 
   -- Update/merge the associated CRM relations after checking existence of said relations
   -- Customer takes precedence over Prospect regardless of source/target.
