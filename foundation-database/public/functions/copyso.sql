@@ -77,7 +77,12 @@ BEGIN
       FALSE,
       0.0,
       NULL,
-      _soitem.coitem_custpn,
+      CASE WHEN (SELECT cohead_cust_id = COALESCE(pCustomer, cohead_cust_id)
+                   FROM cohead
+                  WHERE cohead_id = pSoheadid)
+           THEN _soitem.coitem_custpn
+           ELSE ''
+       END,
       _soitem.coitem_order_type,
       NULL,
       _soitem.coitem_substitute_item_id,
