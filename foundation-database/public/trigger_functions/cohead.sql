@@ -570,14 +570,12 @@ BEGIN
     END IF;
 
     IF ((OLD.cohead_shipchrg_id != NEW.cohead_shipchrg_id)
-        OR (OLD.cohead_freight != NEW.cohead_freight)
         OR (OLD.cohead_shipvia != NEW.cohead_shipvia)) THEN
       UPDATE shiphead SET
         shiphead_shipchrg_id=
 	     CASE WHEN (NEW.cohead_shipchrg_id <= 0) THEN NULL
 	          ELSE NEW.cohead_shipchrg_id
 	     END,
-        shiphead_freight=NEW.cohead_freight,
         shiphead_shipvia=NEW.cohead_shipvia
       WHERE ((shiphead_order_type='SO')
       AND  (shiphead_order_id=NEW.cohead_id)
