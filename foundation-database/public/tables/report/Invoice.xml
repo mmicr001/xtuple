@@ -408,7 +408,7 @@ order by shiphead_shipdate;</sql>
     <height>20</height>
    </rect>
    <font>
-    <face>Luciduxsans</face>
+    <face>Sans Serif</face>
     <size>12</size>
     <weight>48</weight>
    </font>
@@ -477,11 +477,11 @@ order by shiphead_shipdate;</sql>
    <rect>
     <x>120</x>
     <y>155</y>
-    <width>120</width>
+    <width>240</width>
     <height>20</height>
    </rect>
    <font>
-    <face>Arial</face>
+    <face>Sans Serif</face>
     <size>10</size>
     <weight>normal</weight>
    </font>
