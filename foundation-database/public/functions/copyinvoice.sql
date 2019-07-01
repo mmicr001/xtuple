@@ -98,7 +98,7 @@ BEGIN
          invcitem_taxtype_id,
          invcitem_qty_uom_id, invcitem_qty_invuomratio,
          invcitem_price_uom_id, invcitem_price_invuomratio,
-         invcitem_coitem_id, invcitem_tax_exemption)
+         invcitem_coitem_id, invcitem_tax_exemption, invcitem_rev_accnt_id)
     VALUES
         (_invcitemid, _invcheadid,
          _l.invcitem_linenumber, _l.invcitem_item_id,
@@ -110,7 +110,7 @@ BEGIN
          _l.invcitem_taxtype_id,
          _l.invcitem_qty_uom_id, _l.invcitem_qty_invuomratio,
          _l.invcitem_price_uom_id, _l.invcitem_price_invuomratio,
-         _l.invcitem_coitem_id, _l.invcitem_tax_exemption);
+         _l.invcitem_coitem_id, _l.invcitem_tax_exemption, _l.invcitem_rev_accnt_id);
 
     PERFORM copyTax('INV', _l.invcitem_id, 'INV', _invcitemid, _invcheadid);
   END LOOP;
