@@ -77,7 +77,21 @@ BEGIN
       FALSE,
       0.0,
       NULL,
-      _soitem.coitem_custpn,
+      CASE WHEN (SELECT cohead_cust_id = COALESCE(pCustomer, cohead_cust_id)
+                   FROM cohead
+                  WHERE cohead_id = pSoheadid)
+           THEN _soitem.coitem_custpn
+           ELSE (SELECT COALESCE(itemalias_number, '')
+                   FROM itemalias
+                   LEFT OUTER JOIN crmacct ON itemalias_crmacct_id = crmacct_id
+                   LEFT OUTER JOIN custinfo ON crmacct_id = cust_crmacct_id
+                  WHERE itemalias_item_id = (SELECT itemsite_item_id
+                                               FROM itemsite
+                                              WHERE itemsite_id = _soitem.coitem_itemsite_id)
+                    AND cust_id = pCustomer OR itemalias_crmacct_id IS NULL
+                  ORDER BY itemalias_crmacct_id IS NULL, itemalias_number
+                 LIMIT 1)
+       END,
       _soitem.coitem_order_type,
       NULL,
       _soitem.coitem_substitute_item_id,
