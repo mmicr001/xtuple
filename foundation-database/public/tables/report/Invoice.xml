@@ -3,7 +3,8 @@
  <title>Invoice</title>
  <name>Invoice</name>
  <description>With Logo - With Invoice Currency</description>
- <parameter default="97" active="true" listtype="dynamic" type="string" name="invchead_id">
+ <defaultFont size="13" family=".SF NS Text"/>
+ <parameter name="invchead_id" active="true" default="97" type="string" listtype="dynamic">
   <description></description>
   <query>SELECT invchead_id, invchead_invcnumber FROM invchead ORDER BY invchead_invcnumber;</query>
  </parameter>
@@ -293,6 +294,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <top/>
    <string>Invoice</string>
+   <buddy></buddy>
   </label>
   <text>
    <rect>
@@ -329,10 +331,11 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Bill To:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
-    <x>129</x>
+    <x>100</x>
     <y>140</y>
     <width>111</width>
     <height>20</height>
@@ -342,7 +345,7 @@ order by shiphead_shipdate;</sql>
     <size>10</size>
     <weight>normal</weight>
    </font>
-   <right/>
+   <left/>
    <vcenter/>
    <data>
     <query>GroupHead</query>
@@ -364,6 +367,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>F.O.B.</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -383,6 +387,7 @@ order by shiphead_shipdate;</sql>
     <query>GroupHead</query>
     <column>invchead_shipto_name</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -398,7 +403,8 @@ order by shiphead_shipdate;</sql>
    </font>
    <left/>
    <vcenter/>
-   <string>Order #</string>
+   <string>Order #:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -408,7 +414,7 @@ order by shiphead_shipdate;</sql>
     <height>20</height>
    </rect>
    <font>
-    <face>Luciduxsans</face>
+    <face>Sans Serif</face>
     <size>12</size>
     <weight>48</weight>
    </font>
@@ -433,7 +439,8 @@ order by shiphead_shipdate;</sql>
    </font>
    <left/>
    <vcenter/>
-   <string>P.O. Number</string>
+   <string>P.O. Number:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -456,7 +463,7 @@ order by shiphead_shipdate;</sql>
   </field>
   <field>
    <rect>
-    <x>140</x>
+    <x>100</x>
     <y>125</y>
     <width>100</width>
     <height>20</height>
@@ -466,7 +473,7 @@ order by shiphead_shipdate;</sql>
     <size>10</size>
     <weight>normal</weight>
    </font>
-   <right/>
+   <left/>
    <vcenter/>
    <data>
     <query>GroupHead</query>
@@ -475,17 +482,17 @@ order by shiphead_shipdate;</sql>
   </field>
   <field>
    <rect>
-    <x>120</x>
+    <x>100</x>
     <y>155</y>
-    <width>120</width>
+    <width>240</width>
     <height>20</height>
    </rect>
    <font>
-    <face>Arial</face>
+    <face>Sans Serif</face>
     <size>10</size>
     <weight>normal</weight>
    </font>
-   <right/>
+   <left/>
    <vcenter/>
    <data>
     <query>GroupHead</query>
@@ -513,7 +520,7 @@ order by shiphead_shipdate;</sql>
   </field>
   <field>
    <rect>
-    <x>95</x>
+    <x>100</x>
     <y>170</y>
     <width>145</width>
     <height>20</height>
@@ -523,12 +530,13 @@ order by shiphead_shipdate;</sql>
     <size>10</size>
     <weight>normal</weight>
    </font>
-   <right/>
+   <left/>
    <vcenter/>
    <data>
     <query>GroupHead</query>
     <column>cust_number</column>
    </data>
+   <collapse/>
   </field>
   <text>
    <rect>
@@ -585,6 +593,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Ship To:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -601,6 +610,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Order Date</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -617,6 +627,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Customer #:</string>
+   <buddy></buddy>
   </label>
   <line>
    <xstart>5</xstart>
@@ -643,6 +654,7 @@ order by shiphead_shipdate;</sql>
     <query>GroupHead</query>
     <column>invchead_fob</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -659,6 +671,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Invoice #:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -678,6 +691,7 @@ order by shiphead_shipdate;</sql>
     <query>GroupHead</query>
     <column>f_invoicedate</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -694,6 +708,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Invoice Date:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -710,6 +725,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Due Date:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -745,6 +761,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Discount Date:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -780,6 +797,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Terms:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -830,6 +848,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Tracking #</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -846,6 +865,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Shipment Details</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -862,6 +882,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Ship Date</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -878,6 +899,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Carrier</string>
+     <buddy></buddy>
     </label>
    </head>
    <foot>
@@ -977,6 +999,7 @@ order by shiphead_shipdate;</sql>
     <right/>
     <vcenter/>
     <string>Invoice Currency:</string>
+    <buddy></buddy>
    </label>
    <label>
     <rect>
@@ -993,6 +1016,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <vcenter/>
     <string>Unit Price</string>
+    <buddy></buddy>
    </label>
    <label>
     <rect>
@@ -1009,6 +1033,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <vcenter/>
     <string>Qty. Shipped</string>
+    <buddy></buddy>
    </label>
    <field>
     <rect>
@@ -1051,6 +1076,7 @@ order by shiphead_shipdate;</sql>
     <hcenter/>
     <vcenter/>
     <string>UOM</string>
+    <buddy></buddy>
    </label>
    <label>
     <rect>
@@ -1067,6 +1093,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <vcenter/>
     <string>Item Description</string>
+    <buddy></buddy>
    </label>
    <label>
     <rect>
@@ -1083,6 +1110,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <vcenter/>
     <string>Ext. Price</string>
+    <buddy></buddy>
    </label>
    <label>
     <rect>
@@ -1099,6 +1127,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <vcenter/>
     <string>Item Number</string>
+    <buddy></buddy>
    </label>
   </detail>
  </section>
@@ -1182,6 +1211,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <top/>
     <string>Serial #/Lot Information:</string>
+    <buddy></buddy>
    </label>
    <field>
     <rect>
@@ -1220,6 +1250,7 @@ order by shiphead_shipdate;</sql>
      <query>currency</query>
      <column>curr_symbol</column>
     </data>
+    <collapse/>
    </field>
    <field>
     <rect>
@@ -1239,6 +1270,7 @@ order by shiphead_shipdate;</sql>
      <query>Detail</query>
      <column>f_extprice</column>
     </data>
+    <collapse/>
    </field>
    <field>
     <rect>
@@ -1258,6 +1290,7 @@ order by shiphead_shipdate;</sql>
      <query>Detail</query>
      <column>descrip2</column>
     </data>
+    <collapse/>
    </field>
    <label>
     <rect>
@@ -1274,6 +1307,7 @@ order by shiphead_shipdate;</sql>
     <left/>
     <top/>
     <string>Notes:</string>
+    <buddy></buddy>
    </label>
    <field>
     <rect>
@@ -1293,6 +1327,7 @@ order by shiphead_shipdate;</sql>
      <query>Detail</query>
      <column>f_unitprice</column>
     </data>
+    <collapse/>
    </field>
    <text>
     <rect>
@@ -1376,6 +1411,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Doc #</string>
+     <buddy></buddy>
     </label>
     <line>
      <xstart>45</xstart>
@@ -1399,6 +1435,7 @@ order by shiphead_shipdate;</sql>
      <right/>
      <vcenter/>
      <string>Total Credit</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -1415,6 +1452,7 @@ order by shiphead_shipdate;</sql>
      <hcenter/>
      <vcenter/>
      <string>Allocated</string>
+     <buddy></buddy>
     </label>
     <line>
      <xstart>45</xstart>
@@ -1438,6 +1476,7 @@ order by shiphead_shipdate;</sql>
      <left/>
      <vcenter/>
      <string>Pre-Allocated Credits</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -1454,6 +1493,7 @@ order by shiphead_shipdate;</sql>
      <hcenter/>
      <vcenter/>
      <string>Allocated</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -1470,6 +1510,7 @@ order by shiphead_shipdate;</sql>
      <hcenter/>
      <vcenter/>
      <string>Prev. Applied</string>
+     <buddy></buddy>
     </label>
     <label>
      <rect>
@@ -1486,6 +1527,7 @@ order by shiphead_shipdate;</sql>
      <hcenter/>
      <vcenter/>
      <string>Balance</string>
+     <buddy></buddy>
     </label>
    </head>
    <foot>
@@ -1508,6 +1550,7 @@ order by shiphead_shipdate;</sql>
       <query>currency</query>
       <column>curr_symbol</column>
      </data>
+     <collapse/>
     </field>
     <label>
      <rect>
@@ -1524,6 +1567,7 @@ order by shiphead_shipdate;</sql>
      <right/>
      <vcenter/>
      <string>Total Allocated:</string>
+     <buddy></buddy>
     </label>
     <field>
      <rect>
@@ -1590,6 +1634,7 @@ order by shiphead_shipdate;</sql>
      <query>allocatedCMs</query>
      <column>f_allocated_invccurr</column>
     </data>
+    <collapse/>
    </field>
    <line>
     <xstart>590</xstart>
@@ -1711,6 +1756,7 @@ order by shiphead_shipdate;</sql>
      <query>allocatedCMs</query>
      <column>f_balance</column>
     </data>
+    <collapse/>
    </field>
   </detail>
  </section>
@@ -1789,6 +1835,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Freight:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -1824,6 +1871,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Subtotal:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -1843,6 +1891,7 @@ order by shiphead_shipdate;</sql>
     <query>currency</query>
     <column>curr_symbol</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -1859,6 +1908,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Page:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -1875,6 +1925,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Pre-Allocated Credit</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -1970,6 +2021,7 @@ order by shiphead_shipdate;</sql>
     <query>GroupExtended</query>
     <column>f_allocated</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -1986,6 +2038,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Misc. Charge:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -2059,6 +2112,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Sales Tax:</string>
+   <buddy></buddy>
   </label>
   <line>
    <xstart>5</xstart>
@@ -2085,6 +2139,7 @@ order by shiphead_shipdate;</sql>
     <query>Context Query</query>
     <column>page_number</column>
    </data>
+   <collapse/>
   </field>
   <field>
    <rect>
@@ -2120,6 +2175,7 @@ order by shiphead_shipdate;</sql>
    <right/>
    <vcenter/>
    <string>Total Due:</string>
+   <buddy></buddy>
   </label>
   <label>
    <rect>
@@ -2136,6 +2192,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>of</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -2193,6 +2250,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>Page:</string>
+   <buddy></buddy>
   </label>
   <field>
    <rect>
@@ -2212,6 +2270,7 @@ order by shiphead_shipdate;</sql>
     <query>Context Query</query>
     <column>page_count</column>
    </data>
+   <collapse/>
   </field>
   <label>
    <rect>
@@ -2228,6 +2287,7 @@ order by shiphead_shipdate;</sql>
    <left/>
    <vcenter/>
    <string>of</string>
+   <buddy></buddy>
   </label>
  </pgfoot>
 </report>
