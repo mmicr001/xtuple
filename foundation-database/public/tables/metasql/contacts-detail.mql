@@ -80,7 +80,6 @@ FROM cntct()
   LEFT OUTER JOIN addr ON cntct_addr_id=addr_id
   LEFT OUTER JOIN country ON addr_country=country_name
   LEFT OUTER JOIN state ON addr_state=state_abbr AND state_country_id=country_id
-  LEFT OUTER JOIN cntcteml ON (cntcteml_cntct_id=cntct_id)
 <? foreach("char_id_text_list") ?>
   LEFT OUTER JOIN chartext charass_alias<? literal("char_id_text_list") ?> ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cntct_id)
                                                                     AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
@@ -135,7 +134,9 @@ WHERE true
   AND phonejson(cntct_id)::TEXT ~* <? value("cntct_phone_pattern") ?>)
 <? endif ?>
 <? if exists("cntct_email_pattern") ?>
-  AND (COALESCE(cntcteml_email,'') ~* <? value("cntct_email_pattern") ?>)
+  AND (SELECT BOOL_OR(cntcteml_email ~* <? value("search_pattern") ?>)
+         FROM cntcteml
+        WHERE cntcteml_cntct_id=cntct_id)
 <? endif ?>
 <? if exists("addr_street_pattern") ?>
   AND (COALESCE(addr_line1,'') || ' ' || COALESCE(addr_line2,'') || ' ' || COALESCE(addr_line3,'') ~* <? value("addr_street_pattern") ?>)
@@ -175,7 +176,7 @@ WHERE true
 <? endif ?>
 <? literal("charClause") ?>
 
-GROUP BY cntct_id, cntct_number, cntcteml_primary
+GROUP BY cntct_id, cntct_number
 <? if exists("hasContext") ?>
     , crmacctcntctass_id, crmrole_sort, crmrole_name, crmacctcntctass_active
 <? endif ?>
@@ -198,7 +199,6 @@ GROUP BY cntct_id, cntct_number, cntcteml_primary
  ORDER BY length(cntct_last_name)=0, length(cntct_first_name)=0,
          cntct_last_name, cntct_first_name, cntct_number,
          <? if exists("hasContext") ?>crmrole_name,<? endif ?>
-         cntcteml_primary desc
 )
 SELECT * FROM _contacts
 <? if exists("search_pattern") ?>
