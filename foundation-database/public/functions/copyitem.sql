@@ -17,7 +17,7 @@ BEGIN
     item_maxcost, item_prodweight, item_packweight,
     item_prodcat_id,item_exclusive, item_listprice, item_listcost,
     item_config, item_comments, item_extdescrip, item_warrdays,
-    item_upccode, item_inv_uom_id, item_price_uom_id )
+    item_upccode, item_inv_uom_id, item_price_uom_id, item_freightclass_id )
   SELECT pTItemNumber, item_descrip1, item_descrip2,
          item_classcode_id, item_type,
          item_active, item_picklist, item_sold, item_fractional,
@@ -25,7 +25,7 @@ BEGIN
          item_prodcat_id, item_exclusive, item_listprice, item_listcost,
          item_config, item_comments, item_extdescrip, item_warrdays,
          CASE WHEN fetchmetricbool('EnforceUniqueBarcodes') THEN NULL::TEXT ELSE item_upccode END,
-         item_inv_uom_id, item_price_uom_id
+         item_inv_uom_id, item_price_uom_id, item_freightclass_id
   FROM item
   WHERE (item_id=pSItemid)
   RETURNING item_id INTO _itemid;
